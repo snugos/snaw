@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.4"; // Daily merge 2026-05-02 - Verified all features, snaw is super-repo, no bugs found
+export const APP_VERSION = "0.3.5"; // Daily merge 2026-05-03 - Added project name state, master automation armed state, synth presets from app repo
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks
