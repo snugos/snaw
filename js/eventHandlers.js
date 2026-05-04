@@ -890,6 +890,19 @@ export function attachGlobalControlEvents(elements) {
     }
     // === End Audio Stretch Quality Button ===
 
+    // === Track Solo Chain Button ===
+    const trackSoloChainBtnGlobal = document.getElementById('trackSoloChainBtnGlobal');
+    if (trackSoloChainBtnGlobal) {
+        trackSoloChainBtnGlobal.addEventListener('click', () => {
+            if (window.openSoloChainPanel) {
+                window.openSoloChainPanel();
+            } else if (localAppServices.showNotification) {
+                localAppServices.showNotification('Track Solo Chain not available', 2000);
+            }
+        });
+    }
+    // === End Track Solo Chain Button ===
+
     // === Snap Resolution Button ===
     const snapResolutionBtn = document.getElementById('snapResolutionBtn');
     if (snapResolutionBtn) {
