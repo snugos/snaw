@@ -4,16 +4,20 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Lyrics Track Timeline** - Display lyrics synced to the timeline for vocal recording/visualization
-2. **Time Signature Per Track** - Allow different time signatures per track for polyrhythmic compositions
-3. **Sidechain Volume Envelope** - Draw ducking volume curves directly on clips for sidechain effects
-4. **Clip Gain Envelope Quick** - Double-click clip top to add gain envelope points without opening full editor
-5. **Track Freeze Export** - One-click export of frozen track stems to audio files
-6. **MIDI Chord Display** - Show chord names (Cmaj7, D7, etc.) above MIDI clip sections
-7. **BPM Tap Avg Display** - Show rolling average of last N tap tempo values in transport bar
-8. **Audio Clip Stretch Markers** - Visual markers showing where audio was time-stretched
-9. **Scale Highlight Global** - Show scale highlights across all tracks for harmonic consistency
-10. **Loop Region Markers** ✅ - Add named markers at loop boundaries for section referencing (completed)
+1. **Time Signature Per Track** - Allow different time signatures per track for polyrhythmic compositions
+2. **Sidechain Volume Envelope** - Draw ducking volume curves directly on clips for sidechain effects
+3. **Clip Gain Envelope Quick** - Double-click clip top to add gain envelope points without opening full editor
+4. **Track Freeze Export** - One-click export of frozen track stems to audio files
+5. **MIDI Chord Display** - Show chord names (Cmaj7, D7, etc.) above MIDI clip sections
+6. **Audio Clip Stretch Markers** - Visual markers showing where audio was time-stretched
+7. **Scale Highlight Global** - Show scale highlights across all tracks for harmonic consistency
+8. **BPM Tap Avg Display** - Show rolling average of last N tap tempo values in transport bar
+
+## COMPLETED FEATURES (for reference)
+- ✅ Lyrics Track Timeline - Timeline synced lyrics display and editing
+- ✅ Loop Region Markers - Named markers at loop boundaries
+- ✅ Tempo Ramper Visual - Draw tempo automation curves on canvas
+- ✅ Tap History - Floating panel showing recent tap values
 
 ## Workflow
 

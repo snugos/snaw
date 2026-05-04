@@ -1,12 +1,12 @@
-// js/LyricsTrack.js - Lyrics Track Timeline Feature
+// js/LyricsTrack.js - Lyrics Track Timeline
 // Display lyrics synced to the timeline for vocal recording/visualization
 
 let localAppServices = {};
-let lyrics = []; // { id, text, startTime, endTime, trackId }
+let lyrics = []; // Array of { id, text, startTime, duration, isActive }
+let isEnabled = false;
 let currentLyricIndex = -1;
-let isEnabled = true;
 const LYRICS_PANEL_ID = 'lyricsTrackContent';
-const LYRICS_LAYER_CLASS = 'lyrics-track-display';
+const LYRICS_HEIGHT = 40; // Height of lyrics display area in pixels
 
 /**
  * Initialize Lyrics Track module
@@ -14,79 +14,43 @@ const LYRICS_LAYER_CLASS = 'lyrics-track-display';
  */
 export function initLyricsTrack(appServices) {
     localAppServices = appServices || {};
-    
-    // Wait for timeline to be ready
-    setTimeout(() => {
-        setupLyricsDisplay();
-    }, 500);
-    
-    console.log('[LyricsTrack] Initialized');
+    console.log('[LyricsTrack] Module initialized');
 }
 
 /**
  * Get all lyrics
- * @returns {Array}
+ * @returns {Array} Copy of lyrics array
  */
 export function getLyrics() {
     return JSON.parse(JSON.stringify(lyrics));
 }
 
 /**
- * Get lyrics by track ID
- * @param {number} trackId
- * @returns {Array}
- */
-export function getLyricsByTrack(trackId) {
-    return lyrics.filter(l => l.trackId === trackId);
-}
-
-/**
- * Get current active lyric based on playback position
- * @returns {Object|null}
- */
-export function getCurrentLyric() {
-    if (!localAppServices.getCurrentPlaybackPosition) return null;
-    const position = localAppServices.getCurrentPlaybackPosition();
-    return lyrics.find(l => position >= l.startTime && position <= l.endTime) || null;
-}
-
-/**
- * Add a new lyric
+ * Add a lyric line
  * @param {string} text - Lyric text
  * @param {number} startTime - Start time in seconds
- * @param {number} endTime - End time in seconds
- * @param {number} trackId - Track ID (optional, defaults to first MIDI track)
- * @returns {string|null} Lyric ID
+ * @param {number} duration - Duration in seconds (optional, default 2s)
+ * @returns {string|null} Lyric ID or null
  */
-export function addLyric(text, startTime, endTime, trackId = null) {
+export function addLyric(text, startTime, duration = 2.0) {
     if (!text || typeof text !== 'string') {
         console.warn('[LyricsTrack] Invalid lyric text');
         return null;
     }
     
     const id = `lyric-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
-    // Find default track if not specified
-    if (trackId === null) {
-        const tracks = localAppServices.getTracks ? localAppServices.getTracks() : [];
-        const midiTrack = tracks.find(t => t.type === 'midi' || t.type === 'instrument');
-        trackId = midiTrack ? midiTrack.id : null;
-    }
-    
     lyrics.push({
         id,
         text: text.trim(),
         startTime: Math.max(0, parseFloat(startTime) || 0),
-        endTime: Math.max(0.1, parseFloat(endTime) || startTime + 2),
-        trackId,
-        createdAt: new Date().toISOString()
+        duration: Math.max(0.1, parseFloat(duration) || 2.0),
+        isActive: false
     });
     
     // Sort by start time
     lyrics.sort((a, b) => a.startTime - b.startTime);
     
-    console.log(`[LyricsTrack] Added lyric: "${text.substring(0, 30)}..." at ${startTime}s`);
-    
+    console.log(`[LyricsTrack] Added lyric "${text}" at ${startTime}s`);
     updateLyricsDisplay();
     
     if (localAppServices.captureStateForUndo) {
@@ -99,24 +63,21 @@ export function addLyric(text, startTime, endTime, trackId = null) {
 /**
  * Update a lyric
  * @param {string} lyricId
- * @param {Object} updates - Fields to update
+ * @param {Object} updates - Fields to update (text, startTime, duration)
  * @returns {boolean}
  */
 export function updateLyric(lyricId, updates) {
-    const index = lyrics.findIndex(l => l.id === lyricId);
-    if (index === -1) {
+    const lyric = lyrics.find(l => l.id === lyricId);
+    if (!lyric) {
         console.warn(`[LyricsTrack] Lyric ${lyricId} not found`);
         return false;
     }
     
-    if (updates.text !== undefined) lyrics[index].text = updates.text.trim();
-    if (updates.startTime !== undefined) lyrics[index].startTime = Math.max(0, parseFloat(updates.startTime) || 0);
-    if (updates.endTime !== undefined) lyrics[index].endTime = Math.max(0.1, parseFloat(updates.endTime) || 0.1);
-    if (updates.trackId !== undefined) lyrics[index].trackId = updates.trackId;
+    if (updates.text !== undefined) lyric.text = updates.text.trim();
+    if (updates.startTime !== undefined) lyric.startTime = Math.max(0, parseFloat(updates.startTime) || 0);
+    if (updates.duration !== undefined) lyric.duration = Math.max(0.1, parseFloat(updates.duration) || 2.0);
     
-    // Re-sort
     lyrics.sort((a, b) => a.startTime - b.startTime);
-    
     updateLyricsDisplay();
     
     if (localAppServices.captureStateForUndo) {
@@ -132,13 +93,14 @@ export function updateLyric(lyricId, updates) {
  * @returns {boolean}
  */
 export function removeLyric(lyricId) {
-    const index = lyrics.findIndex(l => l.id === lyricId);
-    if (index === -1) {
+    const idx = lyrics.findIndex(l => l.id === lyricId);
+    if (idx === -1) {
         console.warn(`[LyricsTrack] Lyric ${lyricId} not found`);
         return false;
     }
     
-    lyrics.splice(index, 1);
+    lyrics.splice(idx, 1);
+    console.log(`[LyricsTrack] Removed lyric ${lyricId}`);
     updateLyricsDisplay();
     
     if (localAppServices.captureStateForUndo) {
@@ -152,145 +114,82 @@ export function removeLyric(lyricId) {
  * Clear all lyrics
  */
 export function clearAllLyrics() {
-    const count = lyrics.length;
     lyrics = [];
     currentLyricIndex = -1;
     updateLyricsDisplay();
+    console.log('[LyricsTrack] Cleared all lyrics');
     
     if (localAppServices.captureStateForUndo) {
         localAppServices.captureStateForUndo('Clear all lyrics');
     }
-    
-    console.log(`[LyricsTrack] Cleared ${count} lyrics`);
 }
 
 /**
- * Import lyrics from text (one line per lyric, tab-separated time)
- * Format: "00:00.00\tLyric text" or just "Lyric text" (will auto-space)
- * @param {string} text - Multi-line lyrics text
- * @param {number} startTime - Starting time for first lyric
- * @param {number} durationPerLine - Duration for each lyric line
+ * Import lyrics from text (one line per lyric, space-separated start times optional)
+ * Format: "Hello world" or "Hello world @1.5" (with start time)
+ * @param {string} text - Multi-line text
+ * @param {number} defaultDuration - Default duration per line
  */
-export function importLyricsText(text, startTime = 0, durationPerLine = 3) {
-    if (!text) return 0;
+export function importLyricsText(text, defaultDuration = 2.0) {
+    if (!text) return;
     
-    const lines = text.split('\n').filter(l => l.trim());
-    let currentTime = startTime;
-    let count = 0;
+    const lines = text.split('\n').filter(line => line.trim());
+    let currentTime = 0;
     
     lines.forEach(line => {
-        const lineText = line.replace(/^\d+[:\.]\d+\s*/, '').trim(); // Remove timestamp prefix if present
-        if (lineText) {
-            addLyric(lineText, currentTime, currentTime + durationPerLine);
-            currentTime += durationPerLine;
-            count++;
+        const trimmed = line.trim();
+        if (!trimmed) return;
+        
+        // Check for explicit start time: "Hello @1.5"
+        const atMatch = trimmed.match(/^(.+?)\s+@(\d+\.?\d*)$/);
+        if (atMatch) {
+            addLyric(atMatch[1], parseFloat(atMatch[2]), defaultDuration);
+        } else {
+            addLyric(trimmed, currentTime, defaultDuration);
+            currentTime += defaultDuration;
         }
     });
     
-    console.log(`[LyricsTrack] Imported ${count} lyrics from text`);
-    return count;
+    console.log(`[LyricsTrack] Imported ${lines.length} lyric lines`);
 }
 
 /**
- * Setup lyrics display on timeline
+ * Get current lyric based on playback position
+ * @param {number} currentTime - Current playback time in seconds
+ * @returns {Object|null}
  */
-function setupLyricsDisplay() {
-    // Create lyrics layer if it doesn't exist
-    const existingLayer = document.querySelector(`.${LYRICS_LAYER_CLASS}`);
-    if (existingLayer) return;
+export function getCurrentLyric(currentTime) {
+    const active = lyrics.find(l => 
+        currentTime >= l.startTime && currentTime < l.startTime + l.duration
+    );
+    return active || null;
+}
+
+/**
+ * Update display based on current playback time
+ * @param {number} currentTime - Current playback time in seconds
+ */
+export function updateCurrentLyric(currentTime) {
+    const newIndex = lyrics.findIndex(l => 
+        currentTime >= l.startTime && currentTime < l.startTime + l.duration
+    );
     
-    // Create lyrics track container
-    const lyricsContainer = document.createElement('div');
-    lyricsContainer.className = LYRICS_LAYER_CLASS;
-    lyricsContainer.style.cssText = `
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        height: 60px;
-        background: linear-gradient(to top, rgba(138, 43, 226, 0.1), transparent);
-        pointer-events: none;
-        z-index: 5;
-        display: none;
-    `;
-    
-    // Find timeline content area
-    const timelineContent = document.querySelector('.timeline-content') || 
-                           document.getElementById('timelineContent') ||
-                           document.querySelector('.timeline');
-    
-    if (timelineContent) {
-        timelineContent.style.position = 'relative';
-        timelineContent.appendChild(lyricsContainer);
+    if (newIndex !== currentLyricIndex) {
+        // Deactivate all
+        lyrics.forEach(l => l.isActive = false);
+        
+        // Activate new
+        if (newIndex >= 0 && newIndex < lyrics.length) {
+            lyrics[newIndex].isActive = true;
+        }
+        
+        currentLyricIndex = newIndex;
+        updateLyricsDisplay();
     }
-    
-    console.log('[LyricsTrack] Lyrics display setup complete');
 }
 
 /**
- * Update lyrics display based on current playback position
- */
-function updateLyricsDisplay() {
-    const lyricsLayer = document.querySelector(`.${LYRICS_LAYER_CLASS}`);
-    if (!lyricsLayer) return;
-    
-    // Get current playback position
-    const position = localAppServices.getCurrentPlaybackPosition ? 
-                    localAppServices.getCurrentPlaybackPosition() : 0;
-    
-    // Find current lyric
-    const currentLyric = lyrics.find(l => position >= l.startTime && position <= l.endTime);
-    
-    if (!isEnabled || !currentLyric) {
-        lyricsLayer.style.display = 'none';
-        return;
-    }
-    
-    lyricsLayer.style.display = 'block';
-    
-    const pixelsPerSecond = localAppServices.getPixelsPerSecond ? 
-                           localAppServices.getPixelsPerSecond() : 100;
-    
-    // Calculate position
-    const lyricLeft = currentLyric.startTime * pixelsPerSecond;
-    const lyricWidth = (currentLyric.endTime - currentLyric.startTime) * pixelsPerSecond;
-    
-    lyricsLayer.innerHTML = `
-        <div class="current-lyric-display" style="
-            position: absolute;
-            left: ${lyricLeft}px;
-            top: 50%;
-            transform: translateY(-50%);
-            padding: 8px 16px;
-            background: rgba(138, 43, 226, 0.9);
-            color: white;
-            font-size: 14px;
-            font-weight: 600;
-            border-radius: 8px;
-            white-space: nowrap;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            max-width: ${lyricWidth}px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        ">
-            ${escapeHtml(currentLyric.text)}
-        </div>
-    `;
-}
-
-/**
- * Escape HTML to prevent XSS
- * @param {string} text
- * @returns {string}
- */
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-/**
- * Enable/disable the feature
+ * Enable/disable lyrics track display
  * @param {boolean} enabled
  */
 export function setLyricsTrackEnabled(enabled) {
@@ -300,7 +199,7 @@ export function setLyricsTrackEnabled(enabled) {
 }
 
 /**
- * Check if feature is enabled
+ * Check if lyrics track is enabled
  * @returns {boolean}
  */
 export function isLyricsTrackEnabled() {
@@ -308,444 +207,291 @@ export function isLyricsTrackEnabled() {
 }
 
 /**
- * Open the Lyrics Track panel
+ * Open lyrics panel window
  */
 export function openLyricsTrackPanel() {
-    const windowId = 'lyricsTrack';
+    const windowId = 'lyricsTrackPanel';
     const openWindows = localAppServices.getOpenWindows ? localAppServices.getOpenWindows() : new Map();
     
     if (openWindows.has(windowId)) {
         const win = openWindows.get(windowId);
         win.restore();
-        renderLyricsPanel();
         return win;
     }
     
     const contentContainer = document.createElement('div');
     contentContainer.id = LYRICS_PANEL_ID;
-    contentContainer.className = 'p-3 h-full flex flex-col bg-gray-100 dark:bg-slate-800';
+    contentContainer.className = 'p-0 h-full flex flex-col bg-gray-100 dark:bg-slate-800 overflow-hidden';
+    contentContainer.innerHTML = getLyricsPanelHTML();
     
     const options = {
-        width: 480,
-        height: 600,
+        width: 600,
+        height: 400,
         minWidth: 400,
-        minHeight: 500,
+        minHeight: 300,
         initialContentKey: windowId,
         closable: true,
         minimizable: true,
         resizable: true
     };
     
-    const win = localAppServices.createWindow ? 
-                localAppServices.createWindow(windowId, 'Lyrics Track', contentContainer, options) : null;
-    
+    const win = localAppServices.createWindow(windowId, 'Lyrics Track', contentContainer, options);
     if (win?.element) {
-        renderLyricsPanel();
-        
-        // Connect to playback position updates
-        startLyricsSync();
+        setupLyricsPanelEvents(contentContainer);
     }
     
     return win;
 }
 
 /**
- * Render the lyrics panel content
+ * Get HTML for lyrics panel
+ * @returns {string}
  */
-function renderLyricsPanel() {
-    const container = document.getElementById(LYRICS_PANEL_ID);
-    if (!container) return;
-    
-    const position = localAppServices.getCurrentPlaybackPosition ? 
-                    localAppServices.getCurrentPlaybackPosition() : 0;
-    
-    let html = `
-        <div class="mb-4 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" id="lyricsTrackEnabled" ${isEnabled ? 'checked' : ''} class="w-4 h-4 accent-purple-500">
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Show on Timeline</span>
-                </label>
-            </div>
-            <div class="flex gap-2">
-                <button id="lyricsImportBtn" class="px-2 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600">Import</button>
-                <button id="lyricsClearBtn" class="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600">Clear All</button>
-            </div>
+function getLyricsPanelHTML() {
+    const lyricsList = lyrics.map(l => `
+        <div class="lyric-item flex items-center gap-2 p-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-slate-700" data-id="${l.id}">
+            <span class="lyric-time text-xs text-gray-500 w-16">${l.startTime.toFixed(2)}s</span>
+            <span class="lyric-text flex-1 ${l.isActive ? 'text-blue-600 font-bold' : 'text-gray-700 dark:text-gray-300'}">${l.text}</span>
+            <button class="lyric-edit-btn px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600">Edit</button>
+            <button class="lyric-delete-btn px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600">Delete</button>
         </div>
-        
-        <div class="mb-3 p-2 bg-slate-700 rounded text-xs text-slate-300">
-            <strong>Current:</strong> <span id="lyricsCurrentPos">${formatTime(position)}</span> | 
-            <span id="lyricsCurrentText">${getCurrentLyric()?.text || 'No lyric'}</span>
-        </div>
-        
-        <div class="mb-3 flex gap-2">
-            <button id="lyricsAddBtn" class="px-3 py-1.5 text-xs bg-purple-500 text-white rounded hover:bg-purple-600">+ Add Lyric</button>
-            <button id="lyricsFromSelectionBtn" class="px-3 py-1.5 text-xs bg-blue-500 text-white rounded hover:bg-blue-600">+ From Selection</button>
-        </div>
-        
-        <div id="lyricsList" class="flex-1 overflow-y-auto space-y-2">
-    `;
+    `).join('');
     
-    if (lyrics.length === 0) {
-        html += `
-            <div class="text-center py-8 text-gray-500 dark:text-gray-400">
-                <p>No lyrics yet</p>
-                <p class="text-xs mt-1">Add lyrics manually or import from text</p>
+    return `
+        <div class="flex flex-col h-full">
+            <div class="lyrics-toolbar p-2 bg-gray-200 dark:bg-slate-700 flex items-center gap-2 border-b border-gray-300 dark:border-gray-600">
+                <button id="lyricsAddBtn" class="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600">+ Add Lyric</button>
+                <button id="lyricsImportBtn" class="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600">Import Text</button>
+                <button id="lyricsClearBtn" class="px-3 py-1 bg-gray-500 text-white rounded text-sm hover:bg-gray-600">Clear All</button>
+                <div class="flex-1"></div>
+                <button id="lyricsPlayBtn" class="px-3 py-1 bg-purple-500 text-white rounded text-sm hover:bg-purple-600">▶ Play Lyrics</button>
             </div>
-        `;
-    } else {
-        lyrics.forEach((lyric, index) => {
-            const isActive = position >= lyric.startTime && position <= lyric.endTime;
-            html += `
-                <div class="p-3 bg-white dark:bg-slate-700 rounded border ${isActive ? 'border-purple-500' : 'border-gray-200 dark:border-slate-600'} lyric-item" data-id="${lyric.id}">
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-xs text-gray-500">#${index + 1}</span>
-                        <div class="flex gap-1">
-                            <button class="lyricEditBtn px-2 py-0.5 text-xs bg-blue-500 text-white rounded hover:bg-blue-600">Edit</button>
-                            <button class="lyricDeleteBtn px-2 py-0.5 text-xs bg-red-500 text-white rounded hover:bg-red-600">×</button>
-                        </div>
-                    </div>
-                    <div class="text-sm text-gray-700 dark:text-gray-300 lyric-text mb-1" style="word-break: break-word;">${escapeHtml(lyric.text)}</div>
-                    <div class="text-xs text-gray-500">
-                        <span class="lyric-time">${formatTime(lyric.startTime)}</span> → <span class="lyric-end">${formatTime(lyric.endTime)}</span>
-                        <span class="text-gray-400 ml-2">(${formatDuration(lyric.endTime - lyric.startTime)})</span>
-                    </div>
+            <div id="lyricsListContainer" class="flex-1 overflow-y-auto p-2 space-y-1">
+                ${lyrics.length > 0 ? lyricsList : '<p class="text-gray-500 text-center py-4">No lyrics yet. Add some!</p>'}
+            </div>
+            <div class="lyrics-input-area p-2 bg-gray-200 dark:bg-slate-700 border-t border-gray-300 dark:border-gray-600">
+                <div class="flex gap-2">
+                    <input id="lyricsTextInput" type="text" placeholder="Enter lyric text..." class="flex-1 px-2 py-1 border rounded text-sm">
+                    <input id="lyricsTimeInput" type="number" placeholder="Start" step="0.1" min="0" class="w-20 px-2 py-1 border rounded text-sm">
+                    <input id="lyricsDurationInput" type="number" placeholder="Dur" step="0.1" min="0.1" value="2" class="w-16 px-2 py-1 border rounded text-sm">
+                    <button id="lyricsAddSubmitBtn" class="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600">Add</button>
                 </div>
-            `;
-        });
-    }
-    
-    html += `</div>`;
-    
-    container.innerHTML = html;
-    
-    // Attach event listeners
-    const enabledCheckbox = container.querySelector('#lyricsTrackEnabled');
-    enabledCheckbox?.addEventListener('change', (e) => {
-        setLyricsTrackEnabled(e.target.checked);
-    });
-    
-    const importBtn = container.querySelector('#lyricsImportBtn');
-    importBtn?.addEventListener('click', showImportDialog);
-    
-    const clearBtn = container.querySelector('#lyricsClearBtn');
-    clearBtn?.addEventListener('click', () => {
-        if (lyrics.length > 0 && confirm('Clear all lyrics?')) {
-            clearAllLyrics();
-            renderLyricsPanel();
-        }
-    });
-    
-    const addBtn = container.querySelector('#lyricsAddBtn');
-    addBtn?.addEventListener('click', showAddLyricDialog);
-    
-    const fromSelBtn = container.querySelector('#lyricsFromSelectionBtn');
-    fromSelBtn?.addEventListener('click', addLyricFromSelection);
-    
-    container.querySelectorAll('.lyricEditBtn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const item = e.target.closest('.lyric-item');
-            const lyricId = item.dataset.id;
-            openEditLyricDialog(lyricId);
-        });
-    });
-    
-    container.querySelectorAll('.lyricDeleteBtn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const item = e.target.closest('.lyric-item');
-            const lyricId = item.dataset.id;
-            removeLyric(lyricId);
-            renderLyricsPanel();
-        });
-    });
-}
-
-/**
- * Format time as MM:SS.ms
- * @param {number} seconds
- * @returns {string}
- */
-function formatTime(seconds) {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toFixed(2).padStart(5, '0')}`;
-}
-
-/**
- * Format duration as seconds
- * @param {number} seconds
- * @returns {string}
- */
-function formatDuration(seconds) {
-    return `${seconds.toFixed(1)}s`;
-}
-
-/**
- * Show import dialog
- */
-function showImportDialog() {
-    const dialog = document.createElement('div');
-    dialog.style.cssText = `
-        position: fixed;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        background: #1f2937;
-        border: 1px solid #374151;
-        border-radius: 8px;
-        padding: 16px;
-        z-index: 10000;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-        width: 400px;
-    `;
-    
-    dialog.innerHTML = `
-        <div class="text-white text-sm font-medium mb-3">Import Lyrics</div>
-        <div class="mb-3">
-            <label class="text-gray-400 text-xs">Start Time (seconds)</label>
-            <input type="number" id="lyricImportStart" value="0" step="0.1" min="0"
-                class="w-full px-2 py-1.5 bg-gray-700 text-white text-sm rounded border border-gray-600 mt-1">
-        </div>
-        <div class="mb-3">
-            <label class="text-gray-400 text-xs">Duration per line (seconds)</label>
-            <input type="number" id="lyricImportDuration" value="3" step="0.5" min="0.5"
-                class="w-full px-2 py-1.5 bg-gray-700 text-white text-sm rounded border border-gray-600 mt-1">
-        </div>
-        <div class="mb-3">
-            <label class="text-gray-400 text-xs">Lyrics Text (one line per lyric)</label>
-            <textarea id="lyricImportText" rows="8" placeholder="Enter lyrics here, one per line..."
-                class="w-full px-2 py-1.5 bg-gray-700 text-white text-sm rounded border border-gray-600 mt-1 resize-none"></textarea>
-        </div>
-        <div class="flex justify-end gap-2">
-            <button id="lyricImportCancel" class="px-3 py-1.5 text-xs bg-gray-600 text-white rounded hover:bg-gray-500">Cancel</button>
-            <button id="lyricImportConfirm" class="px-3 py-1.5 text-xs bg-green-500 text-white rounded hover:bg-green-600">Import</button>
-        </div>
-    `;
-    
-    document.body.appendChild(dialog);
-    
-    dialog.querySelector('#lyricImportCancel').addEventListener('click', () => dialog.remove());
-    dialog.querySelector('#lyricImportConfirm').addEventListener('click', () => {
-        const startTime = parseFloat(dialog.querySelector('#lyricImportStart').value) || 0;
-        const duration = parseFloat(dialog.querySelector('#lyricImportDuration').value) || 3;
-        const text = dialog.querySelector('#lyricImportText').value;
-        
-        if (text.trim()) {
-            importLyricsText(text, startTime, duration);
-            dialog.remove();
-            renderLyricsPanel();
-        }
-    });
-    
-    // Escape to close
-    document.addEventListener('keydown', function closeOnEscape(e) {
-        if (e.key === 'Escape') {
-            dialog.remove();
-            document.removeEventListener('keydown', closeOnEscape);
-        }
-    });
-}
-
-/**
- * Show add lyric dialog
- */
-function showAddLyricDialog() {
-    const position = localAppServices.getCurrentPlaybackPosition ? 
-                    localAppServices.getCurrentPlaybackPosition() : 0;
-    
-    const dialog = document.createElement('div');
-    dialog.style.cssText = `
-        position: fixed;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        background: #1f2937;
-        border: 1px solid #374151;
-        border-radius: 8px;
-        padding: 16px;
-        z-index: 10000;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-        width: 360px;
-    `;
-    
-    dialog.innerHTML = `
-        <div class="text-white text-sm font-medium mb-3">Add Lyric</div>
-        <div class="mb-3">
-            <label class="text-gray-400 text-xs">Lyric Text</label>
-            <input type="text" id="lyricAddText" placeholder="Enter lyric text..."
-                class="w-full px-2 py-1.5 bg-gray-700 text-white text-sm rounded border border-gray-600 mt-1">
-        </div>
-        <div class="mb-3 flex gap-2">
-            <div class="flex-1">
-                <label class="text-gray-400 text-xs">Start Time</label>
-                <input type="number" id="lyricAddStart" value="${position.toFixed(1)}" step="0.1" min="0"
-                    class="w-full px-2 py-1.5 bg-gray-700 text-white text-sm rounded border border-gray-600 mt-1">
-            </div>
-            <div class="flex-1">
-                <label class="text-gray-400 text-xs">Duration</label>
-                <input type="number" id="lyricAddDuration" value="3" step="0.5" min="0.5"
-                    class="w-full px-2 py-1.5 bg-gray-700 text-white text-sm rounded border border-gray-600 mt-1">
             </div>
         </div>
-        <div class="flex justify-end gap-2">
-            <button id="lyricAddCancel" class="px-3 py-1.5 text-xs bg-gray-600 text-white rounded hover:bg-gray-500">Cancel</button>
-            <button id="lyricAddConfirm" class="px-3 py-1.5 text-xs bg-purple-500 text-white rounded hover:bg-purple-600">Add</button>
-        </div>
     `;
-    
-    document.body.appendChild(dialog);
-    
-    dialog.querySelector('#lyricAddCancel').addEventListener('click', () => dialog.remove());
-    dialog.querySelector('#lyricAddConfirm').addEventListener('click', () => {
-        const text = dialog.querySelector('#lyricAddText').value.trim();
-        const startTime = parseFloat(dialog.querySelector('#lyricAddStart').value) || 0;
-        const duration = parseFloat(dialog.querySelector('#lyricAddDuration').value) || 3;
+}
+
+/**
+ * Setup event handlers for lyrics panel
+ * @param {HTMLElement} container 
+ */
+function setupLyricsPanelEvents(container) {
+    // Add button
+    container.querySelector('#lyricsAddBtn')?.addEventListener('click', () => {
+        const textInput = container.querySelector('#lyricsTextInput');
+        const timeInput = container.querySelector('#lyricsTimeInput');
+        const durationInput = container.querySelector('#lyricsDurationInput');
         
-        if (text) {
-            addLyric(text, startTime, startTime + duration);
-            dialog.remove();
-            renderLyricsPanel();
-        }
+        const text = textInput?.value?.trim();
+        if (!text) return;
+        
+        const startTime = parseFloat(timeInput?.value) || 0;
+        const duration = parseFloat(durationInput?.value) || 2.0;
+        
+        addLyric(text, startTime, duration);
+        textInput.value = '';
+        timeInput.value = '';
+        container.querySelector('#lyricsListContainer').innerHTML = getLyricsPanelHTML().match(/<div id="lyricsListContainer"[^>]*>([\s\S]*?)<\/div>/)?.[1] || '';
+        setupLyricsPanelEvents(container);
     });
     
-    // Enter to submit
-    dialog.querySelector('#lyricAddText').addEventListener('keydown', (e) => {
+    // Submit on Enter
+    container.querySelector('#lyricsTextInput')?.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
-            dialog.querySelector('#lyricAddConfirm').click();
-        } else if (e.key === 'Escape') {
-            dialog.remove();
+            container.querySelector('#lyricsAddBtn')?.click();
         }
     });
     
-    setTimeout(() => dialog.querySelector('#lyricAddText').focus(), 50);
-}
-
-/**
- * Add lyric from current selection
- */
-function addLyricFromSelection() {
-    const position = localAppServices.getCurrentPlaybackPosition ? 
-                    localAppServices.getCurrentPlaybackPosition() : 0;
-    showAddLyricDialog();
-    // Pre-fill start time with current position
-    const startInput = document.querySelector('#lyricAddStart');
-    if (startInput) startInput.value = position.toFixed(1);
-}
-
-/**
- * Open edit lyric dialog
- * @param {string} lyricId
- */
-function openEditLyricDialog(lyricId) {
-    const lyric = lyrics.find(l => l.id === lyricId);
-    if (!lyric) return;
-    
-    const dialog = document.createElement('div');
-    dialog.style.cssText = `
-        position: fixed;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        background: #1f2937;
-        border: 1px solid #374151;
-        border-radius: 8px;
-        padding: 16px;
-        z-index: 10000;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-        width: 360px;
-    `;
-    
-    dialog.innerHTML = `
-        <div class="text-white text-sm font-medium mb-3">Edit Lyric</div>
-        <div class="mb-3">
-            <label class="text-gray-400 text-xs">Lyric Text</label>
-            <input type="text" id="lyricEditText" value="${escapeHtml(lyric.text)}"
-                class="w-full px-2 py-1.5 bg-gray-700 text-white text-sm rounded border border-gray-600 mt-1">
-        </div>
-        <div class="mb-3 flex gap-2">
-            <div class="flex-1">
-                <label class="text-gray-400 text-xs">Start Time</label>
-                <input type="number" id="lyricEditStart" value="${lyric.startTime.toFixed(1)}" step="0.1" min="0"
-                    class="w-full px-2 py-1.5 bg-gray-700 text-white text-sm rounded border border-gray-600 mt-1">
-            </div>
-            <div class="flex-1">
-                <label class="text-gray-400 text-xs">End Time</label>
-                <input type="number" id="lyricEditEnd" value="${lyric.endTime.toFixed(1)}" step="0.1" min="0"
-                    class="w-full px-2 py-1.5 bg-gray-700 text-white text-sm rounded border border-gray-600 mt-1">
-            </div>
-        </div>
-        <div class="flex justify-between">
-            <button id="lyricEditDelete" class="px-3 py-1.5 text-xs bg-red-500 text-white rounded hover:bg-red-600">Delete</button>
-            <div class="flex gap-2">
-                <button id="lyricEditCancel" class="px-3 py-1.5 text-xs bg-gray-600 text-white rounded hover:bg-gray-500">Cancel</button>
-                <button id="lyricEditSave" class="px-3 py-1.5 text-xs bg-purple-500 text-white rounded hover:bg-purple-600">Save</button>
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(dialog);
-    
-    dialog.querySelector('#lyricEditCancel').addEventListener('click', () => dialog.remove());
-    dialog.querySelector('#lyricEditDelete').addEventListener('click', () => {
-        removeLyric(lyricId);
-        dialog.remove();
-        renderLyricsPanel();
-    });
-    dialog.querySelector('#lyricEditSave').addEventListener('click', () => {
-        const text = dialog.querySelector('#lyricEditText').value.trim();
-        const startTime = parseFloat(dialog.querySelector('#lyricEditStart').value) || 0;
-        const endTime = parseFloat(dialog.querySelector('#lyricEditEnd').value) || startTime + 1;
-        
+    // Import button - simple prompt for multi-line text
+    container.querySelector('#lyricsImportBtn')?.addEventListener('click', () => {
+        const text = prompt('Paste lyrics (one line per lyric, optionally use @time for specific start time):\n\nExample:\nHello world\nHello world @1.5\nNice to meet you');
         if (text) {
-            updateLyric(lyricId, { text, startTime, endTime });
-            dialog.remove();
-            renderLyricsPanel();
+            importLyricsText(text, 2.0);
+            refreshLyricsList(container);
         }
     });
     
-    // Escape to close
-    document.addEventListener('keydown', function closeOnEscape(e) {
-        if (e.key === 'Escape') {
-            dialog.remove();
-            document.removeEventListener('keydown', closeOnEscape);
+    // Clear all
+    container.querySelector('#lyricsClearBtn')?.addEventListener('click', () => {
+        if (confirm('Clear all lyrics?')) {
+            clearAllLyrics();
+            refreshLyricsList(container);
         }
+    });
+    
+    // Play lyrics - just highlight and show
+    container.querySelector('#lyricsPlayBtn')?.addEventListener('click', () => {
+        if (lyrics.length === 0) return;
+        // Jump to first lyric
+        const firstTime = lyrics[0].startTime;
+        if (localAppServices.seekPlayback) {
+            localAppServices.seekPlayback(firstTime);
+        }
+    });
+    
+    // Delete buttons
+    container.querySelectorAll('.lyric-delete-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const item = e.target.closest('.lyric-item');
+            const id = item?.dataset?.id;
+            if (id && confirm('Delete this lyric?')) {
+                removeLyric(id);
+                refreshLyricsList(container);
+            }
+        });
+    });
+    
+    // Edit buttons
+    container.querySelectorAll('.lyric-edit-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const item = e.target.closest('.lyric-item');
+            const id = item?.dataset?.id;
+            const lyric = lyrics.find(l => l.id === id);
+            if (!lyric) return;
+            
+            const newText = prompt('Edit lyric text:', lyric.text);
+            const newTime = parseFloat(prompt('Edit start time:', lyric.startTime)) || lyric.startTime;
+            const newDuration = parseFloat(prompt('Edit duration:', lyric.duration)) || lyric.duration;
+            
+            if (newText !== null) {
+                updateLyric(id, { text: newText, startTime: newTime, duration: newDuration });
+                refreshLyricsList(container);
+            }
+        });
     });
 }
 
-// Sync loop
-let lyricsSyncInterval = null;
-
 /**
- * Start lyrics sync with playback
+ * Refresh the lyrics list in panel
+ * @param {HTMLElement} container 
  */
-function startLyricsSync() {
-    if (lyricsSyncInterval) return;
-    
-    const syncLoop = () => {
-        updateLyricsDisplay();
-        // Update current position in panel if open
-        const posEl = document.getElementById('lyricsCurrentPos');
-        const textEl = document.getElementById('lyricsCurrentText');
-        if (posEl || textEl) {
-            const position = localAppServices.getCurrentPlaybackPosition ? 
-                            localAppServices.getCurrentPlaybackPosition() : 0;
-            const current = getCurrentLyric();
-            if (posEl) posEl.textContent = formatTime(position);
-            if (textEl) textEl.textContent = current?.text || 'No lyric';
-        }
-    };
-    
-    lyricsSyncInterval = setInterval(syncLoop, 100);
-    console.log('[LyricsTrack] Sync loop started');
-}
-
-/**
- * Stop lyrics sync
- */
-function stopLyricsSync() {
-    if (lyricsSyncInterval) {
-        clearInterval(lyricsSyncInterval);
-        lyricsSyncInterval = null;
-        console.log('[LyricsTrack] Sync loop stopped');
+function refreshLyricsList(container) {
+    const listContainer = container.querySelector('#lyricsListContainer');
+    if (listContainer) {
+        listContainer.innerHTML = lyrics.map(l => `
+            <div class="lyric-item flex items-center gap-2 p-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-slate-700" data-id="${l.id}">
+                <span class="lyric-time text-xs text-gray-500 w-16">${l.startTime.toFixed(2)}s</span>
+                <span class="lyric-text flex-1 ${l.isActive ? 'text-blue-600 font-bold' : 'text-gray-700 dark:text-gray-300'}">${l.text}</span>
+                <button class="lyric-edit-btn px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600">Edit</button>
+                <button class="lyric-delete-btn px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600">Delete</button>
+            </div>
+        `).join('') || '<p class="text-gray-500 text-center py-4">No lyrics yet. Add some!</p>';
+        
+        setupLyricsPanelEvents(container);
     }
+}
+
+/**
+ * Update the lyrics display in timeline (called during playback)
+ */
+function updateLyricsDisplay() {
+    // Find or create lyrics display element in timeline
+    let display = document.getElementById('lyricsTimelineDisplay');
+    
+    if (!isEnabled) {
+        if (display) display.style.display = 'none';
+        return;
+    }
+    
+    if (!display) {
+        // Create lyrics display area below timeline ruler
+        const ruler = document.querySelector('.timeline-ruler') || document.querySelector('#timelineRuler');
+        if (ruler) {
+            display = document.createElement('div');
+            display.id = 'lyricsTimelineDisplay';
+            display.className = 'lyrics-timeline-display';
+            display.style.cssText = `
+                height: ${LYRICS_HEIGHT}px;
+                background: linear-gradient(90deg, rgba(168,85,247,0.1), rgba(168,85,247,0.2));
+                border-bottom: 2px solid rgba(168,85,247,0.5);
+                position: relative;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                overflow: hidden;
+            `;
+            ruler.parentElement?.insertBefore(display, ruler.nextSibling);
+        }
+    }
+    
+    if (display) {
+        display.style.display = 'flex';
+        
+        // Render lyric highlights
+        const currentTime = localAppServices.getPlaybackPosition ? localAppServices.getPlaybackPosition() : 0;
+        const pixelsPerSecond = 100; // Approximate, should match timeline
+        
+        display.innerHTML = lyrics.map(l => {
+            const left = l.startTime * pixelsPerSecond;
+            const width = l.duration * pixelsPerSecond;
+            return `
+                <div class="lyric-highlight" data-id="${l.id}" style="
+                    position: absolute;
+                    left: ${left}px;
+                    width: ${width}px;
+                    height: 100%;
+                    background: ${l.isActive ? 'rgba(168,85,247,0.5)' : 'rgba(168,85,247,0.2)'};
+                    border-left: 2px solid rgba(168,85,247,0.8);
+                    display: flex;
+                    align-items: center;
+                    padding: 0 4px;
+                    overflow: hidden;
+                    font-size: 11px;
+                    color: ${l.isActive ? '#fff' : 'rgba(255,255,255,0.7)'};
+                    font-weight: ${l.isActive ? 'bold' : 'normal'};
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                " title="${l.text}">${l.text}</div>
+            `;
+        }).join('');
+        
+        // Update active lyric text
+        const activeLyric = getCurrentLyric(currentTime);
+        if (activeLyric) {
+            display.title = activeLyric.text;
+        }
+    }
+}
+
+/**
+ * Export lyrics data for serialization
+ * @returns {Array}
+ */
+export function exportLyricsData() {
+    return lyrics.map(l => ({
+        text: l.text,
+        startTime: l.startTime,
+        duration: l.duration
+    }));
+}
+
+/**
+ * Import lyrics data from serialized format
+ * @param {Array} data 
+ */
+export function importLyricsData(data) {
+    if (!Array.isArray(data)) return;
+    
+    lyrics = data.map(l => ({
+        id: `lyric-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        text: l.text || '',
+        startTime: l.startTime || 0,
+        duration: l.duration || 2.0,
+        isActive: false
+    }));
+    
+    lyrics.sort((a, b) => a.startTime - b.startTime);
+    currentLyricIndex = -1;
+    updateLyricsDisplay();
+    console.log(`[LyricsTrack] Imported ${lyrics.length} lyrics`);
 }
