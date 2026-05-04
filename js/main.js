@@ -89,6 +89,8 @@ import { initRhythmRandomizer, openRhythmRandomizerPanel, getRhythmRandomizerSet
 import { initArrangementSnapGrid, openSnapGridPanel, getSnapValue, setSnapValue, snapTimeToGrid, toggleSnapEnabled, getSnapInfo } from './ArrangementSnapGrid.js';
 // Clip Ghost Trails
 import { initClipGhostTrails, openGhostTrailsPanel, getGhostTrails, addGhostTrail, removeGhostTrail, clearAllGhostTrails, createGhostFromClip, renderGhostTrailsOnCanvas, getGhostTrailCount, exportGhostTrailsData, importGhostTrailsData } from './ClipGhostTrails.js';
+// Time Signature Per Track - Allow different time signatures per track for polyrhythmic compositions
+import { initTimeSignaturePerTrack, openTimeSignaturePanel, getTrackTimeSignature, setTrackTimeSignature, clearTrackTimeSignature, getBarDurationSeconds, exportTimeSignatures, importTimeSignatures } from './TimeSignaturePerTrack.js';
 // Drum Replace - Analyze audio and replace drum hits with samples
 import { initDrumReplace, openDrumReplacePanel } from './DrumReplace.js';
 // Clip Opacity
@@ -729,6 +731,7 @@ import {
     openLoopRegionQuickSetSettings,
     openLoopRegionMarkersPanel,
     openLyricsTrackPanel,
+    openTimeSignaturePanel,
     toggleClipLoopPreview,
     deactivateClipLoopPreview,
     isClipInLoopPreview,
@@ -1306,6 +1309,7 @@ async function initializeSnugOS() {
         if (typeof initLoopRegionQuickSet === 'function') initLoopRegionQuickSet(appServices); // Loop Region Quick Set initialization
         if (typeof initLoopRegionMarkers === 'function') initLoopRegionMarkers(appServices); // Loop Region Markers initialization
         if (typeof initLyricsTrack === 'function') initLyricsTrack(appServices); // Lyrics Track initialization
+        if (typeof initTimeSignaturePerTrack === 'function') initTimeSignaturePerTrack(appServices); // Time Signature Per Track initialization
         if (typeof initClipContextMenu === 'function') initClipContextMenu(appServices); // Clip context menu with reverse
         if (typeof initClipGroupManager === 'function') initClipGroupManager(appServices); // Clip Group Manager
         if (typeof openStepSequencerView === 'function') openStepSequencerView(appServices); // Step Sequencer View initialization
