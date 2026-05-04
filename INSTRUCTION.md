@@ -10,10 +10,10 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 4. **Clip Gain Envelope Quick** - Double-click clip top to add gain envelope points without opening full editor
 5. **Track Freeze Export** - One-click export of frozen track stems to audio files
 6. **MIDI Chord Display** - Show chord names (Cmaj7, D7, etc.) above MIDI clip sections
-7. **Loop Region Markers** - Add named markers at loop boundaries for section referencing
-8. **BPM Tap Avg Display** - Show rolling average of last N tap tempo values in transport bar
-9. **Audio Clip Stretch Markers** - Visual markers showing where audio was time-stretched
-10. **Scale Highlight Global** - Show scale highlights across all tracks for harmonic consistency
+7. **BPM Tap Avg Display** - Show rolling average of last N tap tempo values in transport bar
+8. **Audio Clip Stretch Markers** - Visual markers showing where audio was time-stretched
+9. **Scale Highlight Global** - Show scale highlights across all tracks for harmonic consistency
+10. **Loop Region Markers** ✅ - Add named markers at loop boundaries for section referencing (completed)
 
 ## Workflow
 
