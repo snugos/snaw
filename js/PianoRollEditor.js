@@ -1,6 +1,8 @@
 // js/PianoRollEditor.js - Piano Roll Editor with Note Editing
 // A true piano roll showing notes as bars on a timeline with full note editing capabilities
 
+import { getCurrentScaleSettings, isNoteInScale, getNoteScaleClass } from './ScaleHighlightMode.js';
+
 let localAppServices = {};
 let pianoRollWindow = null;
 let currentPianoRollTrackId = null;
@@ -139,9 +141,11 @@ function renderPianoRollContent(trackId = null) {
     const totalWidth = numSteps * PIANO_ROLL_PPI * horizontalZoom;
     const totalHeight = numRows * NOTE_HEIGHT * verticalZoom;
 
-    // Build piano keys (left side)
+    // Build piano keys (left side) with optional scale highlighting
     let pianoKeysHtml = `<div class="flex-shrink-0" style="width: ${PIANO_KEY_WIDTH}px;">`;
     pianoKeysHtml += `<div class="h-8 border-b border-gray-300 dark:border-slate-600 bg-gray-200 dark:bg-slate-700"></div>`; // Header spacer
+    const scaleSettings = getCurrentScaleSettings();
+    const scaleEnabled = scaleSettings.enabled;
     for (let r = numRows - 1; r >= 0; r--) {
         let keyLabel = '';
         if (isDrumTrack) {
@@ -155,8 +159,41 @@ function renderPianoRollContent(trackId = null) {
             keyLabel = `${noteName}${octave}`;
         }
         const isBlackKey = keyLabel.includes('#');
+        
+        // Get scale-based styling
+        let bgClass, textClass, borderClass;
+        if (scaleEnabled && !isDrumTrack) {
+            // Calculate MIDI note (C4 = 60, MIDI note = row + 36 based on synthPitches)
+            const midiNote = r + 36;
+            const inScale = isNoteInScale(midiNote);
+            const scaleClass = getNoteScaleClass(midiNote, 0.8);
+            
+            // Use scale colors for background
+            if (scaleClass.bgClass.includes('purple')) {
+                bgClass = 'bg-purple-900';
+                textClass = 'text-purple-200';
+            } else if (scaleClass.bgClass.includes('blue')) {
+                bgClass = 'bg-blue-900';
+                textClass = 'text-blue-200';
+            } else if (scaleClass.bgClass.includes('cyan')) {
+                bgClass = 'bg-cyan-900';
+                textClass = 'text-cyan-200';
+            } else if (scaleClass.bgClass.includes('orange')) {
+                bgClass = 'bg-orange-900';
+                textClass = 'text-orange-200';
+            } else {
+                bgClass = isBlackKey ? 'bg-gray-800' : 'bg-gray-100';
+                textClass = isBlackKey ? 'text-gray-200' : 'text-gray-600';
+            }
+            borderClass = scaleClass.isInScale ? '' : 'border-l-2 border-red-500';
+        } else {
+            bgClass = isBlackKey ? 'bg-gray-800 text-white text-opacity-70' : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-400';
+            textClass = '';
+            borderClass = '';
+        }
+        
         pianoKeysHtml += `
-            <div class="flex items-center justify-end pr-2 border-b border-gray-300 dark:border-slate-600 ${isBlackKey ? 'bg-gray-800 text-white text-opacity-70' : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-400'}"
+            <div class="flex items-center justify-end pr-2 border-b border-gray-300 dark:border-slate-600 ${bgClass} ${textClass} ${borderClass}"
                  style="height: ${NOTE_HEIGHT * verticalZoom}px; font-size: 10px;">
                 ${keyLabel}
             </div>
@@ -203,7 +240,7 @@ function renderPianoRollContent(trackId = null) {
         }
     }
 
-    // Render notes from sequence
+    // Render notes from sequence with scale highlighting
     if (activeSeq?.data) {
         for (let r = 0; r < activeSeq.data.length; r++) {
             for (let s = 0; s < (activeSeq.data[r]?.length || 0); s++) {
@@ -217,13 +254,30 @@ function renderPianoRollContent(trackId = null) {
                     const noteHeight = Math.max(4, NOTE_HEIGHT * verticalZoom - 2);
                     const noteId = `pr-note-${r}-${s}`;
                     const isSelected = selectedNotes.has(noteId);
+                    
+                    // Determine note color based on scale if enabled
+                    let noteColor = 'rgba(59, 130, 246, '; // Default blue
+                    if (scaleEnabled && !isDrumTrack) {
+                        const midiNote = r + 36;
+                        const scaleClass = getNoteScaleClass(midiNote, velocity);
+                        // Map scale colors to rgba
+                        if (scaleClass.bgClass.includes('purple')) {
+                            noteColor = 'rgba(147, 51, 234, '; // Purple
+                        } else if (scaleClass.bgClass.includes('blue')) {
+                            noteColor = 'rgba(59, 130, 246, '; // Blue
+                        } else if (scaleClass.bgClass.includes('cyan')) {
+                            noteColor = 'rgba(6, 182, 212, '; // Cyan
+                        } else if (scaleClass.bgClass.includes('orange')) {
+                            noteColor = 'rgba(249, 115, 22, '; // Orange
+                        }
+                    }
 
                     gridAreaHtml += `
                         <div class="absolute rounded cursor-move note-block ${isSelected ? 'ring-2 ring-yellow-400' : ''}"
                              data-note-row="${r}" data-note-step="${s}" data-note-id="${noteId}"
                              style="left: ${xPos + 2}px; top: ${yPos + 1}px; 
                                     width: ${noteWidth}px; height: ${noteHeight}px;
-                                    background-color: rgba(59, 130, 246, ${0.4 + velocity * 0.6});
+                                    background-color: ${noteColor}${0.4 + velocity * 0.6});
                                     box-shadow: 0 1px 3px rgba(0,0,0,0.2);">
                             <div class="w-full h-full flex items-center justify-center">
                                 <div class="w-2 h-2 rounded-full bg-white opacity-60"></div>

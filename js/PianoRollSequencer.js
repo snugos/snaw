@@ -2,6 +2,7 @@
 // Feature: Clickable piano roll with note editing
 
 import { synthPitches, STEPS_PER_BAR } from './constants.js';
+import { getCurrentScaleSettings, isNoteInScale, getNoteScaleClass } from './ScaleHighlightMode.js';
 
 let localAppServices = {};
 
@@ -148,8 +149,24 @@ function renderPianoRollContent(trackId) {
     setupPianoRollEvents(trackId, track);
 }
 
+function getMidiNoteFromRow(row, track) {
+    if (track.type === 'DrumSampler') {
+        // Map row to MIDI note for drum pads (36-43, C2-C3)
+        return 36 + row;
+    }
+    // For synth pitches, they're indexed from bottom (C1=0) to top
+    // synthPitches is reversed, so row 0 = B5, row 47 = C1
+    // We need to get the actual MIDI note
+    const pitchIndex = synthPitches.length - 1 - row;
+    const pitch = synthPitches[pitchIndex] || 'C4';
+    const noteName = pitch.replace(/[0-9]/g, '');
+    const octave = parseInt(pitch.match(/[0-9]+/)?.[0] || '4', 10);
+    const noteToMidi = { 'C': 0, 'C#': 1, 'D': 2, 'D#': 3, 'E': 4, 'F': 5, 'F#': 6, 'G': 7, 'G#': 8, 'A': 9, 'A#': 10, 'B': 11 };
+    return (octave + 1) * 12 + (noteToMidi[noteName] || 0);
+}
+
 /**
- * Renders the piano keys sidebar
+ * Renders the piano keys sidebar with optional scale highlighting
  * @param {number} trackId - Track ID
  * @param {object} track - Track object
  * @param {Array} sequenceData - 2D array of step data
@@ -160,16 +177,47 @@ function renderPianoKeys(trackId, track, sequenceData) {
     
     const pitches = synthPitches;
     const numRows = track.type === 'DrumSampler' ? 8 : pitches.length;
+    const scaleSettings = getCurrentScaleSettings();
+    const scaleEnabled = scaleSettings.enabled;
     
     let html = '';
     for (let row = 0; row < numRows; row++) {
         const isBlackKey = track.type !== 'DrumSampler' && pitches[row].includes('#');
-        const bgClass = isBlackKey ? 'bg-gray-700' : 'bg-gray-100';
-        const textClass = isBlackKey ? 'text-gray-200' : 'text-gray-800';
         const label = track.type === 'DrumSampler' ? `Pad ${row + 1}` : pitches[row];
         
+        // Get scale-based styling
+        let bgClass, textClass, borderClass;
+        if (scaleEnabled && track.type !== 'DrumSampler') {
+            const midiNote = getMidiNoteFromRow(row, track);
+            const inScale = isNoteInScale(midiNote);
+            const scaleClass = getNoteScaleClass(midiNote, 0.8);
+            
+            // Use scale colors for background
+            if (scaleClass.bgClass.includes('purple')) {
+                bgClass = 'bg-purple-900';
+                textClass = 'text-purple-200';
+            } else if (scaleClass.bgClass.includes('blue')) {
+                bgClass = 'bg-blue-900';
+                textClass = 'text-blue-200';
+            } else if (scaleClass.bgClass.includes('cyan')) {
+                bgClass = 'bg-cyan-900';
+                textClass = 'text-cyan-200';
+            } else if (scaleClass.bgClass.includes('orange')) {
+                bgClass = 'bg-orange-900';
+                textClass = 'text-orange-200';
+            } else {
+                bgClass = isBlackKey ? 'bg-gray-700' : 'bg-gray-100';
+                textClass = isBlackKey ? 'text-gray-200' : 'text-gray-800';
+            }
+            borderClass = scaleClass.isInScale ? '' : 'border-l-2 border-red-500';
+        } else {
+            bgClass = isBlackKey ? 'bg-gray-700' : 'bg-gray-100';
+            textClass = isBlackKey ? 'text-gray-200' : 'text-gray-800';
+            borderClass = '';
+        }
+        
         html += `
-            <div class="piano-key h-5 ${bgClass} ${textClass} border-b border-gray-600 flex items-center justify-end pr-1 text-xs font-mono" 
+            <div class="piano-key h-5 ${bgClass} ${textClass} border-b border-gray-600 ${borderClass} flex items-center justify-end pr-1 text-xs font-mono" 
                  data-row="${row}" style="height: 20px;">
                 ${label}
             </div>
