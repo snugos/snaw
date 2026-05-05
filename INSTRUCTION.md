@@ -4,15 +4,15 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Sidechain Volume Envelope** - Draw ducking volume curves directly on clips for sidechain effects
-2. **Clip Gain Envelope Quick** - Double-click clip top to add gain envelope points without opening full editor
-3. **Track Freeze Export** - One-click export of frozen track stems to audio files
-4. **MIDI Chord Display** - Show chord names (Cmaj7, D7, etc.) above MIDI clip sections
-5. **Audio Clip Stretch Markers** - Visual markers showing where audio was time-stretched
-6. **Scale Highlight Global** - Show scale highlights across all tracks for harmonic consistency
-7. **BPM Tap Avg Display** - Show rolling average of last N tap tempo values in transport bar
+1. **Clip Gain Envelope Quick** - Double-click clip top to add gain envelope points without opening full editor
+2. **Track Freeze Export** - One-click export of frozen track stems to audio files
+3. **MIDI Chord Display** - Show chord names (Cmaj7, D7, etc.) above MIDI clip sections
+4. **Audio Clip Stretch Markers** - Visual markers showing where audio was time-stretched
+5. **Scale Highlight Global** - Show scale highlights across all tracks for harmonic consistency
+6. **BPM Tap Avg Display** - Show rolling average of last N tap tempo values in transport bar
 
 ## COMPLETED FEATURES (for reference)
+- ✅ Sidechain Volume Envelope - Draw ducking volume curves directly on clips for sidechain effects
 - ✅ Time Signature Per Track - Allow different time signatures per track for polyrhythmic compositions
 - ✅ Lyrics Track Timeline - Timeline synced lyrics display and editing
 - ✅ Loop Region Markers - Named markers at loop boundaries
