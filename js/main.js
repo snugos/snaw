@@ -103,6 +103,10 @@ import { initClipLoopPreview, toggleClipLoopPreview, deactivateClipLoopPreview, 
 import { initQuickRename } from './QuickRename.js';
 // Project Auto-Naming - Auto-name clips and tracks based on content type
 import { ProjectAutoNaming } from './ProjectAutoNaming.js';
+// Sidechain Volume Envelope - Draw ducking curves on clips for sidechain effects
+import { initSidechainVolumeEnvelope, openSidechainVolumeEnvelopePanel, getSidechainEnvelope } from './SidechainVolumeEnvelope.js';
+// Sidechain Visualizer - Visual indicator for sidechain routing and ducking status
+import { initSidechainVisualizer, openSidechainVisualizerPanel, triggerSidechainVisualizer, getDuckingLevel, resetDuckingIndicators } from './SidechainVisualizer.js';
 // Effect panel imports - Session 2026-04-24
 import { openTubeSaturationPanel } from './DynamicTubeSaturation.js';
 import { openMultibandGatePanel } from './MultibandGate.js';
@@ -948,6 +952,13 @@ import {
     // Clip Envelope Shaper
     showClipEnvelopeShaper,
     
+    // Sidechain Volume Envelope
+    openSidechainVolumeEnvelopePanel,
+    getSidechainEnvelope,
+    
+    // Sidechain Visualizer
+    openSidechainVisualizerPanel,
+    
     // Track Solo Chain
     enableSoloChain,
     disableSoloChain,
@@ -1367,6 +1378,8 @@ async function initializeSnugOS() {
         if (typeof setupTempoSyncMenuItem === 'function') setupTempoSyncMenuItem(); // Add to start menu
         if (typeof initArrangementSnapGrid === 'function') initArrangementSnapGrid(appServices); // Arrangement Snap Grid initialization
         if (typeof initTempoRamperVisual === 'function') initTempoRamperVisual(appServices); // Tempo Ramper Visual initialization
+        if (typeof initSidechainVolumeEnvelope === 'function') initSidechainVolumeEnvelope(appServices); // Sidechain Volume Envelope initialization
+        if (typeof initSidechainVisualizer === 'function') initSidechainVisualizer(appServices); // Sidechain Visualizer initialization
         
         if (typeof initializePrimaryEventListeners === 'function') {
              initializePrimaryEventListeners(appServices);
