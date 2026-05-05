@@ -4,12 +4,11 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. ~~**Clip Gain Envelope Quick** - Double-click clip top to add gain envelope points without opening full editor~~ ✅ COMPLETED
+1. ~~**BPM Tap Avg Display** - Show rolling average of last N tap tempo values in transport bar~~ ✅ COMPLETED
 2. **Track Freeze Export** - One-click export of frozen track stems to audio files
 3. **MIDI Chord Display** - Show chord names (Cmaj7, D7, etc.) above MIDI clip sections
 4. **Audio Clip Stretch Markers** - Visual markers showing where audio was time-stretched
 5. **Scale Highlight Global** - Show scale highlights across all tracks for harmonic consistency
-6. **BPM Tap Avg Display** - Show rolling average of last N tap tempo values in transport bar
 
 ## COMPLETED FEATURES (for reference)
 - ✅ Sidechain Volume Envelope - Draw ducking volume curves directly on clips for sidechain effects
