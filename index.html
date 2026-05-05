@@ -95,6 +95,7 @@
             <button id="tempoNudgeUp" title="Increase Tempo (+0.1)" class="transport-btn px-1 text-xs">+</button>
             <button id="tapBtnGlobal" title="Tap Tempo" class="transport-btn px-2">Tap</button>
             <button id="tapHistoryBtn" title="Tap History" class="transport-btn px-2 text-xs">History</button>
+            <span id="tapAvgDisplay" title="Rolling average of recent taps" class="text-xs text-yellow-400 px-2 py-1 bg-[#282828] rounded border border-[#4a4a4a] font-mono" style="display: none;">Avg: --</span>
             <button id="tempoFineNudgeDown" title="Fine Decrease (-0.01)" class="transport-btn px-1 text-xs opacity-70 hover:opacity-100">−−</button>
             <button id="tempoFineNudgeUp" title="Fine Increase (+0.01)" class="transport-btn px-1 text-xs opacity-70 hover:opacity-100">++</button>
         </div>
@@ -155,6 +156,8 @@
         <div id="snapResolutionContainer" class="relative">
             <button id="snapResolutionBtn" title="Snap Resolution" class="transport-btn px-2 text-xs">Snap: 1/16</button>
         </div>
+        <!-- Auto-Save Toggle -->
+        <button id="autoSaveToggleBtn" title="Toggle Auto-Save" class="transport-btn px-2 text-xs">AutoSave: On</button>
         <!-- Note Length Default Toggle -->
         <div id="noteLengthContainer" class="relative">
             <button id="noteLengthBtn" title="Default Note Length" class="transport-btn px-2 text-xs">Note: 1/16</button>
@@ -336,6 +339,7 @@
     <script src="js/CpuPerformanceMode.js"></script>
     <script src="js/PlayheadSnap.js"></script>
     <script src="js/TapHistoryUI.js"></script>
+    <script src="js/TapAvgDisplay.js"></script>
     <script src="js/AITempoSuggestion.js"></script>
     <script src="js/SnawQuickLaunch.js"></script>
     <script src="js/KeyboardShortcuts.js"></script>

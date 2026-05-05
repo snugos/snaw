@@ -697,7 +697,7 @@ export function attachGlobalControlEvents(elements) {
         console.error('[EventHandlers attachGlobalControlEvents] Elements object is null or undefined.');
         return;
     }
-    const { playBtnGlobal, recordBtnGlobal, stopBtnGlobal, tempoGlobalInput, tempoNudgeDown, tempoNudgeUp, tempoFineNudgeDown, tempoFineNudgeUp, midiInputSelectGlobal, playbackModeToggleBtnGlobal, midiLearnBtnGlobal, tapBtnGlobal, tapHistoryBtn, loopToggleBtnGlobal, loopStartInput, loopEndInput, metronomeToggleBtnGlobal, metronomeVolumeSlider, metronomeVolumeDisplay, metronomeVolumeControl, performanceMonitorBtn, beatLfoToggleBtnGlobal, scaleSelectGlobal, keySelectGlobal, scaleNotesDisplay } = elements;
+    const { playBtnGlobal, recordBtnGlobal, stopBtnGlobal, tempoGlobalInput, tempoNudgeDown, tempoNudgeUp, tempoFineNudgeDown, tempoFineNudgeUp, midiInputSelectGlobal, playbackModeToggleBtnGlobal, midiLearnBtnGlobal, tapBtnGlobal, tapHistoryBtn, loopToggleBtnGlobal, loopStartInput, loopEndInput, metronomeToggleBtnGlobal, metronomeVolumeSlider, metronomeVolumeDisplay, metronomeVolumeControl, performanceMonitorBtn, autoSaveToggleBtn, beatLfoToggleBtnGlobal, scaleSelectGlobal, keySelectGlobal, scaleNotesDisplay } = elements;
     // Helper function to toggle play/pause icons
     function setPlayButtonState(isPlaying) {
         if (!playBtnGlobal) return;
@@ -825,6 +825,18 @@ export function attachGlobalControlEvents(elements) {
         });
     }
     // === End Performance Monitor Button ===
+
+    // === Auto-Save Toggle Button ===
+    if (autoSaveToggleBtn) {
+        autoSaveToggleBtn.addEventListener('click', () => {
+            if (localAppServices.toggleAutoSave) {
+                localAppServices.toggleAutoSave();
+            } else if (localAppServices.showNotification) {
+                localAppServices.showNotification('Auto-save toggle not available', 2000);
+            }
+        });
+    }
+    // === End Auto-Save Toggle Button ===
 
     // === Beat-Synced LFO Button ===
     if (beatLfoToggleBtnGlobal) {
@@ -1292,6 +1304,15 @@ export function attachGlobalControlEvents(elements) {
                 }).catch(err => console.error('[EventHandlers] Failed to load TapHistoryUI:', err));
             }
         });
+    }
+
+    // Initialize Tap Avg Display
+    if (window.TapAvgDisplay && window.TapAvgDisplay.initTapAvgDisplay) {
+        window.TapAvgDisplay.initTapAvgDisplay(localAppServices);
+    } else {
+        import('./TapAvgDisplay.js').then(module => {
+            if (module.initTapAvgDisplay) module.initTapAvgDisplay(localAppServices);
+        }).catch(err => console.error('[EventHandlers] Failed to load TapAvgDisplay:', err));
     }
 }
 
