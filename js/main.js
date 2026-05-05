@@ -1374,6 +1374,7 @@ async function initializeSnugOS() {
         if (window.TransportMemory && typeof window.TransportMemory.init === 'function') window.TransportMemory.init(); // Transport Memory restoration
         if (typeof initClipGainEnvelope === 'function') initClipGainEnvelope(appServices); // Clip Gain Envelope Core initialization
         if (typeof initClipGainEnvelopeEditor === 'function') initClipGainEnvelopeEditor(appServices); // Clip Gain Envelope Editor UI initialization
+        if (typeof initClipGainEnvelopeQuick === 'function') initClipGainEnvelopeQuick(appServices); // Clip Gain Envelope Quick - double-click clip top to add points
         if (typeof initLoopCountStateReferences === 'function') initLoopCountStateReferences(
             () => getLoopRegionEnabled(),
             () => getLoopRegionStart(),
