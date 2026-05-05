@@ -664,6 +664,15 @@ import {
     loadMasterEffectPreset,
     getAvailableMasterEffectPresets,
     deleteMasterEffectPreset,
+
+    // Clip Fade Presets (state-backed)
+    getClipFadePresetsState,
+    saveClipFadePreset,
+    getClipFadePreset,
+    getClipFadePresetNames,
+    deleteClipFadePreset,
+    applyClipFadePreset,
+
     effectsRegistryAccess: {
         AVAILABLE_EFFECTS: null, getEffectParamDefinitions: null,
         getEffectDefaultParams: null, synthEngineControlDefinitions: null,
