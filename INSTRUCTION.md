@@ -4,7 +4,7 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Clip Gain Envelope Quick** - Double-click clip top to add gain envelope points without opening full editor
+1. ~~**Clip Gain Envelope Quick** - Double-click clip top to add gain envelope points without opening full editor~~ ✅ COMPLETED
 2. **Track Freeze Export** - One-click export of frozen track stems to audio files
 3. **MIDI Chord Display** - Show chord names (Cmaj7, D7, etc.) above MIDI clip sections
 4. **Audio Clip Stretch Markers** - Visual markers showing where audio was time-stretched
