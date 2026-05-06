@@ -195,3 +195,5 @@ const TrackSoloChain = (function() {
         clearChain
     };
 })();
+
+export { enableSoloChain, disableSoloChain, toggleTrackInChain, getSoloedTrackIds, getIsActive, clearChain, openSoloChainPanel };
