@@ -5,6 +5,24 @@ let localAppServices = {};
 let contextMenuListenersInitialized = false;
 
 /**
+ * Download a blob as a file
+ * @param {Blob} blob - The blob to download
+ * @param {string} filename - The filename
+ */
+function downloadBlob(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }, 100);
+}
+
+/**
  * Initialize the track context menu module
  * @param {object} services - App services
  */
@@ -55,13 +73,35 @@ function showTrackContextMenu(x, y, trackId) {
     
     const trackName = track.name || 'Unnamed Track';
     const trackType = track.type || 'Unknown';
+    const isFrozen = track.frozen && track.frozenAudioBlob;
     
     // Create context menu
     const menu = document.createElement('div');
     menu.id = 'track-context-menu';
     menu.className = 'fixed bg-gray-900 border border-gray-600 rounded shadow-lg z-[10000] py-1 min-w-[200px]';
     menu.style.left = `${Math.min(x, window.innerWidth - 220)}px`;
-    menu.style.top = `${Math.min(y, window.innerHeight - 250)}px`;
+    menu.style.top = `${Math.min(y, window.innerHeight - 300)}px`;
+    
+    let freezeMenuItems = '';
+    if (isFrozen) {
+        freezeMenuItems = `
+            <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="exportFrozen" data-track-id="${trackId}">
+                <span class="w-4">📤</span>
+                <span>Export Frozen Audio</span>
+            </button>
+            <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="unfreeze" data-track-id="${trackId}">
+                <span class="w-4">🔥</span>
+                <span>Unfreeze Track</span>
+            </button>
+        `;
+    } else {
+        freezeMenuItems = `
+            <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="freeze" data-track-id="${trackId}">
+                <span class="w-4">❄️</span>
+                <span>Freeze Track</span>
+            </button>
+        `;
+    }
     
     menu.innerHTML = `
         <div class="px-3 py-1.5 text-xs text-gray-400 border-b border-gray-700">
@@ -85,6 +125,9 @@ function showTrackContextMenu(x, y, trackId) {
                 <span class="w-4">📏</span>
                 <span>Adjust Height</span>
             </button>
+        </div>
+        <div class="border-t border-gray-700 mt-1 pt-1">
+            ${freezeMenuItems}
         </div>
         <div class="border-t border-gray-700 mt-1 pt-1">
             <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="delete" data-track-id="${trackId}">
@@ -193,6 +236,46 @@ function handleTrackAction(action, trackId) {
                 }
                 localAppServices.showNotification?.(`Track height set to ${heightKeys[heightIndex]}`, 1500);
                 if (localAppServices.renderTracks) localAppServices.renderTracks();
+            }
+            break;
+            
+        case 'freeze':
+            if (track.freeze) {
+                localAppServices.showNotification?.('Freezing track...', 1500);
+                track.freeze().then(() => {
+                    localAppServices.showNotification?.('Track frozen successfully', 2000);
+                    if (localAppServices.renderTracks) localAppServices.renderTracks();
+                }).catch(err => {
+                    console.error('[TrackContextMenu] Freeze error:', err);
+                    localAppServices.showNotification?.('Freeze failed: ' + err.message, 3000);
+                });
+            } else {
+                localAppServices.showNotification?.('Freeze not available for this track type', 2000);
+            }
+            break;
+            
+        case 'unfreeze':
+            if (track.unfreeze) {
+                localAppServices.showNotification?.('Unfreezing track...', 1500);
+                track.unfreeze().then(() => {
+                    localAppServices.showNotification?.('Track unfrozen successfully', 2000);
+                    if (localAppServices.renderTracks) localAppServices.renderTracks();
+                }).catch(err => {
+                    console.error('[TrackContextMenu] Unfreeze error:', err);
+                    localAppServices.showNotification?.('Unfreeze failed: ' + err.message, 3000);
+                });
+            } else {
+                localAppServices.showNotification?.('Unfreeze not available', 2000);
+            }
+            break;
+            
+        case 'exportFrozen':
+            if (track.frozenAudioBlob) {
+                const filename = `${track.name || 'Track-' + trackId}_frozen.wav`;
+                downloadBlob(track.frozenAudioBlob, filename);
+                localAppServices.showNotification?.('Frozen audio exported', 2000);
+            } else {
+                localAppServices.showNotification?.('No frozen audio to export', 2000);
             }
             break;
             
