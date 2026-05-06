@@ -697,7 +697,7 @@ export function attachGlobalControlEvents(elements) {
         console.error('[EventHandlers attachGlobalControlEvents] Elements object is null or undefined.');
         return;
     }
-    const { playBtnGlobal, recordBtnGlobal, stopBtnGlobal, tempoGlobalInput, tempoNudgeDown, tempoNudgeUp, tempoFineNudgeDown, tempoFineNudgeUp, midiInputSelectGlobal, playbackModeToggleBtnGlobal, midiLearnBtnGlobal, tapBtnGlobal, tapHistoryBtn, loopToggleBtnGlobal, loopStartInput, loopEndInput, metronomeToggleBtnGlobal, metronomeVolumeSlider, metronomeVolumeDisplay, metronomeVolumeControl, performanceMonitorBtn, autoSaveToggleBtn, beatLfoToggleBtnGlobal, scaleSelectGlobal, keySelectGlobal, scaleNotesDisplay } = elements;
+    const { playBtnGlobal, recordBtnGlobal, stopBtnGlobal, tempoGlobalInput, tempoNudgeDown, tempoNudgeUp, tempoFineNudgeDown, tempoFineNudgeUp, midiInputSelectGlobal, playbackModeToggleBtnGlobal, midiLearnBtnGlobal, tapBtnGlobal, tapHistoryBtn, loopToggleBtnGlobal, loopStartInput, loopEndInput, metronomeToggleBtnGlobal, metronomeVolumeSlider, metronomeVolumeDisplay, metronomeVolumeControl, performanceMonitorBtn, autoSaveToggleBtn, beatLfoToggleBtnGlobal, scaleSelectGlobal, keySelectGlobal, scaleNotesDisplay, stretchQualityBtn } = elements;
     // Helper function to toggle play/pause icons
     function setPlayButtonState(isPlaying) {
         if (!playBtnGlobal) return;
@@ -817,14 +817,24 @@ export function attachGlobalControlEvents(elements) {
     // === Performance Monitor Button ===
     if (performanceMonitorBtn) {
         performanceMonitorBtn.addEventListener('click', () => {
-            if (typeof PerformanceMonitor !== 'undefined' && PerformanceMonitor.openPanel) {
-                PerformanceMonitor.openPanel();
-            } else if (localAppServices.showNotification) {
-                localAppServices.showNotification('Performance Monitor not available', 2000);
-            }
+            if (typeof openPerformancePanel === 'function') openPerformancePanel();
         });
     }
     // === End Performance Monitor Button ===
+
+    // === Audio Stretching Quality Toggle Button ===
+    if (stretchQualityBtn) {
+        stretchQualityBtn.addEventListener('click', () => {
+            if (typeof openAudioStretchQualityPanel === 'function') {
+                openAudioStretchQualityPanel();
+            } else if (localAppServices.openStretchQualityPanel) {
+                localAppServices.openStretchQualityPanel();
+            } else {
+                showNotification?.('Audio stretch quality panel not available', 'warning');
+            }
+        });
+    }
+    // === End Audio Stretching Quality Button ===
 
     // === Auto-Save Toggle Button ===
     if (autoSaveToggleBtn) {
@@ -890,13 +900,12 @@ export function attachGlobalControlEvents(elements) {
     // === End Phase Correlation Meter Button ===
 
     // === Audio Stretch Quality Button ===
-    const stretchQualityBtnGlobal = document.getElementById('stretchQualityBtnGlobal');
-    if (stretchQualityBtnGlobal) {
-        stretchQualityBtnGlobal.addEventListener('click', () => {
-            if (localAppServices.openAudioStretchQualityPanel) {
-                localAppServices.openAudioStretchQualityPanel();
-            } else if (localAppServices.showNotification) {
-                localAppServices.showNotification('Audio Stretch Quality Panel not available', 2000);
+    if (stretchQualityBtn) {
+        stretchQualityBtn.addEventListener('click', () => {
+            if (typeof openAudioStretchQualityPanel === 'function') {
+                openAudioStretchQualityPanel();
+            } else {
+                showNotification?.('Audio stretch quality panel not available', 'warning');
             }
         });
     }

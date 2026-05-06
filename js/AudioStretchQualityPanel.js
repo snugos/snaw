@@ -81,8 +81,8 @@ export function openAudioStretchQualityPanel() {
             btn.style.background = '#4a4a8a';
             btn.style.borderColor = '#6a6aaa';
             // Update the transport bar button text
-            const transportBtn = document.getElementById('stretchQualityBtnGlobal');
-            if (transportBtn) transportBtn.textContent = q.label;
+            const transportBtn = document.getElementById('stretchQualityBtn');
+            if (transportBtn) transportBtn.textContent = `Stretch: ${q.label}`;
             qualityBtns.forEach(other => {
                 if (other !== btn) {
                     other.style.background = '#2a2a4a';

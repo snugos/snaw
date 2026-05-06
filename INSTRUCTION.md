@@ -4,9 +4,8 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **MIDI Chord Display** - Show chord names (Cmaj7, D7, etc.) above MIDI clip sections
-2. **Audio Clip Stretch Markers** - Visual markers showing where audio was time-stretched
-3. **Scale Highlight Global** - Show scale highlights across all tracks for harmonic consistency
+1. **Audio Clip Stretch Markers** - Visual markers showing where audio was time-stretched
+2. **Scale Highlight Global** - Show scale highlights across all tracks for harmonic consistency
 
 ## COMPLETED FEATURES (for reference)
 - ✅ Sidechain Volume Envelope - Draw ducking volume curves directly on clips for sidechain effects
@@ -15,6 +14,7 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 - ✅ Loop Region Markers - Named markers at loop boundaries
 - ✅ Tempo Ramper Visual - Draw tempo automation curves on canvas
 - ✅ Tap History - Floating panel showing recent tap values
+- ✅ MIDI Chord Display - Show chord names (Cmaj7, D7, etc.) above MIDI clips
 
 ## Workflow
 

@@ -40,7 +40,7 @@ import { AudioFingerprinting } from './AudioFingerprinting.js';
 import { initAudioTapTempo } from './AudioTapTempo.js';
 import { initAudioNormalizer, openAudioNormalizerPanel } from './AudioNormalizer.js';
 import { initAudioFadePreset, openAudioFadePresetPanel } from './AudioFadePreset.js';
-import { openAudioStretchQualityPanel, openStretchQualityPanel, closeAudioStretchQualityPanel } from './AudioStretchQualityPanel.js';
+import { openAudioStretchQualityPanel, openStretchQualityPanel, closeAudioStretchQualityPanel, getAudioStretchingQuality } from './AudioStretchQualityPanel.js';
 import { initAITempoSuggestion, openAITempoSuggestionPanel } from './AITempoSuggestion.js';
 import { initAutoScrollSync, toggleAutoScroll, autoScrollTimeline } from './AutoScrollSync.js';
 import { initProjectRecoveryManager, createManualBackup, listBackups, restoreBackup, setRecoveryEnabled, getRecoveryStatus } from './ProjectRecoveryManager.js';
@@ -459,6 +459,13 @@ import {
             const quality = getAudioStretchingQuality();
             const label = quality === 'fast' ? 'Fast' : quality === 'high' ? 'High' : 'Balanced';
             uiElementsCache.stretchQualityDisplay.textContent = `${label}`;
+        }
+    },
+    updateStretchQualityBtn: () => {
+        if (uiElementsCache.stretchQualityBtn) {
+            const quality = getAudioStretchingQuality();
+            const label = quality === 'fast' ? 'Fast' : quality === 'high' ? 'High' : 'Balanced';
+            uiElementsCache.stretchQualityBtn.textContent = `Stretch: ${label}`;
         }
     },
     updateUndoRedoButtonsUI: (undoState, redoState) => {
@@ -1287,6 +1294,7 @@ async function initializeSnugOS() {
             metronomeVolumeControl: document.getElementById('metronomeVolumeControl'),
             beatLfoToggleBtnGlobal: document.getElementById('beatLfoToggleBtnGlobal'),
             performanceMonitorBtn: document.getElementById('performanceMonitorBtn'),
+            stretchQualityBtn: document.getElementById('stretchQualityBtn'),
             scaleSelectGlobal: document.getElementById('scaleSelectGlobal'),
             keySelectGlobal: document.getElementById('keySelectGlobal'),
             scaleNotesDisplay: document.getElementById('scaleNotesDisplay')
