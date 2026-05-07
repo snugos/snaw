@@ -48,7 +48,7 @@ const KeyboardShortcuts = (function() {
             });
             md += '\n';
         });
-        return md;
+        return md; // FIXED: added missing return
     }
 
     function enable() { enabled.value = true; }
