@@ -105,6 +105,8 @@ import { initClipLoopPreview, toggleClipLoopPreview, deactivateClipLoopPreview, 
 import { initQuickRename } from './QuickRename.js';
 // Project Auto-Naming - Auto-name clips and tracks based on content type
 import { ProjectAutoNaming } from './ProjectAutoNaming.js';
+// Audio Clip Stretch Markers - Visual markers on stretched audio clips
+import { initAudioClipStretchMarkers, openStretchMarkersPanel, drawStretchMarkers } from './AudioClipStretchMarkers.js';
 // Sidechain Volume Envelope - Draw ducking curves on clips for sidechain effects
 import { initSidechainVolumeEnvelope, openSidechainVolumeEnvelopePanel, getSidechainEnvelope } from './SidechainVolumeEnvelope.js';
 // Sidechain Visualizer - Visual indicator for sidechain routing and ducking status
@@ -747,6 +749,7 @@ import {
     openDrumReplacePanel,
     openClipOpacityPanel,
     openClipFadePresetsPanel,
+    openStretchMarkersPanel,
     openPitchDriftCorrectionPanel,
     openTempoRamperPanel,
     openTempoRamperVisual,
@@ -1396,6 +1399,7 @@ async function initializeSnugOS() {
         if (typeof initSidechainVisualizer === 'function') initSidechainVisualizer(appServices); // Sidechain Visualizer initialization
         if (typeof initAudioFadePreset === 'function') initAudioFadePreset(); // Audio Fade Presets initialization
         if (typeof initEnvelopeIntegration === 'function') initEnvelopeIntegration(); // Envelope Integration initialization
+        if (typeof initAudioClipStretchMarkers === 'function') initAudioClipStretchMarkers(appServices); // Audio Clip Stretch Markers initialization
         
         if (typeof initializePrimaryEventListeners === 'function') {
              initializePrimaryEventListeners(appServices);
