@@ -34,3 +34,8 @@ window.addEventListener('clipEnvelopeApplied', (e) => {
 export function openClipEnvelopeShaper(clip, clipData) {
     showClipEnvelopeShaper(clip, clipData);
 }
+
+// Initialize the EnvelopeIntegration module
+export function initEnvelopeIntegration() {
+    console.log('[EnvelopeIntegration] Module initialized');
+}

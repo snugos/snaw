@@ -60,6 +60,7 @@ import { initAudioRecorder, startRecording, stopRecording, isRecordingActive, re
 import { initMIDArpeggiatorPanel, openMIDArpeggiatorPanel } from './MIDArpeggiatorPanel.js';
 import { initTrackTemplateLibrary, openTrackTemplateLibraryPanel, getTrackTemplateNames, getTrackTemplate, saveTrackTemplate, deleteTrackTemplate, exportTemplates, importTemplates } from './TrackTemplateLibrary.js';
 import { showClipEnvelopeShaper } from './ClipEnvelopeShaper.js';
+import { initEnvelopeIntegration } from './EnvelopeIntegration.js';
 import { enableSoloChain, disableSoloChain, toggleTrackInChain, clearChain, getSoloedTrackIds, getIsActive } from './TrackSoloChain.js';
 import { initLoopRegionQuickSet, openLoopRegionQuickSetSettings } from './LoopRegionQuickSet.js';
 import { initLoopRegionMarkers, openLoopRegionMarkersPanel, addLoopRegionMarker } from './LoopRegionMarkers.js';
@@ -1394,6 +1395,7 @@ async function initializeSnugOS() {
         if (typeof initSidechainVolumeEnvelope === 'function') initSidechainVolumeEnvelope(appServices); // Sidechain Volume Envelope initialization
         if (typeof initSidechainVisualizer === 'function') initSidechainVisualizer(appServices); // Sidechain Visualizer initialization
         if (typeof initAudioFadePreset === 'function') initAudioFadePreset(); // Audio Fade Presets initialization
+        if (typeof initEnvelopeIntegration === 'function') initEnvelopeIntegration(); // Envelope Integration initialization
         
         if (typeof initializePrimaryEventListeners === 'function') {
              initializePrimaryEventListeners(appServices);
