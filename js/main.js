@@ -1393,6 +1393,7 @@ async function initializeSnugOS() {
         if (typeof initTempoRamperVisual === 'function') initTempoRamperVisual(appServices); // Tempo Ramper Visual initialization
         if (typeof initSidechainVolumeEnvelope === 'function') initSidechainVolumeEnvelope(appServices); // Sidechain Volume Envelope initialization
         if (typeof initSidechainVisualizer === 'function') initSidechainVisualizer(appServices); // Sidechain Visualizer initialization
+        if (typeof initAudioFadePreset === 'function') initAudioFadePreset(); // Audio Fade Presets initialization
         
         if (typeof initializePrimaryEventListeners === 'function') {
              initializePrimaryEventListeners(appServices);
