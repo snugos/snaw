@@ -4,17 +4,17 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Track Duplicate with Offset** - Duplicate track with configurable time offset for layered takes
-2. **Tempo Tap Visual** - Animated visual showing tap tempo rhythm for visual metronome
-3. **Track Group Collapse** - Collapse/expand groups of tracks for arrangement view
-4. **Keyboard Velocity Curve** - Visual editor for MIDI velocity sensitivity curve
-5. **Send Effect Amount** - Per-track sends to reverb/delay with amount knob
-6. **Loop Start/End Snapping** - Snap loop region to clip boundaries
-7. **Track Solo Mode Toggle** - Solo button shows current mode (exclusive/chain)
-8. **Clip Name Inline Edit** - Double-click clip name to rename directly on timeline
-9. **MIDI Velocity Quantize** - Quantize note velocities to steps for consistent dynamics
+1. **Tempo Tap Visual** - Animated visual showing tap tempo rhythm for visual metronome
+2. **Track Group Collapse** - Collapse/expand groups of tracks for arrangement view
+3. **Keyboard Velocity Curve** - Visual editor for MIDI velocity sensitivity curve
+4. **Send Effect Amount** - Per-track sends to reverb/delay with amount knob
+5. **Loop Start/End Snapping** - Snap loop region to clip boundaries
+6. **Track Solo Mode Toggle** - Solo button shows current mode (exclusive/chain)
+7. **Clip Name Inline Edit** - Double-click clip name to rename directly on timeline
+8. **MIDI Velocity Quantize** - Quantize note velocities to steps for consistent dynamics
 
 ## COMPLETED FEATURES (for reference)
+- ✅ Track Duplicate with Offset - Duplicate track with configurable time offset for layered takes
 - ✅ Clip Fade Handles - Drag handles on clip edges to adjust fade in/out with visual curve preview
 - ✅ Scale Highlight Global - Show scale highlights across all tracks for harmonic consistency
 - ✅ Audio Clip Stretch Markers - Visual markers showing where audio was time-stretched
