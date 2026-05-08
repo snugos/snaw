@@ -40,6 +40,7 @@ import { AudioFingerprinting } from './AudioFingerprinting.js';
 import { initAudioTapTempo } from './AudioTapTempo.js';
 import { initAudioNormalizer, openAudioNormalizerPanel } from './AudioNormalizer.js';
 import { initAudioFadePreset, openAudioFadePresetPanel } from './AudioFadePreset.js';
+import { initClipFadeHandles, openClipFadeHandlesPanel } from './ClipFadeHandles.js';
 import { openAudioStretchQualityPanel, openStretchQualityPanel, closeAudioStretchQualityPanel, getAudioStretchingQuality } from './AudioStretchQualityPanel.js';
 import { initAITempoSuggestion, openAITempoSuggestionPanel } from './AITempoSuggestion.js';
 import { initAutoScrollSync, toggleAutoScroll, autoScrollTimeline } from './AutoScrollSync.js';
@@ -750,6 +751,7 @@ import {
     openDrumReplacePanel,
     openClipOpacityPanel,
     openClipFadePresetsPanel,
+    openClipFadeHandlesPanel,
     openStretchMarkersPanel,
     openPitchDriftCorrectionPanel,
     openTempoRamperPanel,
@@ -1401,6 +1403,7 @@ async function initializeSnugOS() {
         if (typeof initSidechainVolumeEnvelope === 'function') initSidechainVolumeEnvelope(appServices); // Sidechain Volume Envelope initialization
         if (typeof initSidechainVisualizer === 'function') initSidechainVisualizer(appServices); // Sidechain Visualizer initialization
         if (typeof initAudioFadePreset === 'function') initAudioFadePreset(); // Audio Fade Presets initialization
+        if (typeof initClipFadeHandles === 'function') initClipFadeHandles(); // Clip Fade Handles initialization
         if (typeof initEnvelopeIntegration === 'function') initEnvelopeIntegration(); // Envelope Integration initialization
         if (typeof initAudioClipStretchMarkers === 'function') initAudioClipStretchMarkers(appServices); // Audio Clip Stretch Markers initialization
         
