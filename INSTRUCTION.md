@@ -4,10 +4,20 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Audio Clip Stretch Markers** - Visual markers showing where audio was time-stretched
+1. **Clip Fade Handles** - Drag handles on clip edges to adjust fade in/out with visual curve preview
+2. **Track Duplicate with Offset** - Duplicate track with configurable time offset for layered takes
+3. **Tempo Tap Visual** - Animated visual showing tap tempo rhythm for visual metronome
+4. **Track Group Collapse** - Collapse/expand groups of tracks for arrangement view
+5. **Keyboard Velocity Curve** - Visual editor for MIDI velocity sensitivity curve
+6. **Send Effect Amount** - Per-track sends to reverb/delay with amount knob
+7. **Loop Start/End Snapping** - Snap loop region to clip boundaries
+8. **Track Solo Mode Toggle** - Solo button shows current mode (exclusive/chain)
+9. **Clip Name Inline Edit** - Double-click clip name to rename directly on timeline
+10. **MIDI Velocity Quantize** - Quantize note velocities to steps for consistent dynamics
 
 ## COMPLETED FEATURES (for reference)
 - ✅ Scale Highlight Global - Show scale highlights across all tracks for harmonic consistency
+- ✅ Audio Clip Stretch Markers - Visual markers showing where audio was time-stretched
 - ✅ Sidechain Volume Envelope - Draw ducking volume curves directly on clips for sidechain effects
 - ✅ Time Signature Per Track - Allow different time signatures per track for polyrhythmic compositions
 - ✅ Lyrics Track Timeline - Timeline synced lyrics display and editing
@@ -46,23 +56,7 @@ After successfully implementing a feature:
 
 ## When Queue is Empty
 
-Run this brainstorming process:
-
-```
-Based on SnugOS being a browser-based DAW with:
-- Tone.js audio engine
-- Multi-track timeline
-- Effects rack
-- Sequencer mode
-- MIDI support
-
-Generate 10 NEW feature ideas that are:
-1. Achievable in a single session
-2. Complement existing features
-3. Enhance creative workflow
-
-Output as numbered list and update this instruction.
-```
+Generate 10 new feature ideas based on SnugOS DAW capabilities (Tone.js, multi-track, effects rack, sequencer, MIDI) and update this instruction with the new queue.
 
 ## Rules
 
