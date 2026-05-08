@@ -56,6 +56,7 @@ import { openStepSequencerView } from './StepSequencerView.js';
 import { openPianoRollEditor, initPianoRollEditor } from './PianoRollEditor.js';
 import { initCCStepSequencer, openCCStepSequencer, getCCPatternData, setCCPatternData } from './CCStepSequencer.js';
 import { initScaleHighlightMode, openScaleHighlightPanel, isNoteInScale, getNoteScaleClass, quantizeNoteToScale } from './ScaleHighlightMode.js';
+import { initScaleHighlightGlobal, openScaleHighlightGlobalPanel, toggleGlobalScaleHighlight, setGlobalScale, setGlobalRootNote, isGlobalScaleHighlightEnabled } from './ScaleHighlightGlobal.js';
 import { initAudioRecorder, startRecording, stopRecording, isRecordingActive, requestMicAccess, getRecordingStatus, cleanupRecording } from './AudioRecorder.js';
 import { initMIDArpeggiatorPanel, openMIDArpeggiatorPanel } from './MIDArpeggiatorPanel.js';
 import { initTrackTemplateLibrary, openTrackTemplateLibraryPanel, getTrackTemplateNames, getTrackTemplate, saveTrackTemplate, deleteTrackTemplate, exportTemplates, importTemplates } from './TrackTemplateLibrary.js';
@@ -836,6 +837,7 @@ import {
     getCCPatternData,
     setCCPatternData,
     openScaleHighlightPanel,
+    openScaleHighlightGlobalPanel,
     openRhythmRandomizerPanel,
     
     // Audio Recording
@@ -1349,6 +1351,7 @@ async function initializeSnugOS() {
         if (typeof initPianoRollEditor === 'function') initPianoRollEditor(appServices); // Piano Roll Editor initialization
         if (typeof initCCStepSequencer === 'function') initCCStepSequencer(appServices); // CC Step Sequencer initialization
         if (typeof initScaleHighlightMode === 'function') initScaleHighlightMode(appServices); // Scale Highlight Mode initialization
+        if (typeof initScaleHighlightGlobal === 'function') initScaleHighlightGlobal(appServices); // Scale Highlight Global initialization
         if (typeof initAudioRecorder === 'function') initAudioRecorder(appServices); // Audio Recorder initialization
         if (typeof initMIDArpeggiatorPanel === 'function') initMIDArpeggiatorPanel(appServices); // MIDI Arpeggiator Panel initialization
         if (typeof initTrackTemplateLibrary === 'function') initTrackTemplateLibrary(appServices); // Track Template Library initialization
