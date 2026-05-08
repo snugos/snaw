@@ -5,9 +5,9 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 ## Current Feature Queue
 
 1. **Audio Clip Stretch Markers** - Visual markers showing where audio was time-stretched
-2. **Scale Highlight Global** - Show scale highlights across all tracks for harmonic consistency
 
 ## COMPLETED FEATURES (for reference)
+- ✅ Scale Highlight Global - Show scale highlights across all tracks for harmonic consistency
 - ✅ Sidechain Volume Envelope - Draw ducking volume curves directly on clips for sidechain effects
 - ✅ Time Signature Per Track - Allow different time signatures per track for polyrhythmic compositions
 - ✅ Lyrics Track Timeline - Timeline synced lyrics display and editing
