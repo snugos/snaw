@@ -491,6 +491,19 @@ export function initializePrimaryEventListeners(appContext) {
                     }
                 } catch(e) { console.error('[Menu] Tap History error:', e); }
             },
+            menuTapVisual: () => {
+                console.log('[Menu] Tap Tempo Visual clicked');
+                try {
+                    if (window.TapTempoVisual && window.TapTempoVisual.toggleVisualPanel) {
+                        window.TapTempoVisual.toggleVisualPanel();
+                    } else {
+                        import('./TapTempoVisual.js').then(m => {
+                            if (m.initTapTempoVisual) m.initTapTempoVisual(localAppServices);
+                            if (m.toggleVisualPanel) m.toggleVisualPanel();
+                        });
+                    }
+                } catch(e) { console.error('[Menu] Tap Tempo Visual error:', e); }
+            },
             menuHeadroomMeter: () => {
                 console.log('[Menu] Track Headroom Meter clicked');
                 try {
@@ -697,7 +710,7 @@ export function attachGlobalControlEvents(elements) {
         console.error('[EventHandlers attachGlobalControlEvents] Elements object is null or undefined.');
         return;
     }
-    const { playBtnGlobal, recordBtnGlobal, stopBtnGlobal, tempoGlobalInput, tempoNudgeDown, tempoNudgeUp, tempoFineNudgeDown, tempoFineNudgeUp, midiInputSelectGlobal, playbackModeToggleBtnGlobal, midiLearnBtnGlobal, tapBtnGlobal, tapHistoryBtn, loopToggleBtnGlobal, loopStartInput, loopEndInput, metronomeToggleBtnGlobal, metronomeVolumeSlider, metronomeVolumeDisplay, metronomeVolumeControl, performanceMonitorBtn, autoSaveToggleBtn, beatLfoToggleBtnGlobal, scaleSelectGlobal, keySelectGlobal, scaleNotesDisplay, stretchQualityBtn } = elements;
+    const { playBtnGlobal, recordBtnGlobal, stopBtnGlobal, tempoGlobalInput, tempoNudgeDown, tempoNudgeUp, tempoFineNudgeDown, tempoFineNudgeUp, midiInputSelectGlobal, playbackModeToggleBtnGlobal, midiLearnBtnGlobal, tapBtnGlobal, tapHistoryBtn, tapVisualBtn, loopToggleBtnGlobal, loopStartInput, loopEndInput, metronomeToggleBtnGlobal, metronomeVolumeSlider, metronomeVolumeDisplay, metronomeVolumeControl, performanceMonitorBtn, autoSaveToggleBtn, beatLfoToggleBtnGlobal, scaleSelectGlobal, keySelectGlobal, scaleNotesDisplay, stretchQualityBtn } = elements;
     // Helper function to toggle play/pause icons
     function setPlayButtonState(isPlaying) {
         if (!playBtnGlobal) return;
@@ -1311,6 +1324,21 @@ export function attachGlobalControlEvents(elements) {
                     if (module.initTapHistoryUI) module.initTapHistoryUI(localAppServices);
                     if (module.toggleHistoryPanel) module.toggleHistoryPanel();
                 }).catch(err => console.error('[EventHandlers] Failed to load TapHistoryUI:', err));
+            }
+        });
+    }
+
+    // Tap Visual button handler
+    if (tapVisualBtn) {
+        tapVisualBtn.addEventListener('click', () => {
+            if (window.TapTempoVisual && window.TapTempoVisual.toggleVisualPanel) {
+                window.TapTempoVisual.toggleVisualPanel();
+            } else {
+                // Try dynamic import
+                import('./TapTempoVisual.js').then(module => {
+                    if (module.initTapTempoVisual) module.initTapTempoVisual(localAppServices);
+                    if (module.toggleVisualPanel) module.toggleVisualPanel();
+                }).catch(err => console.error('[EventHandlers] Failed to load TapTempoVisual:', err));
             }
         });
     }
