@@ -82,13 +82,13 @@ export function duplicateTrackWithOffset(trackId, offsetSeconds = 0) {
     
     // Create new track data
     const newTrack = JSON.parse(JSON.stringify(sourceTrack));
-    newTrack.id = localAppServices.generateId ? localAppServices.generateId() : Date.now();
+    newTrack.id = localAppServices.generateId?.() ?? Date.now();
     newTrack.name = (sourceTrack.name || 'Track') + ' Offset';
     
     // Offset all clips
     if (newTrack.clips && Array.isArray(newTrack.clips)) {
         newTrack.clips = newTrack.clips.map(clip => {
-            const newClip = {...clip, id: localAppServices.generateId ? localAppServices.generateId() : Date.now() + Math.random()};
+            const newClip = {...clip, id: localAppServices.generateId?.() ?? (Date.now() + Math.random())};
             newClip.startTime = (clip.startTime || 0) + offsetSeconds;
             return newClip;
         });
@@ -98,7 +98,7 @@ export function duplicateTrackWithOffset(trackId, offsetSeconds = 0) {
     if (newTrack.effects && Array.isArray(newTrack.effects)) {
         newTrack.effects = newTrack.effects.map(effect => ({
             ...effect,
-            id: localAppServices.generateId ? localAppServices.generateId() : Date.now() + Math.random()
+            id: localAppServices.generateId?.() ?? (Date.now() + Math.random())
         }));
     }
     

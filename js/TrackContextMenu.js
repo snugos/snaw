@@ -112,6 +112,10 @@ function showTrackContextMenu(x, y, trackId) {
             <span>Duplicate Track</span>
             <span class="ml-auto text-xs text-gray-500">Ctrl+D</span>
         </button>
+        <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="duplicateOffset" data-track-id="${trackId}">
+            <span class="w-4">📅</span>
+            <span>Duplicate with Offset</span>
+        </button>
         <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="rename" data-track-id="${trackId}">
             <span class="w-4">✏️</span>
             <span>Rename Track</span>
@@ -192,6 +196,20 @@ function handleTrackAction(action, trackId) {
                 if (newTrack) {
                     localAppServices.showNotification?.('Track duplicated', 1500);
                     if (localAppServices.renderTracks) localAppServices.renderTracks();
+                }
+            }
+            break;
+            
+        case 'duplicateOffset':
+            if (localAppServices.openDuplicateOffsetDialog) {
+                localAppServices.openDuplicateOffsetDialog(trackId);
+            } else {
+                // Fallback to default offset
+                if (localAppServices.duplicateTrackWithOffset) {
+                    localAppServices.duplicateTrackWithOffset(trackId, 4);
+                    localAppServices.showNotification?.('Track duplicated (+4s offset)', 1500);
+                } else {
+                    localAppServices.showNotification?.('Offset duplicate not available', 2000);
                 }
             }
             break;

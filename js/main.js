@@ -72,6 +72,8 @@ import { initTempoRamperVisual, openTempoRamperVisual } from './TempoRamperVisua
 import { initClipContextMenu } from './ClipContextMenu.js';
 import { initClipGroupManager } from './ClipGroupManager.js';
 import { initTrackContextMenu } from './TrackContextMenu.js';
+// Track Duplicate with Offset
+import { initTrackDuplicateOffset, openDuplicateOffsetDialog, duplicateTrackWithOffset } from './TrackDuplicateOffset.js';
 import { initTrackColorPanel, openTrackColorPanel } from './TrackColorPanel.js';
 import { initTrackIconPicker, openTrackIconPickerPanel } from './TrackIconPicker.js';
 import { initChordVoicingModes, openChordVoicingPanel } from './ChordVoicingModes.js';
@@ -745,6 +747,7 @@ import {
     openPhaseCorrelationMeterPanel,
     openTrackColorPalettePanel,
     openTrackColorPanel,
+    openDuplicateOffsetDialog,
     openTrackIconPickerPanel,
     openChordVoicingPanel,
     openGhostTrailsPanel,
@@ -1360,6 +1363,7 @@ async function initializeSnugOS() {
         
         if (typeof initDrumReplace === 'function') initDrumReplace(appServices); // Drum Replace initialization
         if (typeof initTrackContextMenu === 'function') initTrackContextMenu(appServices); // Track context menu with duplicate
+        if (typeof initTrackDuplicateOffset === 'function') initTrackDuplicateOffset(appServices); // Track Duplicate with Offset
         if (typeof initTrackColorPanel === 'function') initTrackColorPanel(appServices); // Track Color Panel initialization
         if (typeof initTrackIconPicker === 'function') initTrackIconPicker(appServices); // Track Icon Picker initialization
         if (typeof initChordVoicingModes === 'function') initChordVoicingModes(appServices); // Chord Voicing Modes initialization
