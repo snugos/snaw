@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.8"; // Daily merge 2026-05-08 - Verified all features present, no merges needed, no bugs found
+export const APP_VERSION = "0.3.9"; // Daily merge 2026-05-09 - Added MIDI CC Learn system from app repo
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks

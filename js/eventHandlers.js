@@ -44,6 +44,92 @@ let localAppServices = {};
 let transportKeepAliveBufferSource = null;
 let silentKeepAliveBuffer = null;
 
+// --- MIDI CC Learn / Mapping System ---
+let _midiCCMappings = {}; // { targetId: { cc, channel, min, max } }
+let _midiCCLearnActive = null; // { targetId, paramPath, trackId, defaultMin, defaultMax }
+
+// Serialization keys for project save/load
+const MIDI_CC_MAPPINGS_STORAGE_KEY = 'midiCCMappings';
+const MIDI_CC_LEARN_ACTIVE_STORAGE_KEY = 'midiCCLearnActive';
+
+export function getMidiCCMappings() { return _midiCCMappings; }
+export function getMidiCCLearnActive() { return _midiCCLearnActive; }
+
+export function clearMidiCCMappings() { _midiCCMappings = {}; }
+export function removeMidiCCMapping(targetId) { delete _midiCCMappings[targetId]; }
+export function setMidiCCMapping(targetId, mapping) { _midiCCMappings[targetId] = mapping; }
+export function getMidiCCMapping(targetId) { return _midiCCMappings[targetId] || null; }
+
+// Persist CC mappings to a plain object for project save/load
+export function getMidiCCMappingsForProject() {
+    return Object.keys(_midiCCMappings).map(key => ({
+        targetId: key,
+        cc: _midiCCMappings[key].cc,
+        channel: _midiCCMappings[key].channel,
+        min: _midiCCMappings[key].min,
+        max: _midiCCMappings[key].max
+    }));
+}
+
+// Restore CC mappings from a project data array
+export function loadMidiCCMappingsFromProject(mappingsData) {
+    _midiCCMappings = {};
+    if (Array.isArray(mappingsData)) {
+        for (const entry of mappingsData) {
+            if (entry && typeof entry.targetId === 'string' && typeof entry.cc === 'number') {
+                _midiCCMappings[entry.targetId] = {
+                    cc: entry.cc,
+                    channel: entry.channel !== undefined ? entry.channel : 0,
+                    min: entry.min !== undefined ? entry.min : 0,
+                    max: entry.max !== undefined ? entry.max : 1
+                };
+            }
+        }
+    }
+    console.log(`[MIDI CC] Loaded ${Object.keys(_midiCCMappings).length} CC mappings from project.`);
+}
+
+// Apply CC value to a mapped target
+function applyMidiCCMapping(targetId, ccValue, channel) {
+    const mapping = _midiCCMappings[targetId];
+    if (!mapping || mapping.channel !== channel) return;
+    const normalized = ccValue / 127;
+    const value = mapping.min + normalized * (mapping.max - mapping.min);
+    if (localAppServices.applyMidiCCToKnob) {
+        localAppServices.applyMidiCCToKnob(targetId, value);
+    }
+}
+
+// Start CC learn mode for a knob/control target
+export function startMidiCCLearn(targetId, paramPath, trackId, defaultMin, defaultMax) {
+    _midiCCLearnActive = { targetId, paramPath, trackId, defaultMin: defaultMin !== undefined ? defaultMin : 0, defaultMax: defaultMax !== undefined ? defaultMax : 1 };
+    if (localAppServices.showNotification) localAppServices.showNotification("MIDI CC Learn: Move a controller to assign, Esc to cancel.", 5000);
+    console.log(`[MIDI CC Learn] Started for target: ${targetId}, param: ${paramPath}`);
+}
+
+// Cancel CC learn mode
+export function cancelMidiCCLearn() {
+    if (_midiCCLearnActive) {
+        console.log(`[MIDI CC Learn] Cancelled for target: ${_midiCCLearnActive.targetId}`);
+        _midiCCLearnActive = null;
+    }
+}
+
+// Called by handleMIDIMessage when a CC message is received
+function handleCCLearnMessage(cc, channel) {
+    if (!_midiCCLearnActive) return;
+    const mapping = {
+        cc: cc,
+        channel: channel,
+        min: _midiCCLearnActive.defaultMin,
+        max: _midiCCLearnActive.defaultMax
+    };
+    _midiCCMappings[_midiCCLearnActive.targetId] = mapping;
+    if (localAppServices.showNotification) localAppServices.showNotification(`MIDI CC ${cc} (ch ${channel+1}) mapped to this control.`, 3000);
+    console.log(`[MIDI CC Learn] Mapped CC ${cc} (ch ${channel+1}) to target: ${_midiCCLearnActive.targetId}`);
+    _midiCCLearnActive = null;
+}
+
 export function initializeEventHandlersModule(appServicesFromMain) {
     localAppServices = appServicesFromMain || {}; 
     if (!localAppServices.setPlaybackMode && setPlaybackModeState) {
