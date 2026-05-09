@@ -172,6 +172,24 @@ export function renameTrackGroup(groupId, newName) {
 }
 
 /**
+ * Update a track group's properties.
+ * @param {number} groupId - The group ID
+ * @param {Object} updates - Properties to update (e.g., { collapsed: true })
+ */
+export function updateTrackGroup(groupId, updates) {
+    const group = trackGroups.find(g => g.id === groupId);
+    if (!group) return false;
+    
+    Object.assign(group, updates);
+    
+    if (appServices.updateTrackGroupsUI) {
+        appServices.updateTrackGroupsUI();
+    }
+    
+    return true;
+}
+
+/**
  * Add a track to a group
  */
 export function addTrackToGroup(groupId, trackId) {
@@ -854,6 +872,7 @@ export default {
     createTrackGroup,
     removeTrackGroup,
     renameTrackGroup,
+    updateTrackGroup,
     addTrackToGroup,
     removeTrackFromGroup,
     setGroupVolume,

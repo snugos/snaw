@@ -1098,6 +1098,7 @@ import {
     setGroupLinked: window.setGroupLinked,
     setGroupColor: window.setGroupColor,
     renameGroup: window.renameGroup,
+    updateTrackGroup: window.updateTrackGroup,
     moveGroup: window.moveGroup,
     duplicateGroup: window.duplicateGroup,
     getGroupHierarchy: window.getGroupHierarchy,

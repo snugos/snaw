@@ -4,13 +4,20 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Track Group Collapse** - Collapse/expand groups of tracks for arrangement view
-2. **Keyboard Velocity Curve** - Visual editor for MIDI velocity sensitivity curve
-3. **Send Effect Amount** - Per-track sends to reverb/delay with amount knob
-4. **Loop Start/End Snapping** - Snap loop region to clip boundaries
-5. **Track Solo Mode Toggle** - Solo button shows current mode (exclusive/chain)
+**Note:** Several features below already have partial implementations that need completion or connection to the UI:
+- **Track Group Collapse** - `js/TrackGrouping.js` has `toggleGroupCollapse()` but UI doesn't display collapsed state
+- **Keyboard Velocity Curve** - `js/MIDIVelocityCurve.js` exists with `openMIDIVelocityCurvePanel()` but may need button in UI
+- **Send Effect Amount** - `js/Track.js` has `sendLevels = {reverb: 0, delay: 0}` and mixer has sends section
+- **Track Solo Mode Toggle** - Solo is single mode only (exclusive); chain/exclusive toggle not yet UI-exposed
+- **MIDI Velocity Quantize** - `js/QuantizeStrengthControl.js` has velocity quantize panel; check if accessible
+
+1. **Track Group Collapse** - Complete the collapse/expand UI for track groups in the arrangement view
+2. **Keyboard Velocity Curve** - Connect existing `js/MIDIVelocityCurve.js` to accessible UI (menu or button)
+3. **Send Effect Amount** - Add reverb/delay send knobs to track inspector or mixer channel strip
+4. **Loop Start/End Snapping** - Add snap options for loop region to clip boundaries
+5. **Track Solo Mode Toggle** - Add toggle between exclusive solo (one track) and chain solo (multiple)
 6. **Clip Name Inline Edit** - Double-click clip name to rename directly on timeline
-7. **MIDI Velocity Quantize** - Quantize note velocities to steps for consistent dynamics
+7. **MIDI Velocity Quantize** - Ensure Quantize panel with velocity options is accessible
 
 ## COMPLETED FEATURES (for reference)
 - ✅ Tempo Tap Visual - Animated visual showing tap tempo rhythm for visual metronome
@@ -25,6 +32,11 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 - ✅ Tempo Ramper Visual - Draw tempo automation curves on canvas
 - ✅ Tap History - Floating panel showing recent tap values
 - ✅ MIDI Chord Display - Show chord names (Cmaj7, D7, etc.) above MIDI clips
+- ✅ Piano Roll Sequencer - Full piano roll editor with clickable note editing
+- ✅ Piano Roll Editor - Alternative editor with drag/move/resize notes
+- ✅ Track Color Coding - Tracks have color property with color picker UI
+- ✅ Waveform Visualization - Audio clips display waveforms on timeline
+- ✅ Keyboard Shortcuts Panel - Press `?` or use menu to show all shortcuts
 
 ## Workflow
 

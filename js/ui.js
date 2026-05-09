@@ -1574,12 +1574,18 @@ function renderTrackGroupsContent() {
         
         groups.forEach(group => {
             const groupTracks = group.trackIds.map(id => tracks.find(t => t.id === id)).filter(Boolean);
+            const isCollapsed = group.collapsed || false;
             
             html += `
                 <div class="p-3 bg-white dark:bg-slate-700 rounded border border-gray-200 dark:border-slate-600 track-group-item" data-id="${group.id}" style="border-left: 4px solid ${group.color}">
                     <div class="flex items-center justify-between mb-2">
-                        <input type="text" class="group-name-input p-1 text-sm bg-gray-50 dark:bg-slate-600 border border-gray-200 dark:border-slate-500 rounded text-gray-700 dark:text-gray-200 font-medium w-40"
-                            value="${group.name}" data-id="${group.id}" placeholder="Group name">
+                        <div class="flex items-center gap-2">
+                            <button class="group-collapse-btn w-6 h-6 flex items-center justify-center text-xs rounded bg-gray-200 dark:bg-slate-600 hover:bg-gray-300 dark:hover:bg-slate-500 cursor-pointer" data-id="${group.id}" title="${isCollapsed ? 'Expand' : 'Collapse'}">
+                                ${isCollapsed ? '▶' : '▼'}
+                            </button>
+                            <input type="text" class="group-name-input p-1 text-sm bg-gray-50 dark:bg-slate-600 border border-gray-200 dark:border-slate-500 rounded text-gray-700 dark:text-gray-200 font-medium w-40"
+                                value="${group.name}" data-id="${group.id}" placeholder="Group name">
+                        </div>
                         <div class="flex items-center gap-2">
                             <input type="color" class="group-color-input w-6 h-6 rounded cursor-pointer" 
                                 value="${group.color}" data-id="${group.id}" title="Group color">
@@ -1605,15 +1611,16 @@ function renderTrackGroupsContent() {
                     </div>
                     
                     <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">
-                        ${groupTracks.length} track${groupTracks.length !== 1 ? 's' : ''}: ${groupTracks.length > 0 ? groupTracks.map(t => t.name).join(', ') : 'None'}
+                        ${groupTracks.length} track${groupTracks.length !== 1 ? 's' : ''}: ${groupTracks.length > 0 ? (isCollapsed ? `${groupTracks.length} tracks (collapsed)` : groupTracks.map(t => t.name).join(', ')) : 'None'}
                     </div>
-                    
+                    ${!isCollapsed ? `
                     <div class="flex items-center gap-2">
                         <select class="add-track-to-group-select p-1 text-xs bg-gray-50 dark:bg-slate-600 border border-gray-200 dark:border-slate-500 rounded text-gray-700 dark:text-gray-200 flex-1" data-id="${group.id}">
                             <option value="">+ Add track to group...</option>
                             ${tracks.filter(t => !group.trackIds.includes(t.id)).map(t => `<option value="${t.id}">${t.name}</option>`).join('')}
                         </select>
                     </div>
+                    ` : ''}
                 </div>
             `;
         });
@@ -1703,6 +1710,18 @@ function renderTrackGroupsContent() {
                 renderTrackGroupsContent();
             }
             e.target.value = '';
+        });
+    });
+    
+    // Collapse/expand group
+    container.querySelectorAll('.group-collapse-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const groupId = parseInt(e.target.dataset.id, 10);
+            const group = localAppServices.getTrackGroups?.().find(g => g.id === groupId);
+            if (group) {
+                localAppServices.updateTrackGroup?.(groupId, { collapsed: !group.collapsed });
+                renderTrackGroupsContent();
+            }
         });
     });
 }
