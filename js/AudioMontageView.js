@@ -753,6 +753,41 @@ class AudioMontageView {
         
         this.setupEventHandlers();
         this.draw();
+        
+        // Tooltip for clip hover
+        this.tooltip = document.createElement('div');
+        this.tooltip.style.cssText = `
+            position: fixed;
+            background: rgba(30, 30, 50, 0.95);
+            border: 1px solid #555;
+            border-radius: 4px;
+            padding: 6px 10px;
+            font-size: 11px;
+            color: #fff;
+            pointer-events: none;
+            z-index: 10000;
+            display: none;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        `;
+        document.body.appendChild(this.tooltip);
+    }
+    
+    destroy() {
+        if (this.tooltip && this.tooltip.parentNode) {
+            this.tooltip.parentNode.removeChild(this.tooltip);
+        }
+    }
+    
+    showTooltip(clip, x, y) {
+        this.tooltip.innerHTML = `<strong>${clip.name}</strong><br>Duration: ${clip.duration.toFixed(2)}s | Start: ${clip.start.toFixed(2)}s`;
+        this.tooltip.style.display = 'block';
+        this.tooltip.style.left = (x + 15) + 'px';
+        this.tooltip.style.top = (y + 15) + 'px';
+    }
+    
+    hideTooltip() {
+        this.tooltip.style.display = 'none';
     }
     
     setupEventHandlers() {
@@ -852,23 +887,31 @@ class AudioMontageView {
     }
     
     handleMouseMove(e) {
-        if (!this.drag.active) return;
-        
         const rect = this.canvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         
-        const pps = this.config.pixelsPerSecond * this.timeline.zoom;
-        const deltaX = x - this.drag.startX;
-        const deltaTime = deltaX / pps;
-        
-        if (this.drag.type === 'clip') {
-            for (const original of this.drag.originalPositions) {
-                this.moveClip(original.id, original.start + deltaTime);
+        if (this.drag.active) {
+            const pps = this.config.pixelsPerSecond * this.timeline.zoom;
+            const deltaX = x - this.drag.startX;
+            const deltaTime = deltaX / pps;
+            
+            if (this.drag.type === 'clip') {
+                for (const original of this.drag.originalPositions) {
+                    this.moveClip(original.id, original.start + deltaTime);
+                }
+            }
+            
+            this.draw();
+        } else {
+            // Hover tooltip for clips
+            const clip = this.getClipAtPosition(x, y);
+            if (clip) {
+                this.showTooltip(clip, e.clientX, e.clientY);
+            } else {
+                this.hideTooltip();
             }
         }
-        
-        this.draw();
     }
     
     handleMouseUp(e) {
