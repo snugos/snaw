@@ -4,17 +4,13 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-**Note:** Several features below already have partial implementations that need completion or connection to the UI:
-- **Send Effect Amount** - `js/Track.js` has `sendLevels = {reverb: 0, delay: 0}` and mixer has sends section
-- **Track Solo Mode Toggle** - Solo is single mode only (exclusive); chain/exclusive toggle not yet UI-exposed
-
-1. **Send Effect Amount** - Add reverb/delay send knobs to track inspector or mixer channel strip
-2. **Loop Start/End Snapping** - Add snap options for loop region to clip boundaries
-3. **Track Solo Mode Toggle** - Add toggle between exclusive solo (one track) and chain solo (multiple)
-4. **Clip Name Inline Edit** - Double-click clip name to rename directly on timeline
-5. **MIDI Velocity Quantize** - Ensure Quantize panel with velocity options is accessible
+1. **Loop Start/End Snapping** - Add snap options for loop region to clip boundaries
+2. **Track Solo Mode Toggle** - Add toggle between exclusive solo (one track) and chain solo (multiple)
+3. **Clip Name Inline Edit** - Double-click clip name to rename directly on timeline
+4. **MIDI Velocity Quantize** - Ensure Quantize panel with velocity options is accessible
 
 ## COMPLETED FEATURES (for reference)
+- ✅ Send Effect Amount - Connect reverb/delay send knobs to mixer channel strip
 - ✅ Keyboard Velocity Curve - Connect `js/MIDIVelocityCurve.js` to Start menu for MIDI velocity curve editing
 - ✅ Track Group Collapse - Complete collapse/expand UI for track groups in arrangement view
 - ✅ Tempo Tap Visual - Animated visual showing tap tempo rhythm for visual metronome
