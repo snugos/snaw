@@ -1,199 +1,203 @@
-// TrackSoloChain.js - Mute all tracks except selected chain of tracks for focused listening
-const TrackSoloChain = (function() {
-    let soloedTrackIds = new Set();
-    let isActive = false;
-    let originalMuteStates = new Map();
+/**
+ * Track Solo Chain - Mute all tracks except a chain of connected tracks
+ */
+import { getTracksState, getTrackByIdState } from './state.js';
 
-    function getTracksState() {
-        if (typeof tracks !== 'undefined') return tracks;
-        return [];
+let originalMuteStates = new Map();
+let soloChainActive = false;
+let soloChainTrackIds = [];
+
+export function isSoloChainActive() { return soloChainActive; }
+
+export function getSoloChainTrackIds() { return [...soloChainTrackIds]; }
+
+export function toggleSoloChain(trackId) {
+    if (!soloChainActive) {
+        activateSoloChain();
     }
-
-    function saveOriginalMuteStates() {
-        originalMuteStates.clear();
-        const tracks = getTracksState();
-        tracks.forEach(track => {
-            if (track && track.id) {
-                originalMuteStates.set(track.id, track.muted || false);
-            }
-        });
+    
+    const idx = soloChainTrackIds.indexOf(trackId);
+    if (idx !== -1) {
+        soloChainTrackIds.splice(idx, 1);
+    } else {
+        soloChainTrackIds.push(trackId);
     }
-
-    function restoreOriginalMuteStates() {
-        const tracks = getTracksState();
-        tracks.forEach(track => {
-            if (track && track.id && originalMuteStates.has(track.id)) {
-                track.muted = originalMuteStates.get(track.id);
-                if (track.audioTrack && track.audioTrack.mute !== undefined) {
-                    track.audioTrack.mute = track.muted;
-                }
-            }
-        });
-        originalMuteStates.clear();
+    
+    applySoloChain();
+    
+    if (soloChainTrackIds.length === 0) {
+        deactivateSoloChain();
     }
+}
 
-    function enableSoloChain(trackIds) {
-        saveOriginalMuteStates();
-        soloedTrackIds = new Set(trackIds);
-        isActive = true;
-        applySoloChain();
+export function activateSoloChain() {
+    if (soloChainActive) return;
+    
+    const tracks = getTracksState();
+    originalMuteStates.clear();
+    soloChainTrackIds = [];
+    
+    tracks.forEach(t => {
+        originalMuteStates.set(t.id, t.muted);
+        if (!t.muted) t.muted = true;
+    });
+    
+    soloChainActive = true;
+    
+    const btn = document.getElementById('trackSoloChainBtnGlobal');
+    if (btn) btn.classList.add('active');
+    
+    if (typeof showSafeNotification === 'function') {
+        showSafeNotification('Solo Chain activated - click tracks to add to chain', 2000);
     }
+}
 
-    function applySoloChain() {
-        const tracks = getTracksState();
-        tracks.forEach(track => {
-            if (!track || !track.id) return;
-            const shouldMute = !soloedTrackIds.has(track.id);
-            track.muted = shouldMute;
-            if (track.audioTrack && track.audioTrack.mute !== undefined) {
-                track.audioTrack.mute = shouldMute;
-            }
-        });
-        updateUI();
+export function deactivateSoloChain() {
+    if (!soloChainActive) return;
+    
+    const tracks = getTracksState();
+    tracks.forEach(t => {
+        const orig = originalMuteStates.get(t.id);
+        if (orig !== undefined) t.muted = orig;
+    });
+    
+    originalMuteStates.clear();
+    soloChainTrackIds = [];
+    soloChainActive = false;
+    
+    const btn = document.getElementById('trackSoloChainBtnGlobal');
+    if (btn) btn.classList.remove('active');
+    
+    if (typeof showSafeNotification === 'function') {
+        showSafeNotification('Solo Chain deactivated', 1500);
     }
+}
 
-    function disableSoloChain() {
-        isActive = false;
-        restoreOriginalMuteStates();
-        soloedTrackIds.clear();
-        updateUI();
+export function applySoloChain() {
+    if (!soloChainActive) return;
+    
+    const tracks = getTracksState();
+    tracks.forEach(t => {
+        t.muted = !soloChainTrackIds.includes(t.id);
+    });
+}
+
+export function clearSoloChain() {
+    soloChainTrackIds = [];
+    applySoloChain();
+}
+
+let panelOpen = false;
+
+export function openSoloChainPanel() {
+    if (panelOpen) {
+        closeSoloChainPanel();
+        return;
     }
-
-    function toggleTrackInChain(trackId) {
-        if (soloedTrackIds.has(trackId)) {
-            soloedTrackIds.delete(trackId);
-        } else {
-            soloedTrackIds.add(trackId);
-        }
-        if (isActive) {
-            applySoloChain();
-        }
-    }
-
-    function getSoloedTrackIds() {
-        return Array.from(soloedTrackIds);
-    }
-
-    function getIsActive() {
-        return isActive;
-    }
-
-    function clearChain() {
-        soloedTrackIds.clear();
-        if (isActive) {
-            applySoloChain();
-        }
-        updateUI();
-    }
-
-    function updateUI() {
-        const statusEl = document.getElementById('soloChainStatus');
-        if (statusEl) {
-            if (isActive) {
-                const count = soloedTrackIds.size;
-                statusEl.textContent = `Solo Chain: ${count} track${count !== 1 ? 's' : ''}`;
-                statusEl.classList.add('active');
-            } else {
-                statusEl.textContent = 'Solo Chain: Off';
-                statusEl.classList.remove('active');
-            }
-        }
-    }
-
-    function openSoloChainPanel() {
-        const existingPanel = document.getElementById('soloChainPanel');
-        if (existingPanel) {
-            existingPanel.remove();
-            return;
-        }
-
-        const panel = document.createElement('div');
-        panel.id = 'soloChainPanel';
-        panel.className = 'floating-panel';
-        panel.style.cssText = 'position:fixed;top:80px;right:20px;width:280px;background:#1a1a2e;border:1px solid #333;border-radius:8px;padding:16px;z-index:1000;color:#e0e0e0;font-family:system-ui;font-size:13px;';
-
-        const title = document.createElement('div');
-        title.style.cssText = 'font-weight:600;font-size:14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;';
-        title.innerHTML = '<span>🎧 Track Solo Chain</span><button id="soloChainClose" style="background:none;border:none;color:#888;cursor:pointer;font-size:16px;line-height:1;">×</button>';
-        panel.appendChild(title);
-
-        const status = document.createElement('div');
-        status.id = 'soloChainStatus';
-        status.style.cssText = 'font-size:12px;color:#888;margin-bottom:12px;';
-        panel.appendChild(status);
-
-        const trackList = document.createElement('div');
-        trackList.style.cssText = 'max-height:300px;overflow-y:auto;';
-        const tracks = getTracksState();
-        tracks.forEach(track => {
-            if (!track || !track.id) return;
-            const isSoloed = soloedTrackIds.has(track.id);
-            const trackItem = document.createElement('div');
-            trackItem.style.cssText = 'display:flex;align-items:center;padding:6px 0;border-bottom:1px solid #2a2a3e;cursor:pointer;';
-            trackItem.innerHTML = `
-                <input type="checkbox" ${isSoloed ? 'checked' : ''} data-track-id="${track.id}" 
-                    style="margin-right:8px;cursor:pointer;">
-                <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${track.name || 'Track ' + track.id}</span>
-                <span style="color:#666;font-size:11px;">${track.type || 'audio'}</span>
-            `;
-            trackItem.querySelector('input').addEventListener('change', (e) => {
-                e.stopPropagation();
-                toggleTrackInChain(track.id);
-            });
-            trackList.appendChild(trackItem);
-        });
-        panel.appendChild(trackList);
-
-        const buttonRow = document.createElement('div');
-        buttonRow.style.cssText = 'display:flex;gap:8px;margin-top:12px;';
-        buttonRow.innerHTML = `
-            <button id="soloChainEnable" style="flex:1;padding:8px;background:#4a4a6a;border:none;border-radius:4px;color:#fff;cursor:pointer;font-size:12px;">
-                ${isActive ? 'Update Chain' : 'Enable Chain'}
-            </button>
-            <button id="soloChainDisable" style="flex:1;padding:8px;background:#3a3a5a;border:none;border-radius:4px;color:#fff;cursor:pointer;font-size:12px;">
-                Disable
-            </button>
-            <button id="soloChainClear" style="flex:1;padding:8px;background:#2a2a4a;border:none;border-radius:4px;color:#888;cursor:pointer;font-size:12px;">
-                Clear
-            </button>
+    
+    const tracks = getTracksState();
+    
+    const panel = document.createElement('div');
+    panel.id = 'soloChainPanel';
+    panel.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        background: #1a1a2e;
+        border: 1px solid #3a3a5e;
+        border-radius: 8px;
+        padding: 16px;
+        z-index: 9999;
+        min-width: 240px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        font-family: system-ui, -apple-system, sans-serif;
+        color: #e0e0e0;
+    `;
+    
+    const title = document.createElement('div');
+    title.textContent = 'Solo Chain';
+    title.style.cssText = 'font-weight: 600; font-size: 14px; margin-bottom: 12px; color: #fff;';
+    panel.appendChild(title);
+    
+    const status = document.createElement('div');
+    status.id = 'soloChainStatus';
+    status.style.cssText = 'font-size: 11px; color: #888; margin-bottom: 10px;';
+    status.textContent = soloChainActive ? `Active - ${soloChainTrackIds.length} track(s) in chain` : 'Inactive';
+    panel.appendChild(status);
+    
+    tracks.forEach(t => {
+        const btn = document.createElement('button');
+        btn.textContent = t.name || `Track ${t.id}`;
+        const isInChain = soloChainTrackIds.includes(t.id);
+        btn.style.cssText = `
+            display: block;
+            width: 100%;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            background: ${isInChain ? '#4a4a8a' : '#2a2a4a'};
+            border: 1px solid ${isInChain ? '#6a6aaa' : '#3a3a6a'};
+            border-radius: 4px;
+            color: ${t.muted ? '#666' : '#fff'};
+            font-size: 12px;
+            cursor: pointer;
+            text-align: left;
         `;
-        panel.appendChild(buttonRow);
-
-        document.body.appendChild(panel);
-
-        document.getElementById('soloChainClose').onclick = () => panel.remove();
-        document.getElementById('soloChainEnable').onclick = () => {
-            if (soloedTrackIds.size > 0) {
-                enableSoloChain(Array.from(soloedTrackIds));
-            }
-        };
-        document.getElementById('soloChainDisable').onclick = disableSoloChain;
-        document.getElementById('soloChainClear').onclick = clearChain;
-
-        updateUI();
+        
+        btn.addEventListener('click', () => {
+            toggleSoloChain(t.id);
+            btn.style.background = soloChainTrackIds.includes(t.id) ? '#4a4a8a' : '#2a2a4a';
+            btn.style.borderColor = soloChainTrackIds.includes(t.id) ? '#6a6aaa' : '#3a3a6a';
+            updatePanelStatus();
+        });
+        
+        panel.appendChild(btn);
+    });
+    
+    const btnRow = document.createElement('div');
+    btnRow.style.cssText = 'display: flex; gap: 8px; margin-top: 12px;';
+    
+    const deactivateBtn = document.createElement('button');
+    deactivateBtn.textContent = 'Deactivate';
+    deactivateBtn.style.cssText = 'flex: 1; padding: 8px; background: #3a2a2a; border: 1px solid #5a3a3a; border-radius: 4px; color: #ff8888; cursor: pointer;';
+    deactivateBtn.addEventListener('click', () => {
+        deactivateSoloChain();
+        closeSoloChainPanel();
+    });
+    btnRow.appendChild(deactivateBtn);
+    
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = 'Close';
+    closeBtn.style.cssText = 'flex: 1; padding: 8px; background: #2a2a3a; border: 1px solid #3a3a5a; border-radius: 4px; color: #aaa; cursor: pointer;';
+    closeBtn.addEventListener('click', closeSoloChainPanel);
+    btnRow.appendChild(closeBtn);
+    
+    panel.appendChild(btnRow);
+    
+    const closeX = document.createElement('button');
+    closeX.textContent = '✕';
+    closeX.style.cssText = 'position: absolute; top: 8px; right: 10px; background: none; border: none; color: #888; font-size: 16px; cursor: pointer;';
+    closeX.addEventListener('click', closeSoloChainPanel);
+    panel.appendChild(closeX);
+    
+    document.body.appendChild(panel);
+    panelOpen = true;
+    
+    function updatePanelStatus() {
+        const s = document.getElementById('soloChainStatus');
+        if (s) s.textContent = soloChainActive ? `Active - ${soloChainTrackIds.length} track(s) in chain` : 'Inactive';
     }
+}
 
-    if (typeof window !== 'undefined') {
-        window.openSoloChainPanel = openSoloChainPanel;
-        window.trackSoloChain = {
-            enableSoloChain,
-            disableSoloChain,
-            toggleTrackInChain,
-            getSoloedTrackIds,
-            getIsActive,
-            clearChain
-        };
+export function closeSoloChainPanel() {
+    const panel = document.getElementById('soloChainPanel');
+    if (panel) {
+        panel.remove();
+        panelOpen = false;
     }
+}
 
-    return {
-        openSoloChainPanel,
-        enableSoloChain,
-        disableSoloChain,
-        toggleTrackInChain,
-        getSoloedTrackIds,
-        getIsActive,
-        clearChain
-    };
-})();
-
-export { enableSoloChain, disableSoloChain, toggleTrackInChain, getSoloedTrackIds, getIsActive, clearChain, openSoloChainPanel };
+// Expose to window for eventHandlers.js integration
+window.openSoloChainPanel = openSoloChainPanel;
+window.toggleSoloChain = toggleSoloChain;
+window.isSoloChainActive = isSoloChainActive;
+window.deactivateSoloChain = deactivateSoloChain;
