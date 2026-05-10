@@ -7734,15 +7734,23 @@ function renderTrackStrip(track) {
             <div class="strip-sends-section mt-1">
                 <div class="text-xs text-gray-500 mb-1">Sends</div>
                 <div class="space-y-1">
-                    ${sends.length === 0 ? '<div class="text-xs text-gray-600">No sends</div>' : sends.map((send, idx) => `
-                        <div class="flex items-center gap-1">
-                            <span class="text-xs text-gray-400 w-8 truncate">${send.target || `Send ${idx + 1}`}</span>
-                            <input type="range" class="strip-send-input flex-1 h-1" 
-                                   data-track-id="${track.id}" data-send-idx="${idx}" 
-                                   min="0" max="1" step="0.01" value="${send.amount || 0}">
-                            <span class="text-xs text-gray-400 w-6">${Math.round((send.amount || 0) * 100)}</span>
-                        </div>
-                    `).join('')}
+                    ${(() => {
+                        const sendBuses = localAppServices.getAvailableSendBuses ? localAppServices.getAvailableSendBuses() : ['reverb', 'delay'];
+                        const sendLevels = track.sendLevels || {};
+                        if (!sendBuses || sendBuses.length === 0) return '<div class="text-xs text-gray-600">No sends</div>';
+                        return sendBuses.map(bus => {
+                            const level = sendLevels[bus] !== undefined ? sendLevels[bus] : 0;
+                            return `
+                                <div class="flex items-center gap-1">
+                                    <span class="text-xs text-gray-400 w-8 truncate capitalize">${bus}</span>
+                                    <input type="range" class="strip-send-input flex-1 h-1" 
+                                           data-track-id="${track.id}" data-bus="${bus}" 
+                                           min="0" max="1" step="0.01" value="${level}">
+                                    <span class="text-xs text-gray-400 w-6">${Math.round(level * 100)}</span>
+                                </div>
+                            `;
+                        }).join('');
+                    })()}
                 </div>
             </div>
         </div>
@@ -7929,11 +7937,16 @@ function setupMixerChannelStripEvents(container, tracks) {
     container.querySelectorAll('.strip-send-input').forEach(input => {
         input.addEventListener('input', (e) => {
             const trackId = e.target.dataset.trackId;
-            const sendIdx = parseInt(e.target.dataset.sendIdx);
+            const bus = e.target.dataset.bus;
             const amount = parseFloat(e.target.value);
-            if (localAppServices.setTrackSendAmount) {
-                localAppServices.setTrackSendAmount(trackId, sendIdx, amount);
+            // Use track.setSendLevel directly if available
+            const tracks = localAppServices.getTracks ? localAppServices.getTracks() : [];
+            const track = tracks.find(t => t.id === trackId);
+            if (track && typeof track.setSendLevel === 'function') {
+                track.setSendLevel(bus, amount, true);
             }
+            // Update display value
+            e.target.nextElementSibling.textContent = Math.round(amount * 100);
         });
     });
 
