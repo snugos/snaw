@@ -102,7 +102,21 @@ import { initDrumReplace, openDrumReplacePanel } from './DrumReplace.js';
 // Clip Opacity
 import { initClipOpacity, openClipOpacityPanel } from './ClipOpacity.js';
 // Clip Fade Presets
-import { openClipFadePresetsPanel } from './ClipFadePresets.js';
+import { initializeClipFadePresets, getClipFadeMenuItems, getClipFadeMenuItemsSimple, applyFadePresetToClip } from './ClipFadePresets.js';
+
+// Export for external use (menu integration)
+export { getClipFadeMenuItems, getClipFadeMenuItemsSimple, applyFadePresetToClip };
+
+// Clip Fade Presets panel opener (used by menus)
+function openClipFadePresetsPanel(services = {}) {
+    const { label, submenu } = getClipFadeMenuItems({}, null);
+    // The panel is accessible via the Audio Fade Presets menu
+    // This function is kept for compatibility but delegates to the main panel
+    if (services.openAudioFadePresetPanel) {
+        services.openAudioFadePresetPanel();
+    }
+}
+
 // Clip Loop Preview
 import { initClipLoopPreview, toggleClipLoopPreview, deactivateClipLoopPreview, isClipInLoopPreview } from './ClipLoopPreview.js';
 // Quick Rename

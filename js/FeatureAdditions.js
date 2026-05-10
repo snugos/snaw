@@ -74,3 +74,5 @@ export { initScalePreviewKeys, setScalePreviewEnabled, isScalePreviewEnabled, op
 
 // Arrangement Snap Grid - Customizable snap grid with visual subdivisions
 export { initArrangementSnapGrid, openSnapGridPanel, getSnapValue, setSnapValue, snapTimeToGrid, toggleSnapEnabled, getSnapInfo } from './ArrangementSnapGrid.js';
+// MIDI Velocity Curve - Apply custom velocity curves to MIDI input for expressive performance
+export { openMIDIVelocityCurvePanel } from './MIDIVelocityCurve.js';

@@ -30,7 +30,7 @@ export function getClipFadeMenuItems(clipData, trackId) {
 /**
  * Apply a fade preset to a clip
  */
-function applyFadePresetToClip(clipData, trackId, preset) {
+export function applyFadePresetToClip(clipData, trackId, preset) {
     if (!clipData || !clipData.buffer) {
         console.warn('[ClipFadePresets] No buffer on clip to apply fade');
         return;
