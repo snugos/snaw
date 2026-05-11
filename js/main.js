@@ -1178,6 +1178,22 @@ import {
     getMIDITransforms: window.getMIDITransforms,
     setMIDITransform: window.setMIDITransform,
     midiMonitorEnhanceState: window.midiMonitorEnhanceState,
+
+    addNewTrack: async (type = "Synth", options = {}) => {
+        try {
+            const track = await addTrackToStateInternal(type, null, true);
+            if (track && options.color) {
+                track.color = options.color;
+            }
+            if (track && typeof renderTracks === "function") renderTracks();
+            if (track && typeof renderTimeline === "function") renderTimeline();
+            console.log("[Main addNewTrack] Created track:", track?.name);
+            return track;
+        } catch (error) {
+            console.error("[Main addNewTrack] Error:", error);
+            return null;
+        }
+    },
 };
 
 function handleTrackUIUpdate(trackId, reason, detail) {
