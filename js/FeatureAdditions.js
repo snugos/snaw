@@ -76,3 +76,6 @@ export { initScalePreviewKeys, setScalePreviewEnabled, isScalePreviewEnabled, op
 export { initArrangementSnapGrid, openSnapGridPanel, getSnapValue, setSnapValue, snapTimeToGrid, toggleSnapEnabled, getSnapInfo } from './ArrangementSnapGrid.js';
 // MIDI Velocity Curve - Apply custom velocity curves to MIDI input for expressive performance
 export { openMIDIVelocityCurvePanel } from './MIDIVelocityCurve.js';
+
+// Loop Region Snap - Snap loop region boundaries to clip edges
+export { initLoopRegionSnap, openLoopRegionSnapSettings, openLoopSnapPanel, isLoopRegionSnapEnabled, setLoopRegionSnapEnabled, toggleLoopSnap, getSnapConfig, snapLoopRegionStart, snapLoopRegionEnd, snapLoopRegion, getLoopRegionSnapSettings, setSnapThreshold } from './LoopRegionSnap.js';

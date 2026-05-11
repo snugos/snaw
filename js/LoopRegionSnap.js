@@ -32,6 +32,16 @@ export function isLoopRegionSnapEnabled() {
 }
 
 /**
+ * Toggle snap enabled/disabled
+ * @returns {boolean} New enabled state
+ */
+export function toggleLoopSnap() {
+    isSnapEnabled = !isSnapEnabled;
+    console.log(`[LoopRegionSnap] Snap ${isSnapEnabled ? 'enabled' : 'disabled'}`);
+    return isSnapEnabled;
+}
+
+/**
  * Get all clip boundaries across all tracks
  * @returns {Array} Array of {time, type: 'start'|'end', trackId, clipId}
  */
@@ -247,6 +257,14 @@ export function openLoopRegionSnapSettings() {
     }, 50);
     
     return win;
+}
+
+// Alias for main.js compatibility
+export const openLoopSnapPanel = openLoopRegionSnapSettings;
+
+// Get snap config alias
+export function getSnapConfig() {
+    return getLoopRegionSnapSettings();
 }
 
 // Expose functions globally for integration
