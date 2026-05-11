@@ -4,12 +4,12 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Loop Start/End Snapping** - Add snap options for loop region to clip boundaries
-2. **Track Solo Mode Toggle** - Add toggle between exclusive solo (one track) and chain solo (multiple)
-3. **Clip Name Inline Edit** - Double-click clip name to rename directly on timeline
-4. **MIDI Velocity Quantize** - Ensure Quantize panel with velocity options is accessible
+1. **Track Solo Mode Toggle** - Add toggle between exclusive solo (one track) and chain solo (multiple)
+2. **Clip Name Inline Edit** - Double-click clip name to rename directly on timeline
+3. **MIDI Velocity Quantize** - Ensure Quantize panel with velocity options is accessible
 
 ## COMPLETED FEATURES (for reference)
+- ✅ Loop Start/End Snapping - Snap loop region to nearest clip boundaries
 - ✅ Send Effect Amount - Connect reverb/delay send knobs to mixer channel strip
 - ✅ Keyboard Velocity Curve - Connect `js/MIDIVelocityCurve.js` to Start menu for MIDI velocity curve editing
 - ✅ Track Group Collapse - Complete collapse/expand UI for track groups in arrangement view
