@@ -776,6 +776,7 @@ import {
     openTempoRamperVisual,
     openLoopRegionQuickSetSettings,
     openLoopRegionMarkersPanel,
+    openLoopSnapPanel,
     openLyricsTrackPanel,
     openTimeSignaturePanel,
     toggleClipLoopPreview,
@@ -1380,6 +1381,7 @@ async function initializeSnugOS() {
         if (typeof initTrackHeadphoneMix === 'function') initTrackHeadphoneMix(appServices); // Headphone Mix initialization
         if (typeof initLoopRegionQuickSet === 'function') initLoopRegionQuickSet(appServices); // Loop Region Quick Set initialization
         if (typeof initLoopRegionMarkers === 'function') initLoopRegionMarkers(appServices); // Loop Region Markers initialization
+        if (typeof initLoopRegionSnap === 'function') initLoopRegionSnap(appServices); // Loop Region Snap initialization
         if (typeof initLyricsTrack === 'function') initLyricsTrack(appServices); // Lyrics Track initialization
         if (typeof initTimeSignaturePerTrack === 'function') initTimeSignaturePerTrack(appServices); // Time Signature Per Track initialization
         if (typeof initClipContextMenu === 'function') initClipContextMenu(appServices); // Clip context menu with reverse

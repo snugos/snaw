@@ -1,324 +1,260 @@
-// js/LoopRegionSnap.js - Loop Region Snapping to Clip Boundaries
-// Feature: Add snap options for loop region to clip boundaries
+// js/LoopRegionSnap.js - Loop Region Snap to Clip Boundaries
+// Snap loop region start/end to nearest clip boundaries for precise editing
 
 let localAppServices = {};
-let isLoopSnapEnabled = false;
-let snapToClipEdges = true;
-let snapToClipCenters = false;
+let isSnapEnabled = true;
+let snapThreshold = 0.5; // seconds - distance within which to snap
 
 /**
  * Initialize the Loop Region Snap module
- * @param {Object} services - App services
+ * @param {Object} appServices - Application services from main.js
  */
-export function initLoopRegionSnap(services) {
-    localAppServices = services || {};
+export function initLoopRegionSnap(appServices) {
+    localAppServices = appServices || {};
     console.log('[LoopRegionSnap] Initialized');
 }
 
 /**
- * Check if loop snap is enabled
+ * Enable/disable snap functionality
+ * @param {boolean} enabled
+ */
+export function setLoopRegionSnapEnabled(enabled) {
+    isSnapEnabled = !!enabled;
+    console.log(`[LoopRegionSnap] Snap ${isSnapEnabled ? 'enabled' : 'disabled'}`);
+}
+
+/**
+ * Check if snap is enabled
  * @returns {boolean}
  */
-export function isLoopSnapEnabled() {
-    return isLoopSnapEnabled;
+export function isLoopRegionSnapEnabled() {
+    return isSnapEnabled;
 }
 
 /**
- * Toggle loop snap enabled state
+ * Get all clip boundaries across all tracks
+ * @returns {Array} Array of {time, type: 'start'|'end', trackId, clipId}
  */
-export function toggleLoopSnap() {
-    isLoopSnapEnabled = !isLoopSnapEnabled;
-    localAppServices.showNotification?.(
-        isLoopSnapEnabled ? 'Loop Snap: On' : 'Loop Snap: Off', 
-        1500
-    );
-    return isLoopSnapEnabled;
-}
-
-/**
- * Set loop snap enabled state
- * @param {boolean} enabled 
- */
-export function setLoopSnapEnabled(enabled) {
-    isLoopSnapEnabled = !!enabled;
-}
-
-/**
- * Check if snapping to clip edges is enabled
- * @returns {boolean}
- */
-export function isSnapToClipEdges() {
-    return snapToClipEdges;
-}
-
-/**
- * Set snap to clip edges
- * @param {boolean} enabled 
- */
-export function setSnapToClipEdges(enabled) {
-    snapToClipEdges = !!enabled;
-}
-
-/**
- * Check if snapping to clip centers is enabled
- * @returns {boolean}
- */
-export function isSnapToClipCenters() {
-    return snapToClipCenters;
-}
-
-/**
- * Set snap to clip centers
- * @param {boolean} enabled 
- */
-export function setSnapToClipCenters(enabled) {
-    snapToClipCenters = !!enabled;
-}
-
-/**
- * Get all snap points (edges and optionally centers of clips)
- * @returns {Array} Array of snap point times in seconds
- */
-export function getSnapPoints() {
-    const snapPoints = [];
-    const tracks = localAppServices.getTracks?.() || [];
+function getAllClipBoundaries() {
+    const boundaries = [];
+    const tracks = localAppServices.getTracksState ? localAppServices.getTracksState() : [];
     
     tracks.forEach(track => {
         if (!track.timelineClips) return;
-        
         track.timelineClips.forEach(clip => {
-            const start = clip.startTime || 0;
-            const duration = clip.duration || 0;
-            const end = start + duration;
-            
-            // Add edge snap points
-            if (snapToClipEdges) {
-                snapPoints.push({ time: start, type: 'edge', clipId: clip.id });
-                snapPoints.push({ time: end, type: 'edge', clipId: clip.id });
+            if (clip.start !== undefined) {
+                boundaries.push({
+                    time: clip.start,
+                    type: 'start',
+                    trackId: track.id,
+                    clipId: clip.id
+                });
             }
-            
-            // Add center snap points
-            if (snapToClipCenters && duration > 0) {
-                const center = start + duration / 2;
-                snapPoints.push({ time: center, type: 'center', clipId: clip.id });
+            if (clip.start !== undefined && clip.duration !== undefined) {
+                boundaries.push({
+                    time: clip.start + clip.duration,
+                    type: 'end',
+                    trackId: track.id,
+                    clipId: clip.id
+                });
             }
         });
     });
     
-    return snapPoints.sort((a, b) => a.time - b.time);
+    return boundaries.sort((a, b) => a.time - b.time);
 }
 
 /**
- * Snap a value to the nearest snap point
- * @param {number} time - Time to snap in seconds
- * @param {number} threshold - Maximum snap distance in seconds (default 0.5s)
- * @returns {number} Snapped time
+ * Find nearest clip boundary within threshold
+ * @param {number} time - Time to snap from
+ * @param {number} threshold - Max distance to snap
+ * @returns {number|null} Snapped time or null if no snap
  */
-export function snapToNearestPoint(time, threshold = 0.5) {
-    if (!isLoopSnapEnabled) return time;
+function findNearestBoundary(time, threshold = snapThreshold) {
+    const boundaries = getAllClipBoundaries();
     
-    const snapPoints = getSnapPoints();
-    let nearestPoint = null;
-    let nearestDistance = threshold;
+    let nearest = null;
+    let nearestDist = Infinity;
     
-    for (const point of snapPoints) {
-        const distance = Math.abs(point.time - time);
-        if (distance < nearestDistance) {
-            nearestDistance = distance;
-            nearestPoint = point;
+    for (const boundary of boundaries) {
+        const dist = Math.abs(boundary.time - time);
+        if (dist < threshold && dist < nearestDist) {
+            nearest = boundary;
+            nearestDist = dist;
         }
     }
     
-    if (nearestPoint) {
-        localAppServices.showNotification?.(
-            `Snapped to ${nearestPoint.type}: ${nearestPoint.time.toFixed(2)}s`,
-            1000
-        );
-        return nearestPoint.time;
-    }
-    
-    return time;
+    return nearest ? nearest.time : null;
 }
 
 /**
  * Snap loop region start to nearest clip boundary
- * @param {number} startTime - Proposed start time
+ * @param {number} proposedStart - Proposed start time
  * @returns {number} Snapped start time
  */
-export function snapLoopStart(startTime) {
-    return snapToNearestPoint(startTime, 0.5);
+export function snapLoopRegionStart(proposedStart) {
+    if (!isSnapEnabled) return proposedStart;
+    
+    const snapped = findNearestBoundary(proposedStart, snapThreshold);
+    if (snapped !== null) {
+        console.log(`[LoopRegionSnap] Loop start snapped: ${proposedStart.toFixed(2)}s → ${snapped.toFixed(2)}s`);
+        return snapped;
+    }
+    return proposedStart;
 }
 
 /**
  * Snap loop region end to nearest clip boundary
- * @param {number} endTime - Proposed end time
+ * @param {number} proposedEnd - Proposed end time
  * @returns {number} Snapped end time
  */
-export function snapLoopEnd(endTime) {
-    return snapToNearestPoint(endTime, 0.5);
+export function snapLoopRegionEnd(proposedEnd) {
+    if (!isSnapEnabled) return proposedEnd;
+    
+    const snapped = findNearestBoundary(proposedEnd, snapThreshold);
+    if (snapped !== null) {
+        console.log(`[LoopRegionSnap] Loop end snapped: ${proposedEnd.toFixed(2)}s → ${snapped.toFixed(2)}s`);
+        return snapped;
+    }
+    return proposedEnd;
 }
 
 /**
- * Get snap status info
- * @returns {Object} Current snap configuration
+ * Snap both loop region start and end
+ * @param {number} start - Proposed start time
+ * @param {number} end - Proposed end time  
+ * @returns {{start: number, end: number}} Snapped values
  */
-export function getSnapConfig() {
+export function snapLoopRegion(start, end) {
     return {
-        enabled: isLoopSnapEnabled,
-        snapToEdges: snapToClipEdges,
-        snapToCenters: snapToClipCenters,
-        snapPointCount: getSnapPoints().length
+        start: snapLoopRegionStart(start),
+        end: snapLoopRegionEnd(end)
     };
 }
 
 /**
- * Open loop region snap settings panel
+ * Get snap settings for UI
+ * @returns {Object} Current snap settings
  */
-export function openLoopSnapPanel() {
-    const existingPanel = document.getElementById('loopSnapPanel');
-    if (existingPanel) {
-        existingPanel.remove();
-        return;
+export function getLoopRegionSnapSettings() {
+    return {
+        enabled: isSnapEnabled,
+        threshold: snapThreshold
+    };
+}
+
+/**
+ * Set snap threshold
+ * @param {number} threshold - New threshold in seconds
+ */
+export function setSnapThreshold(threshold) {
+    snapThreshold = Math.max(0.1, Math.min(10, threshold));
+    console.log(`[LoopRegionSnap] Threshold set to ${snapThreshold}s`);
+}
+
+/**
+ * Open Loop Region Snap settings panel
+ */
+export function openLoopRegionSnapSettings() {
+    const windowId = 'loopRegionSnapSettings';
+    const openWindows = localAppServices.getOpenWindows ? localAppServices.getOpenWindows() : new Map();
+    
+    if (openWindows.has(windowId)) {
+        const win = openWindows.get(windowId);
+        win.restore();
+        return win;
     }
-
-    const panel = document.createElement('div');
-    panel.id = 'loopSnapPanel';
-    panel.className = 'fixed bg-[#2a2a2a] border border-[#4a4a4a] rounded-lg shadow-2xl z-[9999]';
-    panel.style.cssText = 'width:280px;left:50%;top:50%;transform:translate(-50%,-50%);';
-
-    panel.innerHTML = `
-        <div class="flex items-center justify-between px-3 py-2 bg-[#1a1a1a] rounded-t-lg border-b border-[#3a3a3a] cursor-move" data-drag-handle>
-            <span class="text-sm font-semibold text-[#e0e0e0]">📍 Loop Region Snap</span>
-            <button id="loopSnapClose" class="w-5 h-5 flex items-center justify-center text-[#888] hover:text-[#fff] text-lg">&times;</button>
+    
+    const contentContainer = document.createElement('div');
+    contentContainer.id = 'loopRegionSnapContent';
+    contentContainer.className = 'p-4 h-full flex flex-col bg-gray-100 dark:bg-slate-800';
+    
+    const settings = getLoopRegionSnapSettings();
+    
+    contentContainer.innerHTML = `
+        <div class="mb-4">
+            <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2">Loop Region Snap</h3>
+            <p class="text-sm text-gray-600 dark:text-slate-400">Snap loop region boundaries to clip edges for precise editing.</p>
         </div>
         
-        <div class="p-4 space-y-4">
-            <!-- Enable Toggle -->
-            <div class="flex items-center justify-between p-3 bg-[#1a1a1a] rounded">
-                <span class="text-sm text-[#ccc]">Enable Loop Snap</span>
-                <button id="loopSnapToggleBtn" class="w-12 h-6 rounded-full transition-colors ${isLoopSnapEnabled ? 'bg-[#ff7700]' : 'bg-[#444]'} relative">
-                    <span class="absolute top-1 ${isLoopSnapEnabled ? 'right-1' : 'left-1'} w-4 h-4 bg-white rounded-full transition-all"></span>
-                </button>
-            </div>
-            
-            <!-- Snap to Edges -->
-            <div class="flex items-center justify-between p-3 bg-[#1a1a1a] rounded">
-                <span class="text-sm text-[#ccc]">Snap to Clip Edges</span>
-                <button id="snapEdgesToggle" class="w-12 h-6 rounded-full transition-colors ${snapToClipEdges ? 'bg-[#4a9eff]' : 'bg-[#444]'} relative">
-                    <span class="absolute top-1 ${snapToClipEdges ? 'right-1' : 'left-1'} w-4 h-4 bg-white rounded-full transition-all"></span>
-                </button>
-            </div>
-            
-            <!-- Snap to Centers -->
-            <div class="flex items-center justify-between p-3 bg-[#1a1a1a] rounded">
-                <span class="text-sm text-[#ccc]">Snap to Clip Centers</span>
-                <button id="snapCentersToggle" class="w-12 h-6 rounded-full transition-colors ${snapToClipCenters ? 'bg-[#4a9eff]' : 'bg-[#444]'} relative">
-                    <span class="absolute top-1 ${snapToClipCenters ? 'right-1' : 'left-1'} w-4 h-4 bg-white rounded-full transition-all"></span>
-                </button>
-            </div>
-            
-            <!-- Snap Points Count -->
-            <div class="text-center p-3 bg-[#1a1a1a] rounded">
-                <div class="text-xs text-[#888]">Available Snap Points</div>
-                <div id="snapPointCount" class="text-xl font-bold text-[#4a9eff]">${getSnapPoints().length}</div>
-            </div>
-            
-            <!-- Info -->
-            <div class="text-xs text-[#666] text-center">
-                Loop region will snap to clip boundaries within 0.5s
+        <div class="mb-4">
+            <label class="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" id="loopSnapEnabled" ${settings.enabled ? 'checked' : ''} 
+                    class="w-5 h-5 rounded accent-blue-500">
+                <span class="text-gray-800 dark:text-white font-medium">Enable Snap to Clip Boundaries</span>
+            </label>
+        </div>
+        
+        <div class="mb-4 p-3 bg-white dark:bg-slate-700 rounded border border-gray-300 dark:border-slate-600">
+            <label class="block text-sm text-gray-700 dark:text-slate-300 mb-2">
+                Snap Threshold: <span id="snapThresholdValue">${settings.threshold}</span>s
+            </label>
+            <input type="range" id="snapThresholdSlider" 
+                min="0.1" max="5" step="0.1" 
+                value="${settings.threshold}"
+                class="w-full h-2 bg-gray-300 dark:bg-slate-600 rounded appearance-none cursor-pointer">
+            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                <span>0.1s</span>
+                <span>5s</span>
             </div>
         </div>
+        
+        <div class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/30 rounded border border-blue-200 dark:border-blue-700">
+            <div class="text-sm text-blue-800 dark:text-blue-300 font-medium mb-1">How it works:</div>
+            <ul class="text-xs text-blue-700 dark:text-blue-400 space-y-1">
+                <li>• When setting loop region start/end, snaps to nearest clip boundary within threshold</li>
+                <li>• Works with drag handles, input fields, and quick-set operations</li>
+                <li>• Hold <kbd class="px-1 py-0.5 bg-gray-200 dark:bg-slate-600 rounded">Alt</kbd> while dragging to temporarily disable snap</li>
+            </ul>
+        </div>
+        
+        <div class="flex-1"></div>
+        
+        <div class="text-xs text-gray-500 border-t border-gray-300 dark:border-slate-600 pt-3">
+            <div class="font-medium mb-1">Current clip boundaries: ${getAllClipBoundaries().length}</div>
+            <div class="text-gray-400">Found across all tracks</div>
+        </div>
     `;
-
-    document.body.appendChild(panel);
-
-    // Close button
-    document.getElementById('loopSnapClose').addEventListener('click', () => {
-        panel.remove();
-    });
-
-    // Enable toggle
-    document.getElementById('loopSnapToggleBtn').addEventListener('click', () => {
-        toggleLoopSnap();
-        updatePanelUI();
-    });
-
-    // Edges toggle
-    document.getElementById('snapEdgesToggle').addEventListener('click', () => {
-        setSnapToClipEdges(!snapToClipEdges);
-        updatePanelUI();
-    });
-
-    // Centers toggle
-    document.getElementById('snapCentersToggle').addEventListener('click', () => {
-        setSnapToClipCenters(!snapToClipCenters);
-        updatePanelUI();
-    });
-
-    // Make panel draggable
-    makeDraggable(panel);
+    
+    const options = {
+        width: 380,
+        height: 420,
+        minWidth: 320,
+        minHeight: 380,
+        closable: true,
+        minimizable: true,
+        resizable: true
+    };
+    
+    const win = localAppServices.createWindow ? localAppServices.createWindow(windowId, 'Loop Region Snap', contentContainer, options) : null;
+    
+    // Add event listeners
+    setTimeout(() => {
+        const enabledCb = document.getElementById('loopSnapEnabled');
+        const thresholdSlider = document.getElementById('snapThresholdSlider');
+        const thresholdValue = document.getElementById('snapThresholdValue');
+        
+        enabledCb?.addEventListener('change', (e) => {
+            setLoopRegionSnapEnabled(e.target.checked);
+            localAppServices.showNotification?.(`Loop Region Snap ${e.target.checked ? 'enabled' : 'disabled'}`, 1500);
+        });
+        
+        thresholdSlider?.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            thresholdValue.textContent = val.toFixed(1);
+            setSnapThreshold(val);
+        });
+    }, 50);
+    
+    return win;
 }
 
-/**
- * Update panel UI to reflect current state
- */
-function updatePanelUI() {
-    const snapToggleBtn = document.getElementById('loopSnapToggleBtn');
-    if (snapToggleBtn) {
-        snapToggleBtn.className = `w-12 h-6 rounded-full transition-colors ${isLoopSnapEnabled ? 'bg-[#ff7700]' : 'bg-[#444]'} relative`;
-        snapToggleBtn.querySelector('span').className = `absolute top-1 ${isLoopSnapEnabled ? 'right-1' : 'left-1'} w-4 h-4 bg-white rounded-full transition-all`;
-    }
-
-    const edgesToggle = document.getElementById('snapEdgesToggle');
-    if (edgesToggle) {
-        edgesToggle.className = `w-12 h-6 rounded-full transition-colors ${snapToClipEdges ? 'bg-[#4a9eff]' : 'bg-[#444]'} relative`;
-        edgesToggle.querySelector('span').className = `absolute top-1 ${snapToClipEdges ? 'right-1' : 'left-1'} w-4 h-4 bg-white rounded-full transition-all`;
-    }
-
-    const centersToggle = document.getElementById('snapCentersToggle');
-    if (centersToggle) {
-        centersToggle.className = `w-12 h-6 rounded-full transition-colors ${snapToClipCenters ? 'bg-[#4a9eff]' : 'bg-[#444]'} relative`;
-        centersToggle.querySelector('span').className = `absolute top-1 ${snapToClipCenters ? 'right-1' : 'left-1'} w-4 h-4 bg-white rounded-full transition-all`;
-    }
-
-    const snapPointCount = document.getElementById('snapPointCount');
-    if (snapPointCount) {
-        snapPointCount.textContent = getSnapPoints().length;
-    }
-}
-
-/**
- * Make element draggable
- * @param {HTMLElement} element 
- */
-function makeDraggable(element) {
-    const dragHandle = element.querySelector('[data-drag-handle]');
-    if (!dragHandle) return;
-
-    let isDragging = false;
-    let startX, startY, startLeft, startTop;
-
-    dragHandle.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        startX = e.clientX;
-        startY = e.clientY;
-        startLeft = element.offsetLeft;
-        startTop = element.offsetTop;
-        e.preventDefault();
-    });
-
-    document.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        const dx = e.clientX - startX;
-        const dy = e.clientY - startY;
-        element.style.left = `${startLeft + dx}px`;
-        element.style.top = `${startTop + dy}px`;
-        element.style.transform = 'none';
-    });
-
-    document.addEventListener('mouseup', () => {
-        isDragging = false;
-    });
-}
-
-console.log('[LoopRegionSnap] Module loaded');
+// Expose functions globally for integration
+window.loopRegionSnap = {
+    snapLoopRegionStart,
+    snapLoopRegionEnd,
+    snapLoopRegion,
+    setEnabled: setLoopRegionSnapEnabled,
+    isEnabled: isLoopRegionSnapEnabled,
+    getSettings: getLoopRegionSnapSettings
+};

@@ -624,6 +624,12 @@ export function initializePrimaryEventListeners(appContext) {
                     localAppServices.openLoopRegionQuickSetSettings?.();
                 } catch(e) { console.error('[Menu] Loop Region Quick Set error:', e); }
             },
+            menuLoopRegionSnap: () => {
+                console.log('[Menu] Loop Region Snap clicked');
+                try {
+                    localAppServices.openLoopSnapPanel?.();
+                } catch(e) { console.error('[Menu] Loop Region Snap error:', e); }
+            },
             menuTempoRamper: () => {
                 console.log('[Menu] Tempo Ramper clicked');
                 try {
