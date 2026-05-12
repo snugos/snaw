@@ -2133,6 +2133,10 @@ export class Track {
         }
     }
 
+    getPan() {
+        return this.pan;
+    }
+
     /**
      * Set the track color for visual grouping.
      * @param {string} color - Hex color string (e.g., '#ef4444')
@@ -12304,4 +12308,4 @@ export class Track {
 
     setCrossfadeDuration(crossfadeId, duration) {
         if (!this.clipCrossfadeEditor) return;
-        const crossfade = this.clipCrossfadeEditor.crossfades.find(c => c.id === crossfadeId
+        const crossfade = this.clipCrossfadeEditor.crossfades.find(c => c.id === crossfadeId);
