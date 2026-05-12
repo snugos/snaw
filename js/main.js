@@ -126,6 +126,8 @@ import { initQuickRename } from './QuickRename.js';
 import { ProjectAutoNaming } from './ProjectAutoNaming.js';
 // Audio Clip Stretch Markers - Visual markers on stretched audio clips
 import { initAudioClipStretchMarkers, openStretchMarkersPanel, drawStretchMarkers } from './AudioClipStretchMarkers.js';
+// Audio Scrubbing Integration - Audible scrub through audio by dragging on the timeline
+import { initAudioScrubbing, openScrubSettingsPanel, setScrubOnDragEnabled, isAudioScrubActive } from './AudioScrubbingIntegration.js';
 // Sidechain Volume Envelope - Draw ducking curves on clips for sidechain effects
 import { initSidechainVolumeEnvelope, openSidechainVolumeEnvelopePanel, getSidechainEnvelope } from './SidechainVolumeEnvelope.js';
 // Sidechain Visualizer - Visual indicator for sidechain routing and ducking status
@@ -1444,6 +1446,7 @@ async function initializeSnugOS() {
         if (typeof initClipFadeHandles === 'function') initClipFadeHandles(); // Clip Fade Handles initialization
         if (typeof initEnvelopeIntegration === 'function') initEnvelopeIntegration(); // Envelope Integration initialization
         if (typeof initAudioClipStretchMarkers === 'function') initAudioClipStretchMarkers(appServices); // Audio Clip Stretch Markers initialization
+        if (typeof initAudioScrubbing === 'function') initAudioScrubbing(appServices); // Audio Scrubbing initialization - audible scrub on timeline drag
         
         if (typeof initializePrimaryEventListeners === 'function') {
              initializePrimaryEventListeners(appServices);

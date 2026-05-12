@@ -209,7 +209,8 @@ function createAudioScrubber(audioContext) {
     return new AudioScrubber(audioContext);
 }
 
-// Export
+// Export for ES modules and CommonJS compatibility
+export { AudioScrubber, createAudioScrubber };
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { AudioScrubber, createAudioScrubber };
 }
