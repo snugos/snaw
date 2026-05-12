@@ -542,6 +542,19 @@ import {
         if (typeof updateMixerWindow === 'function') updateMixerWindow();
         if (typeof renderTimeline === 'function') renderTimeline();
     },
+    updateClipName: (clipId, newName) => {
+        const tracks = getTracksState();
+        for (const track of tracks) {
+            const clip = track.timelineClips?.find(c => c.id === clipId);
+            if (clip) {
+                if (captureStateForUndoInternal) captureStateForUndoInternal(`Rename clip to "${newName}"`);
+                clip.name = newName;
+                if (typeof renderTimeline === 'function') renderTimeline();
+                return true;
+            }
+        }
+        return false;
+    },
     createWindow: (id, title, content, options) => new SnugWindow(id, title, content, options, appServices),
     openWindowWithContent: (id, title, contentHTML, options) => {
         const win = new SnugWindow(id, title, contentHTML, options, appServices);
