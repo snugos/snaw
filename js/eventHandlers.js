@@ -811,7 +811,7 @@ export function attachGlobalControlEvents(elements) {
         console.error('[EventHandlers attachGlobalControlEvents] Elements object is null or undefined.');
         return;
     }
-    const { playBtnGlobal, recordBtnGlobal, stopBtnGlobal, tempoGlobalInput, tempoNudgeDown, tempoNudgeUp, tempoFineNudgeDown, tempoFineNudgeUp, midiInputSelectGlobal, playbackModeToggleBtnGlobal, midiLearnBtnGlobal, tapBtnGlobal, tapHistoryBtn, tapVisualBtn, loopToggleBtnGlobal, loopStartInput, loopEndInput, metronomeToggleBtnGlobal, metronomeVolumeSlider, metronomeVolumeDisplay, metronomeVolumeControl, performanceMonitorBtn, autoSaveToggleBtn, beatLfoToggleBtnGlobal, scaleSelectGlobal, keySelectGlobal, scaleNotesDisplay, stretchQualityBtn } = elements;
+    const { playBtnGlobal, recordBtnGlobal, stopBtnGlobal, tempoGlobalInput, tempoNudgeDown, tempoNudgeUp, tempoFineNudgeDown, tempoFineNudgeUp, midiInputSelectGlobal, playbackModeToggleBtnGlobal, midiLearnBtnGlobal, tapBtnGlobal, tapHistoryBtn, tapVisualBtn, tapSettingsBtn, loopToggleBtnGlobal, loopStartInput, loopEndInput, metronomeToggleBtnGlobal, metronomeVolumeSlider, metronomeVolumeDisplay, metronomeVolumeControl, performanceMonitorBtn, autoSaveToggleBtn, beatLfoToggleBtnGlobal, scaleSelectGlobal, keySelectGlobal, scaleNotesDisplay, stretchQualityBtn } = elements;
     // Helper function to toggle play/pause icons
     function setPlayButtonState(isPlaying) {
         if (!playBtnGlobal) return;
@@ -1462,6 +1462,16 @@ export function attachGlobalControlEvents(elements) {
                     if (module.toggleVisualPanel) module.toggleVisualPanel();
                 }).catch(err => console.error('[EventHandlers] Failed to load TapTempoVisual:', err));
             }
+        });
+    }
+
+    // Tap Settings button handler
+    if (tapSettingsBtn) {
+        tapSettingsBtn.addEventListener('click', () => {
+            import('./TapTempoSettings.js').then(module => {
+                if (module.initTapTempoSettings) module.initTapTempoSettings(localAppServices);
+                if (module.toggleTapTempoSettings) module.toggleTapTempoSettings();
+            }).catch(err => console.error('[EventHandlers] Failed to load TapTempoSettings:', err));
         });
     }
 

@@ -10,7 +10,34 @@ let tapTimestamps = [];
 const MAX_TAPS = 16; // Use last N taps for averaging
 const TIMEOUT_MS = 3000; // Reset if no tap within this time
 
+// Mutable settings (expose to allow user adjustment)
+let maxTapsSetting = MAX_TAPS;
+let timeoutMsSetting = TIMEOUT_MS;
 let tapTimeoutId = null;
+
+/**
+ * Get current max taps setting.
+ * @returns {number}
+ */
+export function getMaxTapsSetting() { return maxTapsSetting; }
+
+/**
+ * Set max taps setting.
+ * @param {number} n
+ */
+export function setMaxTapsSetting(n) { maxTapsSetting = Math.max(2, Math.min(32, parseInt(n) || 16)); }
+
+/**
+ * Get current timeout setting in ms.
+ * @returns {number}
+ */
+export function getTimeoutMsSetting() { return timeoutMsSetting; }
+
+/**
+ * Set timeout in ms.
+ * @param {number} ms
+ */
+export function setTimeoutMsSetting(ms) { timeoutMsSetting = Math.max(500, Math.min(10000, parseInt(ms) || 3000)); }
 
 /**
  * Initialize the Audio Tap Tempo module.
@@ -32,13 +59,13 @@ export function handleTap() {
     if (tapTimeoutId) {
         clearTimeout(tapTimeoutId);
     }
-    tapTimeoutId = setTimeout(resetTaps, TIMEOUT_MS);
+    tapTimeoutId = setTimeout(resetTaps, timeoutMsSetting);
     
     // Record this tap
     tapTimestamps.push(now);
     
     // Keep only recent taps
-    if (tapTimestamps.length > MAX_TAPS) {
+    if (tapTimestamps.length > maxTapsSetting) {
         tapTimestamps.shift();
     }
     
