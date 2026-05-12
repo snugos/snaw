@@ -8,6 +8,14 @@ import {
     captureStateForUndoInternal as captureStateForUndo,
     setSoloedTrackIdState as setSoloedTrackId,
     getSoloedTrackIdState as getSoloedTrackId,
+    getSoloMode,
+    setSoloMode,
+    toggleSoloMode,
+    getSoloedTrackIds,
+    setSoloedTrackIds,
+    addSoloedTrackId,
+    removeSoloedTrackId,
+    isTrackSoloedInChain,
     setArmedTrackIdState as setArmedTrackId,
     getArmedTrackIdState as getArmedTrackId,
     setActiveSequencerTrackIdState as setActiveSequencerTrackId,
@@ -1030,6 +1038,27 @@ export function attachGlobalControlEvents(elements) {
     }
     // === End Track Solo Chain Button ===
 
+    // === Solo Mode Toggle Button ===
+    const soloModeToggleBtn = document.getElementById('soloModeToggleBtn');
+    if (soloModeToggleBtn) {
+        // Update button text based on current mode
+        const updateBtnText = () => {
+            const mode = getSoloMode();
+            soloModeToggleBtn.textContent = `Solo: ${mode === 'exclusive' ? 'Excl' : 'Chain'}`;
+        };
+        updateBtnText();
+
+        soloModeToggleBtn.addEventListener('click', () => {
+            toggleSoloMode();
+            updateBtnText();
+            const mode = getSoloMode();
+            if (localAppServices.showNotification) {
+                localAppServices.showNotification(`Solo mode: ${mode === 'exclusive' ? 'Exclusive (one track)' : 'Chain (multiple tracks)'}`, 1500);
+            }
+        });
+    }
+    // === End Solo Mode Toggle Button ===
+
     // === Snap Resolution Button ===
     const snapResolutionBtn = document.getElementById('snapResolutionBtn');
     if (snapResolutionBtn) {
@@ -2043,26 +2072,72 @@ export function handleTrackSolo(trackId) {
         const track = getTrackById(trackId);
         if (!track) { console.warn(`[EventHandlers] Solo: Track ${trackId} not found.`); return; }
         const currentSoloed = getSoloedTrackId();
+        const soloMode = getSoloMode();
         
         // Check if trying to unsolo a locked track
-        if (track.isSoloed && track.soloLocked && currentSoloed === trackId) {
+        if (track.isSoloed && track.soloLocked) {
             console.log(`[EventHandlers] Solo for track "${track.name}" is locked - cannot toggle off`);
             if (localAppServices.showNotification) localAppServices.showNotification('Solo is locked on this track', 1500);
             return;
         }
         
         captureStateForUndo(`Toggle Solo for ${track.name}`);
-        setSoloedTrackId(currentSoloed === trackId ? null : trackId);
-
-        const tracks = getTracks();
-        if (tracks && Array.isArray(tracks)) {
-            tracks.forEach(t => {
+        
+        if (soloMode === 'chain') {
+            // Chain solo mode: multiple tracks can be soloed
+            const chainSoloed = getSoloedTrackIds();
+            const idx = chainSoloed.indexOf(trackId);
+            
+            if (idx !== -1) {
+                // Track is currently soloed, remove it
+                removeSoloedTrackId(trackId);
+                track.isSoloed = false;
+            } else {
+                // Track is not soloed, add it
+                addSoloedTrackId(trackId);
+                track.isSoloed = true;
+            }
+            
+            // Apply solo state to all tracks
+            const allTracks = getTracks();
+            allTracks.forEach(t => {
                 if (t) {
-                    t.isSoloed = (t.id === getSoloedTrackId());
+                    t.isSoloed = isTrackSoloedInChain(t.id);
                     t.applySoloState();
                     if (localAppServices.updateTrackUI) localAppServices.updateTrackUI(t.id, 'soloChanged');
                 }
             });
+            
+            const soloCount = getSoloedTrackIds().length;
+            if (localAppServices.showNotification) {
+                if (soloCount > 0) {
+                    localAppServices.showNotification(`Solo Chain: ${soloCount} track(s) soloed`, 1500);
+                } else {
+                    localAppServices.showNotification('Solo Chain: All tracks unsoloed', 1500);
+                }
+            }
+        } else {
+            // Exclusive solo mode: only one track at a time
+            setSoloedTrackId(currentSoloed === trackId ? null : trackId);
+            
+            const tracks = getTracks();
+            if (tracks && Array.isArray(tracks)) {
+                tracks.forEach(t => {
+                    if (t) {
+                        t.isSoloed = (t.id === getSoloedTrackId());
+                        t.applySoloState();
+                        if (localAppServices.updateTrackUI) localAppServices.updateTrackUI(t.id, 'soloChanged');
+                    }
+                });
+            }
+            
+            if (localAppServices.showNotification) {
+                const soloed = getSoloedTrackId();
+                if (soloed !== null) {
+                    const soloedTrack = getTrackById(soloed);
+                    localAppServices.showNotification(`Solo: ${soloedTrack?.name || 'Track'}`, 1500);
+                }
+            }
         }
     } catch (error) { console.error(`[EventHandlers handleTrackSolo] Error for track ${trackId}:`, error); }
 }
