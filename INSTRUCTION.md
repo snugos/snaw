@@ -4,9 +4,8 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Track Solo Mode Toggle** - Add toggle between exclusive solo (one track) and chain solo (multiple)
-2. **Clip Name Inline Edit** - Double-click clip name to rename directly on timeline
-3. **MIDI Velocity Quantize** - Ensure Quantize panel with velocity options is accessible
+1. **Clip Name Inline Edit** - Double-click clip name to rename directly on timeline
+2. **MIDI Velocity Quantize** - Ensure Quantize panel with velocity options is accessible
 
 ## COMPLETED FEATURES (for reference)
 - ✅ Loop Start/End Snapping - Snap loop region to nearest clip boundaries
@@ -30,6 +29,7 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 - ✅ Track Color Coding - Tracks have color property with color picker UI
 - ✅ Waveform Visualization - Audio clips display waveforms on timeline
 - ✅ Keyboard Shortcuts Panel - Press `?` or use menu to show all shortcuts
+- ✅ Track Solo Mode Toggle - Add toggle between exclusive solo (one track) and chain solo (multiple)
 
 ## Workflow
 
