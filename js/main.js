@@ -1027,6 +1027,7 @@ import {
     clearChain,
     getSoloedTrackIds,
     getIsActive,
+    openSoloChainPanel,
     
     // Beat Detective
     openBeatDetectivePanel,
@@ -1396,6 +1397,7 @@ async function initializeSnugOS() {
         if (typeof initScoreEditor === 'function') initScoreEditor(appServices); // Score Editor initialization
         if (typeof initClipReverse === 'function') initClipReverse(appServices); // Clip Reverse feature initialization
         if (typeof initTrackHeadphoneMix === 'function') initTrackHeadphoneMix(appServices); // Headphone Mix initialization
+        if (typeof initTrackSoloChain === 'function') initTrackSoloChain(appServices); // Track Solo Chain initialization
         if (typeof initLoopRegionQuickSet === 'function') initLoopRegionQuickSet(appServices); // Loop Region Quick Set initialization
         if (typeof initLoopRegionMarkers === 'function') initLoopRegionMarkers(appServices); // Loop Region Markers initialization
         if (typeof initLoopRegionSnap === 'function') initLoopRegionSnap(appServices); // Loop Region Snap initialization

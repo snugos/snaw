@@ -1,203 +1,337 @@
 /**
- * Track Solo Chain - Mute all tracks except a chain of connected tracks
+ * js/TrackSoloChain.js - Track Solo Chain feature
+ * Mute all tracks except a selected chain of tracks for focused listening
  */
-import { getTracksState, getTrackByIdState } from './state.js';
 
-let originalMuteStates = new Map();
-let soloChainActive = false;
-let soloChainTrackIds = [];
+let localAppServices = {};
+let soloChainMode = false;
+let soloChainTracks = new Set();
 
-export function isSoloChainActive() { return soloChainActive; }
-
-export function getSoloChainTrackIds() { return [...soloChainTrackIds]; }
-
-export function toggleSoloChain(trackId) {
-    if (!soloChainActive) {
-        activateSoloChain();
-    }
-    
-    const idx = soloChainTrackIds.indexOf(trackId);
-    if (idx !== -1) {
-        soloChainTrackIds.splice(idx, 1);
-    } else {
-        soloChainTrackIds.push(trackId);
-    }
-    
-    applySoloChain();
-    
-    if (soloChainTrackIds.length === 0) {
-        deactivateSoloChain();
-    }
+/**
+ * Initialize the Track Solo Chain module
+ * @param {Object} appServices - App services from main.js
+ */
+export function initTrackSoloChain(appServices) {
+    localAppServices = appServices || {};
+    console.log('[TrackSoloChain] Module initialized');
 }
 
-export function activateSoloChain() {
-    if (soloChainActive) return;
-    
-    const tracks = getTracksState();
-    originalMuteStates.clear();
-    soloChainTrackIds = [];
-    
-    tracks.forEach(t => {
-        originalMuteStates.set(t.id, t.muted);
-        if (!t.muted) t.muted = true;
-    });
-    
-    soloChainActive = true;
-    
-    const btn = document.getElementById('trackSoloChainBtnGlobal');
-    if (btn) btn.classList.add('active');
-    
-    if (typeof showSafeNotification === 'function') {
-        showSafeNotification('Solo Chain activated - click tracks to add to chain', 2000);
-    }
+/**
+ * Check if solo chain mode is active
+ * @returns {boolean}
+ */
+export function getIsActive() {
+    return soloChainMode;
 }
 
-export function deactivateSoloChain() {
-    if (!soloChainActive) return;
-    
-    const tracks = getTracksState();
-    tracks.forEach(t => {
-        const orig = originalMuteStates.get(t.id);
-        if (orig !== undefined) t.muted = orig;
-    });
-    
-    originalMuteStates.clear();
-    soloChainTrackIds = [];
-    soloChainActive = false;
-    
-    const btn = document.getElementById('trackSoloChainBtnGlobal');
-    if (btn) btn.classList.remove('active');
-    
-    if (typeof showSafeNotification === 'function') {
-        showSafeNotification('Solo Chain deactivated', 1500);
-    }
+/**
+ * Get the set of solo chain track IDs
+ * @returns {string[]} Array of track IDs
+ */
+export function getSoloedTrackIds() {
+    return Array.from(soloChainTracks);
 }
 
-export function applySoloChain() {
-    if (!soloChainActive) return;
-    
-    const tracks = getTracksState();
-    tracks.forEach(t => {
-        t.muted = !soloChainTrackIds.includes(t.id);
-    });
-}
-
-export function clearSoloChain() {
-    soloChainTrackIds = [];
-    applySoloChain();
-}
-
-let panelOpen = false;
-
-export function openSoloChainPanel() {
-    if (panelOpen) {
-        closeSoloChainPanel();
+/**
+ * Enable solo chain mode
+ */
+export function enableSoloChain() {
+    if (soloChainTracks.size === 0) {
+        if (localAppServices.showNotification) {
+            localAppServices.showNotification('Select tracks to add to chain first', 'warning');
+        }
         return;
     }
+    soloChainMode = true;
+    applySoloChain();
+    updateSoloChainUI();
+    updateTrackMuteStates();
     
-    const tracks = getTracksState();
+    if (localAppServices.showNotification) {
+        localAppServices.showNotification(`Solo Chain enabled with ${soloChainTracks.size} track(s)`, 'info');
+    }
+}
+
+/**
+ * Disable solo chain mode
+ */
+export function disableSoloChain() {
+    soloChainMode = false;
+    applySoloChain();
+    updateSoloChainUI();
+    updateTrackMuteStates();
+    
+    if (localAppServices.showNotification) {
+        localAppServices.showNotification('Solo Chain disabled', 'info');
+    }
+}
+
+/**
+ * Toggle a track in the solo chain
+ * @param {string} trackId - Track ID to toggle
+ */
+export function toggleTrackInChain(trackId) {
+    if (soloChainTracks.has(trackId)) {
+        soloChainTracks.delete(trackId);
+    } else {
+        soloChainTracks.add(trackId);
+    }
+    
+    if (soloChainTracks.size === 0) {
+        soloChainMode = false;
+    }
+    
+    applySoloChain();
+    updateSoloChainUI();
+    updateTrackMuteStates();
+}
+
+/**
+ * Clear all tracks from solo chain
+ */
+export function clearChain() {
+    soloChainTracks.clear();
+    soloChainMode = false;
+    applySoloChain();
+    updateSoloChainUI();
+    updateTrackMuteStates();
+}
+
+/**
+ * Apply solo chain to all tracks (mute non-chain tracks)
+ */
+function applySoloChain() {
+    const tracks = localAppServices.getTracksState ? localAppServices.getTracksState() : [];
+    
+    tracks.forEach(track => {
+        if (!track || !track.id) return;
+        
+        if (soloChainMode && soloChainTracks.size > 0) {
+            // Save original mute state before muting
+            if (track._originalMuteState === undefined) {
+                track._originalMuteState = track.isMuted || false;
+            }
+            // Mute all tracks not in the chain
+            if (!soloChainTracks.has(track.id)) {
+                track.isMuted = true;
+            } else {
+                track.isMuted = false; // Keep chain tracks unmuted
+            }
+        } else {
+            // Restore original mute state
+            if (track._originalMuteState !== undefined) {
+                track.isMuted = track._originalMuteState;
+                delete track._originalMuteState;
+            }
+        }
+    });
+}
+
+/**
+ * Update track mute states based on solo chain
+ */
+function updateTrackMuteStates() {
+    const tracks = localAppServices.getTracksState ? localAppServices.getTracksState() : [];
+    
+    // Update track UI
+    if (localAppServices.updateTrackUI) {
+        tracks.forEach(track => {
+            if (track && track.id) {
+                localAppServices.updateTrackUI(track.id, 'soloChainMute');
+            }
+        });
+    }
+    
+    // Re-render timeline if available
+    if (localAppServices.renderTimeline && typeof localAppServices.renderTimeline === 'function') {
+        localAppServices.renderTimeline();
+    }
+}
+
+/**
+ * Update the solo chain UI elements
+ */
+function updateSoloChainUI() {
+    const indicator = localAppServices.uiElementsCache?.soloChainIndicator;
+    if (indicator) {
+        if (soloChainMode && soloChainTracks.size > 0) {
+            indicator.classList.add('active');
+            indicator.textContent = `Solo Chain (${soloChainTracks.size})`;
+        } else {
+            indicator.classList.remove('active');
+            indicator.textContent = 'Solo Chain';
+        }
+    }
+    
+    // Update track mute buttons
+    const tracks = localAppServices.getTracksState ? localAppServices.getTracksState() : [];
+    tracks.forEach(track => {
+        if (!track || !track.id) return;
+        const muteBtn = document.querySelector(`[data-track-mute="${track.id}"]`);
+        if (muteBtn) {
+            muteBtn.classList.toggle('solo-chain-muted', soloChainMode && !soloChainTracks.has(track.id));
+        }
+    });
+}
+
+/**
+ * Open the Solo Chain panel
+ */
+export function openSoloChainPanel() {
+    const existingPanel = document.getElementById('soloChainPanel');
+    if (existingPanel) {
+        existingPanel.remove();
+        return;
+    }
     
     const panel = document.createElement('div');
     panel.id = 'soloChainPanel';
     panel.style.cssText = `
         position: fixed;
-        top: 80px;
-        right: 20px;
-        background: #1a1a2e;
-        border: 1px solid #3a3a5e;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #1e1e2e;
+        border: 1px solid #444;
         border-radius: 8px;
-        padding: 16px;
-        z-index: 9999;
-        min-width: 240px;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-        font-family: system-ui, -apple-system, sans-serif;
+        padding: 20px;
+        min-width: 350px;
+        max-height: 70vh;
+        overflow-y: auto;
+        z-index: 10000;
         color: #e0e0e0;
+        font-family: system-ui, -apple-system, sans-serif;
     `;
     
-    const title = document.createElement('div');
-    title.textContent = 'Solo Chain';
-    title.style.cssText = 'font-weight: 600; font-size: 14px; margin-bottom: 12px; color: #fff;';
-    panel.appendChild(title);
+    const tracks = localAppServices.getTracksState ? localAppServices.getTracksState() : [];
     
-    const status = document.createElement('div');
-    status.id = 'soloChainStatus';
-    status.style.cssText = 'font-size: 11px; color: #888; margin-bottom: 10px;';
-    status.textContent = soloChainActive ? `Active - ${soloChainTrackIds.length} track(s) in chain` : 'Inactive';
-    panel.appendChild(status);
-    
-    tracks.forEach(t => {
-        const btn = document.createElement('button');
-        btn.textContent = t.name || `Track ${t.id}`;
-        const isInChain = soloChainTrackIds.includes(t.id);
-        btn.style.cssText = `
-            display: block;
-            width: 100%;
-            padding: 8px 12px;
-            margin-bottom: 6px;
-            background: ${isInChain ? '#4a4a8a' : '#2a2a4a'};
-            border: 1px solid ${isInChain ? '#6a6aaa' : '#3a3a6a'};
-            border-radius: 4px;
-            color: ${t.muted ? '#666' : '#fff'};
-            font-size: 12px;
-            cursor: pointer;
-            text-align: left;
-        `;
+    panel.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="margin: 0; font-size: 16px; font-weight: 600;">Track Solo Chain</h3>
+            <button id="soloChainCloseBtn" style="
+                background: none;
+                border: none;
+                color: #888;
+                font-size: 20px;
+                cursor: pointer;
+                padding: 0;
+                line-height: 1;
+            ">&times;</button>
+        </div>
         
-        btn.addEventListener('click', () => {
-            toggleSoloChain(t.id);
-            btn.style.background = soloChainTrackIds.includes(t.id) ? '#4a4a8a' : '#2a2a4a';
-            btn.style.borderColor = soloChainTrackIds.includes(t.id) ? '#6a6aaa' : '#3a3a6a';
-            updatePanelStatus();
-        });
+        <div style="margin-bottom: 15px; padding: 10px; background: #2a2a3a; border-radius: 6px;">
+            <p style="margin: 0 0 10px 0; font-size: 13px; color: #aaa;">
+                Mute all tracks except selected ones for focused listening.
+            </p>
+            <div style="display: flex; gap: 10px;">
+                <button id="soloChainEnableBtn" style="
+                    flex: 1;
+                    padding: 8px 12px;
+                    background: ${soloChainMode ? '#22c55e' : '#3b82f6'};
+                    border: none;
+                    border-radius: 4px;
+                    color: white;
+                    font-size: 13px;
+                    cursor: pointer;
+                ">${soloChainMode ? 'Disable Solo Chain' : 'Enable Solo Chain'}</button>
+                <button id="soloChainClearBtn" style="
+                    flex: 1;
+                    padding: 8px 12px;
+                    background: #666;
+                    border: none;
+                    border-radius: 4px;
+                    color: white;
+                    font-size: 13px;
+                    cursor: pointer;
+                ">Clear All</button>
+            </div>
+            <div style="margin-top: 10px; font-size: 12px; color: ${soloChainTracks.size > 0 ? '#22c55e' : '#888'};">
+                ${soloChainTracks.size > 0 ? `${soloChainTracks.size} track(s) in chain` : 'No tracks selected'}
+            </div>
+        </div>
         
-        panel.appendChild(btn);
-    });
-    
-    const btnRow = document.createElement('div');
-    btnRow.style.cssText = 'display: flex; gap: 8px; margin-top: 12px;';
-    
-    const deactivateBtn = document.createElement('button');
-    deactivateBtn.textContent = 'Deactivate';
-    deactivateBtn.style.cssText = 'flex: 1; padding: 8px; background: #3a2a2a; border: 1px solid #5a3a3a; border-radius: 4px; color: #ff8888; cursor: pointer;';
-    deactivateBtn.addEventListener('click', () => {
-        deactivateSoloChain();
-        closeSoloChainPanel();
-    });
-    btnRow.appendChild(deactivateBtn);
-    
-    const closeBtn = document.createElement('button');
-    closeBtn.textContent = 'Close';
-    closeBtn.style.cssText = 'flex: 1; padding: 8px; background: #2a2a3a; border: 1px solid #3a3a5a; border-radius: 4px; color: #aaa; cursor: pointer;';
-    closeBtn.addEventListener('click', closeSoloChainPanel);
-    btnRow.appendChild(closeBtn);
-    
-    panel.appendChild(btnRow);
-    
-    const closeX = document.createElement('button');
-    closeX.textContent = '✕';
-    closeX.style.cssText = 'position: absolute; top: 8px; right: 10px; background: none; border: none; color: #888; font-size: 16px; cursor: pointer;';
-    closeX.addEventListener('click', closeSoloChainPanel);
-    panel.appendChild(closeX);
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+            ${tracks.length === 0 ? '<div style="color: #666; text-align: center; padding: 20px;">No tracks available</div>' : ''}
+            ${tracks.map(track => `
+                <div style="
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    padding: 8px 12px;
+                    background: ${soloChainTracks.has(track.id) ? '#1a3a2a' : '#2a2a3a'};
+                    border-radius: 6px;
+                    border: 1px solid ${soloChainTracks.has(track.id) ? '#22c55e44' : 'transparent'};
+                    cursor: pointer;
+                " data-solo-chain-track="${track.id}">
+                    <div style="
+                        width: 20px;
+                        height: 20px;
+                        border-radius: 4px;
+                        background: ${soloChainTracks.has(track.id) ? '#22c55e' : '#444'};
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 12px;
+                        color: white;
+                    ">${soloChainTracks.has(track.id) ? '✓' : ''}</div>
+                    <div style="flex: 1;">
+                        <div style="font-size: 14px; font-weight: 500;">${track.name || 'Untitled Track'}</div>
+                        <div style="font-size: 11px; color: #888;">${track.type || 'Audio'}</div>
+                    </div>
+                    <div style="
+                        padding: 2px 8px;
+                        border-radius: 4px;
+                        font-size: 11px;
+                        background: ${track.color || '#666'};
+                        color: white;
+                    ">${track.color || 'none'}</div>
+                </div>
+            `).join('')}
+        </div>
+    `;
     
     document.body.appendChild(panel);
-    panelOpen = true;
     
-    function updatePanelStatus() {
-        const s = document.getElementById('soloChainStatus');
-        if (s) s.textContent = soloChainActive ? `Active - ${soloChainTrackIds.length} track(s) in chain` : 'Inactive';
-    }
+    // Event listeners
+    panel.querySelector('#soloChainCloseBtn').addEventListener('click', () => panel.remove());
+    
+    panel.querySelector('#soloChainEnableBtn').addEventListener('click', () => {
+        if (soloChainMode) {
+            disableSoloChain();
+        } else {
+            enableSoloChain();
+        }
+        openSoloChainPanel(); // Refresh
+    });
+    
+    panel.querySelector('#soloChainClearBtn').addEventListener('click', () => {
+        clearChain();
+        openSoloChainPanel(); // Refresh
+    });
+    
+    // Track selection
+    panel.querySelectorAll('[data-solo-chain-track]').forEach(item => {
+        item.addEventListener('click', () => {
+            const trackId = item.getAttribute('data-solo-chain-track');
+            toggleTrackInChain(trackId);
+            openSoloChainPanel(); // Refresh
+        });
+    });
+    
+    // Close on outside click
+    panel.addEventListener('click', (e) => {
+        if (e.target === panel) {
+            panel.remove();
+        }
+    });
 }
 
+/**
+ * Close the Solo Chain panel
+ */
 export function closeSoloChainPanel() {
-    const panel = document.getElementById('soloChainPanel');
-    if (panel) {
-        panel.remove();
-        panelOpen = false;
+    const existingPanel = document.getElementById('soloChainPanel');
+    if (existingPanel) {
+        existingPanel.remove();
     }
 }
-
-// Expose to window for eventHandlers.js integration
-window.openSoloChainPanel = openSoloChainPanel;
-window.toggleSoloChain = toggleSoloChain;
-window.isSoloChainActive = isSoloChainActive;
-window.deactivateSoloChain = deactivateSoloChain;

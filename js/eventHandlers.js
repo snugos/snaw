@@ -222,6 +222,7 @@ export function initializePrimaryEventListeners(appContext) {
                     { label: "Loopback Audio Routing", action: () => { if(localAppServices.openLoopbackRoutingPanel) localAppServices.openLoopbackRoutingPanel(); } },
                     { separator: true },
                     { label: "Track Export Solo", action: () => { if(localAppServices.openTrackExportSoloPanel) localAppServices.openTrackExportSoloPanel(); } },
+                    { label: "Track Solo Chain", action: () => { if(localAppServices.openSoloChainPanel) localAppServices.openSoloChainPanel(); } },
                     { label: "Toggle Full Screen", action: toggleFullScreen }
                 ];
                 if (typeof createContextMenu === 'function') {
