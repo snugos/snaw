@@ -437,14 +437,42 @@ class SmartBPMDetection {
 
         // Detect from selected clip
         detectClipBtn.addEventListener('click', async () => {
-            // This would integrate with the DAW's clip selection system
             bpmResult.style.display = 'block';
             tapArea.style.display = 'none';
             document.getElementById('bpm-value').textContent = 'Analyzing...';
             document.getElementById('bpm-confidence').textContent = '--';
             
-            // Placeholder - in real implementation, would get selected clip audio
-            const result = await this.detectFromURL('/test-audio.wav');
+            // Get selected clip IDs and find the first clip with audio
+            const selectedClipIds = localAppServices.getSelectedClipIds?.();
+            if (!selectedClipIds || selectedClipIds.length === 0) {
+                showNotification?.('No clip selected. Please select an audio clip first.', 'warning');
+                document.getElementById('bpm-value').textContent = 'No Selection';
+                document.getElementById('bpm-confidence').textContent = '--';
+                return;
+            }
+            
+            // Find the first selected clip across all tracks
+            const tracks = getTracksState?.() || [];
+            let audioBuffer = null;
+            for (const track of tracks) {
+                if (!track.clips) continue;
+                for (const clip of track.clips) {
+                    if (selectedClipIds.includes(clip.id) && clip.audioBuffer) {
+                        audioBuffer = clip.audioBuffer;
+                        break;
+                    }
+                }
+                if (audioBuffer) break;
+            }
+            
+            if (!audioBuffer) {
+                showNotification?.('Selected clip has no audio data.', 'warning');
+                document.getElementById('bpm-value').textContent = 'No Audio';
+                document.getElementById('bpm-confidence').textContent = '--';
+                return;
+            }
+            
+            const result = await this.detectFromBuffer(audioBuffer);
             
             if (result.bpm) {
                 detectedBPM = result.bpm;
