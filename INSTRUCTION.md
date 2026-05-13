@@ -4,8 +4,6 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-All 10 features from the previous queue have been implemented. New queue:
-
 1. **Audio Clip Reverse** - Add a button/menu item to reverse audio clips in place for creative effect
 2. **Track Freeze with Effects** - Freeze a track to audio including all effect processing
 3. **MIDI Velocity Editor** - Visual lane to adjust velocities of selected MIDI notes with a brush tool
@@ -14,7 +12,7 @@ All 10 features from the previous queue have been implemented. New queue:
 6. **Track Grouping** - Group tracks together so they can be selected/muted/soloed as one unit
 7. **Clip Color Themes** - Apply color themes to audio/MIDI clips based on content type
 8. **Mixer Snapshot Presets** - Save and recall complete mixer fader/pan settings as presets
-9. **Audio Buffer Size Settings** - UI to adjust audio buffer size for latency/performance tradeoff
+9. **Audio Buffer Size Settings** ✅ - UI to adjust audio buffer size for latency/performance tradeoff (IMPLEMENTED: js/AudioBufferSizeSettings.js)
 10. **Export Selection** - Export only selected tracks or loop region to audio file
 
 ## Workflow
