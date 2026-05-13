@@ -1420,6 +1420,7 @@ async function initializeSnugOS() {
         if (typeof initProjectAutoNaming === 'function') initProjectAutoNaming(appServices); // Project Auto-Naming initialization
         
         if (typeof initDrumReplace === 'function') initDrumReplace(appServices); // Drum Replace initialization
+        if (typeof initDrumPatternSplitter === 'function') initDrumPatternSplitter(appServices); // Drum Pattern Splitter initialization
         if (typeof initTrackContextMenu === 'function') initTrackContextMenu(appServices); // Track context menu with duplicate
         if (typeof initTrackDuplicateOffset === 'function') initTrackDuplicateOffset(appServices); // Track Duplicate with Offset
         if (typeof initTrackColorPanel === 'function') initTrackColorPanel(appServices); // Track Color Panel initialization
