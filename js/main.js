@@ -67,6 +67,7 @@ import { enableSoloChain, disableSoloChain, toggleTrackInChain, clearChain, getS
 import { initLoopRegionQuickSet, openLoopRegionQuickSetSettings } from './LoopRegionQuickSet.js';
 import { initLoopRegionMarkers, openLoopRegionMarkersPanel, addLoopRegionMarker } from './LoopRegionMarkers.js';
 import { initLoopRegionSnap, openLoopSnapPanel, isLoopSnapEnabled, toggleLoopSnap, getSnapConfig } from './LoopRegionSnap.js';
+import { initExportSelection, openExportSelectionPanel } from './ExportSelection.js';
 import { initLyricsTrack, openLyricsTrackPanel, getLyrics, addLyric, importLyricsText, setLyricsTrackEnabled, getCurrentLyric } from './LyricsTrack.js';
 import { openTempoRamperPanel } from './TempoRamperUI.js';
 import { initTempoRamperVisual, openTempoRamperVisual } from './TempoRamperVisual.js';
@@ -793,6 +794,7 @@ import {
     openLoopRegionMarkersPanel,
     openLoopSnapPanel,
     openLyricsTrackPanel,
+    openExportSelectionPanel,
     openTimeSignaturePanel,
     toggleClipLoopPreview,
     deactivateClipLoopPreview,
@@ -1409,6 +1411,8 @@ async function initializeSnugOS() {
         if (typeof initAudioRecorder === 'function') initAudioRecorder(appServices); // Audio Recorder initialization
         if (typeof initMIDArpeggiatorPanel === 'function') initMIDArpeggiatorPanel(appServices); // MIDI Arpeggiator Panel initialization
         if (typeof initTrackTemplateLibrary === 'function') initTrackTemplateLibrary(appServices); // Track Template Library initialization
+        if (typeof initExportSelection === 'function') initExportSelection(appServices); // Export Selection initialization
+        if (typeof initProjectAutoNaming === 'function') initProjectAutoNaming(appServices); // Project Auto-Naming initialization
         
         if (typeof initDrumReplace === 'function') initDrumReplace(appServices); // Drum Replace initialization
         if (typeof initTrackContextMenu === 'function') initTrackContextMenu(appServices); // Track context menu with duplicate
