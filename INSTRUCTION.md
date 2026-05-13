@@ -4,16 +4,16 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Audio Clip Reverse** - Add a button/menu item to reverse audio clips in place for creative effect
-2. **Track Freeze with Effects** - Freeze a track to audio including all effect processing
-3. **MIDI Velocity Editor** - Visual lane to adjust velocities of selected MIDI notes with a brush tool
-4. **Automation Curve Types** - Support for different curve interpolation (linear, exponential, S-curve, stepped)
-5. **Sample Rate Conversion** - Convert project sample rate for export (44.1kHz to 48kHz etc.)
-6. **Track Grouping** - Group tracks together so they can be selected/muted/soloed as one unit
-7. **Clip Color Themes** - Apply color themes to audio/MIDI clips based on content type
-8. **Mixer Snapshot Presets** - Save and recall complete mixer fader/pan settings as presets
-9. **Audio Buffer Size Settings** ✅ - UI to adjust audio buffer size for latency/performance tradeoff (IMPLEMENTED: js/AudioBufferSizeSettings.js)
-10. **Export Selection** ✅ - Export only selected tracks or loop region to audio file (IMPLEMENTED: js/ExportSelection.js)
+1. **Lyrics Track Display** - Display karaoke-style lyrics synced to playback timeline
+2. **Drum Pattern Splitter** - AI-powered separation of drum tracks into kick/snare/hihat components
+3. **Clip Stretch with Handles** - Drag clip edges to stretch/squash audio non-destructively
+4. **Track Compressor Visualizer** - Real-time gain reduction meter on track compressor
+5. **MIDI Polyphonic Expression** - Per-note pitch bend and modulation for expressive MIDI
+6. **Project Templates Gallery** - Browse and preview project templates with audio demos
+7. **Multi-Timeline Views** - Save and switch between different visible track arrangements
+8. **Audio Waveform Overview** - Mini overview of full project waveform above timeline
+9. **Track Mute Group Hierarchy** - Nested mute groups for complex routing
+10. **One-Shot Sample Trigger** - Map one-shot samples to keys with choke groups support
 
 ## Workflow
 
