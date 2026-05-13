@@ -101,6 +101,7 @@ import { initClipGhostTrails, openGhostTrailsPanel, getGhostTrails, addGhostTrai
 import { initTimeSignaturePerTrack, openTimeSignaturePanel, getTrackTimeSignature, setTrackTimeSignature, clearTrackTimeSignature, getBarDurationSeconds, exportTimeSignatures, importTimeSignatures } from './TimeSignaturePerTrack.js';
 // Drum Replace - Analyze audio and replace drum hits with samples
 import { initDrumReplace, openDrumReplacePanel } from './DrumReplace.js';
+import { initDrumPatternSplitter, openDrumPatternSplitterPanel } from './DrumPatternSplitter.js';
 // Clip Opacity
 import { initClipOpacity, openClipOpacityPanel } from './ClipOpacity.js';
 // Clip Fade Presets
@@ -783,6 +784,7 @@ import {
     openChordVoicingPanel,
     openGhostTrailsPanel,
     openDrumReplacePanel,
+    openDrumPatternSplitterPanel,
     openClipOpacityPanel,
     openClipFadePresetsPanel,
     openClipFadeHandlesPanel,

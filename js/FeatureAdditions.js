@@ -79,3 +79,5 @@ export { openMIDIVelocityCurvePanel } from './MIDIVelocityCurve.js';
 
 // Loop Region Snap - Snap loop region boundaries to clip edges
 export { initLoopRegionSnap, openLoopRegionSnapSettings, openLoopSnapPanel, isLoopRegionSnapEnabled, setLoopRegionSnapEnabled, toggleLoopSnap, getSnapConfig, snapLoopRegionStart, snapLoopRegionEnd, snapLoopRegion, getLoopRegionSnapSettings, setSnapThreshold } from './LoopRegionSnap.js';
+// Drum Pattern Splitter - AI-powered separation of drum tracks into kick/snare/hihat components
+export { initDrumPatternSplitter, openDrumPatternSplitterPanel } from './DrumPatternSplitter.js';
