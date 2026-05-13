@@ -4,7 +4,7 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Lyrics Track Display** - Display karaoke-style lyrics synced to playback timeline
+1. ~~**Lyrics Track Display**~~ ✅ - Display karaoke-style lyrics synced to playback timeline (ENHANCED: js/LyricsDisplay.js updated with Tone.Transport integration)
 2. **Drum Pattern Splitter** - AI-powered separation of drum tracks into kick/snare/hihat components
 3. **Clip Stretch with Handles** - Drag clip edges to stretch/squash audio non-destructively
 4. **Track Compressor Visualizer** - Real-time gain reduction meter on track compressor
