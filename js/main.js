@@ -1400,6 +1400,7 @@ async function initializeSnugOS() {
         if (typeof initLoopRegionMarkers === 'function') initLoopRegionMarkers(appServices); // Loop Region Markers initialization
         if (typeof initLoopRegionSnap === 'function') initLoopRegionSnap(appServices); // Loop Region Snap initialization
         if (typeof initLyricsTrack === 'function') initLyricsTrack(appServices); // Lyrics Track initialization
+        if (typeof initLyricsDisplay === 'function') initLyricsDisplay(appServices); // Lyrics Display Karaoke Mode
         if (typeof initTimeSignaturePerTrack === 'function') initTimeSignaturePerTrack(appServices); // Time Signature Per Track initialization
         if (typeof initClipContextMenu === 'function') initClipContextMenu(appServices); // Clip context menu with reverse
         if (typeof initClipGroupManager === 'function') initClipGroupManager(appServices); // Clip Group Manager

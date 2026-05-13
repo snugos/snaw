@@ -9,6 +9,8 @@ let currentWordIndex = -1;
 let lyricsUpdateInterval = null;
 let isKaraokeMode = true;
 let lyricsPanel = null;
+let lyricsText = '';
+let lyricsWordTiming = [];
 
 /**
  * Initialize the Lyrics Display module
@@ -20,19 +22,33 @@ export function initLyricsDisplay(services) {
 }
 
 /**
- * Get lyrics-related state from app
+ * Get current transport position in seconds
  */
-function getLyricsState() {
-    const state = localAppServices.stateModule || {};
-    return {
-        getTransportPosition: state.getTransportPosition || (() => 0),
-        getIsPlaying: state.getIsPlaying || (() => false),
-        getBPM: state.getBPM || (() => 120),
-        lyricsText: state.lyricsText || '',
-        lyricsWordTiming: state.lyricsWordTiming || [],
-        setLyricsText: state.setLyricsText || ((t) => {}),
-        setLyricsWordTiming: state.setLyricsWordTiming || ((a) => {})
-    };
+function getTransportPosition() {
+    if (typeof Tone !== 'undefined' && Tone.Transport) {
+        return Tone.Transport.seconds || 0;
+    }
+    return 0;
+}
+
+/**
+ * Get current playback state
+ */
+function getIsPlaying() {
+    if (typeof Tone !== 'undefined' && Tone.Transport) {
+        return Tone.Transport.state === 'started';
+    }
+    return false;
+}
+
+/**
+ * Get current BPM
+ */
+function getBPM() {
+    if (typeof Tone !== 'undefined' && Tone.Transport) {
+        return Tone.Transport.bpm?.value || 120;
+    }
+    return 120;
 }
 
 /**
@@ -84,8 +100,6 @@ function renderPanelContent() {
     const container = document.getElementById('lyricsDisplayContent');
     if (!container) return;
 
-    const lyricsState = getLyricsState();
-
     container.innerHTML = `
         <div class="flex items-center justify-between mb-3">
             <h3 class="text-sm font-semibold text-slate-300">Karaoke Mode</h3>
@@ -100,7 +114,7 @@ function renderPanelContent() {
         </div>
 
         <div class="flex-1 relative">
-            <div id="lyricsTextArea" class="w-full h-full p-4 bg-slate-800 border border-slate-600 rounded text-sm font-medium leading-relaxed overflow-y-auto resize-none" placeholder="Paste or type lyrics here...">${escapeHtml(lyricsState.lyricsText)}</div>
+            <div id="lyricsTextArea" class="w-full h-full p-4 bg-slate-800 border border-slate-600 rounded text-sm font-medium leading-relaxed overflow-y-auto resize-none" placeholder="Paste or type lyrics here...">${escapeHtml(lyricsText)}</div>
             <div id="lyricsHighlightOverlay" class="absolute inset-0 p-4 text-sm font-medium leading-relaxed overflow-y-auto pointer-events-none whitespace-pre-wrap"></div>
         </div>
 
@@ -120,8 +134,8 @@ function renderPanelContent() {
         </div>
     `;
 
-    setupPanelEvents(container, lyricsState);
-    startLyricsSync(lyricsState);
+    setupPanelEvents(container);
+    startLyricsSync();
 }
 
 /**
@@ -139,7 +153,7 @@ function escapeHtml(text) {
 /**
  * Setup panel event listeners
  */
-function setupPanelEvents(container, lyricsState) {
+function setupPanelEvents(container) {
     const textArea = container.querySelector('#lyricsTextArea');
     const karaokeToggle = container.querySelector('#karaokeModeToggle');
     const importBtn = container.querySelector('#lyricsImportBtn');
@@ -151,9 +165,9 @@ function setupPanelEvents(container, lyricsState) {
     textArea?.addEventListener('input', () => {
         clearTimeout(textDebounceTimer);
         textDebounceTimer = setTimeout(() => {
-            lyricsState.setLyricsText(textArea.value);
+            lyricsText = textArea.value;
             if (isKaraokeMode) {
-                updateKaraokeOverlay(textArea.value, lyricsState);
+                updateKaraokeOverlay(lyricsText);
             }
         }, 500);
     });
@@ -162,7 +176,7 @@ function setupPanelEvents(container, lyricsState) {
     karaokeToggle?.addEventListener('change', () => {
         isKaraokeMode = karaokeToggle.checked;
         if (isKaraokeMode) {
-            updateKaraokeOverlay(textArea?.value || '', lyricsState);
+            updateKaraokeOverlay(textArea?.value || '');
         }
     });
 
@@ -171,9 +185,9 @@ function setupPanelEvents(container, lyricsState) {
         const inputText = prompt('Paste your lyrics (one line per paragraph):');
         if (inputText !== null) {
             textArea.value = inputText;
-            lyricsState.setLyricsText(inputText);
+            lyricsText = inputText;
             if (isKaraokeMode) {
-                updateKaraokeOverlay(inputText, lyricsState);
+                updateKaraokeOverlay(inputText);
             }
         }
     });
@@ -182,8 +196,8 @@ function setupPanelEvents(container, lyricsState) {
     clearBtn?.addEventListener('click', () => {
         if (confirm('Clear all lyrics?')) {
             textArea.value = '';
-            lyricsState.setLyricsText('');
-            lyricsState.setLyricsWordTiming([]);
+            lyricsText = '';
+            lyricsWordTiming = [];
             currentWordIndex = -1;
             updateHighlightDisplay(-1, '');
         }
@@ -192,22 +206,28 @@ function setupPanelEvents(container, lyricsState) {
     // Play from start
     playFromStartBtn?.addEventListener('click', () => {
         // Stop current playback and restart from beginning
-        localAppServices.stopPlayback?.();
-        setTimeout(() => {
-            localAppServices.startPlayback?.();
-        }, 100);
+        if (typeof Tone !== 'undefined' && Tone.Transport) {
+            Tone.Transport.stop();
+            Tone.Transport.seconds = 0;
+            Tone.Transport.start();
+        } else {
+            localAppServices.stopPlayback?.();
+            setTimeout(() => {
+                localAppServices.startPlayback?.();
+            }, 100);
+        }
     });
 
     // Initial karaoke overlay update
     if (isKaraokeMode && textArea?.value) {
-        updateKaraokeOverlay(textArea.value, lyricsState);
+        updateKaraokeOverlay(lyricsText);
     }
 }
 
 /**
  * Update karaoke overlay with word highlighting
  */
-function updateKaraokeOverlay(text, lyricsState) {
+function updateKaraokeOverlay(text) {
     const overlay = document.getElementById('lyricsHighlightOverlay');
     if (!overlay) return;
 
@@ -232,14 +252,14 @@ function updateKaraokeOverlay(text, lyricsState) {
 /**
  * Start lyrics synchronization with playback
  */
-function startLyricsSync(lyricsState) {
+function startLyricsSync() {
     // Stop any existing interval
     stopLyricsSync();
 
     // Update sync every 50ms
     lyricsUpdateInterval = setInterval(() => {
-        const pos = lyricsState.getTransportPosition();
-        const isPlaying = lyricsState.getIsPlaying();
+        const pos = getTransportPosition();
+        const isPlaying = getIsPlaying();
 
         if (!isPlaying) {
             // Update position display
@@ -253,13 +273,11 @@ function startLyricsSync(lyricsState) {
         if (posEl) posEl.textContent = formatTime(pos);
 
         // Update word index based on position
-        const wordTiming = lyricsState.lyricsWordTiming || [];
-        const text = lyricsState.lyricsText || '';
+        const wordTiming = lyricsWordTiming;
+        const text = lyricsText;
         const words = text.split(/\s+/).filter(w => w.length > 0);
 
         // Calculate which word should be highlighted based on position
-        // Simple approach: evenly distribute words over a duration (e.g., 3 minutes)
-        // Or use word timing if available
         let newWordIndex = -1;
         if (wordTiming.length > 0) {
             // Use timing data
@@ -279,7 +297,7 @@ function startLyricsSync(lyricsState) {
             currentWordIndex = newWordIndex;
             updateHighlightDisplay(currentWordIndex, words[currentWordIndex] || '');
             if (isKaraokeMode) {
-                updateKaraokeOverlay(text, lyricsState);
+                updateKaraokeOverlay(text);
             }
         }
     }, 50);
@@ -301,8 +319,7 @@ function stopLyricsSync() {
 function updateHighlightDisplay(wordIdx, currentWord) {
     const wordEl = document.getElementById('lyricsCurrentWord');
     const totalEl = document.getElementById('lyricsTotalWords');
-    const lyricsState = getLyricsState();
-    const words = (lyricsState.lyricsText || '').split(/\s+/).filter(w => w.length > 0);
+    const words = lyricsText.split(/\s+/).filter(w => w.length > 0);
 
     if (wordEl) {
         wordEl.textContent = wordIdx >= 0 ? currentWord : '-';
@@ -330,15 +347,40 @@ export function closeLyricsDisplayPanel() {
     lyricsPanel = null;
 }
 
+/**
+ * Set lyrics text externally
+ */
+export function setLyricsText(text) {
+    lyricsText = text || '';
+}
+
+/**
+ * Get current lyrics text
+ */
+export function getLyricsText() {
+    return lyricsText;
+}
+
+/**
+ * Set word timing data for precise sync
+ * @param {Array} timing - Array of timestamps in seconds for each word
+ */
+export function setLyricsWordTiming(timing) {
+    lyricsWordTiming = timing || [];
+}
+
+/**
+ * Get current word timing
+ */
+export function getLyricsWordTiming() {
+    return lyricsWordTiming;
+}
+
 // Window exposure
 window.openLyricsDisplayPanel = openLyricsDisplayPanel;
 window.openLyricsPanel = openLyricsDisplayPanel;
 window.closeLyricsDisplayPanel = closeLyricsDisplayPanel;
-window.setLyricsText = (text) => {
-    const state = localAppServices.stateModule || {};
-    if (state.setLyricsText) state.setLyricsText(text);
-};
-window.getLyricsText = () => {
-    const state = localAppServices.stateModule || {};
-    return state.lyricsText || '';
-};
+window.setLyricsText = setLyricsText;
+window.getLyricsText = getLyricsText;
+window.setLyricsWordTiming = setLyricsWordTiming;
+window.getLyricsWordTiming = getLyricsWordTiming;
