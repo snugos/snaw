@@ -13,7 +13,7 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 7. **Clip Color Themes** - Apply color themes to audio/MIDI clips based on content type
 8. **Mixer Snapshot Presets** - Save and recall complete mixer fader/pan settings as presets
 9. **Audio Buffer Size Settings** ✅ - UI to adjust audio buffer size for latency/performance tradeoff (IMPLEMENTED: js/AudioBufferSizeSettings.js)
-10. **Export Selection** - Export only selected tracks or loop region to audio file
+10. **Export Selection** ✅ - Export only selected tracks or loop region to audio file (IMPLEMENTED: js/ExportSelection.js)
 
 ## Workflow
 
