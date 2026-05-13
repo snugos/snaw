@@ -4,32 +4,16 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Clip Name Inline Edit** - Double-click clip name to rename directly on timeline
-2. **MIDI Velocity Quantize** - Ensure Quantize panel with velocity options is accessible
-
-## COMPLETED FEATURES (for reference)
-- ✅ Loop Start/End Snapping - Snap loop region to nearest clip boundaries
-- ✅ Send Effect Amount - Connect reverb/delay send knobs to mixer channel strip
-- ✅ Keyboard Velocity Curve - Connect `js/MIDIVelocityCurve.js` to Start menu for MIDI velocity curve editing
-- ✅ Track Group Collapse - Complete collapse/expand UI for track groups in arrangement view
-- ✅ Tempo Tap Visual - Animated visual showing tap tempo rhythm for visual metronome
-- ✅ Track Duplicate with Offset - Duplicate track with configurable time offset for layered takes
-- ✅ Clip Fade Handles - Drag handles on clip edges to adjust fade in/out with visual curve preview
-- ✅ Scale Highlight Global - Show scale highlights across all tracks for harmonic consistency
-- ✅ Audio Clip Stretch Markers - Visual markers showing where audio was time-stretched
-- ✅ Sidechain Volume Envelope - Draw ducking volume curves directly on clips for sidechain effects
-- ✅ Time Signature Per Track - Allow different time signatures per track for polyrhythmic compositions
-- ✅ Lyrics Track Timeline - Timeline synced lyrics display and editing
-- ✅ Loop Region Markers - Named markers at loop boundaries
-- ✅ Tempo Ramper Visual - Draw tempo automation curves on canvas
-- ✅ Tap History - Floating panel showing recent tap values
-- ✅ MIDI Chord Display - Show chord names (Cmaj7, D7, etc.) above MIDI clips
-- ✅ Piano Roll Sequencer - Full piano roll editor with clickable note editing
-- ✅ Piano Roll Editor - Alternative editor with drag/move/resize notes
-- ✅ Track Color Coding - Tracks have color property with color picker UI
-- ✅ Waveform Visualization - Audio clips display waveforms on timeline
-- ✅ Keyboard Shortcuts Panel - Press `?` or use menu to show all shortcuts
-- ✅ Track Solo Mode Toggle - Add toggle between exclusive solo (one track) and chain solo (multiple)
+1. **AI Tempo Suggestion** - Analyze the rhythm of recorded audio and suggest the optimal BPM
+2. **Clip Envelope Shaper** - Draw custom amplitude envelopes on clips for precise dynamics control
+3. **Track Template Library** - Save and browse track templates (instrument + effects + settings)
+4. **MIDI Arpeggiator Panel** - Visual arpeggiator with pattern editing and direction controls
+5. **Audio Stretch Quality Preset** - Quick buttons to switch between fast/balanced/high quality stretching
+6. **Track Solo Chain** - Mute all tracks except selected chain of tracks for focused listening
+7. **Clip Fade Presets** - Save and apply common fade in/out curves (exponential, S-curve, etc.)
+8. **Track Delay Compensation** - Automatically compensate for plugin latency per track
+9. **Project Auto-Naming** - Smart naming for clips and tracks based on recorded content
+10. **Scale Highlight Mode** - Highlight notes belonging to the selected scale in the piano roll
 
 ## Workflow
 
@@ -61,7 +45,23 @@ After successfully implementing a feature:
 
 ## When Queue is Empty
 
-Generate 10 new feature ideas based on SnugOS DAW capabilities (Tone.js, multi-track, effects rack, sequencer, MIDI) and update this instruction with the new queue.
+Run this brainstorming process:
+
+```
+Based on SnugOS being a browser-based DAW with:
+- Tone.js audio engine
+- Multi-track timeline
+- Effects rack
+- Sequencer mode
+- MIDI support
+
+Generate 10 NEW feature ideas that are:
+1. Achievable in a single session
+2. Complement existing features
+3. Enhance creative workflow
+
+Output as numbered list and update this instruction.
+```
 
 ## Rules
 
