@@ -1,69 +1,118 @@
-/**
- * ClipFadePresets Integration
- * Adds fade preset options to clip context menus
- */
+// js/ClipFadePresets.js - Clip Fade Preset Management
+import { showNotification } from './utils.js';
 
-import { AudioFadePreset } from './AudioFadePreset.js';
+let clipFadePresets = {};
+const DEFAULT_PRESETS = [
+    { 
+        id: 'linear_in', 
+        name: 'Linear In', 
+        curve: t => t,
+        description: 'Linear fade in'
+    },
+    { 
+        id: 'linear_out', 
+        name: 'Linear Out', 
+        curve: t => 1 - t,
+        description: 'Linear fade out'
+    },
+    { 
+        id: 'exponential_in', 
+        name: 'Exponential In', 
+        curve: t => t * t,
+        description: 'Slow start, fast finish'
+    },
+    { 
+        id: 'exponential_out', 
+        name: 'Exponential Out', 
+        curve: t => 1 - (1 - t) * (1 - t),
+        description: 'Fast start, slow finish'
+    },
+    { 
+        id: 's_curve_in', 
+        name: 'S-Curve In', 
+        curve: t => t * t * (3 - 2 * t),
+        description: 'Smooth ease-in'
+    },
+    { 
+        id: 's_curve_out', 
+        name: 'S-Curve Out', 
+        curve: t => t > 0.5 ? 1 - Math.pow(-2 * t + 2, 2) / 2 : Math.pow(2 * t, 2) / 2,
+        description: 'Smooth ease-out'
+    },
+    { 
+        id: 'logarithmic_in', 
+        name: 'Logarithmic In', 
+        curve: t => Math.log(1 + 9 * t) / Math.log(10),
+        description: 'Very slow start, accelerate'
+    },
+    { 
+        id: 'logarithmic_out', 
+        name: 'Logarithmic Out', 
+        curve: t => 1 - Math.log(1 + 9 * (1 - t)) / Math.log(10),
+        description: 'Fast start, very slow finish'
+    }
+];
 
-let localAppServices = null;
-
-export function initializeClipFadePresets(services) {
-    localAppServices = services;
-    console.log('[ClipFadePresets] Initialized');
+export function getClipFadePresets() {
+    return { ...clipFadePresets };
 }
 
-/**
- * Get fade preset menu items for clip context menu
- */
-export function getClipFadeMenuItems(clipData, trackId) {
-    const presets = AudioFadePreset.getPresets();
-    
-    return {
-        label: 'Apply Fade Preset',
-        submenu: presets.map(preset => ({
-            label: preset.name,
-            action: () => applyFadePresetToClip(clipData, trackId, preset)
-        }))
+export function getDefaultClipFadePresets() {
+    return [...DEFAULT_PRESETS];
+}
+
+export function getClipFadePresetById(id) {
+    return clipFadePresets[id] || DEFAULT_PRESETS.find(p => p.id === id) || null;
+}
+
+export function addClipFadePreset(name, curveFunction, description = '') {
+    if (!name || !name.trim()) return false;
+    const id = name.trim().toLowerCase().replace(/\s+/g, '_') + '_' + Date.now();
+    clipFadePresets[id] = {
+        id,
+        name: name.trim(),
+        curve: curveFunction,
+        description: description || 'Custom preset'
     };
+    console.log(`[ClipFadePresets] Added preset: ${name}`);
+    return id;
 }
 
-/**
- * Apply a fade preset to a clip
- */
-export function applyFadePresetToClip(clipData, trackId, preset) {
-    if (!clipData || !clipData.buffer) {
-        console.warn('[ClipFadePresets] No buffer on clip to apply fade');
-        return;
+export function removeClipFadePreset(id) {
+    if (DEFAULT_PRESETS.find(p => p.id === id)) {
+        console.warn(`[ClipFadePresets] Cannot remove built-in preset: ${id}`);
+        return false;
     }
-    
-    try {
-        const fadePreset = new AudioFadePreset();
-        fadePreset.fadeInDuration = preset.fadeIn || 0;
-        fadePreset.fadeOutDuration = preset.fadeOut || 0;
-        fadePreset.fadeInCurve = preset.fadeInCurve || 'linear';
-        fadePreset.fadeOutCurve = preset.fadeOutCurve || 'linear';
-        
-        // Apply fade to the buffer
-        fadePreset.applyFade(clipData.buffer);
-        
-        console.log(`[ClipFadePresets] Applied "${preset.name}" to clip`);
-        
-        // Update clip display if needed
-        if (localAppServices && localAppServices.refreshClip) {
-            localAppServices.refreshClip(trackId, clipData.id);
+    if (clipFadePresets[id]) {
+        delete clipFadePresets[id];
+        console.log(`[ClipFadePresets] Removed preset: ${id}`);
+        return true;
+    }
+    return false;
+}
+
+export function applyClipFadePreset(clipId, presetId, fadeType = 'out') {
+    const preset = getClipFadePresetById(presetId);
+    if (!preset) {
+        console.warn(`[ClipFadePresets] Preset not found: ${presetId}`);
+        return false;
+    }
+
+    if (typeof window !== 'undefined' && window.state) {
+        const clip = window.state.getAudioClipById?.(clipId) || window.getAudioClip?.(clipId);
+        if (clip) {
+            const fadeTypeKey = fadeType === 'in' ? 'fadeInCurve' : 'fadeOutCurve';
+            clip[fadeTypeKey] = preset.curve;
+            console.log(`[ClipFadePresets] Applied ${preset.name} to clip ${clipId} as ${fadeType}`);
+            return true;
         }
-    } catch (err) {
-        console.error('[ClipFadePresets] Error applying fade:', err);
     }
+    console.warn(`[ClipFadePresets] Clip not found: ${clipId}`);
+    return false;
 }
 
-/**
- * Get standard fade menu items (non-submenu version for simpler integration)
- */
-export function getClipFadeMenuItemsSimple() {
-    const presets = AudioFadePreset.getPresets();
-    return presets.map(preset => ({
-        label: `Fade: ${preset.name}`,
-        action: (clipData, trackId) => applyFadePresetToClip(clipData, trackId, preset)
-    }));
+export function initClipFadePresets() {
+    console.log('[ClipFadePresets] Initialized with', Object.keys(clipFadePresets).length + DEFAULT_PRESETS.length, 'presets');
 }
+
+if (typeof module !== 'undefined' && module.hot) module.hot.accept();
