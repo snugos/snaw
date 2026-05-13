@@ -4,16 +4,18 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **AI Tempo Suggestion** - Analyze the rhythm of recorded audio and suggest the optimal BPM
-2. **Clip Envelope Shaper** - Draw custom amplitude envelopes on clips for precise dynamics control
-3. **Track Template Library** - Save and browse track templates (instrument + effects + settings)
-4. **MIDI Arpeggiator Panel** - Visual arpeggiator with pattern editing and direction controls
-5. **Audio Stretch Quality Preset** - Quick buttons to switch between fast/balanced/high quality stretching
-6. **Track Solo Chain** - Mute all tracks except selected chain of tracks for focused listening
-7. **Clip Fade Presets** - Save and apply common fade in/out curves (exponential, S-curve, etc.)
-8. **Track Delay Compensation** - Automatically compensate for plugin latency per track
-9. **Project Auto-Naming** - Smart naming for clips and tracks based on recorded content
-10. **Scale Highlight Mode** - Highlight notes belonging to the selected scale in the piano roll
+All 10 features from the previous queue have been implemented. New queue:
+
+1. **Audio Clip Reverse** - Add a button/menu item to reverse audio clips in place for creative effect
+2. **Track Freeze with Effects** - Freeze a track to audio including all effect processing
+3. **MIDI Velocity Editor** - Visual lane to adjust velocities of selected MIDI notes with a brush tool
+4. **Automation Curve Types** - Support for different curve interpolation (linear, exponential, S-curve, stepped)
+5. **Sample Rate Conversion** - Convert project sample rate for export (44.1kHz to 48kHz etc.)
+6. **Track Grouping** - Group tracks together so they can be selected/muted/soloed as one unit
+7. **Clip Color Themes** - Apply color themes to audio/MIDI clips based on content type
+8. **Mixer Snapshot Presets** - Save and recall complete mixer fader/pan settings as presets
+9. **Audio Buffer Size Settings** - UI to adjust audio buffer size for latency/performance tradeoff
+10. **Export Selection** - Export only selected tracks or loop region to audio file
 
 ## Workflow
 
