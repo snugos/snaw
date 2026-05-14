@@ -218,6 +218,7 @@ export function initializePrimaryEventListeners(appContext) {
                     { label: "Upload Custom Background (Image/Video)", action: () => { if(localAppServices.triggerCustomBackgroundUpload) localAppServices.triggerCustomBackgroundUpload(); } },
                     { label: "Remove Custom Background", action: () => { if(localAppServices.removeCustomDesktopBackground) localAppServices.removeCustomDesktopBackground(); else showNotification?.('Desktop background feature not available', 'warning'); } },
                     { label: "Stretch Quality", action: () => { if(localAppServices.openStretchQualityPanel) localAppServices.openStretchQualityPanel(); } },
+                    { label: "MPE Tools", action: () => { if(window.openMPEToolsPanel) window.openMPEToolsPanel(); } },
                     { separator: true },
                     { label: "Loopback Audio Routing", action: () => { if(localAppServices.openLoopbackRoutingPanel) localAppServices.openLoopbackRoutingPanel(); } },
                     { separator: true },
