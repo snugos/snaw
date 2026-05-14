@@ -4,16 +4,16 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Auto Key Detection** - Analyze MIDI/audio to detect musical key and suggest scale for the project
-2. **Chord Trigger Mode** - Play a chord by pressing a single key, with configurable voicings
-3. **Sampler Loop Trim** - Visual waveform editor to set exact loop start/end points in sampler clips
-4. **Track Ghost Signals** - Show faint visual overlay of other tracks' waveforms for visual reference
-5. **Clip Probability** - Set random chance (0-100%) for each clip to play, for generative variations
-6. **Send Effects Reorder** - Drag to reorder send effect slots in the mixer
-7. **Velocity Scaling** - Shift all note velocities in a selection up/down by a percentage
-8. **Timeline Ruler Click** - Click on the timeline ruler/bar to jump playhead to that position
-9. **Export Stems with Effects** - Export individual track stems with their effect chains applied
-10. **Pattern Chaining** - Chain multiple patterns together to play in sequence automatically
+1. **Chord Trigger Mode** - Play a chord by pressing a single key, with configurable voicings
+2. **Sampler Loop Trim** - Visual waveform editor to set exact loop start/end points in sampler clips
+3. **Track Ghost Signals** - Show faint visual overlay of other tracks' waveforms for visual reference
+4. **Clip Probability** - Set random chance (0-100%) for each clip to play, for generative variations
+5. **Send Effects Reorder** - Drag to reorder send effect slots in the mixer
+6. **Velocity Scaling** - Shift all note velocities in a selection up/down by a percentage
+7. **Timeline Ruler Click** - Click on the timeline ruler/bar to jump playhead to that position
+8. **Export Stems with Effects** - Export individual track stems with their effect chains applied
+9. **Pattern Chaining** - Chain multiple patterns together to play in sequence automatically
+10. **AI Mixing Suggestions** - Analyze mix and suggest volume/pan/EQ corrections
 
 ## Workflow
 
