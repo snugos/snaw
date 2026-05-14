@@ -451,3 +451,26 @@ _None — all browser-implementable features currently implemented._
 _None queued; the feature list is stable._
 
 ---
+
+## Session: 2026-05-14 00:55 UTC (Snaw Feature Builder Agent Run)
+
+**Status:** FEATURE ALREADY COMPLETED ✅
+
+The Track Compressor Visualizer feature was completed in the previous session (commit `ec66d55`).
+
+### Feature Details (from commit ec66d55)
+- **Feature:** Track Compressor Visualizer - Real-time gain reduction meter on track compressor
+- **Files Added:** `js/TrackCompressorVisualizer.js` (251 lines)
+- **Files Modified:** `js/main.js` (import and initialization), `js/ui.js` (module wiring)
+
+### Current Feature Queue (Updated)
+1. ~~**Lyrics Track Display**~~ ✅
+2. ~~**Drum Pattern Splitter**~~ ✅
+3. ~~**Clip Stretch with Handles**~~ ✅
+4. ~~**Track Compressor Visualizer**~~ ✅
+5. **MIDI Polyphonic Expression** - Per-note pitch bend and modulation for expressive MIDI
+6. **Project Templates Gallery** - Browse and preview project templates with audio demos
+7. **Multi-Timeline Views** - Save and switch between different visible track arrangements
+8. **Audio Waveform Overview** - Mini overview of full project waveform above timeline
+9. **Track Mute Group Hierarchy** - Nested mute groups for complex routing
+10. **One-Shot Sample Trigger** - Map one-shot samples to keys with choke groups support

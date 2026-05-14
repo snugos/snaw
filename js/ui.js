@@ -3,6 +3,7 @@
 
 let localAppServices = {};
 let trackHeadphoneMixModule = {};
+let trackCompressorVisualizerModule = {};
 
 // Initialize UI module with app services - called from main.js
 export function initializeUIModule(appServicesFromMain) {
