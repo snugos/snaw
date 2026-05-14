@@ -80,6 +80,7 @@ import { initTrackDuplicateOffset, openDuplicateOffsetDialog, duplicateTrackWith
 import { initTrackColorPanel, openTrackColorPanel } from './TrackColorPanel.js';
 import { initTrackIconPicker, openTrackIconPickerPanel } from './TrackIconPicker.js';
 import { initChordVoicingModes, openChordVoicingPanel } from './ChordVoicingModes.js';
+import { initChordTriggerMode, toggleChordTriggerMode, openChordTriggerPanel, isChordTriggerEnabled, handleChordTriggerKeyDown, handleChordTriggerKeyUp, getChordKeyMappings, setChordKeyMapping } from './ChordTriggerMode.js';
 import { initTrackFreezeQuickToggle } from './TrackFreezeQuickToggle.js';
 import { initTrackLaneResize } from './TrackLaneResize.js';
 import { initPerformanceMonitor, initPerformanceIndicator, openPerformancePanel, closePerformancePanel, getPerformanceSnapshot } from './PerformanceMonitor.js';
@@ -786,6 +787,7 @@ import {
     openDuplicateOffsetDialog,
     openTrackIconPickerPanel,
     openChordVoicingPanel,
+    openChordTriggerPanel,
     openGhostTrailsPanel,
     openDrumReplacePanel,
     openDrumPatternSplitterPanel,
@@ -1432,6 +1434,7 @@ async function initializeSnugOS() {
         if (typeof initTrackColorPanel === 'function') initTrackColorPanel(appServices); // Track Color Panel initialization
         if (typeof initTrackIconPicker === 'function') initTrackIconPicker(appServices); // Track Icon Picker initialization
         if (typeof initChordVoicingModes === 'function') initChordVoicingModes(appServices); // Chord Voicing Modes initialization
+        if (typeof initChordTriggerMode === 'function') initChordTriggerMode(appServices); // Chord Trigger Mode initialization
         if (typeof initRhythmRandomizer === 'function') initRhythmRandomizer(appServices); // Rhythm Randomizer initialization
         if (typeof initTrackFreezeQuickToggle === 'function') initTrackFreezeQuickToggle(appServices); // Track Freeze Quick Toggle - F key to freeze
         if (typeof initTrackLaneResize === 'function') initTrackLaneResize(appServices); // Track lane resize
