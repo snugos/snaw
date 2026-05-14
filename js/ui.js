@@ -32,6 +32,21 @@ export function initializeUIModule(appServicesFromMain) {
     }).catch(err => {
         console.error('[UI] Failed to load TrackHeadphoneMix module:', err);
     });
+
+    // Import and initialize the compressor visualizer module
+    import('./TrackCompressorVisualizer.js').then(module => {
+        if (module.initTrackCompressorVisualizer) {
+            module.initTrackCompressorVisualizer(appServicesFromMain);
+        }
+        trackCompressorVisualizerModule = {
+            openTrackCompressorVisualizer: module.openTrackCompressorVisualizer || (() => {}),
+            closeTrackCompressorVisualizer: module.closeTrackCompressorVisualizer || (() => {})
+        };
+        localAppServices.trackCompressorVisualizer = trackCompressorVisualizerModule;
+        console.log('[UI] Track Compressor Visualizer module initialized and wired to appServices');
+    }).catch(err => {
+        console.error('[UI] Failed to load TrackCompressorVisualizer module:', err);
+    });
 }
 
 /**
