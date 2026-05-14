@@ -4,16 +4,16 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. ~~**Lyrics Track Display**~~ ✅ - Display karaoke-style lyrics synced to playback timeline
-2. ~~**Drum Pattern Splitter**~~ ✅ - AI-powered separation of drum tracks into kick/snare/hihat components
-3. ~~**Clip Stretch with Handles**~~ ✅ - Drag clip edges to stretch/squash audio non-destructively
-4. ~~**Track Compressor Visualizer**~~ ✅ - Real-time gain reduction meter on track compressor
-5. **MIDI Polyphonic Expression** - Per-note pitch bend and modulation for expressive MIDI
-6. **Project Templates Gallery** - Browse and preview project templates with audio demos
-7. **Multi-Timeline Views** - Save and switch between different visible track arrangements
-8. **Audio Waveform Overview** - Mini overview of full project waveform above timeline
-9. **Track Mute Group Hierarchy** - Nested mute groups for complex routing
-10. **One-Shot Sample Trigger** - Map one-shot samples to keys with choke groups support
+1. **Auto Key Detection** - Analyze MIDI/audio to detect musical key and suggest scale for the project
+2. **Chord Trigger Mode** - Play a chord by pressing a single key, with configurable voicings
+3. **Sampler Loop Trim** - Visual waveform editor to set exact loop start/end points in sampler clips
+4. **Track Ghost Signals** - Show faint visual overlay of other tracks' waveforms for visual reference
+5. **Clip Probability** - Set random chance (0-100%) for each clip to play, for generative variations
+6. **Send Effects Reorder** - Drag to reorder send effect slots in the mixer
+7. **Velocity Scaling** - Shift all note velocities in a selection up/down by a percentage
+8. **Timeline Ruler Click** - Click on the timeline ruler/bar to jump playhead to that position
+9. **Export Stems with Effects** - Export individual track stems with their effect chains applied
+10. **Pattern Chaining** - Chain multiple patterns together to play in sequence automatically
 
 ## Workflow
 

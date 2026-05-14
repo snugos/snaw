@@ -81,3 +81,5 @@ export { openMIDIVelocityCurvePanel } from './MIDIVelocityCurve.js';
 export { initLoopRegionSnap, openLoopRegionSnapSettings, openLoopSnapPanel, isLoopRegionSnapEnabled, setLoopRegionSnapEnabled, toggleLoopSnap, getSnapConfig, snapLoopRegionStart, snapLoopRegionEnd, snapLoopRegion, getLoopRegionSnapSettings, setSnapThreshold } from './LoopRegionSnap.js';
 // Drum Pattern Splitter - AI-powered separation of drum tracks into kick/snare/hihat components
 export { initDrumPatternSplitter, openDrumPatternSplitterPanel } from './DrumPatternSplitter.js';
+// Auto Key Detection - Analyze MIDI/audio to detect musical key and suggest scale
+export { initAutoKeyDetection, detectKeyFromNotes, analyzeProjectKey, getDetectedKey, applyKeyToProject, openAutoKeyDetectionPanel, closeAutoKeyDetectionPanel } from './AutoKeyDetection.js';

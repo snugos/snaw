@@ -450,6 +450,17 @@ export function initializePrimaryEventListeners(appContext) {
                     if (window.openScaleQuantizePanel) window.openScaleQuantizePanel();
                 } catch(e) { console.error('[Menu] Scale Quantize error:', e); }
             },
+            menuAutoKeyDetection: () => {
+                console.log('[Menu] Auto Key Detection clicked');
+                try {
+                    if (window.openAutoKeyDetectionPanel) window.openAutoKeyDetectionPanel();
+                    else {
+                        import('./AutoKeyDetection.js').then(m => {
+                            if (m.openAutoKeyDetectionPanel) m.openAutoKeyDetectionPanel();
+                        });
+                    }
+                } catch(e) { console.error('[Menu] Auto Key Detection error:', e); }
+            },
             menuMicroTuning: () => {
                 console.log('[Menu] Micro Tuning clicked');
                 try {
