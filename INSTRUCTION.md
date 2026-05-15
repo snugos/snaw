@@ -18,7 +18,7 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## NEW Feature Queue (2026-05-14)
 
-1. **Metronome Visual Flash** - Flash indicator on beat during playback
+1. ~~**Metronome Visual Flash**~~ ✅ - Flash indicator on beat during playback
 2. **Multi-Select Delete** - Select multiple clips and delete together
 3. **Effect Bypass Hotkey** - Toggle effect bypass with keyboard shortcut
 4. **Loop Region Nudge** - Nudge loop region start/end with arrow keys
