@@ -3771,6 +3771,122 @@ export class Track {
     }
 
     /**
+     * Halve the length of the active sequence.
+     * @returns {void}
+     */
+    halveSequence() {
+        if (this.type === 'Audio') return;
+        const activeSeq = this.getActiveSequence();
+        if (!activeSeq) {
+            console.warn(`[Track ${this.id} halveSequence] No active sequence found.`);
+            return;
+        }
+
+        const oldLength = activeSeq.length;
+        const newLength = oldLength / 2;
+        if (newLength < Constants.STEPS_PER_BAR) {
+            if (this.appServices.showNotification) this.appServices.showNotification(`Cannot halve length, minimum is 1 bar.`, 3000);
+            return;
+        }
+        this._captureUndoState(`Halve Sequence Length for "${activeSeq.name}" on ${this.name}`);
+
+        activeSeq.data = activeSeq.data || [];
+        activeSeq.data.forEach(row => {
+            if (row && Array.isArray(row)) {
+                const newRow = new Array(newLength).fill(null);
+                for (let i = 0; i < newLength; i++) {
+                    newRow[i] = row[i] ? JSON.parse(JSON.stringify(row[i])) : null;
+                }
+                row.length = newLength;
+                for (let i = 0; i < newLength; i++) row[i] = newRow[i];
+            }
+        });
+        activeSeq.length = newLength;
+        this.recreateToneSequence(true);
+        if (this.appServices.updateTrackUI) this.appServices.updateTrackUI(this.id, 'sequencerContentChanged');
+        console.log(`[Track ${this.id}] Halved length of sequence "${activeSeq.name}" to ${newLength} steps.`);
+    }
+
+    /**
+     * Scale the velocity of notes in the active sequence by a factor.
+     * @param {number} factor - Multiplier for velocity (0.5-1.25)
+     * @returns {number} Number of notes scaled
+     */
+    scaleVelocities(factor = 1.0) {
+        if (this.type === 'Audio') return 0;
+        const activeSeq = this.getActiveSequence();
+        if (!activeSeq || !activeSeq.data) {
+            console.warn(`[Track ${this.id} scaleVelocities] No active sequence found.`);
+            return 0;
+        }
+
+        let scaledCount = 0;
+        const totalSteps = activeSeq.length;
+
+        activeSeq.data.forEach(row => {
+            if (!row) return;
+            for (let col = 0; col < totalSteps; col++) {
+                const stepData = row[col];
+                if (stepData && stepData.active && stepData.velocity !== undefined) {
+                    const newVelocity = Math.max(0.05, Math.min(1.0, stepData.velocity * factor));
+                    row[col].velocity = Math.round(newVelocity * 100) / 100;
+                    scaledCount++;
+                }
+            }
+        });
+
+        this._captureUndoState(`Scale velocities on ${activeSeq.name}`);
+        return scaledCount;
+    }
+
+    /**
+     * Set the length of the active sequence.
+     * @param {number} newLengthInSteps - New length in steps
+     * @param {boolean} skipUndoCapture - Skip undo capture (default false)
+     * @returns {void}
+     */
+    setSequenceLength(newLengthInSteps, skipUndoCapture = false) {
+        if (this.type === 'Audio') return;
+        const activeSeq = this.getActiveSequence();
+        if (!activeSeq) {
+            console.warn(`[Track ${this.id} setSequenceLength] No active sequence to set length for.`);
+            return;
+        }
+
+        const oldActualLength = activeSeq.length || 0;
+        let validatedNewLength = Math.max(Constants.STEPS_PER_BAR, parseInt(newLengthInSteps) || Constants.defaultStepsPerBar);
+        validatedNewLength = Math.ceil(validatedNewLength / Constants.STEPS_PER_BAR) * Constants.STEPS_PER_BAR;
+        validatedNewLength = Math.min(validatedNewLength, Constants.MAX_BARS * Constants.STEPS_PER_BAR);
+
+        if (oldActualLength === validatedNewLength && activeSeq.length === validatedNewLength) return; 
+
+        if (!skipUndoCapture) {
+            this._captureUndoState(`Set Seq Length for "${activeSeq.name}" on ${this.name} to ${validatedNewLength / Constants.STEPS_PER_BAR} bars`);
+        }
+        activeSeq.length = validatedNewLength;
+
+        let numRows;
+        if (this.type === 'Synth' || this.type === 'InstrumentSampler') numRows = Constants.synthPitches.length;
+        else if (this.type === 'Sampler') numRows = (this.slices && this.slices.length > 0) ? this.slices.length : Constants.numSlices;
+        else if (this.type === 'DrumSampler') numRows = Constants.numDrumSamplerPads;
+        else numRows = (activeSeq.data && activeSeq.data.length > 0) ? activeSeq.data.length : 1;
+
+        if (numRows <= 0) numRows = 1; 
+
+        const currentSequenceData = activeSeq.data || [];
+        activeSeq.data = Array(numRows).fill(null).map((_, rIndex) => {
+            const currentRow = currentSequenceData[rIndex] || [];
+            const newRow = Array(activeSeq.length).fill(null);
+            for (let c = 0; c < Math.min(currentRow.length, activeSeq.length); c++) newRow[c] = currentRow[c];
+            return newRow;
+        });
+
+        this.recreateToneSequence(true);
+        if (this.appServices.updateTrackUI) this.appServices.updateTrackUI(this.id, 'sequencerContentChanged');
+        console.log(`[Track ${this.id}] Set sequence "${activeSeq.name}" length to ${activeSeq.length} steps, ${numRows} rows.`);
+    }
+
+    /**
      * Copy a section of the sequence for later pasting.
      * @param {number} startCol - Start column (step)
      * @param {number} endCol - End column (step)

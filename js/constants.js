@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.11"; // Daily merge 2026-05-12 - All features verified, snaw is super-repo
+export const APP_VERSION = "0.3.12"; // Daily merge 2026-05-15 - Added halveSequence, scaleVelocities, setSequenceLength from app repo
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks
