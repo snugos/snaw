@@ -14,15 +14,15 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 8. ~~**AI Mixing Suggestions**~~ ✅ - Analyze mix and suggest corrections
 9. ~~**MIDI Polyphonic Expression**~~ ✅ - Per-note pitch bend/modulation
 10. ~~**Track Color Coding**~~ ✅ - Assign colors to tracks
+11. ~~**Audio Buffer Preview**~~ ✅ - Hover over audio clip to preview 2 seconds
 
 ## NEW Feature Queue (2026-05-14)
 
-1. **Audio Buffer Preview** ✅ - Hover over audio clip to preview 2 seconds
-2. **Metronome Visual Flash** - Flash indicator on beat during playback
-3. **Multi-Select Delete** - Select multiple clips and delete together
-4. **Effect Bypass Hotkey** - Toggle effect bypass with keyboard shortcut
-5. **Loop Region Nudge** - Nudge loop region start/end with arrow keys
-6. **Save Window Layout** - Save and restore custom window arrangements
+1. **Metronome Visual Flash** - Flash indicator on beat during playback
+2. **Multi-Select Delete** - Select multiple clips and delete together
+3. **Effect Bypass Hotkey** - Toggle effect bypass with keyboard shortcut
+4. **Loop Region Nudge** - Nudge loop region start/end with arrow keys
+5. **Save Window Layout** - Save and restore custom window arrangements
 
 ## When Queue Empty - Generate New Features
 
