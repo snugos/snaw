@@ -4,16 +4,16 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. ~~**Sampler Loop Trim**~~ ✅
-2. **Track Ghost Signals** - Show faint visual overlay of other tracks' waveforms for visual reference
-3. **Clip Probability** - Set random chance (0-100%) for each clip to play, for generative variations
-4. **Send Effects Reorder** - Drag to reorder send effect slots in the mixer
-5. **Velocity Scaling** - Shift all note velocities in a selection up/down by a percentage
-6. **Timeline Ruler Click** - Click on the timeline ruler/bar to jump playhead to that position
-7. **Export Stems with Effects** - Export individual track stems with their effect chains applied
-8. **Pattern Chaining** - Chain multiple patterns together to play in sequence automatically
-9. **AI Mixing Suggestions** - Analyze mix and suggest volume/pan/EQ corrections
-10. **MIDI Polyphonic Expression** - Per-note pitch bend and modulation for expressive MIDI
+1. ~~**Track Ghost Signals**~~ ✅
+2. **Clip Probability** - Set random chance (0-100%) for each clip to play, for generative variations
+3. **Send Effects Reorder** - Drag to reorder send effect slots in the mixer
+4. **Velocity Scaling** - Shift all note velocities in a selection up/down by a percentage
+5. **Timeline Ruler Click** - Click on the timeline ruler/bar to jump playhead to that position
+6. **Export Stems with Effects** - Export individual track stems with their effect chains applied
+7. **Pattern Chaining** - Chain multiple patterns together to play in sequence automatically
+8. **AI Mixing Suggestions** - Analyze mix and suggest volume/pan/EQ corrections
+9. **MIDI Polyphonic Expression** - Per-note pitch bend and modulation for expressive MIDI
+10. **Track Color Coding** - Assign colors to tracks for visual grouping
 
 ## Workflow
 
