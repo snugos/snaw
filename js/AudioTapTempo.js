@@ -10,10 +10,42 @@ let tapTimestamps = [];
 const MAX_TAPS = 16; // Use last N taps for averaging
 const TIMEOUT_MS = 3000; // Reset if no tap within this time
 
+// localStorage keys
+const STORAGE_KEY_MAX_TAPS = 'snaw_taptempo_max_taps';
+const STORAGE_KEY_TIMEOUT_MS = 'snaw_taptempo_timeout_ms';
+
 // Mutable settings (expose to allow user adjustment)
 let maxTapsSetting = MAX_TAPS;
 let timeoutMsSetting = TIMEOUT_MS;
 let tapTimeoutId = null;
+
+// --- Persistence ---
+function loadSettings() {
+    try {
+        const savedMaxTaps = localStorage.getItem(STORAGE_KEY_MAX_TAPS);
+        if (savedMaxTaps !== null) {
+            maxTapsSetting = Math.max(2, Math.min(32, parseInt(savedMaxTaps) || 16));
+        }
+        const savedTimeout = localStorage.getItem(STORAGE_KEY_TIMEOUT_MS);
+        if (savedTimeout !== null) {
+            timeoutMsSetting = Math.max(500, Math.min(10000, parseInt(savedTimeout) || 3000));
+        }
+        console.log(`[AudioTapTempo] Loaded settings: maxTaps=${maxTapsSetting}, timeoutMs=${timeoutMsSetting}`);
+    } catch (e) {
+        console.warn('[AudioTapTempo] Failed to load settings:', e);
+    }
+}
+
+function saveSettings() {
+    try {
+        localStorage.setItem(STORAGE_KEY_MAX_TAPS, String(maxTapsSetting));
+        localStorage.setItem(STORAGE_KEY_TIMEOUT_MS, String(timeoutMsSetting));
+    } catch (e) {
+        console.warn('[AudioTapTempo] Failed to save settings:', e);
+    }
+}
+
+loadSettings();
 
 /**
  * Get current max taps setting.
@@ -25,7 +57,10 @@ export function getMaxTapsSetting() { return maxTapsSetting; }
  * Set max taps setting.
  * @param {number} n
  */
-export function setMaxTapsSetting(n) { maxTapsSetting = Math.max(2, Math.min(32, parseInt(n) || 16)); }
+export function setMaxTapsSetting(n) {
+    maxTapsSetting = Math.max(2, Math.min(32, parseInt(n) || 16));
+    saveSettings();
+}
 
 /**
  * Get current timeout setting in ms.
@@ -37,7 +72,10 @@ export function getTimeoutMsSetting() { return timeoutMsSetting; }
  * Set timeout in ms.
  * @param {number} ms
  */
-export function setTimeoutMsSetting(ms) { timeoutMsSetting = Math.max(500, Math.min(10000, parseInt(ms) || 3000)); }
+export function setTimeoutMsSetting(ms) {
+    timeoutMsSetting = Math.max(500, Math.min(10000, parseInt(ms) || 3000));
+    saveSettings();
+}
 
 /**
  * Initialize the Audio Tap Tempo module.
