@@ -101,6 +101,8 @@ import { initRhythmRandomizer, openRhythmRandomizerPanel, getRhythmRandomizerSet
 import { initArrangementSnapGrid, openSnapGridPanel, getSnapValue, setSnapValue, snapTimeToGrid, toggleSnapEnabled, getSnapInfo } from './ArrangementSnapGrid.js';
 // Clip Ghost Trails
 import { initClipGhostTrails, openGhostTrailsPanel, getGhostTrails, addGhostTrail, removeGhostTrail, clearAllGhostTrails, createGhostFromClip, renderGhostTrailsOnCanvas, getGhostTrailCount, exportGhostTrailsData, importGhostTrailsData } from './ClipGhostTrails.js';
+// Track Ghost Signals - Show faint visual overlay of other tracks' waveforms for visual reference
+import { initTrackGhostSignals, openGhostSignalsPanel, setGhostSignalEnabled, setGhostSignalOpacity, toggleGhostSignal, renderGhostSignalsOnCanvas, getGhostSignalCount } from './TrackGhostSignals.js';
 // Time Signature Per Track - Allow different time signatures per track for polyrhythmic compositions
 import { initTimeSignaturePerTrack, openTimeSignaturePanel, getTrackTimeSignature, setTrackTimeSignature, clearTrackTimeSignature, getBarDurationSeconds, exportTimeSignatures, importTimeSignatures } from './TimeSignaturePerTrack.js';
 // Drum Replace - Analyze audio and replace drum hits with samples
@@ -791,6 +793,7 @@ import {
     openChordVoicingPanel,
     openChordTriggerPanel,
     openGhostTrailsPanel,
+    openGhostSignalsPanel,
     openDrumReplacePanel,
     openDrumPatternSplitterPanel,
     openClipOpacityPanel,
@@ -1457,6 +1460,7 @@ async function initializeSnugOS() {
         if (typeof initClipOpacity === 'function') initClipOpacity(appServices); // Clip Opacity initialization
         if (typeof initClipLoopPreview === 'function') initClipLoopPreview(appServices); // Clip Loop Preview - double-click to loop
         if (typeof initClipGhostTrails === 'function') initClipGhostTrails(appServices); // Clip Ghost Trails initialization
+        if (typeof initTrackGhostSignals === 'function') initTrackGhostSignals(appServices); // Track Ghost Signals initialization
         if (typeof initQuickRename === 'function') initQuickRename(appServices); // Quick Rename initialization
         if (typeof initBulkAssign === 'function') initBulkAssign(); // MIDI Bulk Assign initialization
         if (typeof initBeatDetective === 'function') initBeatDetective(appServices); // Beat Detective initialization
