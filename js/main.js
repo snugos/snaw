@@ -1471,6 +1471,7 @@ async function initializeSnugOS() {
         if (typeof initClipGainEnvelope === 'function') initClipGainEnvelope(appServices); // Clip Gain Envelope Core initialization
         if (typeof initClipGainEnvelopeEditor === 'function') initClipGainEnvelopeEditor(appServices); // Clip Gain Envelope Editor UI initialization
         if (typeof initClipGainEnvelopeQuick === 'function') initClipGainEnvelopeQuick(appServices); // Clip Gain Envelope Quick - double-click clip top to add points
+        if (typeof initAudioClipHoverPreview === 'function') initAudioClipHoverPreview(appServices); // Audio Clip Hover Preview - hover to preview audio
         if (typeof initLoopCountStateReferences === 'function') initLoopCountStateReferences(
             () => getLoopRegionEnabled(),
             () => getLoopRegionStart(),

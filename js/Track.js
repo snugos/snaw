@@ -4430,6 +4430,15 @@ export class Track {
 
                 if (playDurationInWindow <= 1e-3) continue; 
 
+                // Clip Probability - skip clip based on random chance
+                const clipProbability = clip.probability ?? 100;
+                if (clipProbability < 100) {
+                    if (Math.random() * 100 >= clipProbability) {
+                        console.log(`[Track ${this.id}] Timeline: Skipping clip "${clip.name}" (probability: ${clipProbability}%)`);
+                        continue;
+                    }
+                }
+
                 const offsetIntoSource = Math.max(0, effectivePlayStart - clipActualStart);
 
                 if (clip.type === 'audio') {
