@@ -73,6 +73,7 @@ import { initLyricsTrack, openLyricsTrackPanel, getLyrics, addLyric, importLyric
 import { openTempoRamperPanel } from './TempoRamperUI.js';
 import { initTempoRamperVisual, openTempoRamperVisual } from './TempoRamperVisual.js';
 import { initClipContextMenu } from './ClipContextMenu.js';
+import { initClipSelectionManager } from './ClipSelectionManager.js';
 import { initClipFadePresets, openClipFadePresetsPanel, closeClipFadePresetsPanel, addFadePreset, getFadePresets, getClipFadeMenuItems, getClipFadeMenuItemsSimple, applyFadePresetToClip } from './ClipFadePresets.js';
 import { initClipGroupManager } from './ClipGroupManager.js';
 import { initTrackContextMenu } from './TrackContextMenu.js';
