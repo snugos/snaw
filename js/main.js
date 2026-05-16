@@ -73,7 +73,7 @@ import { initLyricsTrack, openLyricsTrackPanel, getLyrics, addLyric, importLyric
 import { openTempoRamperPanel } from './TempoRamperUI.js';
 import { initTempoRamperVisual, openTempoRamperVisual } from './TempoRamperVisual.js';
 import { initClipContextMenu } from './ClipContextMenu.js';
-import { initClipFadePresets, openClipFadePresetsPanel } from './ClipFadePresets.js';
+import { initClipFadePresets, openClipFadePresetsPanel, closeClipFadePresetsPanel, addFadePreset, getFadePresets, getClipFadeMenuItems, getClipFadeMenuItemsSimple, applyFadePresetToClip } from './ClipFadePresets.js';
 import { initClipGroupManager } from './ClipGroupManager.js';
 import { initTrackContextMenu } from './TrackContextMenu.js';
 // Track Duplicate with Offset
@@ -112,7 +112,7 @@ import { initDrumPatternSplitter, openDrumPatternSplitterPanel } from './DrumPat
 // Clip Opacity
 import { initClipOpacity, openClipOpacityPanel } from './ClipOpacity.js';
 // Clip Fade Presets
-import { initializeClipFadePresets, getClipFadeMenuItems, getClipFadeMenuItemsSimple, applyFadePresetToClip } from './ClipFadePresets.js';
+import { initClipFadePresets, openClipFadePresetsPanel, closeClipFadePresetsPanel, addFadePreset, getFadePresets, getClipFadeMenuItems, getClipFadeMenuItemsSimple, applyFadePresetToClip } from './ClipFadePresets.js';
 
 // Export for external use (menu integration)
 export { getClipFadeMenuItems, getClipFadeMenuItemsSimple, applyFadePresetToClip };
