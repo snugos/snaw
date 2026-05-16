@@ -1427,4 +1427,382 @@ export async function loadSoundFromBrowserToTarget(soundData, targetTrackId, tar
     const isTargetSamplerType = ['Sampler', 'InstrumentSampler', 'DrumSampler'].includes(track.type);
 
     if (!isTargetSamplerType) {
-        if (localAppServices.showNotification) localAppServices.showNotification(`Cannot load sample from browser to a ${track.type} track. Target must: { 'logo_overlay'])
+        if (localAppServices.showNotification) localAppServices.showNotification(`Cannot load sample from browser to a ${track.type} track. Target must be a sampler type.`, 3000);
+        return;
+    }
+
+    const audioReady = await initAudioContextAndMasterMeter(true);
+    if (!audioReady) {
+        if (localAppServices.showNotification) localAppServices.showNotification("Audio system not ready. Please interact with the page.", 3000);
+        return;
+    }
+
+    if (localAppServices.showNotification) localAppServices.showNotification(`Loading "${fileName}" to ${track.name}...`, 2000);
+    console.log(`[Audio loadSoundFromBrowserToTarget] Attempting to load: ${fileName} from lib: ${libraryName} (Path: ${fullPath}) to Track ID: ${track.id} (${track.type}), Pad/Slice Index: ${targetPadOrSliceIndex}`);
+
+    try {
+        const loadedZips = localAppServices.getLoadedZipFiles ? localAppServices.getLoadedZipFiles() : {};
+        if (!loadedZips[libraryName] || loadedZips[libraryName] === "loading") {
+            throw new Error(`Library "${libraryName}" not loaded or is still loading.`);
+        }
+        const zipFile = loadedZips[libraryName];
+        const zipEntry = zipFile.file(fullPath);
+        if (!zipEntry) {
+            throw new Error(`File "${fullPath}" not found in library "${libraryName}". Check path case and existence.`);
+        }
+
+        const fileBlobFromZip = await zipEntry.async("blob");
+        const inferredMimeType = getMimeTypeFromFilename(fileName);
+        const finalMimeType = fileBlobFromZip.type && fileBlobFromZip.type !== "application/octet-stream" ? fileBlobFromZip.type : inferredMimeType;
+        const blobToLoad = new File([fileBlobFromZip], fileName, { type: finalMimeType });
+
+        if (track.type === 'DrumSampler') {
+            let actualPadIndex = targetPadOrSliceIndex;
+            if (typeof actualPadIndex !== 'number' || isNaN(actualPadIndex) || actualPadIndex < 0 || actualPadIndex >= Constants.numDrumSamplerPads) {
+                actualPadIndex = track.drumSamplerPads.findIndex(p => !p.dbKey && !p.originalFileName);
+                if (actualPadIndex === -1) actualPadIndex = track.selectedDrumPadForEdit;
+                if (typeof actualPadIndex !== 'number' || actualPadIndex < 0) actualPadIndex = 0;
+            }
+            await commonLoadSampleLogic(blobToLoad, fileName, track, 'DrumSampler', actualPadIndex);
+        } else {
+            await commonLoadSampleLogic(blobToLoad, fileName, track, track.type, null);
+        }
+    } catch (error) {
+        console.error(`[Audio loadSoundFromBrowserToTarget] Error loading sound "${fileName}" from browser:`, error);
+        if (localAppServices.showNotification) {
+            localAppServices.showNotification(`Error loading "${fileName.substring(0,30)}": ${error.message}`, 4000);
+        }
+        if (localAppServices.updateTrackUI) localAppServices.updateTrackUI(track.id, 'sampleLoadError', targetPadOrSliceIndex);
+    }
+}
+
+// ============================================================
+// PUNCH RECORDING
+// ============================================================
+
+let punchRegion = { in: 0, out: 16, enabled: false };
+let recordingScheduledId = null;
+let recordingScheduledTrackId = null;
+
+export function getPunchRegion() {
+    return { ...punchRegion };
+}
+
+export function setPunchRegion(inBars, outBars) {
+    if (inBars < 0 || outBars <= inBars || outBars > Constants.MAX_BARS) {
+        console.warn('[Punch] Invalid region:', inBars, outBars);
+        return false;
+    }
+    punchRegion.in = inBars;
+    punchRegion.out = outBars;
+    console.log(`[Punch] Set to ${punchRegion.in} - ${punchRegion.out} bars`);
+    return true;
+}
+
+export function setPunchRegionEnabled(enabled) {
+    punchRegion.enabled = !!enabled;
+    console.log(`[Punch] ${punchRegion.enabled ? 'Enabled' : 'Disabled'}`);
+    return punchRegion.enabled;
+}
+
+export function isPunchRegionEnabled() {
+    return punchRegion.enabled;
+}
+
+export function getPunchInBars() { return punchRegion.in; }
+export function getPunchOutBars() { return punchRegion.out; }
+
+export function isPositionInPunchRegion(positionString) {
+    if (!punchRegion.enabled) return false;
+    const posParts = positionString.split(':').map(Number);
+    if (posParts.length < 3 || posParts.some(isNaN)) return false;
+    const [bars, beats, sixteenths] = posParts;
+    const totalSixteenths = bars * 16 + beats * 4 + sixteenths;
+    const punchInSixteenths = punchRegion.in * 16;
+    const punchOutSixteenths = punchRegion.out * 16;
+    return totalSixteenths >= punchInSixteenths && totalSixteenths < punchOutSixteenths;
+}
+
+export function scheduleRecordingForPunch(trackId, onPunchOutTriggered) {
+    if (recordingScheduledId !== null) {
+        try { Tone.Transport.clear(recordingScheduledId); } catch(e) {}
+        recordingScheduledId = null;
+    }
+    recordingScheduledTrackId = trackId;
+
+    const punchOutPosition = `+0:${punchRegion.out * 16}:0`;
+    recordingScheduledId = Tone.Transport.schedule((time) => {
+        console.log(`[Punch Recording] Punch-out point reached at ${punchOutPosition}. Stopping recorder.`);
+        if (recorder && recorder.state === 'started') {
+            recorder.stop().then(() => {
+                console.log('[Punch Recording] Recorder stopped at punch-out.');
+                if (onPunchOutTriggered) onPunchOutTriggered();
+            }).catch(e => console.error('[Punch Recording] Error stopping at punch-out:', e));
+        }
+    }, punchOutPosition);
+    console.log(`[Punch Recording] Scheduled punch-out at ${punchOutPosition}, ID:`, recordingScheduledId);
+}
+
+export function cancelScheduledRecording() {
+    if (recordingScheduledId !== null) {
+        try { Tone.Transport.clear(recordingScheduledId); } catch(e) {}
+        recordingScheduledId = null;
+    }
+    recordingScheduledTrackId = null;
+    console.log('[Punch Recording] Cancelled scheduled recording.');
+}
+
+export function getRecordingScheduledTrackId() {
+    return recordingScheduledTrackId;
+}
+
+export function cleanupRecordingScheduling() {
+    cancelScheduledRecording();
+}
+
+// ============================================================
+// CONTEXT SUSPENSION MONITORING & RECOVERY
+// ============================================================
+
+let contextSuspendedCount = 0;
+let resumeAttemptScheduled = false;
+
+export function startContextSuspensionMonitoring(intervalMs = 3000) {
+    if (resumeAttemptScheduled) return;
+    resumeAttemptScheduled = true;
+
+    const checkInterval = setInterval(() => {
+        if (!Tone.context) {
+            resumeAttemptScheduled = false;
+            clearInterval(checkInterval);
+            return;
+        }
+
+        const currentState = Tone.context.state;
+        if (currentState === 'suspended') {
+            contextSuspendedCount++;
+            console.warn(`[Audio ContextMonitor] Context suspended (count: ${contextSuspendedCount}). Attempting auto-resume...`);
+            Tone.context.resume().then(() => {
+                if (Tone.context.state === 'running') {
+                    if (masterEffectsBusInputNode?.disposed || masterGainNodeActual?.disposed || masterMeterNode?.disposed) {
+                        setupMasterBus();
+                    }
+                    if (contextSuspendedCount > 0 && localAppServices.showNotification) {
+                        localAppServices.showNotification('Audio context resumed.', 2000);
+                    }
+                } else {
+                    console.warn('[Audio ContextMonitor] Resume attempted but context still not running. State:', Tone.context.state);
+                    if (contextSuspendedCount >= 3 && localAppServices.showNotification) {
+                        localAppServices.showNotification('Audio suspended. Tap/click to reactivate.', 4000);
+                    }
+                }
+            }).catch(err => {
+                console.error('[Audio ContextMonitor] Error during context resume:', err.message);
+            });
+        } else if (currentState === 'running') {
+            if (contextSuspendedCount > 0) {
+                contextSuspendedCount = 0;
+            }
+        }
+    }, intervalMs);
+
+    console.log('[Audio ContextMonitor] Started context suspension monitoring, interval:', intervalMs, 'ms');
+}
+
+export function stopContextSuspensionMonitoring() {
+    resumeAttemptScheduled = false;
+    contextSuspendedCount = 0;
+    console.log('[Audio ContextMonitor] Stopped context suspension monitoring.');
+}
+
+export function getContextSuspensionCount() {
+    return contextSuspendedCount;
+}
+
+export function getContextState() {
+    return Tone.context ? Tone.context.state : 'unavailable';
+}
+
+// ============================================================
+// TRANSPORT TIME DISPLAY FUNCTIONS
+// ============================================================
+
+export function getTransportPosition() {
+    return Tone.Transport.position;
+}
+
+export function getTransportSeconds() {
+    return Tone.Transport.seconds;
+}
+
+export function getTransportBpm() {
+    return Tone.Transport.bpm.value;
+}
+
+export function getTransportState() {
+    return Tone.Transport.state;
+}
+
+// ============================================================
+// EXPORT MIXDOWN TO WAV
+// ============================================================
+
+export async function exportMixdownToWav(durationSeconds) {
+    console.log('[Audio exportMixdownToWav] Starting export, duration:', durationSeconds, 's');
+    const maxDuration = 600;
+    const safeDuration = Math.min(Math.max(durationSeconds, 1), maxDuration);
+
+    const wasPlaying = Tone.Transport.state === 'started';
+    if (wasPlaying) {
+        Tone.Transport.pause();
+    }
+
+    try {
+        const recorder = new Tone.Recorder();
+        const masterGain = getActualMasterGainNode();
+
+        if (!masterGain || masterGain.disposed) {
+            throw new Error('Master output not available.');
+        }
+
+        masterGain.connect(recorder);
+
+        Tone.Transport.position = 0;
+        Tone.Transport.loop = false;
+
+        const tracks = localAppServices.getTracks ? localAppServices.getTracks() : [];
+        tracks.forEach(t => {
+            if (t && typeof t.stopPlayback === 'function') t.stopPlayback();
+        });
+        await new Promise(r => setTimeout(r, 100));
+
+        for (const track of tracks) {
+            if (track && typeof track.schedulePlayback === 'function') {
+                await track.schedulePlayback(0, safeDuration);
+            }
+        }
+
+        await recorder.start();
+        Tone.Transport.start();
+
+        await new Promise(resolve => setTimeout(resolve, safeDuration * 1000 + 500));
+
+        const recording = await recorder.stop();
+
+        Tone.Transport.stop();
+        Tone.Transport.cancel(0);
+        tracks.forEach(t => {
+            if (t && typeof t.stopPlayback === 'function') t.stopPlayback();
+        });
+
+        try { masterGain.disconnect(recorder); } catch (e) {}
+        recorder.dispose();
+
+        if (!recording || recording.size < 1000) {
+            throw new Error('No audio recorded. Add some notes or audio first.');
+        }
+
+        console.log('[Audio exportMixdownToWav] Export complete.');
+        return recording;
+    } catch (err) {
+        console.error('[Audio exportMixdownToWav] Error during export:', err);
+        throw err;
+    } finally {
+        if (wasPlaying) {
+            Tone.Transport.start();
+        }
+    }
+}
+
+// ============================================================
+// SIDECHAIN COMPRESSION
+// ============================================================
+
+let sidechainBus = null;
+let micForSidechain = null;
+
+export function getSidechainBusInput() {
+    if (!sidechainBus || sidechainBus.disposed) {
+        if (sidechainBus && !sidechainBus.disposed) {
+            try { sidechainBus.dispose(); } catch(e) {}
+        }
+        sidechainBus = new Tone.Gain(1);
+    }
+    return sidechainBus;
+}
+
+export async function enableSidechainFromMic(compressorNode) {
+    if (!compressorNode || compressorNode.disposed) {
+        console.warn('[Audio enableSidechainFromMic] Invalid compressor node provided.');
+        return false;
+    }
+    if (micForSidechain && micForSidechain.state === 'started') {
+        const bus = getSidechainBusInput();
+        try { micForSidechain.connect(bus); } catch(e) {}
+        try { bus.connect(compressorNode); } catch(e) {}
+        return true;
+    }
+    try {
+        await Tone.start();
+        micForSidechain = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const micStream = new Tone.UserMedia();
+        await micStream.open();
+        micForSidechain = micStream;
+        const bus = getSidechainBusInput();
+        try { micStream.connect(bus); } catch(e) {}
+        try { bus.connect(compressorNode); } catch(e) {}
+        if (localAppServices.showNotification) {
+            localAppServices.showNotification('Sidechain: Mic connected to compressor.', 2000);
+        }
+        return true;
+    } catch (e) {
+        console.error('[Audio enableSidechainFromMic] Failed to open mic for sidechain:', e);
+        if (localAppServices.showNotification) {
+            localAppServices.showNotification('Sidechain: Could not access microphone.', 3000);
+        }
+        return false;
+    }
+}
+
+export function disableSidechainFromMic() {
+    if (micForSidechain) {
+        try { micForSidechain.disconnect(); } catch(e) {}
+        try { micForSidechain.close(); } catch(e) {}
+        micForSidechain = null;
+    }
+    if (sidechainBus) {
+        try { sidechainBus.disconnect(); } catch(e) {}
+    }
+}
+
+export async function enableSidechainFromTrackIn(trackId, compressorNode) {
+    if (!compressorNode || compressorNode.disposed) {
+        console.warn('[Audio enableSidechainFromTrackIn] Invalid compressor node provided.');
+        return false;
+    }
+    const track = localAppServices.getTrackById ? localAppServices.getTrackById(trackId) : null;
+    if (!track) {
+        console.warn('[Audio enableSidechainFromTrackIn] Track not found:', trackId);
+        return false;
+    }
+    if (!track.inputChannel || track.inputChannel.disposed) {
+        console.warn('[Audio enableSidechainFromTrackIn] Track inputChannel not available.');
+        return false;
+    }
+    const bus = getSidechainBusInput();
+    try { track.inputChannel.connect(bus); } catch(e) {}
+    try { bus.connect(compressorNode); } catch(e) {}
+    return true;
+}
+
+export function disableSidechainBus() {
+    disableSidechainFromMic();
+    if (sidechainBus) {
+        try { sidechainBus.dispose(); } catch(e) {}
+        sidechainBus = null;
+    }
+}
+
+export function isMicOpenForSidechain() {
+    return micForSidechain && micForSidechain.state === 'started';
+}
