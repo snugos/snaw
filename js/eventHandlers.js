@@ -1314,6 +1314,14 @@ export function attachGlobalControlEvents(elements) {
                 localAppServices.captureStateForUndo(`Set Tempo to ${Tone.Transport.bpm.value.toFixed(1)}`);
             }
         });
+        // Double-click to open fine-tune panel
+        tempoGlobalInput.addEventListener('dblclick', () => {
+            if (localAppServices.openTempoFineTunePanel) {
+                localAppServices.openTempoFineTunePanel();
+            } else {
+                showNotification('Tempo: ' + Tone.Transport.bpm.value.toFixed(1) + ' BPM', 2000);
+            }
+        });
     } else { console.warn("[EventHandlers] tempoGlobalInput not found."); }
 
     // Tempo Nudge Buttons
