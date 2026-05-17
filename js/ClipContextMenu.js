@@ -328,8 +328,44 @@ function handleClipKeyboardShortcut(e) {
         }
     }
     
-    // Delete/Backspace to delete selected clip
+    // Delete/Backspace to delete selected clips (supports multi-select)
     if (e.key === 'Delete' || e.key === 'Backspace') {
+        // Use ClipSelectionManager if available for multi-select
+        if (localAppServices.getSelectedClipIds) {
+            const selectedClipIds = localAppServices.getSelectedClipIds();
+            if (selectedClipIds && selectedClipIds.size > 0) {
+                e.preventDefault();
+                if (localAppServices.captureStateForUndo) {
+                    localAppServices.captureStateForUndo(`Delete ${selectedClipIds.size} clip(s)`);
+                }
+                let deletedCount = 0;
+                selectedClipIds.forEach(clipId => {
+                    // Find clip in all tracks
+                    const tracks = localAppServices.getTracks?.() || [];
+                    for (const track of tracks) {
+                        if (track.timelineClips) {
+                            const idx = track.timelineClips.findIndex(c => c.id === clipId);
+                            if (idx > -1) {
+                                track.timelineClips.splice(idx, 1);
+                                deletedCount++;
+                                break;
+                            }
+                        }
+                    }
+                });
+                if (localAppServices.clearClipSelections) {
+                    localAppServices.clearClipSelections();
+                }
+                if (localAppServices.renderTimeline) {
+                    localAppServices.renderTimeline();
+                }
+                if (localAppServices.showNotification) {
+                    localAppServices.showNotification(`Deleted ${deletedCount} clip(s)`, 1500);
+                }
+                return;
+            }
+        }
+        // Fallback: single clip selection via DOM
         const selectedClip = document.querySelector('.timeline-clip.selected');
         if (selectedClip && selectedClip.dataset.clipId) {
             e.preventDefault();
