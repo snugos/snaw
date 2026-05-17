@@ -4,47 +4,16 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. ~~**Track Ghost Signals**~~ ✅
-2. ~~**Clip Probability**~~ ✅ - Set random chance (0-100%) for each clip to play
-3. ~~**Send Effects Reorder**~~ ✅ - Drag to reorder send effect slots in mixer
-4. ~~**Velocity Scaling**~~ ✅ - Shift note velocities in selection up/down
-5. ~~**Timeline Ruler Click**~~ ✅ - Click ruler to jump playhead
-6. ~~**Export Stems with Effects**~~ ✅ - Export stems with effect chains
-7. ~~**Pattern Chaining**~~ ✅ - Chain patterns for sequence playback
-8. ~~**AI Mixing Suggestions**~~ ✅ - Analyze mix and suggest corrections
-9. ~~**MIDI Polyphonic Expression**~~ ✅ - Per-note pitch bend/modulation
-10. ~~**Track Color Coding**~~ ✅ - Assign colors to tracks
-11. ~~**Audio Buffer Preview**~~ ✅ - Hover over audio clip to preview 2 seconds
-
-## NEW Feature Queue (2026-05-14)
-
-1. ~~**Metronome Visual Flash**~~ ✅ - Flash indicator on beat during playback
-2. ~~**Multi-Select Delete**~~ ✅ - Select multiple clips and delete together
-3. ~~**Effect Bypass Hotkey**~~ ✅ - Toggle effect bypass with keyboard shortcut
-4. **Loop Region Nudge** - Nudge loop region start/end with arrow keys
-5. **Save Window Layout** - Save and restore custom window arrangements
-
-## When Queue Empty - Generate New Features
-
-Based on SnugOS being a browser-based DAW with:
-- Tone.js audio engine
-- Multi-track timeline
-- Effects rack
-- Sequencer mode
-- MIDI support
-
-**10 NEW Feature Ideas:**
-
-1. **Clip Reverse Audio** - One-click reverse audio clips in timeline
-2. **Step Sequencer Grid Size** - Adjust step count per pattern (8/16/32/64)
-3. **Track Solo Mode Toggle** - Toggle between solo-in-place and solo-exclusive modes
-4. **Metronome Visual Flash** - Flash indicator on beat during playback
-5. **Audio Buffer Preview** - Hover over audio clip to preview 2 seconds
-6. **Multi-Select Delete** - Select multiple clips and delete together
-7. **Effect Bypass Hotkey** - Toggle effect bypass with keyboard shortcut
-8. **Loop Region Nudge** - Nudge loop region start/end with arrow keys
-9. **Track Duplicate** - Duplicate track with all settings and clips
-10. **Save Window Layout** - Save and restore custom window arrangements
+1. **Tempo Sync Grid** - Lock grid lines to tempo changes in real-time as BPM changes
+2. **Clip Reverse** - One-click reverse audio clips for reverse effects
+3. **Track Grouping** - Visually group tracks and control their mute/solo together
+4. **MIDI Learn for Knobs** - Map MIDI CC to effect parameters visually
+5. **One-Shot Drum Loops** - Import and auto-slice drum loops to individual hits
+6. **Velocity Curve Editor** - Draw custom velocity curves for MIDI input
+7. **Pattern Chaining** - Chain multiple patterns together in sequence
+8. **Audio Freeze** - Freeze track to audio to save CPU for heavy processing
+9. **Quick Copy Effects** - Copy/paste effect chains between tracks
+10. **Export Stems Selection** - Export only selected tracks as stems
 
 ## Workflow
 
@@ -73,6 +42,26 @@ After successfully implementing a feature:
 - Remove it from the queue
 - Renumber the remaining features
 - Update this instruction with new queue
+
+## When Queue is Empty
+
+Run this brainstorming process:
+
+```
+Based on SnugOS being a browser-based DAW with:
+- Tone.js audio engine
+- Multi-track timeline
+- Effects rack
+- Sequencer mode
+- MIDI support
+
+Generate 10 NEW feature ideas that are:
+1. Achievable in a single session
+2. Complement existing features
+3. Enhance creative workflow
+
+Output as numbered list and update this instruction.
+```
 
 ## Rules
 
