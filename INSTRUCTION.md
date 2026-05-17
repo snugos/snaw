@@ -4,7 +4,7 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Tempo Sync Grid** - Lock grid lines to tempo changes in real-time as BPM changes
+1. ~~**Tempo Sync Grid**~~ ✅ - Lock grid lines to tempo changes in real-time as BPM changes
 2. **Clip Reverse** - One-click reverse audio clips for reverse effects
 3. **Track Grouping** - Visually group tracks and control their mute/solo together
 4. **MIDI Learn for Knobs** - Map MIDI CC to effect parameters visually
