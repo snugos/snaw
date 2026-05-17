@@ -462,6 +462,7 @@ const KEYBOARD_SHORTCUTS = [
         { keys: 'M', description: 'Toggle mute' },
         { keys: 'S', description: 'Toggle solo' },
         { keys: 'R', description: 'Toggle record arm' },
+        { keys: 'E', description: 'Toggle effect bypass (hover effect in rack)' },
         { keys: 'Delete', description: 'Delete selected clips/notes' },
         { keys: 'Ctrl+D', description: 'Duplicate selected' },
     ]},

@@ -51,6 +51,8 @@ import {
 let localAppServices = {};
 let transportKeepAliveBufferSource = null;
 let silentKeepAliveBuffer = null;
+let _hoveredEffectId = null; // Tracks which effect is currently hovered in effects rack
+let _hoveredEffectTrack = null; // The track that owns the hovered effect
 
 // --- MIDI CC Learn / Mapping System ---
 let _midiCCMappings = {}; // { targetId: { cc, channel, min, max } }
@@ -137,6 +139,11 @@ function handleCCLearnMessage(cc, channel) {
     console.log(`[MIDI CC Learn] Mapped CC ${cc} (ch ${channel+1}) to target: ${_midiCCLearnActive.targetId}`);
     _midiCCLearnActive = null;
 }
+
+export function getHoveredEffectId() { return _hoveredEffectId; }
+export function getHoveredEffectTrack() { return _hoveredEffectTrack; }
+export function setHoveredEffect(effectId, track) { _hoveredEffectId = effectId; _hoveredEffectTrack = track; }
+export function clearHoveredEffect() { _hoveredEffectId = null; _hoveredEffectTrack = null; }
 
 export function initializeEventHandlersModule(appServicesFromMain) {
     localAppServices = appServicesFromMain || {}; 
@@ -1879,6 +1886,27 @@ document.addEventListener('keydown', (event) => {
                 localAppServices.openSmartQuantizePanel();
             }
             return;
+        }
+        // E key - Toggle bypass on hovered/focused effect in effects rack
+        if (key === 'e' && !(event.ctrlKey || event.metaKey)) {
+            if (localAppServices.getHoveredEffectId && localAppServices.toggleTrackEffectBypass && localAppServices.getTrackWithHoveredEffect) {
+                const effectId = localAppServices.getHoveredEffectId();
+                if (effectId) {
+                    const track = localAppServices.getTrackWithHoveredEffect(effectId);
+                    if (track) {
+                        track.toggleEffectBypass(effectId);
+                        return;
+                    }
+                }
+            }
+            // Fallback: try master effects rack
+            if (localAppServices.toggleMasterEffectBypass && localAppServices.getHoveredEffectId) {
+                const effectId = localAppServices.getHoveredEffectId();
+                if (effectId) {
+                    localAppServices.toggleMasterEffectBypass(effectId);
+                    return;
+                }
+            }
         }
         // Delete key handler - delete selected clips or notes
         if (key === 'delete' || key === 'backspace') {
