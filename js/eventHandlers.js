@@ -751,6 +751,18 @@ export function initializePrimaryEventListeners(appContext) {
             menuAdaptiveGrid: () => {
                 console.log('[Menu] Adaptive Grid clicked');
             },
+            menuTempoSyncGrid: () => {
+                console.log("[Menu] Tempo Sync Grid clicked");
+                try {
+                    if (window.TempoSyncGrid && window.TempoSyncGrid.initTempoSyncGrid) {
+                        window.TempoSyncGrid.initTempoSyncGrid(localAppServices);
+                    } else {
+                        import("./TempoSyncGrid.js").then(m => {
+                            if (m.initTempoSyncGrid) m.initTempoSyncGrid(localAppServices);
+                        });
+                    }
+                } catch(e) { console.error("[Menu] Tempo Sync Grid error:", e); }
+            },
             menuTrackFreeze: () => {
                 console.log('[Menu] Track Freeze clicked');
                 try {
