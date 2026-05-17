@@ -4824,6 +4824,11 @@ export function handleTapTempo() {
     // Clamp to reasonable range
     const clampedBpm = Math.max(30, Math.min(300, bpm));
     
+    // Record in tap history (if TapHistoryUI is available)
+    if (window.TapHistoryUI && typeof window.TapHistoryUI.recordTap === 'function') {
+        window.TapHistoryUI.recordTap(clampedBpm);
+    }
+    
     return clampedBpm;
 }
 
