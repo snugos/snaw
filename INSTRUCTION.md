@@ -4,16 +4,16 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. ~~**Tempo Sync Grid**~~ ✅ - Lock grid lines to tempo changes in real-time as BPM changes
-2. **Clip Reverse** - One-click reverse audio clips for reverse effects
-3. **Track Grouping** - Visually group tracks and control their mute/solo together
-4. **MIDI Learn for Knobs** - Map MIDI CC to effect parameters visually
-5. **One-Shot Drum Loops** - Import and auto-slice drum loops to individual hits
-6. **Velocity Curve Editor** - Draw custom velocity curves for MIDI input
-7. **Pattern Chaining** - Chain multiple patterns together in sequence
-8. **Audio Freeze** - Freeze track to audio to save CPU for heavy processing
-9. **Quick Copy Effects** - Copy/paste effect chains between tracks
-10. **Export Stems Selection** - Export only selected tracks as stems
+1. **Clip Gain Envelope** - Draw precise gain automation curves directly on audio clips
+2. **MIDI Note Repeat** - Hold a key and have it auto-repeat at a configurable rate for drum programming
+3. **Solo Mode Audio Sources** - Option to solo only the audio sources that are actively playing
+4. **Arrangement Markers Panel** - Visual list/editor for all timeline markers with quick jump
+5. **Track Color Gradient** - Allow horizontal gradient colors per track header for visual hierarchy
+6. **Adaptive BPM Detection** - Analyze incoming audio and suggest optimal BPM in real-time
+7. **Clip Noise Gate** - Simple gate that silences quiet sections of audio clips automatically
+8. **Transport Bar Mini Mode** - Collapsed transport bar for small screens or thumbnail view
+9. **Project Templates Quick Save** - One-click save/load of project templates via quick menu
+10. **BPM Nudge Controls** - Fine +/- adjustment buttons for BPM in transport bar
 
 ## Workflow
 
