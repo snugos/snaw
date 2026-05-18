@@ -181,7 +181,54 @@ export const projectAutoNaming = {
     generateTrackName,
     formatTimestamp,
     generateUniqueClipName,
-    autoNameUnnamedClips
+    autoNameUnnamedClips,
+    autoNameUnnamedTracks,
+    initProjectAutoNaming
 };
+
+let _appServices = null;
+
+/**
+ * Initialize Project Auto-Naming module
+ * @param {Object} appServices - Application services object
+ */
+export function initProjectAutoNaming(appServices) {
+    _appServices = appServices || null;
+    console.log('[ProjectAutoNaming] Module initialized');
+}
+
+/**
+ * Update all unnamed tracks in a project with smart names
+ * @param {Array} tracks - Array of track objects
+ * @returns {number} Number of tracks renamed
+ */
+export function autoNameUnnamedTracks(tracks) {
+    if (!tracks || !Array.isArray(tracks)) return 0;
+    let renamed = 0;
+    
+    const typeCounts = {};
+    
+    tracks.forEach(track => {
+        const isDefaultName = !track.name || 
+            track.name.startsWith('Track') ||
+            track.name === 'Untitled' ||
+            track.name === 'New Track';
+        
+        if (isDefaultName) {
+            const trackType = track.type || 'Audio';
+            typeCounts[trackType] = (typeCounts[trackType] || 0) + 1;
+            
+            track.name = generateTrackName({
+                type: trackType,
+                index: typeCounts[trackType],
+                hasInput: !!track.input,
+                isArmed: !!track.armed
+            });
+            renamed++;
+        }
+    });
+    
+    return renamed;
+}
 
 console.log('[ProjectAutoNaming] Module loaded');
