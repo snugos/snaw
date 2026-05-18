@@ -335,3 +335,7 @@ export function closeSoloChainPanel() {
         existingPanel.remove();
     }
 }
+
+// Expose for global access
+window.openSoloChainPanel = openSoloChainPanel;
+window.closeSoloChainPanel = closeSoloChainPanel;
