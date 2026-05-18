@@ -4,14 +4,14 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Solo Mode Audio Sources** - Option to solo only the audio sources that are actively playing
-2. **Arrangement Markers Panel** - Visual list/editor for all timeline markers with quick jump
-3. **Track Color Gradient** - Allow horizontal gradient colors per track header for visual hierarchy
-4. **Adaptive BPM Detection** - Analyze incoming audio and suggest optimal BPM in real-time
-5. **Clip Noise Gate** - Simple gate that silences quiet sections of audio clips automatically
-6. **Transport Bar Mini Mode** - Collapsed transport bar for small screens or thumbnail view
-7. **Project Templates Quick Save** - One-click save/load of project templates via quick menu
-8. **BPM Nudge Controls** - Fine +/- adjustment buttons for BPM in transport bar
+1. **MIDI Output Device Select** - Dropdown in transport bar to select which MIDI device to send notes to
+2. **Track Duplicate Hotkey** - Press Ctrl+D to duplicate selected track with all clips
+3. **Click Track Volume** - Separate volume control for the metronome click sound
+4. **Snap Grid Visual Overlay** - Show grid lines on timeline even when snap is off
+5. **Loop Region Markers Drag** - Drag the loop region handles directly on the timeline ruler
+6. **Track Reorder Drag** - Drag tracks in the track list to reorder them
+7. **Export Selection** - Export only selected clips to WAV instead of full project
+8. **Keyboard Scale Lock** - Lock scale so computer keyboard plays only notes in the current scale
 
 ## Workflow
 
