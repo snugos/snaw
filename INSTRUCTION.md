@@ -4,16 +4,14 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Clip Gain Envelope** - Draw precise gain automation curves directly on audio clips
-2. **MIDI Note Repeat** - Hold a key and have it auto-repeat at a configurable rate for drum programming
-3. **Solo Mode Audio Sources** - Option to solo only the audio sources that are actively playing
-4. **Arrangement Markers Panel** - Visual list/editor for all timeline markers with quick jump
-5. **Track Color Gradient** - Allow horizontal gradient colors per track header for visual hierarchy
-6. **Adaptive BPM Detection** - Analyze incoming audio and suggest optimal BPM in real-time
-7. **Clip Noise Gate** - Simple gate that silences quiet sections of audio clips automatically
-8. **Transport Bar Mini Mode** - Collapsed transport bar for small screens or thumbnail view
-9. **Project Templates Quick Save** - One-click save/load of project templates via quick menu
-10. **BPM Nudge Controls** - Fine +/- adjustment buttons for BPM in transport bar
+1. **Solo Mode Audio Sources** - Option to solo only the audio sources that are actively playing
+2. **Arrangement Markers Panel** - Visual list/editor for all timeline markers with quick jump
+3. **Track Color Gradient** - Allow horizontal gradient colors per track header for visual hierarchy
+4. **Adaptive BPM Detection** - Analyze incoming audio and suggest optimal BPM in real-time
+5. **Clip Noise Gate** - Simple gate that silences quiet sections of audio clips automatically
+6. **Transport Bar Mini Mode** - Collapsed transport bar for small screens or thumbnail view
+7. **Project Templates Quick Save** - One-click save/load of project templates via quick menu
+8. **BPM Nudge Controls** - Fine +/- adjustment buttons for BPM in transport bar
 
 ## Workflow
 
