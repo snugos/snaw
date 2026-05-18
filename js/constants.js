@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.13"; // Daily merge 2026-05-16 - Added punch recording, context suspension monitoring, transport utilities, exportMixdownToWav, and sidechain bus functions from app repo. Fixed truncated loadSoundFromBrowserToTarget function.
+export const APP_VERSION = "0.3.14"; // Daily merge 2026-05-18 - Verified all features present: tap tempo, auto-save, crash recovery, sidechain routing, MIDI import/export, automation, sequence tools. No bugs found. All undo captures verified in Track.js setters.
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks
