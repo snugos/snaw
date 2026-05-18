@@ -567,6 +567,14 @@ export function initializePrimaryEventListeners(appContext) {
                     }
                 } catch(e) { console.error('[Menu] Clip Stretch Markers error:', e); }
             },
+            menuTimelineMarkers: () => {
+                console.log('[Menu] Timeline Markers clicked');
+                try {
+                    if (window.openTimelineMarkersPanel) {
+                        window.openTimelineMarkersPanel();
+                    }
+                } catch(e) { console.error('[Menu] Timeline Markers error:', e); }
+            },
             menuAutoBeatSync: () => {
                 console.log('[Menu] Auto-Beat Sync clicked');
                 try {

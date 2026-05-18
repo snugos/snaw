@@ -191,3 +191,6 @@ function refreshMarkersPanel() {
         };
     });
 }
+
+// Expose for global access
+window.openTimelineMarkersPanel = openTimelineMarkersPanel;
