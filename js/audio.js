@@ -4,7 +4,7 @@ import * as Constants from './constants.js';
 // import { showNotification } from './utils.js'; // Not directly imported, accessed via appServices
 import { createEffectInstance } from './effectsRegistry.js';
 import { storeAudio, getAudio } from './db.js';
-import { getRecordingStartTimeState, getAdaptiveMetronomeEnabled, getAdaptiveTimingOffset } from './state.js';
+import { getRecordingStartTimeState, getAdaptiveMetronomeEnabled, getAdaptiveTimingOffset, getMetronomeVolume as getMetronomeVolumeState, setMetronomeVolume as setMetronomeVolumeState } from './state.js';
 
 
 let masterEffectsBusInputNode = null;
