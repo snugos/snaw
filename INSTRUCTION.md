@@ -4,12 +4,16 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Click Track Volume** - Separate volume control for the metronome click sound
-2. **Snap Grid Visual Overlay** - Show grid lines on timeline even when snap is off
-3. **Loop Region Markers Drag** - Drag the loop region handles directly on the timeline ruler
-4. **Track Reorder Drag** - Drag tracks in the track list to reorder them
-5. **Export Selection** - Export only selected clips to WAV instead of full project
-6. **Keyboard Scale Lock** - Lock scale so computer keyboard plays only notes in the current scale
+1. **BPM Nudge Buttons** - +/- 0.1 BPM buttons in transport for fine tempo adjustment
+2. **Clip Opacity Slider** - Adjust opacity of audio/MIDI clips in timeline for visual layering
+3. **Track Solo Mode Toggle** - Keyboard shortcut to cycle solo modes (track solo, mute others)
+4. **Metronome Visual Flash** - Add a visual beat indicator that flashes on the downbeat
+5. **Selection Copy/Paste** - Copy selected clips and paste them at playhead position
+6. **Track Rename Inline** - Double-click track name to edit it inline
+7. **Loop Region Audio Export** - Export just the loop region to audio file
+8. **Effect Bypass Hotkey** - Number keys 1-9 to bypass corresponding effect slot
+9. **Timeline Zoom Slider** - Horizontal slider for smooth timeline zoom control
+10. **Track Lane Reorder Drag** ✅ - Drag tracks to reorder lanes with visual drop indicator (completed)
 
 ## Workflow
 
