@@ -4,14 +4,12 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **MIDI Output Device Select** - Dropdown in transport bar to select which MIDI device to send notes to
-2. **Track Duplicate Hotkey** - Press Ctrl+D to duplicate selected track with all clips
-3. **Click Track Volume** - Separate volume control for the metronome click sound
-4. **Snap Grid Visual Overlay** - Show grid lines on timeline even when snap is off
-5. **Loop Region Markers Drag** - Drag the loop region handles directly on the timeline ruler
-6. **Track Reorder Drag** - Drag tracks in the track list to reorder them
-7. **Export Selection** - Export only selected clips to WAV instead of full project
-8. **Keyboard Scale Lock** - Lock scale so computer keyboard plays only notes in the current scale
+1. **Click Track Volume** - Separate volume control for the metronome click sound
+2. **Snap Grid Visual Overlay** - Show grid lines on timeline even when snap is off
+3. **Loop Region Markers Drag** - Drag the loop region handles directly on the timeline ruler
+4. **Track Reorder Drag** - Drag tracks in the track list to reorder them
+5. **Export Selection** - Export only selected clips to WAV instead of full project
+6. **Keyboard Scale Lock** - Lock scale so computer keyboard plays only notes in the current scale
 
 ## Workflow
 
