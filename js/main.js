@@ -1485,6 +1485,7 @@ async function initializeSnugOS() {
         ); // Connect loop count to state functions
         if (typeof initAutoScrollSync === 'function') initAutoScrollSync(); // Auto-Scroll Sync initialization
         if (typeof initTrackLaneReorder === 'function') initTrackLaneReorder(appServices); // Track Lane Reorder initialization
+        if (typeof enableTrackLaneReorder === 'function') enableTrackLaneReorder(); // Enable track lane drag-and-drop
         if (typeof initChordProgressionAssistant === 'function') initChordProgressionAssistant(appServices); // Chord Progression Assistant initialization
         if (typeof initLoopbackAudioRouting === 'function') initLoopbackAudioRouting(appServices); // Loopback Audio Routing initialization
         if (typeof initTempoSyncHelper === 'function') initTempoSyncHelper(appServices); // Tempo Sync Helper initialization
