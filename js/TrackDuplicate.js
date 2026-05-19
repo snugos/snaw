@@ -30,7 +30,12 @@
     window.duplicateTrack = duplicateTrack;
     window.duplicateCurrentTrack = () => {
         const selected = getSelectedTrackId();
-        if (selected) duplicateTrack(selected);
+        if (selected) {
+            const newTrack = duplicateTrack(selected);
+            if (newTrack && window.showNotification) {
+                window.showNotification(`Track duplicated: ${newTrack.name}`, 1500);
+            }
+        }
     };
 
     console.log('[TrackDuplicate] Loaded - Use duplicateTrack(trackId) or duplicateCurrentTrack()');

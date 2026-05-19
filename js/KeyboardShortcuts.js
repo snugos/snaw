@@ -65,6 +65,7 @@ const KeyboardShortcuts = (function() {
     register('m', ['ctrl'], () => { if (typeof toggleMetronome === 'function') toggleMetronome(); }, 'Toggle Metronome', 'Transport');
     register('l', ['ctrl'], () => { if (typeof toggleLoop === 'function') toggleLoop(); }, 'Toggle Loop', 'Transport');
     register('n', ['ctrl'], () => { if (typeof addNewTrack === 'function') addNewTrack(); }, 'New Track', 'Track');
+    register('d', ['ctrl'], () => { if (typeof duplicateCurrentTrack === 'function') duplicateCurrentTrack(); }, 'Duplicate Track', 'Track');
     register('delete', [], () => { if (typeof deleteSelected === 'function') deleteSelected(); }, 'Delete Selected', 'Edit');
     register('a', ['ctrl'], () => { if (typeof selectAll === 'function') selectAll(); }, 'Select All', 'Edit');
     register('c', ['ctrl'], () => { if (typeof copySelection === 'function') copySelection(); }, 'Copy', 'Edit');
