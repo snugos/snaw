@@ -228,6 +228,7 @@ import {
     
     // Event Handler Passthroughs
     selectMIDIInput: eventSelectMIDIInput, 
+    selectMidiOutput: selectMidiOutput,
     handleTrackMute: eventHandleTrackMute,
     handleTrackSolo: eventHandleTrackSolo,
     handleTrackSoloExclusive: eventHandleTrackSoloExclusive,
@@ -1364,6 +1365,7 @@ async function initializeSnugOS() {
             stopBtnGlobal: document.getElementById('stopBtnGlobal'),
             tempoGlobalInput: document.getElementById('tempoGlobalInput'),
             midiInputSelectGlobal: document.getElementById('midiInputSelectGlobal'),
+            midiOutputSelectGlobal: document.getElementById('midiOutputSelectGlobal'),
             masterMeterContainerGlobal: document.getElementById('masterMeterContainerGlobal'),
             masterMeterBarGlobal: document.getElementById('masterMeterBarGlobal'),
             midiIndicatorGlobal: document.getElementById('midiIndicatorGlobal'),

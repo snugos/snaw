@@ -851,7 +851,7 @@ export function attachGlobalControlEvents(elements) {
         console.error('[EventHandlers attachGlobalControlEvents] Elements object is null or undefined.');
         return;
     }
-    const { playBtnGlobal, recordBtnGlobal, stopBtnGlobal, tempoGlobalInput, tempoNudgeDown, tempoNudgeUp, tempoFineNudgeDown, tempoFineNudgeUp, midiInputSelectGlobal, playbackModeToggleBtnGlobal, midiLearnBtnGlobal, tapBtnGlobal, tapHistoryBtn, tapVisualBtn, tapSettingsBtn, loopToggleBtnGlobal, loopStartInput, loopEndInput, metronomeToggleBtnGlobal, metronomeVolumeSlider, metronomeVolumeDisplay, metronomeVolumeControl, performanceMonitorBtn, autoSaveToggleBtn, beatLfoToggleBtnGlobal, scaleSelectGlobal, keySelectGlobal, scaleNotesDisplay, stretchQualityBtn } = elements;
+    const { playBtnGlobal, recordBtnGlobal, stopBtnGlobal, tempoGlobalInput, tempoNudgeDown, tempoNudgeUp, tempoFineNudgeDown, tempoFineNudgeUp, midiInputSelectGlobal, midiOutputSelectGlobal, playbackModeToggleBtnGlobal, midiLearnBtnGlobal, tapBtnGlobal, tapHistoryBtn, tapVisualBtn, tapSettingsBtn, loopToggleBtnGlobal, loopStartInput, loopEndInput, metronomeToggleBtnGlobal, metronomeVolumeSlider, metronomeVolumeDisplay, metronomeVolumeControl, performanceMonitorBtn, autoSaveToggleBtn, beatLfoToggleBtnGlobal, scaleSelectGlobal, keySelectGlobal, scaleNotesDisplay, stretchQualityBtn } = elements;
     // Helper function to toggle play/pause icons
     function setPlayButtonState(isPlaying) {
         if (!playBtnGlobal) return;
@@ -1413,6 +1413,23 @@ export function attachGlobalControlEvents(elements) {
         });
     } else { console.warn("[EventHandlers] midiInputSelectGlobal not found."); }
 
+    // MIDI Output dropdown
+    if (midiOutputSelectGlobal) {
+        midiOutputSelectGlobal.addEventListener('change', (e) => {
+            const deviceId = e.target.value;
+            if (localAppServices.selectMidiOutput) {
+                localAppServices.selectMidiOutput(deviceId);
+            } else if (localAppServices.getMidiOutputDevices && localAppServices.getActiveMidiOutputState) {
+                // Fallback: find device by id and use state functions directly
+                const devices = localAppServices.getMidiOutputDevices();
+                const device = devices.find(d => d.id === deviceId);
+                if (localAppServices.showNotification) {
+                    localAppServices.showNotification(device ? `MIDI Output: ${device.name} selected.` : 'MIDI Output cleared.', 2000);
+                }
+            }
+        });
+    } else { console.warn("[EventHandlers] midiOutputSelectGlobal not found."); }
+
     if (playbackModeToggleBtnGlobal) {
         playbackModeToggleBtnGlobal.addEventListener('click', () => {
             try {
@@ -1573,6 +1590,26 @@ function onMIDISuccess(midiAccess) {
     const activeMIDIId = getActiveMIDIInputState()?.id; 
     if (activeMIDIId) {
         selectElement.value = activeMIDIId;
+    }
+
+    // Populate MIDI output devices dropdown
+    if (localAppServices.uiElementsCache?.midiOutputSelectGlobal) {
+        const outputSelect = localAppServices.uiElementsCache.midiOutputSelectGlobal;
+        outputSelect.innerHTML = '<option value="">No MIDI Output</option>';
+        const outputs = midiAccess.outputs.values();
+        for (let output = outputs.next(); output && !output.done; output = outputs.next()) {
+            if (output.value) {
+                const option = document.createElement('option');
+                option.value = output.value.id;
+                option.textContent = output.value.name || `Unknown MIDI Device ${output.value.id.slice(-4)}`;
+                outputSelect.appendChild(option);
+            }
+        }
+        // Restore selected output
+        const activeOutput = localAppServices.getActiveMidiOutputState?.();
+        if (activeOutput?.id) {
+            outputSelect.value = activeOutput.id;
+        }
     }
 
     midiAccess.onstatechange = (event) => {
