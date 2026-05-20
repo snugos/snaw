@@ -115,6 +115,7 @@ function showTrackContextMenu(x, y, trackId) {
         <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="duplicateOffset" data-track-id="${trackId}">
             <span class="w-4">📅</span>
             <span>Duplicate with Offset</span>
+            <span class="ml-auto text-xs text-gray-500">Ctrl+Shift+D</span>
         </button>
         <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="rename" data-track-id="${trackId}">
             <span class="w-4">✏️</span>

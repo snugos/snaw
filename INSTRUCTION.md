@@ -4,7 +4,7 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Track Compressor Limiter** - Add a combined compressor/limiter effect with threshold, ratio, attack, release controls
+1. ~~Track Compressor Limiter~~ ✅
 2. **MIDILearn Indicator** - Highlight which parameters are currently MIDI-mapped with a pulsing indicator
 3. **Audio Phase Flip** - Instantly flip the phase of an audio clip by 180 degrees
 4. **Clip Start Offset** - Shift the start point of a clip within its timeline slot without moving the clip
