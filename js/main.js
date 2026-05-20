@@ -691,6 +691,21 @@ import {
         else console.warn("Custom background input element not found in cache.");
     },
     removeCustomDesktopBackground: async () => {
+        const hasStoredBg = localStorage.getItem('snugosDesktopBackground') || localStorage.getItem('snugosDesktopBgType');
+        if (!hasStoredBg) {
+            const db = await bgDb.init();
+            const stored = await new Promise((resolve) => {
+                const tx = db.transaction('backgrounds', 'readonly');
+                const store = tx.objectStore('backgrounds');
+                const req = store.get('desktopVideo');
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => resolve(null);
+            });
+            if (!stored) {
+                if (typeof showSafeNotification === 'function') showSafeNotification("No custom background to remove.", 2000);
+                return;
+            }
+        }
         try {
             localStorage.removeItem('snugosDesktopBackground');
             localStorage.removeItem('snugosDesktopBgType');
