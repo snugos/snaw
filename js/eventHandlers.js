@@ -2077,6 +2077,17 @@ document.addEventListener('keydown', (event) => {
             if (localAppServices.toggleRecordArm) localAppServices.toggleRecordArm(-1);
             return;
         }
+        // L key - Toggle loop region
+        if (key === 'l' && !(event.ctrlKey || event.metaKey)) {
+            const currentEnabled = typeof getLoopRegionEnabled === 'function' ? getLoopRegionEnabled() : false;
+            if (typeof setLoopRegionEnabled === 'function') {
+                setLoopRegionEnabled(!currentEnabled);
+                if (localAppServices.showNotification) {
+                    localAppServices.showNotification(`Loop region ${!currentEnabled ? 'enabled' : 'disabled'}`, 1500);
+                }
+            }
+            return;
+        }
         // ? key - Open keyboard shortcuts panel
         if (event.key === '?' || event.key === '/') {
             if (event.shiftKey) {
