@@ -4,15 +4,16 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **BPM Nudge Buttons** - +/- 0.1 BPM buttons in transport for fine tempo adjustment
-2. **Clip Opacity Slider** - Adjust opacity of audio/MIDI clips in timeline for visual layering
-3. **Track Solo Mode Toggle** - Keyboard shortcut to cycle solo modes (track solo, mute others)
-4. **Metronome Visual Flash** ✅ - Add a visual beat indicator that flashes on the downbeat (completed)
-5. **Selection Copy/Paste** - Copy selected clips and paste them at playhead position
-6. **Track Rename Inline** - Double-click track name to edit it inline
-7. **Loop Region Audio Export** - Export just the loop region to audio file
-8. **Effect Bypass Hotkey** - Number keys 1-9 to bypass corresponding effect slot
-9. **Timeline Zoom Slider** - Horizontal slider for smooth timeline zoom control
+1. **Track Compressor Limiter** - Add a combined compressor/limiter effect with threshold, ratio, attack, release controls
+2. **MIDILearn Indicator** - Highlight which parameters are currently MIDI-mapped with a pulsing indicator
+3. **Audio Phase Flip** - Instantly flip the phase of an audio clip by 180 degrees
+4. **Clip Start Offset** - Shift the start point of a clip within its timeline slot without moving the clip
+5. **Track Noise Gate** - Add a noise gate with threshold, attack, hold, release, and range controls
+6. **Grid Snap Intensity** - Slider to control how strongly clips snap to grid (0% = free placement, 100% = full snap)
+7. **MIDI Program Change** - Send MIDI program change messages to change patch on external synths
+8. **Click Track Export** - Bounce just the metronome/click to a separate audio file
+9. **Tempo Tap Visual** - Show a visual representation of tap tempo pattern (shows if you're on beat)
+10. **Track Color Palette** - Quick-access color swatches to change track colors
 
 ## Workflow
 

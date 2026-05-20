@@ -8,6 +8,7 @@ import { StereoImagerEnhancement } from './StereoImagerEnhancement.js';
 import { MultibandSaturator } from './MultibandSaturator.js';
 import { AutoPanner } from './AutoPanner.js';
 import { AudioLimiter } from './AudioLimiter.js';
+import { TrackCompressorLimiter } from './TrackCompressorLimiter.js';
 import { ClipGlitchEffect } from './ClipGlitchEffect.js';
 import { ClipSilenceDetector } from './ClipSilenceDetector.js';
 import { FrequencyShifter } from './FrequencyShifter.js';
@@ -1394,6 +1395,19 @@ export const AVAILABLE_EFFECTS = {
             { key: 'knee', label: 'Knee', type: 'knob', min: 0, max: 12, step: 0.1, defaultValue: 0, decimals: 1, displaySuffix: 'dB', isSignal: false },
         ]
     },
+    TrackCompressorLimiter: {
+        displayName: 'Compressor-Limiter',
+        toneClass: 'TrackCompressorLimiter',
+        params: [
+            { key: 'threshold', label: 'Threshold', type: 'knob', min: -60, max: 0, step: 1, defaultValue: -18, decimals: 0, displaySuffix: 'dB', isSignal: true },
+            { key: 'ratio', label: 'Ratio', type: 'knob', min: 1, max: 20, step: 0.5, defaultValue: 4, decimals: 1, displaySuffix: ':1', isSignal: false },
+            { key: 'attack', label: 'Attack', type: 'knob', min: 1, max: 100, step: 1, defaultValue: 3, decimals: 0, displaySuffix: 'ms', isSignal: false },
+            { key: 'release', label: 'Release', type: 'knob', min: 10, max: 1000, step: 10, defaultValue: 250, decimals: 0, displaySuffix: 'ms', isSignal: false },
+            { key: 'knee', label: 'Knee', type: 'knob', min: 0, max: 12, step: 0.5, defaultValue: 6, decimals: 1, displaySuffix: 'dB', isSignal: false },
+            { key: 'makeup', label: 'Makeup', type: 'knob', min: 0.5, max: 4, step: 0.1, defaultValue: 1, decimals: 1, displaySuffix: 'x', isSignal: false },
+            { key: 'ceiling', label: 'Ceiling', type: 'knob', min: -6, max: 0, step: 0.1, defaultValue: -0.3, decimals: 1, displaySuffix: 'dB', isSignal: false },
+        ]
+    },
     Mono: {
         displayName: 'Mono',
         toneClass: 'Mono',
@@ -1975,4 +1989,5 @@ if (typeof Tone !== 'undefined') {
     Tone.TextureSynth = TextureSynth;
     Tone.DriftOscillator = DriftOscillator;
     Tone.SpectralGate = SpectralGate;
+    Tone.TrackCompressorLimiter = TrackCompressorLimiter;
 }
