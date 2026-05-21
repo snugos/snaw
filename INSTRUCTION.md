@@ -4,16 +4,15 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. ~~Track Compressor Limiter~~ ✅
-2. **MIDILearn Indicator** - Highlight which parameters are currently MIDI-mapped with a pulsing indicator
-3. **Audio Phase Flip** - Instantly flip the phase of an audio clip by 180 degrees
-4. **Clip Start Offset** - Shift the start point of a clip within its timeline slot without moving the clip
-5. **Track Noise Gate** - Add a noise gate with threshold, attack, hold, release, and range controls
-6. **Grid Snap Intensity** - Slider to control how strongly clips snap to grid (0% = free placement, 100% = full snap)
-7. **MIDI Program Change** - Send MIDI program change messages to change patch on external synths
-8. **Click Track Export** - Bounce just the metronome/click to a separate audio file
-9. **Tempo Tap Visual** - Show a visual representation of tap tempo pattern (shows if you're on beat)
-10. **Track Color Palette** - Quick-access color swatches to change track colors
+1. ~~MIDILearn Indicator~~ ✅
+2. **Audio Phase Flip** - Instantly flip the phase of an audio clip by 180 degrees
+3. **Clip Start Offset** - Shift the start point of a clip within its timeline slot without moving the clip
+4. **Track Noise Gate** - Add a noise gate with threshold, attack, hold, release, and range controls
+5. **Grid Snap Intensity** - Slider to control how strongly clips snap to grid (0% = free placement, 100% = full snap)
+6. **MIDI Program Change** - Send MIDI program change messages to change patch on external synths
+7. **Click Track Export** - Bounce just the metronome/click to a separate audio file
+8. **Tempo Tap Visual** - Show a visual representation of tap tempo pattern (shows if you're on beat)
+9. **Track Color Palette** - Quick-access color swatches to change track colors
 
 ## Workflow
 
