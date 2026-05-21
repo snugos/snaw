@@ -5,7 +5,7 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 ## Current Feature Queue
 
 1. ~~MIDILearn Indicator~~ ✅
-2. **Audio Phase Flip** - Instantly flip the phase of an audio clip by 180 degrees
+2. ~~Audio Phase Flip~~ ✅
 3. **Clip Start Offset** - Shift the start point of a clip within its timeline slot without moving the clip
 4. **Track Noise Gate** - Add a noise gate with threshold, attack, hold, release, and range controls
 5. **Grid Snap Intensity** - Slider to control how strongly clips snap to grid (0% = free placement, 100% = full snap)
