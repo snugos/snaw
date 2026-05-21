@@ -7,7 +7,7 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 1. ~~MIDILearn Indicator~~ ✅
 2. ~~Audio Phase Flip~~ ✅
 3. ~~Clip Start Offset~~ ✅
-4. **Track Noise Gate** - Add a noise gate with threshold, attack, hold, release, and range controls
+4. ~~Track Noise Gate~~ ✅
 5. **Grid Snap Intensity** - Slider to control how strongly clips snap to grid (0% = free placement, 100% = full snap)
 6. **MIDI Program Change** - Send MIDI program change messages to change patch on external synths
 7. **Click Track Export** - Bounce just the metronome/click to a separate audio file
