@@ -110,6 +110,7 @@ function showClipContextMenu(x, y, clipId, trackId) {
     if (!clip) return;
     
     const isReversed = clip.reversed || false;
+    const isPhaseInverted = clip.phaseInverted || false;
     
     // Build menu HTML - get selected clips count for grouping
     const selectedClips = getCurrentClipSelections();
@@ -123,6 +124,10 @@ function showClipContextMenu(x, y, clipId, trackId) {
             <span class="w-4">🔄</span>
             <span>${isReversed ? 'Unreverse' : 'Reverse'}</span>
             <span class="ml-auto text-xs text-gray-500">R</span>
+        </button>
+        <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="flipPhase" data-clip-id="${clipId}" data-track-id="${trackId}">
+            <span class="w-4">∅</span>
+            <span>${isPhaseInverted ? 'Uninvert Phase' : 'Flip Phase'}</span>
         </button>
         <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="duplicate" data-clip-id="${clipId}" data-track-id="${trackId}">
             <span class="w-4">📋</span>
@@ -289,6 +294,15 @@ function handleClipAction(action, clipId, trackId) {
             }
             break;
             
+        case 'flipPhase':
+            if (track.toggleAudioClipPhaseInvert) {
+                track.toggleAudioClipPhaseInvert(clipId);
+                const inverted = track.getAudioClipPhaseInvert ? track.getAudioClipPhaseInvert(clipId) : false;
+                localAppServices.showNotification?.(`Phase ${inverted ? 'inverted' : 'reset'}`, 1500);
+            }
+            if (localAppServices.renderTimeline) localAppServices.renderTimeline();
+            break;
+            
         default:
             // Check for external actions (e.g., freezeTrack)
             if (action.startsWith('external_')) {
@@ -325,6 +339,26 @@ function handleClipKeyboardShortcut(e) {
             reverseAudioClip(trackId, clipId);
             localAppServices.showNotification?.('Clip reversed', 1500);
             if (localAppServices.renderTimeline) localAppServices.renderTimeline();
+        }
+    }
+    
+    // F key for phase flip (when a clip is selected)
+    if (e.key === 'f' || e.key === 'F') {
+        const selectedClip = document.querySelector('.timeline-clip.selected');
+        if (selectedClip && selectedClip.dataset.clipId) {
+            e.preventDefault();
+            const clipId = selectedClip.dataset.clipId;
+            const trackId = parseInt(selectedClip.dataset.trackId);
+            const track = localAppServices.getTrackById?.(trackId);
+            
+            if (track && typeof track.toggleAudioClipPhaseInvert === 'function') {
+                if (localAppServices.captureStateForUndo) {
+                    localAppServices.captureStateForUndo('Flip clip phase');
+                }
+                const inverted = track.toggleAudioClipPhaseInvert(clipId);
+                localAppServices.showNotification?.(`Phase ${inverted ? 'inverted' : 'reset'}`, 1500);
+                if (localAppServices.renderTimeline) localAppServices.renderTimeline();
+            }
         }
     }
     
