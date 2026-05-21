@@ -1,7 +1,12 @@
 // js/AudioPhaseFlip.js - Flip the phase of audio clips by 180 degrees
 // This module provides functionality to invert the waveform of any audio clip
 
+import { getTracksState, getTrackByIdState } from './state.js';
+
+let localAppServices = {};
+
 export function initAudioPhaseFlip(appServices) {
+    localAppServices = appServices || {};
     console.log("[AudioPhaseFlip] Initialized");
 }
 
@@ -27,10 +32,21 @@ export function flipAudioBufferPhase(audioBuffer) {
     }
 }
 
+// Find a clip by ID across all tracks' timelineClips
+function findClipById(clipId) {
+    const tracks = getTracksState();
+    for (const track of tracks) {
+        if (track.timelineClips) {
+            const clip = track.timelineClips.find(c => c.id === clipId);
+            if (clip) return { clip, track };
+        }
+    }
+    return { clip: null, track: null };
+}
+
 // Toggle phase flip state on a clip
-export function toggleClipPhaseFlip(clipId, audioContext) {
-    const state = getState();
-    const clip = state.clips?.find(c => c.id === clipId);
+export function toggleClipPhaseFlip(clipId) {
+    const { clip, track } = findClipById(clipId);
     if (!clip) {
         console.warn("[AudioPhaseFlip] Clip not found:", clipId);
         return false;
@@ -41,19 +57,27 @@ export function toggleClipPhaseFlip(clipId, audioContext) {
     
     // If we have an audio buffer and it should be flipped, apply the inversion
     if (clip.audioBuffer && clip.phaseInverted) {
-        return flipAudioBufferPhase(clip.audioBuffer);
+        const result = flipAudioBufferPhase(clip.audioBuffer);
+        if (result && localAppServices.showNotification) {
+            localAppServices.showNotification(`Phase inverted for clip`, 1500);
+        }
+        return result;
     }
     
+    if (localAppServices.showNotification) {
+        localAppServices.showNotification(`Phase reset to normal for clip`, 1500);
+    }
     return true;
 }
 
 export function isClipPhaseInverted(clipId) {
-    const state = getState();
-    const clip = state.clips?.find(c => c.id === clipId);
+    const { clip } = findClipById(clipId);
     return clip?.phaseInverted || false;
 }
 
 export function openAudioPhaseFlipPanel(clipId) {
     const inverted = isClipPhaseInverted(clipId);
-    showNotification?.(`Clip phase is currently ${inverted ? 'INVERTED' : 'normal'}`, 2000);
+    if (localAppServices.showNotification) {
+        localAppServices.showNotification(`Clip phase is currently ${inverted ? 'INVERTED' : 'normal'}`, 2000);
+    }
 }
