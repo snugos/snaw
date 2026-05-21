@@ -140,6 +140,8 @@ import { initAudioClipStretchMarkers, openStretchMarkersPanel, drawStretchMarker
 import { initClipStretchWithHandles } from './ClipStretchWithHandles.js';
 // Audio Scrubbing Integration - Audible scrub through audio by dragging on the timeline
 import { initAudioScrubbing, openScrubSettingsPanel, setScrubOnDragEnabled, isAudioScrubActive } from './AudioScrubbingIntegration.js';
+// Audio Phase Flip - Invert the phase of audio clips by 180 degrees
+import { initAudioPhaseFlip, flipAudioBufferPhase, toggleClipPhaseFlip, isClipPhaseInverted, openAudioPhaseFlipPanel } from './AudioPhaseFlip.js';
 // Sidechain Volume Envelope - Draw ducking curves on clips for sidechain effects
 import { initSidechainVolumeEnvelope, openSidechainVolumeEnvelopePanel, getSidechainEnvelope } from './SidechainVolumeEnvelope.js';
 // Sidechain Visualizer - Visual indicator for sidechain routing and ducking status
@@ -212,6 +214,8 @@ import {
     // MIDI Learn
     getMidiLearnMode, setMidiLearnMode, getMidiLearnTarget, setMidiLearnTarget,
     getMidiMappings, addMidiMapping, removeMidiMapping, getMidiMappingForCC, clearAllMidiMappings,
+    // MIDI Learn Mapped Indicator
+    highlightMappedParameters, clearMappedIndicators, toggleMappedIndicators, areMappedIndicatorsVisible,
     // MIDI CC Visualizer
     getCcVisualizerValues, updateCcVisualizerValue,
     // Loop Region
@@ -1048,6 +1052,12 @@ import {
     // Clip Envelope Shaper
     showClipEnvelopeShaper,
     
+    // Audio Phase Flip
+    flipAudioBufferPhase,
+    toggleClipPhaseFlip,
+    isClipPhaseInverted,
+    openAudioPhaseFlipPanel,
+    
     // Sidechain Volume Envelope
     openSidechainVolumeEnvelopePanel,
     getSidechainEnvelope,
@@ -1516,6 +1526,7 @@ async function initializeSnugOS() {
         if (typeof initAudioClipStretchMarkers === 'function') initAudioClipStretchMarkers(appServices); // Audio Clip Stretch Markers initialization
         if (typeof initClipStretchWithHandles === 'function') initClipStretchWithHandles(appServices); // Clip Stretch With Handles initialization
         if (typeof initAudioScrubbing === 'function') initAudioScrubbing(appServices); // Audio Scrubbing initialization - audible scrub on timeline drag
+        if (typeof initAudioPhaseFlip === 'function') initAudioPhaseFlip(appServices); // Audio Phase Flip - invert clip phase by 180 degrees
         
         if (typeof initializePrimaryEventListeners === 'function') {
              initializePrimaryEventListeners(appServices);

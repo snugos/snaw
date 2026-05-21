@@ -1467,8 +1467,13 @@ export function attachGlobalControlEvents(elements) {
                 } else {
                     midiLearnBtnGlobal.classList.remove('playing');
                     midiLearnBtnGlobal.textContent = 'Learn';
-                    if (localAppServices.showNotification) {
-                        localAppServices.showNotification('MIDI Learn cancelled', 2000);
+                    // Highlight currently mapped parameters with pulsing indicators
+                    if (localAppServices.toggleMappedIndicators) {
+                        localAppServices.toggleMappedIndicators();
+                        const shown = localAppServices.areMappedIndicatorsVisible?.() ?? false;
+                        if (localAppServices.showNotification) {
+                            localAppServices.showNotification(shown ? 'MIDI mapped indicators shown' : 'MIDI mapped indicators hidden', 1500);
+                        }
                     }
                 }
             } catch (error) {
