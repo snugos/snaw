@@ -15,6 +15,33 @@ let midiLearnTargetInfo = null;
 // Elements that support MIDI learn
 const learnableElements = new Map();
 
+// Pulsing animation state for mapped indicators
+let mappedIndicatorsInterval = null;
+const MAPPED_INDICATOR_KEY = 'midi-mapped-indicator';
+
+// CSS for pulsing indicator
+const pulsingCSS = `
+@keyframes midiMappedPulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+}
+.midi-mapped-indicator {
+    position: relative;
+}
+.midi-mapped-indicator::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 8px;
+    height: 8px;
+    background: #4ade80;
+    border-radius: 50%;
+    animation: midiMappedPulse 1.5s ease-in-out infinite;
+    box-shadow: 0 0 6px #4ade80;
+}
+`;
+
 // Initialize MIDI Learn Mode
 export function initMIDILearnMode() {
     // Find all learnable elements (sliders, knobs, range inputs)
@@ -477,4 +504,65 @@ export function getMidiLearnTarget() {
 
 export function refreshLearnableElements() {
     scanForLearnableElements();
+}
+
+// Highlight which parameters are currently MIDI-mapped with a pulsing indicator
+export function highlightMappedParameters() {
+    // Inject CSS once
+    if (!document.getElementById(MAPPED_INDICATOR_KEY)) {
+        const style = document.createElement('style');
+        style.id = MAPPED_INDICATOR_KEY;
+        style.textContent = pulsingCSS;
+        document.head.appendChild(style);
+    }
+
+    // Get all current MIDI mappings
+    const mappings = window.appServices?.getMidiMappings?.() || {};
+    const mappedKeys = new Set(Object.keys(mappings));
+
+    // Iterate over learnable elements and add/remove pulsing indicator
+    learnableElements.forEach((info, element) => {
+        // Build matching key pattern
+        const typeKey = info.type + '_' + (info.targetId ?? 'master') + '_' + info.paramPath;
+        const mapped = Array.from(mappedKeys).some(key => {
+            const mapping = mappings[key];
+            return mapping && mapping.type === info.type &&
+                mapping.targetId === info.targetId &&
+                mapping.paramPath === info.paramPath;
+        });
+
+        if (mapped) {
+            element.classList.add('midi-mapped-indicator');
+            element.title = (info.label || 'Mapped') + ' [MIDI Mapped]';
+        } else {
+            element.classList.remove('midi-mapped-indicator');
+            element.title = info.label || '';
+        }
+    });
+}
+
+// Remove pulsing indicators from all elements
+export function clearMappedIndicators() {
+    learnableElements.forEach((info, element) => {
+        element.classList.remove('midi-mapped-indicator');
+        element.title = info.label || '';
+    });
+}
+
+// Toggle indicator highlighting (show/hide mapped indicators)
+let indicatorsVisible = false;
+
+export function toggleMappedIndicators() {
+    if (indicatorsVisible) {
+        clearMappedIndicators();
+        indicatorsVisible = false;
+    } else {
+        highlightMappedParameters();
+        indicatorsVisible = true;
+    }
+    return indicatorsVisible;
+}
+
+export function areMappedIndicatorsVisible() {
+    return indicatorsVisible;
 }
