@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.16"; // Daily merge 2026-05-20 - Verified all features present: tap tempo, auto-save, crash recovery, sidechain routing, MIDI import/export, automation, sequence tools. No bugs found. All undo captures verified. Syntax checks passed. No merge needed - snaw is already the super-repo.
+export const APP_VERSION = "0.3.17"; // Daily merge 2026-05-21 - Verified all features present: tap tempo, auto-save, crash recovery, sidechain routing, MIDI import/export, automation, sequence tools. No bugs found. All undo captures verified. Syntax checks passed. No merge needed - snaw is already the super-repo. Feature verification: handleTapTempo✓ resetTapTempo✓ startAutoSave✓ checkCrashRecovery✓ getSidechainBusNode✓ setupSidechainRouting✓ handleMIDIDrop✓ exportTrackToMIDI✓ scheduleAutomation✓ shiftSequenceNotes✓. All imports resolve. All syntax checks pass.
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks
