@@ -1,7 +1,7 @@
 // js/TrackNoiseGate.js - Track Noise Gate for SnugOS DAW
 // Gate effect with frequency focus option
 
-import * as Tone from 'tone';
+// Uses global Tone from Tone.js loaded via script tag
 
 export class TrackNoiseGate {
     constructor(options = {}) {

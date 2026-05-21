@@ -414,6 +414,19 @@ export function initializePrimaryEventListeners(appContext) {
                     }
                 } catch(e) { console.error("[Menu] Track Color Panel error:", e); }
             },
+            menuTrackNoiseGate: () => {
+                console.log("[Menu] Track Noise Gate clicked");
+                try {
+                    if (typeof window.openNoiseGatePanel === 'function') {
+                        window.openNoiseGatePanel();
+                    } else {
+                        // Fallback: import and call directly
+                        import('./TrackNoiseGate.js').then(m => {
+                            if (m.openNoiseGatePanel) m.openNoiseGatePanel();
+                        }).catch(e => console.error('[Menu] Track Noise Gate import error:', e));
+                    }
+                } catch(e) { console.error("[Menu] Track Noise Gate error:", e); }
+            },
             menuTrackIconPicker: () => {
                 console.log("[Menu] Track Icon Picker clicked");
                 try {
