@@ -133,6 +133,10 @@ function showTrackContextMenu(x, y, trackId) {
         </div>
         <div class="border-t border-gray-700 mt-1 pt-1">
             ${freezeMenuItems}
+            <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="bounce" data-track-id="${trackId}">
+                <span class="w-4">🎛️</span>
+                <span>Bounce Track to WAV</span>
+            </button>
         </div>
         <div class="border-t border-gray-700 mt-1 pt-1">
             <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="delete" data-track-id="${trackId}">
@@ -295,6 +299,24 @@ function handleTrackAction(action, trackId) {
                 localAppServices.showNotification?.('Frozen audio exported', 2000);
             } else {
                 localAppServices.showNotification?.('No frozen audio to export', 2000);
+            }
+            break;
+            
+        case 'bounce':
+            if (localAppServices.bounceTrackToAudio) {
+                localAppServices.showNotification?.('Bouncing track to WAV...', 1500);
+                const result = await localAppServices.bounceTrackToAudio(trackId, {
+                    download: true,
+                    createNewTrack: false,
+                    returnBlob: false
+                });
+                if (result && result.success) {
+                    localAppServices.showNotification?.('Track bounced to WAV', 2000);
+                } else {
+                    localAppServices.showNotification?.('Bounce failed', 2000);
+                }
+            } else {
+                localAppServices.showNotification?.('Bounce not available for this track type', 2000);
             }
             break;
             
