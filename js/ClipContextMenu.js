@@ -4,6 +4,7 @@
 import { reverseAudioClip } from './ClipReverse.js';
 import { getFadePresets, applyFadePresetToClip, clearFadePoints } from './ClipFadePresets.js';
 import { createClipGroup, getCurrentClipSelections } from './ClipGroupManager.js';
+import { openClipStartOffsetPanel } from './ClipStartOffset.js';
 
 let localAppServices = {};
 let contextMenuListenersInitialized = false;
@@ -128,6 +129,10 @@ function showClipContextMenu(x, y, clipId, trackId) {
         <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="flipPhase" data-clip-id="${clipId}" data-track-id="${trackId}">
             <span class="w-4">∅</span>
             <span>${isPhaseInverted ? 'Uninvert Phase' : 'Flip Phase'}</span>
+        </button>
+        <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="startOffset" data-clip-id="${clipId}" data-track-id="${trackId}">
+            <span class="w-4">⏱</span>
+            <span>Start Offset</span>
         </button>
         <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="duplicate" data-clip-id="${clipId}" data-track-id="${trackId}">
             <span class="w-4">📋</span>
@@ -302,7 +307,11 @@ function handleClipAction(action, clipId, trackId) {
             }
             if (localAppServices.renderTimeline) localAppServices.renderTimeline();
             break;
-            
+
+        case 'startOffset':
+            openClipStartOffsetPanel(clipId);
+            break;
+
         default:
             // Check for external actions (e.g., freezeTrack)
             if (action.startsWith('external_')) {

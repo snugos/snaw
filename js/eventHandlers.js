@@ -2,6 +2,7 @@
 import * as Constants from './constants.js';
 import { showNotification, showConfirmationDialog, createContextMenu } from './utils.js';
 import { parseMidiFile, midiNotesToSequenceData, encodeSequenceToMidi, midiToNoteName, noteNameToMidi } from './midiUtils.js';
+import { openClipStartOffsetPanel } from './ClipStartOffset.js';
 import {
     getTracksState as getTracks,
     getTrackByIdState as getTrackById,
@@ -429,6 +430,22 @@ export function initializePrimaryEventListeners(appContext) {
                 try {
                     localAppServices.openClipOpacityPanel?.();
                 } catch(e) { console.error("[Menu] Clip Opacity error:", e); }
+            },
+            menuClipStartOffset: () => {
+                console.log("[Menu] Clip Start Offset clicked");
+                try {
+                    // Open panel for first selected clip if any
+                    if (localAppServices.getSelectedClipIds) {
+                        const ids = localAppServices.getSelectedClipIds();
+                        if (ids && ids.size > 0) {
+                            const firstClipId = ids.values().next().value;
+                            openClipStartOffsetPanel(firstClipId);
+                            return;
+                        }
+                    }
+                    // Fallback: show notification
+                    localAppServices.showNotification?.('Right-click a clip and select "Start Offset" to adjust its start point', 3000);
+                } catch(e) { console.error("[Menu] Clip Start Offset error:", e); }
             },
             menuQuickRename: () => {
                 console.log("[Menu] Quick Rename clicked");

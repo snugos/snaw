@@ -4492,7 +4492,7 @@ export class Track {
                         const effectivePlayEnd = Math.min(clipActualEnd, transportStopTime);
                         let playDurationInWindow = effectivePlayEnd - effectivePlayStart;
                         if (playDurationInWindow <= 1e-3) continue;
-                        const offsetIntoSource = Math.max(0, effectivePlayStart - clipActualStart);
+                        const offsetIntoSource = Math.max(0, effectivePlayStart - clipActualStart) + (clip.startOffset || 0);
 
                         if (clip.type === 'audio') {
                             if (!clip.sourceId) continue;
@@ -4555,7 +4555,7 @@ export class Track {
                     }
                 }
 
-                const offsetIntoSource = Math.max(0, effectivePlayStart - clipActualStart);
+                const offsetIntoSource = Math.max(0, effectivePlayStart - clipActualStart) + (clip.startOffset || 0);
 
                 if (clip.type === 'audio') {
                     if (!clip.sourceId) { console.warn(`[Track ${this.id}] Audio clip ${clip.id} has no sourceId.`); continue; }

@@ -112,6 +112,8 @@ import { initDrumReplace, openDrumReplacePanel } from './DrumReplace.js';
 import { initDrumPatternSplitter, openDrumPatternSplitterPanel } from './DrumPatternSplitter.js';
 // Clip Opacity
 import { initClipOpacity, openClipOpacityPanel } from './ClipOpacity.js';
+// Clip Start Offset
+import { initClipStartOffset, openClipStartOffsetPanel } from './ClipStartOffset.js';
 // Clip Fade Presets
 import { initClipFadePresets, openClipFadePresetsPanel, closeClipFadePresetsPanel, addFadePreset, getFadePresets, getClipFadeMenuItems, getClipFadeMenuItemsSimple, applyFadePresetToClip } from './ClipFadePresets.js';
 
@@ -1492,6 +1494,7 @@ async function initializeSnugOS() {
         if (typeof initTimelineRulerClick === 'function') initTimelineRulerClick(appServices); // Timeline Ruler Click - click to jump playhead
         if (typeof initMidiChordDisplay === 'function') initMidiChordDisplay(appServices); // MIDI Chord Display initialization
         if (typeof initClipOpacity === 'function') initClipOpacity(appServices); // Clip Opacity initialization
+        if (typeof initClipStartOffset === 'function') initClipStartOffset(appServices); // Clip Start Offset initialization
         if (typeof initClipLoopPreview === 'function') initClipLoopPreview(appServices); // Clip Loop Preview - double-click to loop
         if (typeof initClipGhostTrails === 'function') initClipGhostTrails(appServices); // Clip Ghost Trails initialization
         if (typeof initTrackGhostSignals === 'function') initTrackGhostSignals(appServices); // Track Ghost Signals initialization
