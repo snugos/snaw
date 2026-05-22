@@ -116,7 +116,10 @@
         const selectedTrackId = getSelectedTrackId();
         
         if (e.key === 's' || e.key === 'S') {
-            if (e.shiftKey) {
+            if (e.altKey) {
+                // Reset ALL solos
+                tracks.forEach(t => setTrackSolo(t.id, false));
+            } else if (e.shiftKey) {
                 // Solo all OTHER tracks
                 tracks.forEach(t => {
                     if (t.id !== selectedTrackId) setTrackSolo(t.id, true);
