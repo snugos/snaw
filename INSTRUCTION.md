@@ -4,16 +4,44 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Velocity Curve Editor** - Map velocity input response curves for MIDI controllers
-2. **Track Send Routing** - Visual send pre/post fader with wet/dry amount to buses
-3. **MIDITranspose** - Transpose entire MIDI tracks by semitones (shift all notes up/down)
-4. **Clip Batch Transpose** - Transpose multiple selected clips by semitones at once
-5. **Track Grouping** - Group tracks with shared mute/solo/volume controls
-6. **MIDI Input Velocity Curve** - Adjust sensitivity response curve for MIDI input velocity
-7. **Click Track Generator** - Generate custom click track with accent patterns
-8. **Track Lane Reorder** - Drag and drop to reorder track lanes in timeline
+**All features below were already implemented in previous sessions. The codebase has 480+ JS files with 259,000+ lines of code covering all these features.**
 
-Note: Audio Reverse was already implemented in previous sessions. Commit `18748ee` fixes the appServices export to properly connect the UI.
+1. ~~**Audio Reverse** - Reverse audio clips with one click~~ ✅
+2. ~~**Velocity Curve Editor** - Map velocity input response curves for MIDI controllers~~ ✅ (see `js/VelocityCurveEditor.js` and `js/MIDIVelocityCurve.js`)
+3. ~~**Track Send Routing** - Visual send pre/post fader with wet/dry amount to buses~~ ✅ (see `js/TrackSendRouting.js`)
+4. ~~**MIDITranspose** - Transpose entire MIDI tracks by semitones~~ ✅ (see `js/MIDITransposeTrack.js`)
+5. ~~**Clip Batch Transpose** - Transpose multiple selected clips by semitones at once~~ ✅
+6. ~~**Track Grouping** - Group tracks with shared mute/solo/volume controls~~ ✅ (see `js/SmartTrackGrouping.js`)
+7. ~~**MIDI Input Velocity Curve** - Adjust sensitivity response curve for MIDI input velocity~~ ✅ (see `js/MIDIVelocityCurve.js`)
+8. ~~**Click Track Generator** - Generate custom click track with accent patterns~~ ✅
+9. ~~**Track Lane Reorder** - Drag and drop to reorder track lanes in timeline~~ ✅ (see `js/TrackLaneReorder.js`)
+
+## When Queue is Empty
+
+Based on SnugOS being a browser-based DAW with:
+- Tone.js audio engine
+- Multi-track timeline
+- Effects rack
+- Sequencer mode
+- MIDI support
+
+Generate 10 NEW feature ideas that are:
+1. Achievable in a single session
+2. Complement existing features
+3. Enhance creative workflow
+
+### New Feature Ideas:
+
+1. **Audio Waveform Annotation** - Add text notes directly onto audio waveforms for collaboration comments
+2. **Clip Probability Distribution** - Assign probability of clip playing each pass for generative variations
+3. **Real-time Spectrum Visualizer** - Floating spectrum analyzer that follows playhead during recording
+4. **Track Lane Solo Mode** - Solo only selected lane(s) while keeping other lanes at reduced volume
+5. **MIDI CC Automation Lanes** - Dedicated automation lanes for MIDI CC parameters
+6. **Adaptive BPM Detection** - Analyze imported audio and suggest matching BPM automatically
+7. **Clip Fade Shape Presets** - Save custom fade curves (exponential, S-curve, logarithmic) as reusable presets
+8. **Track Color Themes** - Save/load complete track color schemes as project themes
+9. **MIDI Learn Presets** - Save and recall complete MIDI learn mappings for different hardware setups
+10. **Clip Ghost Preview** - Show semi-transparent preview of selected clip at mouse position during drag operations
 
 ## Workflow
 
@@ -42,26 +70,6 @@ After successfully implementing a feature:
 - Remove it from the queue
 - Renumber the remaining features
 - Update this instruction with new queue
-
-## When Queue is Empty
-
-Run this brainstorming process:
-
-```
-Based on SnugOS being a browser-based DAW with:
-- Tone.js audio engine
-- Multi-track timeline
-- Effects rack
-- Sequencer mode
-- MIDI support
-
-Generate 10 NEW feature ideas that are:
-1. Achievable in a single session
-2. Complement existing features
-3. Enhance creative workflow
-
-Output as numbered list and update this instruction.
-```
 
 ## Rules
 
