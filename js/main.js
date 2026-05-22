@@ -29,6 +29,7 @@ import { SmartTrackGrouping, smartTrackGrouping, initSmartTrackGrouping, openSma
 import { AudioEventDetection, audioEventDetection, initAudioEventDetection, openAudioEventDetectionPanel } from './AudioEventDetection.js';
 import { CrossTrackPitchAnalysis, crossTrackPitchAnalysis, initCrossTrackPitchAnalysis, openCrossTrackPitchAnalysisPanel } from './CrossTrackPitchAnalysis.js';
 // New Feature Modules - Session 2026-04-24
+import { initAudioLegatoDetection, detectLegatoGroups, openLegatoDetectionPanel } from './AudioLegatoDetection.js';
 import { AICompositionVariations } from './AICompositionVariations.js';
 import { HarmonicAnalysisEngine } from './HarmonicAnalysisEngine.js';
 import { AudioStemSeparation } from './AudioStemSeparation.js';
@@ -1528,6 +1529,7 @@ async function initializeSnugOS() {
         if (typeof initPianoRollSequencer === 'function') initPianoRollSequencer(appServices); // Piano Roll Sequencer initialization
         if (typeof initScoreEditor === 'function') initScoreEditor(appServices); // Score Editor initialization
         if (typeof initClipReverse === 'function') initClipReverse(appServices); // Clip Reverse feature initialization
+        if (typeof initAudioLegatoDetection === 'function') initAudioLegatoDetection(appServices); // Audio Legato Detection initialization
         if (typeof initTrackSendRouting === 'function') initTrackSendRouting(appServices); // Track Send Routing initialization
         if (typeof initTrackHeadphoneMix === 'function') initTrackHeadphoneMix(appServices); // Headphone Mix initialization
         if (typeof initTrackSoloChain === 'function') initTrackSoloChain(appServices); // Track Solo Chain initialization
