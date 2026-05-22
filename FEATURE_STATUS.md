@@ -1,3 +1,37 @@
+## Session: 2026-05-22 00:45 UTC (Snaw Feature Builder Agent Run)
+
+**Status:** FEATURE IMPLEMENTED ✅
+
+### Feature Completed This Session:
+- **Audio Count-In** - `js/CountInAudio.js` (NEW)
+  - Plays metronome count-in before recording starts (configurable 1-4 bars)
+  - Dropdown control in global controls bar (after loop controls)
+  - Visual count indicator during count-in
+  - Uses existing metronome synth from `js/audio.js`
+  - Integrated with record button click handler in `js/eventHandlers.js`
+  - Commit: `31b5fb3`
+
+### Files Modified:
+- `js/CountInAudio.js` (NEW) - Main module
+- `js/main.js` - Import and initialization
+- `js/eventHandlers.js` - Record button count-in logic
+- `INSTRUCTION.md` - Updated feature queue
+- `index.html` - Auto-adds count-in dropdown via JS
+
+### Updated Feature Queue:
+1. **Audio Reverse** - Reverse audio clips with one click
+2. **Velocity Curve Editor** - Map velocity input response curves for MIDI controllers
+3. **Track Send Routing** - Visual send pre/post fader with wet/dry to buses
+4. **MIDITranspose** - Transpose entire MIDI tracks by semitones
+5. **Clip Batch Transpose** - Transpose multiple clips by semitones at once
+6. **Audio Legato Detection** - Auto-detect and link consecutive audio notes
+7. **Track Grouping** - Group tracks with shared mute/solo/volume
+8. **MIDI Input Velocity Curve** - Adjust sensitivity response for MIDI input
+9. **Click Track Generator** - Generate custom click track with accent patterns
+10. **Track Lane Reorder** - Drag and drop to reorder track lanes
+
+---
+
 ## Session: 2026-05-22 00:20 UTC (Snaw Feature Completion Agent Run)
 
 **Status:** No incomplete features detected — Snaw remains feature-complete.
