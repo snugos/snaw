@@ -3933,6 +3933,11 @@ export class Track {
             return 0;
         }
 
+        // Capture undo state BEFORE mutation (Day 559 fix)
+        if (!skipUndo) {
+            this._captureUndoState(`Paste section at col ${targetCol} on ${this.name}`);
+        }
+
         let pastedCount = 0;
         const sectionNumRows = sectionData.length;
         const sectionLength = sectionData[0]?.length || 0;
@@ -3960,10 +3965,6 @@ export class Track {
                     }
                 }
             }
-        }
-
-        if (!skipUndo) {
-            this._captureUndoState(`Paste section at col ${targetCol} on ${this.name}`);
         }
 
         return pastedCount;
@@ -5683,11 +5684,11 @@ export class Track {
                 targetDb: normalize ? targetDb : null
             };
 
+            // Capture undo state BEFORE mutation (Day 559 fix)
+            this._captureUndoState(`Added audio clip "${clip.name}" on ${this.name}`);
+
             this.timelineClips.push(clip);
             console.log(`[Track ${this.id} addAudioClip] Created clip:`, clip.name, 'at', clip.startTime, 'duration:', clip.duration);
-
-            // Capture undo state
-            this._captureUndoState(`Added audio clip "${clip.name}" on ${this.name}`);
 
             // Update UI if available
             if (this.appServices.updateTrackUI) {
@@ -9058,7 +9059,7 @@ export class Track {
     }
 
     // ============================================
-    // MPE (MIDI Polyphonic Expression) Support
+    // MPE (MIDI POLYPHONIC EXPRESSION) SUPPORT
     // ============================================
 
     /**
@@ -11100,7 +11101,7 @@ export class Track {
      */
     initAIComposition(config = {}) {
         this.aiComposition = {
-            enabled: config.enabled ?? true,
+            enabled: true,
             model: config.model ?? 'markov', // 'markov', 'n-gram', 'rule-based'
             key: config.key ?? 'C',
             scale: config.scale ?? 'major',
@@ -11524,7 +11525,7 @@ export class Track {
      */
     initCollaborativeEditing(config = {}) {
         this.collaboration = {
-            enabled: config.enabled ?? true,
+            enabled: true,
             sessionId: config.sessionId ?? null,
             userId: config.userId ?? `user-${Date.now()}`,
             userName: config.userName ?? 'Anonymous',
@@ -11870,7 +11871,7 @@ export class Track {
      */
     initMobileTouch(config = {}) {
         this.mobileTouch = {
-            enabled: config.enabled ?? true,
+            enabled: true,
             touchSensitivity: config.touchSensitivity ?? 1.0,
             gestureRecognition: config.gestureRecognition ?? true,
             multiTouch: config.multiTouch ?? true,
