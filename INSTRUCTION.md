@@ -9,11 +9,10 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 3. **Track Send Routing** - Visual send pre/post fader with wet/dry amount to buses
 4. **MIDITranspose** - Transpose entire MIDI tracks by semitones (shift all notes up/down)
 5. **Clip Batch Transpose** - Transpose multiple selected clips by semitones at once
-6. **Audio Legato Detection** - Auto-detect and link consecutive notes in audio clips
-7. **Track Grouping** - Group tracks with shared mute/solo/volume controls
-8. **MIDI Input Velocity Curve** - Adjust sensitivity response curve for MIDI input velocity
-9. **Click Track Generator** - Generate custom click track with accent patterns
-10. **Track Lane Reorder** - Drag and drop to reorder track lanes in timeline
+6. **Track Grouping** - Group tracks with shared mute/solo/volume controls
+7. **MIDI Input Velocity Curve** - Adjust sensitivity response curve for MIDI input velocity
+8. **Click Track Generator** - Generate custom click track with accent patterns
+9. **Track Lane Reorder** - Drag and drop to reorder track lanes in timeline
 
 ## Workflow
 
