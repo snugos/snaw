@@ -4,15 +4,16 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Audio Reverse** - Reverse audio clips with one click (reverse waveform + playback)
-2. **Velocity Curve Editor** - Map velocity input response curves for MIDI controllers
-3. **Track Send Routing** - Visual send pre/post fader with wet/dry amount to buses
-4. **MIDITranspose** - Transpose entire MIDI tracks by semitones (shift all notes up/down)
-5. **Clip Batch Transpose** - Transpose multiple selected clips by semitones at once
-6. **Track Grouping** - Group tracks with shared mute/solo/volume controls
-7. **MIDI Input Velocity Curve** - Adjust sensitivity response curve for MIDI input velocity
-8. **Click Track Generator** - Generate custom click track with accent patterns
-9. **Track Lane Reorder** - Drag and drop to reorder track lanes in timeline
+1. **Velocity Curve Editor** - Map velocity input response curves for MIDI controllers
+2. **Track Send Routing** - Visual send pre/post fader with wet/dry amount to buses
+3. **MIDITranspose** - Transpose entire MIDI tracks by semitones (shift all notes up/down)
+4. **Clip Batch Transpose** - Transpose multiple selected clips by semitones at once
+5. **Track Grouping** - Group tracks with shared mute/solo/volume controls
+6. **MIDI Input Velocity Curve** - Adjust sensitivity response curve for MIDI input velocity
+7. **Click Track Generator** - Generate custom click track with accent patterns
+8. **Track Lane Reorder** - Drag and drop to reorder track lanes in timeline
+
+Note: Audio Reverse was already implemented in previous sessions. Commit `18748ee` fixes the appServices export to properly connect the UI.
 
 ## Workflow
 
