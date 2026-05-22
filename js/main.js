@@ -52,6 +52,7 @@ import { FrequencyBandSplitter, MultibandProcessor, getFrequencyBandSplitter, op
 // Performance & Workflow - Session 2026-04-26
 import { openPerformanceTriggerPadsPanel, getPerformanceTriggerPads } from './PerformanceTriggerPads.js';
 import { initTrackHeadphoneMix, openTrackHeadphoneMixPanel } from './TrackHeadphoneMix.js';
+import { initTrackSendRouting, openTrackSendRoutingPanel } from './TrackSendRouting.js';
 import { openTrackDelayCompensationPanel } from './TrackDelayCompensation.js';
 import { openGrooveExtractorPanel } from './GrooveExtractor.js';
 import { openStepSequencerView } from './StepSequencerView.js';
@@ -1305,6 +1306,45 @@ import {
     },
 };
 
+async function handleCustomBackgroundUpload(event) {
+    if (!event?.target?.files?.[0]) return;
+    const file = event.target.files[0];
+    const isVideo = file.type.startsWith('video/');
+    const isImage = file.type.startsWith('image/');
+    
+    if (!isVideo && !isImage) {
+        if (typeof showSafeNotification === 'function') showSafeNotification("Invalid file type. Please select an image or video.", 3000);
+        return;
+    }
+    
+    try {
+        if (isImage) {
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const dataURL = e.target.result;
+                localStorage.setItem('snugosDesktopBackground', dataURL);
+                localStorage.setItem('snugosDesktopBgType', 'image');
+                await applyDesktopBackground(dataURL, 'image');
+                if (typeof showSafeNotification === 'function') showSafeNotification("Image background applied.", 2000);
+            };
+            reader.readAsDataURL(file);
+        } else if (isVideo) {
+            if (typeof showSafeNotification === 'function') showSafeNotification("Processing video background...", 2000);
+            await bgDb.save('desktopVideo', file);
+            localStorage.setItem('snugosDesktopBgType', 'video');
+            localStorage.removeItem('snugosDesktopBackground');
+            const objectUrl = URL.createObjectURL(file);
+            await applyDesktopBackground(objectUrl, 'video');
+            if (typeof showSafeNotification === 'function') showSafeNotification("Video background applied.", 2000);
+        }
+    } catch (error) {
+        console.error("Error saving background:", error);
+        if (typeof showSafeNotification === 'function') showSafeNotification("Could not save background: " + error.message, 4000);
+    }
+    
+    if (event.target) event.target.value = null;
+}
+
 function handleTrackUIUpdate(trackId, reason, detail) {
     if (!getTrackByIdState) { console.warn("[Main UI Update] getTrackByIdState service not available."); return; }
     const track = getTrackByIdState(trackId);
@@ -1488,6 +1528,7 @@ async function initializeSnugOS() {
         if (typeof initPianoRollSequencer === 'function') initPianoRollSequencer(appServices); // Piano Roll Sequencer initialization
         if (typeof initScoreEditor === 'function') initScoreEditor(appServices); // Score Editor initialization
         if (typeof initClipReverse === 'function') initClipReverse(appServices); // Clip Reverse feature initialization
+        if (typeof initTrackSendRouting === 'function') initTrackSendRouting(appServices); // Track Send Routing initialization
         if (typeof initTrackHeadphoneMix === 'function') initTrackHeadphoneMix(appServices); // Headphone Mix initialization
         if (typeof initTrackSoloChain === 'function') initTrackSoloChain(appServices); // Track Solo Chain initialization
         if (typeof initMetronomeVisual === 'function') initMetronomeVisual(appServices); // Metronome Visual Beat Indicator

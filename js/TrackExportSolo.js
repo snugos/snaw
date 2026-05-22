@@ -800,3 +800,5 @@ export function openTrackExportSoloPanel(services = {}) {
 }
 
 export default TrackExportSolo;
+// Expose to window for eventHandlers.js menu access
+window.openTrackExportSoloPanel = openTrackExportSoloPanel;

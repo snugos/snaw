@@ -233,6 +233,7 @@ export function initializePrimaryEventListeners(appContext) {
                     { separator: true },
                     { label: "Track Export Solo", action: () => { if(localAppServices.openTrackExportSoloPanel) localAppServices.openTrackExportSoloPanel(); } },
                     { label: "Track Solo Chain", action: () => { if(localAppServices.openSoloChainPanel) localAppServices.openSoloChainPanel(); } },
+                    { label: "Track Send Routing", action: () => { if(localAppServices.openTrackSendRoutingPanel) localAppServices.openTrackSendRoutingPanel(); } },
                     { label: "Toggle Full Screen", action: toggleFullScreen }
                 ];
                 if (typeof createContextMenu === 'function') {
