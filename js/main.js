@@ -1260,6 +1260,45 @@ import {
             return null;
         }
     },
+
+    triggerCustomBackgroundUpload: () => {
+        if (uiElementsCache.customBgInput) uiElementsCache.customBgInput.click();
+        else console.warn("Custom background input element not found in cache.");
+    },
+    removeCustomDesktopBackground: async () => {
+        const hasStoredBg = localStorage.getItem('snugosDesktopBackground') || localStorage.getItem('snugosDesktopBgType');
+        if (!hasStoredBg) {
+            const db = await bgDb.init();
+            const stored = await new Promise((resolve) => {
+                const tx = db.transaction('backgrounds', 'readonly');
+                const store = tx.objectStore('backgrounds');
+                const req = store.get('desktopVideo');
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => resolve(null);
+            });
+            if (!stored) {
+                if (typeof showSafeNotification === 'function') showSafeNotification("No custom background to remove.", 2000);
+                return;
+            }
+        }
+        try {
+            localStorage.removeItem('snugosDesktopBackground');
+            localStorage.removeItem('snugosDesktopBgType');
+            const db = await bgDb.init();
+            await new Promise((resolve, reject) => {
+                const tx = db.transaction('backgrounds', 'readwrite');
+                const store = tx.objectStore('backgrounds');
+                store.delete('desktopVideo');
+                tx.oncomplete = () => resolve();
+                tx.onerror = () => reject(tx.error);
+            });
+            if (typeof applyDesktopBackground === 'function') applyDesktopBackground(null, null);
+            if (typeof showSafeNotification === 'function') showSafeNotification("Background removed.", 2000);
+        } catch (e) {
+            console.error("Error removing custom background:", e);
+            if (typeof showSafeNotification === 'function') showSafeNotification("Could not remove background.", 2000);
+        }
+    },
 };
 
 function handleTrackUIUpdate(trackId, reason, detail) {
