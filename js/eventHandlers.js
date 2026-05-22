@@ -367,6 +367,12 @@ export function initializePrimaryEventListeners(appContext) {
                     localAppServices.openMIDIChordPlayerPanel?.();
                 } catch(e) { console.error('[Menu] MIDI Chord Player error:', e); }
             },
+            menuGuitarTabEditor: () => {
+                console.log('[Menu] Guitar Tab Editor clicked');
+                try {
+                    localAppServices.openGuitarTabEditor?.();
+                } catch(e) { console.error('[Menu] Guitar Tab Editor error:', e); }
+            },
             menuAIComposition: () => {
                 console.log('[Menu] AI Composition Assistant clicked');
                 try {

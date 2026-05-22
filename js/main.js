@@ -80,6 +80,8 @@ import { initTrackContextMenu } from './TrackContextMenu.js';
 // Track Duplicate with Offset
 import { initTrackDuplicateOffset, openDuplicateOffsetDialog, duplicateTrackWithOffset } from './TrackDuplicateOffset.js';
 import { initSamplerLoopTrim, openSamplerLoopTrimPanel } from './SamplerLoopTrim.js';
+// Guitar Tab Editor
+import { initGuitarTabEditor, openGuitarTabEditor } from './GuitarTabEditor.js';
 import { initTrackColorPanel, openTrackColorPanel } from './TrackColorPanel.js';
 import { initTrackIconPicker, openTrackIconPickerPanel } from './TrackIconPicker.js';
 import { initChordVoicingModes, openChordVoicingPanel } from './ChordVoicingModes.js';
@@ -811,6 +813,7 @@ import {
     openPhaseCorrelationMeterPanel,
     openTrackColorPalettePanel,
     openTrackColorPanel,
+    openGuitarTabEditor,
     openSamplerLoopTrimPanel,
     openDuplicateOffsetDialog,
     openTrackIconPickerPanel,
@@ -1522,8 +1525,8 @@ async function initializeSnugOS() {
         if (typeof initPerformanceMonitor === 'function') initPerformanceMonitor(); // Performance monitor initialization
         if (typeof initPerformanceIndicator === 'function') initPerformanceIndicator(); // Performance indicator initialization
         if (typeof initUndoHistoryPanel === 'function') initUndoHistoryPanel(); // Undo history panel initialization
+        if (typeof initGuitarTabEditor === 'function') initGuitarTabEditor(appServices); // Guitar Tab Editor initialization
         if (typeof initSpectrumAnalyzer === 'function') initSpectrumAnalyzer(appServices); // Spectrum Analyzer initialization
-        if (typeof initTrackCompressorVisualizer === 'function') initTrackCompressorVisualizer(appServices); // Track Compressor Visualizer initialization
         if (typeof initBeatSyncedLFOPanel === 'function') initBeatSyncedLFOPanel(appServices); // Beat-synced LFO panel initialization
         if (typeof initTempoSyncVisualizer === 'function') initTempoSyncVisualizer(appServices); // Tempo Sync Visualizer initialization
         if (typeof initPhaseCorrelationMeter === 'function') initPhaseCorrelationMeter(appServices); // Phase Correlation Meter initialization

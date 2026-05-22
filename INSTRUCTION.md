@@ -4,15 +4,16 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. ~~MIDILearn Indicator~~ ✅
-2. ~~Audio Phase Flip~~ ✅
-3. ~~Clip Start Offset~~ ✅
-4. ~~Track Noise Gate~~ ✅
-5. **Grid Snap Intensity** - Slider to control how strongly clips snap to grid (0% = free placement, 100% = full snap)
-6. **MIDI Program Change** - Send MIDI program change messages to change patch on external synths
-7. **Click Track Export** - Bounce just the metronome/click to a separate audio file
-8. **Tempo Tap Visual** - Show a visual representation of tap tempo pattern (shows if you're on beat)
-9. **Track Color Palette** - Quick-access color swatches to change track colors
+1. **MIDI Guitar Tab Editor** - Draw guitar tablature with bend/pull-up icons, export as MIDI
+2. **Track AB Compare** - A/B toggle between original and processed audio on the same track
+3. **Audio-to-MIDI Converter** - Monophonic pitch detection to convert recorded audio to MIDI notes
+4. **Collaborative Session Link** - Generate a shareable URL to invite others to a live session
+5. **Track Group with Group FX** - Group multiple tracks into a sub-mix with shared effects chain
+6. **Piano Roll Step Sequencer View** - Toggle between piano roll and step sequencer grid display
+7. **Clip Automation Envelope** - Draw volume/pan automation directly on audio clips
+8. **Modular Patch Bay** - Visual node-based routing graph for complex audio chains
+9. **Groove Quantize Template** - Save swing/shuffle grids and apply them to any track
+10. **Sidechain Punch-In** - Record audio while monitoring a specific track's signal as cue
 
 ## Workflow
 
