@@ -4,16 +4,16 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **MIDI Guitar Tab Editor** - Draw guitar tablature with bend/pull-up icons, export as MIDI
-2. **Track AB Compare** - A/B toggle between original and processed audio on the same track
-3. **Audio-to-MIDI Converter** - Monophonic pitch detection to convert recorded audio to MIDI notes
-4. **Collaborative Session Link** - Generate a shareable URL to invite others to a live session
-5. **Track Group with Group FX** - Group multiple tracks into a sub-mix with shared effects chain
-6. **Piano Roll Step Sequencer View** - Toggle between piano roll and step sequencer grid display
-7. **Clip Automation Envelope** - Draw volume/pan automation directly on audio clips
-8. **Modular Patch Bay** - Visual node-based routing graph for complex audio chains
-9. **Groove Quantize Template** - Save swing/shuffle grids and apply them to any track
-10. **Sidechain Punch-In** - Record audio while monitoring a specific track's signal as cue
+1. **Audio Count-In** - Metronome count-in before recording starts (configurable 1-4 bars)
+2. **Audio Reverse** - Reverse audio clips with one click (reverse waveform + playback)
+3. **Velocity Curve Editor** - Map velocity input response curves for MIDI controllers
+4. **Track Send Routing** - Visual send pre/post fader with wet/dry amount to buses
+5. **MIDITranspose** - Transpose entire MIDI tracks by semitones (shift all notes up/down)
+6. **Clip Batch Transpose** - Transpose multiple selected clips by semitones at once
+7. **Audio Legato Detection** - Auto-detect and link consecutive notes in audio clips
+8. **Track Grouping** - Group tracks with shared mute/solo/volume controls
+9. **MIDI Input Velocity Curve** - Adjust sensitivity response curve for MIDI input velocity
+10. **Click Track Generator** - Generate custom click track with accent patterns
 
 ## Workflow
 

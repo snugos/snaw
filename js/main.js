@@ -60,6 +60,7 @@ import { initCCStepSequencer, openCCStepSequencer, getCCPatternData, setCCPatter
 import { initScaleHighlightMode, openScaleHighlightPanel, isNoteInScale, getNoteScaleClass, quantizeNoteToScale } from './ScaleHighlightMode.js';
 import { initScaleHighlightGlobal, openScaleHighlightGlobalPanel, toggleGlobalScaleHighlight, setGlobalScale, setGlobalRootNote, isGlobalScaleHighlightEnabled } from './ScaleHighlightGlobal.js';
 import { initAudioRecorder, startRecording, stopRecording, isRecordingActive, requestMicAccess, getRecordingStatus, cleanupRecording } from './AudioRecorder.js';
+import { initCountInAudio, setupCountInUI, playCountIn, isCountInActive } from './CountInAudio.js';
 import { initMIDArpeggiatorPanel, openMIDArpeggiatorPanel } from './MIDArpeggiatorPanel.js';
 import { initTrackTemplateLibrary, openTrackTemplateLibraryPanel, getTrackTemplateNames, getTrackTemplate, saveTrackTemplate, deleteTrackTemplate, exportTemplates, importTemplates } from './TrackTemplateLibrary.js';
 import { showClipEnvelopeShaper } from './ClipEnvelopeShaper.js';
@@ -1505,6 +1506,8 @@ async function initializeSnugOS() {
         if (typeof initScaleHighlightMode === 'function') initScaleHighlightMode(appServices); // Scale Highlight Mode initialization
         if (typeof initScaleHighlightGlobal === 'function') initScaleHighlightGlobal(appServices); // Scale Highlight Global initialization
         if (typeof initAudioRecorder === 'function') initAudioRecorder(appServices); // Audio Recorder initialization
+        if (typeof initCountInAudio === 'function') initCountInAudio(appServices); // Count-In Audio initialization
+        setTimeout(() => { if (typeof setupCountInUI === 'function') setupCountInUI(); }, 100); // Setup count-in UI controls
         if (typeof initMIDArpeggiatorPanel === 'function') initMIDArpeggiatorPanel(appServices); // MIDI Arpeggiator Panel initialization
         if (typeof initTrackTemplateLibrary === 'function') initTrackTemplateLibrary(appServices); // Track Template Library initialization
         if (typeof initExportSelection === 'function') initExportSelection(appServices); // Export Selection initialization

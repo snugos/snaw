@@ -3,6 +3,7 @@ import * as Constants from './constants.js';
 import { showNotification, showConfirmationDialog, createContextMenu } from './utils.js';
 import { parseMidiFile, midiNotesToSequenceData, encodeSequenceToMidi, midiToNoteName, noteNameToMidi } from './midiUtils.js';
 import { openClipStartOffsetPanel } from './ClipStartOffset.js';
+import { playCountIn, isCountInActive, getCountInBars } from './CountInAudio.js';
 import {
     getTracksState as getTracks,
     getTrackByIdState as getTrackById,
@@ -1334,6 +1335,24 @@ export function attachGlobalControlEvents(elements) {
                     } else { recordingInitialized = true; } 
 
                     if (recordingInitialized) {
+                        // Count-in before recording
+                        const { getCountInBars } = await import('./CountInAudio.js');
+                        const countBars = getCountInBars();
+                        if (countBars > 0) {
+                            // Play count-in, callback will start recording
+                            const bpm = Tone.Transport.bpm.value;
+                            await playCountIn(async () => {
+                                setIsRecording(true);
+                                setRecordingTrackId(trackToRecord.id);
+                                if (Tone.Transport.state !== 'started') { Tone.Transport.cancel(0); Tone.Transport.position = 0; }
+                                setRecordingStartTime(Tone.Transport.seconds);
+                                if (Tone.Transport.state !== 'started') Tone.Transport.start(); 
+                                if (localAppServices.updateRecordButtonUI) localAppServices.updateRecordButtonUI(true);
+                                showNotification(`Recording started for ${trackToRecord.name}.`, 2000);
+                            }, bpm);
+                            return;
+                        }
+                        // No count-in, start immediately
                         setIsRecording(true);
                         setRecordingTrackId(trackToRecord.id);
                         if (Tone.Transport.state !== 'started') { Tone.Transport.cancel(0); Tone.Transport.position = 0; }
