@@ -149,6 +149,8 @@ import { initClipStretchWithHandles } from './ClipStretchWithHandles.js';
 import { initAudioScrubbing, openScrubSettingsPanel, setScrubOnDragEnabled, isAudioScrubActive } from './AudioScrubbingIntegration.js';
 // Audio Phase Flip - Invert the phase of audio clips by 180 degrees
 import { initAudioPhaseFlip, flipAudioBufferPhase, toggleClipPhaseFlip, isClipPhaseInverted, openAudioPhaseFlipPanel } from './AudioPhaseFlip.js';
+// Clip Reverse - Reverse audio clips with one click
+import { initClipReverse, openClipReversePanel, reverseAudioClip, reverseMIDISequence, isClipReversed, isSequenceReversed } from './ClipReverse.js';
 // Sidechain Volume Envelope - Draw ducking curves on clips for sidechain effects
 import { initSidechainVolumeEnvelope, openSidechainVolumeEnvelopePanel, getSidechainEnvelope } from './SidechainVolumeEnvelope.js';
 // Sidechain Visualizer - Visual indicator for sidechain routing and ducking status
@@ -1065,6 +1067,13 @@ import {
     toggleClipPhaseFlip,
     isClipPhaseInverted,
     openAudioPhaseFlipPanel,
+    
+    // Clip Reverse
+    openClipReversePanel,
+    reverseAudioClip,
+    reverseMIDISequence,
+    isClipReversed,
+    isSequenceReversed,
     
     // Sidechain Volume Envelope
     openSidechainVolumeEnvelopePanel,
