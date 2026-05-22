@@ -149,6 +149,8 @@ import { initClipStretchWithHandles } from './ClipStretchWithHandles.js';
 import { initAudioScrubbing, openScrubSettingsPanel, setScrubOnDragEnabled, isAudioScrubActive } from './AudioScrubbingIntegration.js';
 // Audio Phase Flip - Invert the phase of audio clips by 180 degrees
 import { initAudioPhaseFlip, flipAudioBufferPhase, toggleClipPhaseFlip, isClipPhaseInverted, openAudioPhaseFlipPanel } from './AudioPhaseFlip.js';
+// Audio Waveform Annotation - Add text notes directly onto audio waveforms
+import { initAudioWaveformAnnotation, openAnnotationPanel, addAnnotation, getAnnotations, renderAnnotationMarkers } from './AudioWaveformAnnotation.js';
 // Clip Reverse - Reverse audio clips with one click
 import { initClipReverse, openClipReversePanel, reverseAudioClip, reverseMIDISequence, isClipReversed, isSequenceReversed } from './ClipReverse.js';
 // Sidechain Volume Envelope - Draw ducking curves on clips for sidechain effects
@@ -1068,6 +1070,12 @@ import {
     isClipPhaseInverted,
     openAudioPhaseFlipPanel,
     
+    // Audio Waveform Annotation
+    openAnnotationPanel,
+    addAnnotation,
+    getAnnotations,
+    renderAnnotationMarkers,
+    
     // Clip Reverse
     openClipReversePanel,
     reverseAudioClip,
@@ -1627,6 +1635,7 @@ async function initializeSnugOS() {
         if (typeof initClipStretchWithHandles === 'function') initClipStretchWithHandles(appServices); // Clip Stretch With Handles initialization
         if (typeof initAudioScrubbing === 'function') initAudioScrubbing(appServices); // Audio Scrubbing initialization - audible scrub on timeline drag
         if (typeof initAudioPhaseFlip === 'function') initAudioPhaseFlip(appServices); // Audio Phase Flip - invert clip phase by 180 degrees
+        if (typeof initAudioWaveformAnnotation === 'function') initAudioWaveformAnnotation(appServices); // Audio Waveform Annotation - add notes on waveforms
         
         if (typeof initializePrimaryEventListeners === 'function') {
              initializePrimaryEventListeners(appServices);
