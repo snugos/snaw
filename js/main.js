@@ -498,6 +498,27 @@ import {
         console.log("All audio and transport stopped via panic.");
         showSafeNotification("All audio stopped.", 1500);
     },
+    stopAndResetTransport: () => {
+        console.log("[AppServices] Stop and Reset Transport requested.");
+        // Stop all audio using panic
+        appServices.panicStopAllAudio();
+        // Reset transport position to start
+        if (typeof Tone !== 'undefined' && Tone.Transport) {
+            Tone.Transport.position = 0;
+            Tone.Transport.progress = 0;
+        }
+        // Reset play button to stopped state
+        const playBtn = uiElementsCache.playBtnGlobal;
+        if (playBtn) {
+            playBtn.textContent = 'Play';
+            playBtn.classList.remove('playing');
+        }
+        // Clear timeline position display
+        if (uiElementsCache.timelinePositionDisplay) {
+            uiElementsCache.timelinePositionDisplay.textContent = '0:00:000';
+        }
+        showSafeNotification("Transport stopped and reset.", 1500);
+    },
     // END MODIFICATION
 
     updateTaskbarTempoDisplay: (tempo) => {

@@ -1976,9 +1976,15 @@ document.addEventListener('keydown', (event) => {
             return;
         }
         if (key === 'Escape' || key === 'esc') {
+            // Stop and reset transport first
+            if (localAppServices.stopAndResetTransport) {
+                localAppServices.stopAndResetTransport();
+            } else if (localAppServices.panicStopAllAudio) {
+                localAppServices.panicStopAllAudio();
+            }
+            // Then close all windows
             const allWindows = localAppServices.getOpenWindows ? localAppServices.getOpenWindows() : [];
             allWindows.forEach(w => { if (w.close) w.close(); });
-            if (localAppServices.showNotification) localAppServices.showNotification('Closed all windows', 800);
             return;
         }
         if (key === 'arrowleft') {
