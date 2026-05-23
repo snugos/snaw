@@ -1,118 +1,185 @@
 /**
- * MetronomeVisual.js
- * Provides a visual beat indicator that flashes in sync with the metronome audio clicks.
+ * js/MetronomeVisual.js - Enhanced Visual Beat Indicator
+ * Provides a visible beat indicator that flashes on the transport bar
+ * Features:
+ * - Large beat dot in transport bar that flashes on each beat
+ * - Special flash on downbeat (beat 1)
+ * - Visual pulse animation synced to transport position
  */
 
-let beatIndicatorEl = null;
+let beatDotEl = null;
 let animationFrameId = null;
 let isActive = false;
 let lastBeatIndex = -1;
+let currentBeatCount = 0;
+let transportStarted = false;
 
 // Beat colors
-const DOWNBEAT_COLOR = '#ff7700';
-const REGULAR_BEAT_COLOR = '#ffaa00';
+const DOWNBEAT_COLOR = '#ff4444';
+const REGULAR_BEAT_COLOR = '#ff7700';
 const INACTIVE_COLOR = '#333333';
 
 /**
- * Initialize the beat indicator element and start the visual loop.
- * @param {Object} appServices - Application services (optional, for compatibility with main.js pattern)
+ * Initialize the beat indicator element in the transport bar
+ * @param {Object} appServices - Application services
  */
 export function initMetronomeVisual(appServices) {
-    // Create or get the beat indicator element
-    beatIndicatorEl = document.getElementById('beatIndicatorGlobal');
-    if (!beatIndicatorEl) {
-        beatIndicatorEl = document.createElement('div');
-        beatIndicatorEl.id = 'beatIndicatorGlobal';
-        beatIndicatorEl.title = 'Beat Indicator';
-        beatIndicatorEl.style.cssText = `
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: ${INACTIVE_COLOR};
-            transition: background 0.05s ease-out;
-            box-shadow: 0 0 4px rgba(0,0,0,0.5);
-        `;
-        
-        // Try to find a good place in the transport bar
-        const transportBar = document.getElementById('globalControlsBar');
-        if (transportBar) {
-            // Insert after the metronome toggle button
-            const metronomeBtn = document.getElementById('metronomeToggleBtnGlobal');
-            if (metronomeBtn) {
-                metronomeBtn.parentNode.insertBefore(beatIndicatorEl, metronomeBtn.nextSibling);
-            } else {
-                transportBar.appendChild(beatIndicatorEl);
-            }
-        }
-    }
+    // Find the transport bar and metronome button
+    const transportBar = document.getElementById('globalControlsBar');
+    const metronomeBtn = document.getElementById('metronomeToggleBtnGlobal');
     
-    console.log('[MetronomeVisual] Beat indicator initialized');
-    return beatIndicatorEl;
-}
-
-/**
- * Update the visual indicator based on the current transport position and beat.
- */
-export function updateBeatVisual() {
-    if (!beatIndicatorEl || !isActive) return;
-    
-    if (typeof Tone === 'undefined') return;
-    
-    const state = Tone.Transport.state;
-    if (state !== 'started') {
-        beatIndicatorEl.style.background = INACTIVE_COLOR;
+    if (!transportBar) {
+        console.warn('[MetronomeVisual] Transport bar not found');
         return;
     }
     
-    // Get current position
-    const pos = Tone.Transport.position;
-    const parts = pos.split(':');
-    const beatsInBar = parseInt(parts[1], 10);
-    const ticks = parseInt(parts[2], 10);
+    // Create the beat indicator dot
+    beatDotEl = document.createElement('div');
+    beatDotEl.id = 'beatIndicatorDot';
+    beatDotEl.title = 'Beat Indicator';
+    beatDotEl.style.cssText = `
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: ${INACTIVE_COLOR};
+        box-shadow: 0 0 4px rgba(0,0,0,0.5);
+        transition: background 0.05s ease-out, box-shadow 0.05s ease-out, transform 0.05s ease-out;
+        margin-left: 4px;
+        cursor: pointer;
+    `;
     
-    // Calculate current beat within bar (0-3 for 4/4)
-    const currentBeat = Math.floor(ticks / (Tone.Transport.resolution / 4));
-    const isDownbeat = beatsInBar === 0 && currentBeat === 0;
-    
-    // Flash on the beat (every quarter note)
-    const beatIndex = beatsInBar * 4 + currentBeat;
-    
-    if (beatIndex !== lastBeatIndex) {
-        lastBeatIndex = beatIndex;
-        
-        // Flash the indicator
-        const color = isDownbeat ? DOWNBEAT_COLOR : REGULAR_BEAT_COLOR;
-        beatIndicatorEl.style.background = color;
-        beatIndicatorEl.style.boxShadow = `0 0 8px ${color}`;
-        
-        // Fade back to inactive after a short duration
-        setTimeout(() => {
-            if (beatIndicatorEl) {
-                beatIndicatorEl.style.background = INACTIVE_COLOR;
-                beatIndicatorEl.style.boxShadow = '0 0 4px rgba(0,0,0,0.5)';
-            }
-        }, 100);
+    // Insert after metronome button if it exists
+    if (metronomeBtn && metronomeBtn.parentNode) {
+        metronomeBtn.parentNode.insertBefore(beatDotEl, metronomeBtn.nextSibling);
+    } else {
+        transportBar.appendChild(beatDotEl);
     }
+    
+    // Click to toggle beat count display
+    beatDotEl.addEventListener('click', () => {
+        currentBeatCount = 0;
+    });
+    
+    isActive = true;
+    console.log('[MetronomeVisual] Beat indicator initialized');
+    
+    // Start the visual update loop
+    startVisualLoop();
+    
+    return beatDotEl;
 }
 
 /**
- * Start the visual beat loop.
+ * Main visual update loop - syncs with Tone.js Transport
  */
-export function startBeatVisualLoop() {
-    if (isActive) return;
-    isActive = true;
-    lastBeatIndex = -1;
+function startVisualLoop() {
+    if (!isActive) return;
     
     function loop() {
-        updateBeatVisual();
+        updateBeatVisualFromTransport();
         animationFrameId = requestAnimationFrame(loop);
     }
+    
     loop();
-    console.log('[MetronomeVisual] Beat visual loop started');
 }
 
 /**
- * Stop the visual beat loop.
+ * Update visual beat based on Tone.Transport position
+ */
+function updateBeatVisualFromTransport() {
+    if (!beatDotEl || !isActive) return;
+    
+    // Check if metronome is enabled
+    const metronomeEnabled = typeof getMetronomeEnabled === 'function' ? getMetronomeEnabled() : false;
+    
+    if (typeof Tone === 'undefined' || Tone.Transport.state !== 'started' || !metronomeEnabled) {
+        // Transport stopped or metronome disabled - reset
+        if (transportStarted) {
+            transportStarted = false;
+            currentBeatCount = 0;
+            lastBeatIndex = -1;
+            resetBeatDot();
+        }
+        return;
+    }
+    
+    transportStarted = true;
+    
+    // Get current position from Tone.Transport
+    // Format: "bars:quarters:sixteenths" (e.g., "0:0:0.0")
+    const pos = Tone.Transport.position;
+    const parts = pos.split(':');
+    
+    if (parts.length < 3) return;
+    
+    const bars = parseInt(parts[0], 10);
+    const quarters = parseInt(parts[1], 10);
+    const sixteenths = parseFloat(parts[2]);
+    
+    // Calculate beat within the bar (0-3 for 4/4 time)
+    const beatInBar = Math.floor(sixteenths / 4);
+    const isDownbeat = quarters === 0 && beatInBar === 0;
+    
+    // Calculate total beat index for cycle detection
+    const timeSignatureTop = typeof getMetronomeTimeSigTop === 'function' ? getMetronomeTimeSigTop() : 4;
+    const beatIndex = bars * timeSignatureTop + quarters;
+    
+    // Only flash when beat changes
+    if (beatIndex !== lastBeatIndex) {
+        lastBeatIndex = beatIndex;
+        currentBeatCount++;
+        
+        if (isDownbeat) {
+            // Flash downbeat - larger, redder pulse
+            flashBeatDot(DOWNBEAT_COLOR, true);
+            currentBeatCount = 1; // Reset count on downbeat
+        } else {
+            // Flash regular beat
+            flashBeatDot(REGULAR_BEAT_COLOR, false);
+        }
+    }
+}
+
+/**
+ * Flash the beat dot with color and animation
+ * @param {string} color - Hex color for the flash
+ * @param {boolean} isDownbeat - Whether this is a downbeat
+ */
+function flashBeatDot(color, isDownbeat) {
+    if (!beatDotEl) return;
+    
+    beatDotEl.style.background = color;
+    beatDotEl.style.boxShadow = `0 0 12px ${color}`;
+    
+    // Slight scale for downbeat
+    if (isDownbeat) {
+        beatDotEl.style.transform = 'scale(1.3)';
+    } else {
+        beatDotEl.style.transform = 'scale(1.15)';
+    }
+    
+    // Fade back after 100ms
+    setTimeout(() => {
+        if (beatDotEl) {
+            beatDotEl.style.background = INACTIVE_COLOR;
+            beatDotEl.style.boxShadow = '0 0 4px rgba(0,0,0,0.5)';
+            beatDotEl.style.transform = 'scale(1)';
+        }
+    }, 100);
+}
+
+/**
+ * Reset beat dot to inactive state
+ */
+function resetBeatDot() {
+    if (!beatDotEl) return;
+    beatDotEl.style.background = INACTIVE_COLOR;
+    beatDotEl.style.boxShadow = '0 0 4px rgba(0,0,0,0.5)';
+    beatDotEl.style.transform = 'scale(1)';
+}
+
+/**
+ * Stop the visual loop
  */
 export function stopBeatVisualLoop() {
     if (!isActive) return;
@@ -121,27 +188,57 @@ export function stopBeatVisualLoop() {
         cancelAnimationFrame(animationFrameId);
         animationFrameId = null;
     }
-    if (beatIndicatorEl) {
-        beatIndicatorEl.style.background = INACTIVE_COLOR;
-    }
+    resetBeatDot();
     console.log('[MetronomeVisual] Beat visual loop stopped');
 }
 
 /**
- * Check if the metronome visual is active.
+ * Start the visual loop (called by init)
+ */
+function startBeatVisualLoop() {
+    if (isActive) return;
+    isActive = true;
+    startVisualLoop();
+}
+
+/**
+ * Check if the metronome visual is active
  * @returns {boolean}
  */
 export function isBeatVisualActive() {
     return isActive;
 }
 
-// Auto-start when transport plays and stop when it stops
-// The actual sync happens in eventHandlers.js where startMetronomeScheduling is called
+/**
+ * Get current beat count since transport started
+ * @returns {number}
+ */
+export function getBeatCount() {
+    return currentBeatCount;
+}
+
+/**
+ * Force update - call this when transport state changes
+ */
+export function forceUpdate() {
+    lastBeatIndex = -1;
+    currentBeatCount = 0;
+}
+
+// External references (will be set by eventHandlers.js)
+function getMetronomeEnabled() {
+    return window.state?.metronomeEnabled || false;
+}
+
+function getMetronomeTimeSigTop() {
+    return window.state?.metronomeTimeSigTop || 4;
+}
 
 export default {
     initMetronomeVisual,
-    updateBeatVisual,
     startBeatVisualLoop,
     stopBeatVisualLoop,
-    isBeatVisualActive
+    isBeatVisualActive,
+    getBeatCount,
+    forceUpdate
 };
