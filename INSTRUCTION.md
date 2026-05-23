@@ -32,16 +32,16 @@ Generate 10 NEW feature ideas that are:
 
 ### New Feature Ideas:
 
-1. **Audio Waveform Annotation** - Add text notes directly onto audio waveforms for collaboration comments
-2. **Clip Probability Distribution** - Assign probability of clip playing each pass for generative variations
-3. **Real-time Spectrum Visualizer** - Floating spectrum analyzer that follows playhead during recording
-4. **Track Lane Solo Mode** - Solo only selected lane(s) while keeping other lanes at reduced volume
-5. **MIDI CC Automation Lanes** - Dedicated automation lanes for MIDI CC parameters
-6. **Adaptive BPM Detection** - Analyze imported audio and suggest matching BPM automatically
-7. **Clip Fade Shape Presets** - Save custom fade curves (exponential, S-curve, logarithmic) as reusable presets
-8. **Track Color Themes** - Save/load complete track color schemes as project themes
-9. **MIDI Learn Presets** - Save and recall complete MIDI learn mappings for different hardware setups
-10. **Clip Ghost Preview** - Show semi-transparent preview of selected clip at mouse position during drag operations
+1. ~~**Audio Waveform Annotation** - Add text notes directly onto audio waveforms for collaboration comments~~ ✅
+2. ~~**Clip Probability Distribution** - Assign probability of clip playing each pass for generative variations~~ ✅
+3. ~~**Real-time Spectrum Visualizer** - Floating spectrum analyzer that follows playhead during recording~~ ✅
+4. ~~**Track Lane Solo Mode** - Solo only selected lane(s) while keeping other lanes at reduced volume~~ ✅
+5. ~~**MIDI CC Automation Lanes** - Dedicated automation lanes for MIDI CC parameters~~ ✅
+6. ~~**Adaptive BPM Detection** - Analyze imported audio and suggest matching BPM automatically~~ ✅
+7. ~~**Clip Fade Shape Presets** - Save custom fade curves (exponential, S-curve, logarithmic) as reusable presets~~ ✅
+8. ~~**Track Color Themes** - Save/load complete track color schemes as project themes~~ ✅
+9. ~~**MIDI Learn Presets** - Save and recall complete MIDI learn mappings for different hardware setups~~ ✅ (see `js/MIDILearnPresets.js`)
+10. ~~**Clip Ghost Preview** - Show semi-transparent preview of selected clip at mouse position during drag operations~~ ✅
 
 ## Workflow
 
