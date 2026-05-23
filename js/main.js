@@ -995,6 +995,7 @@ import {
 
     // MIDI Learn Wizard
     openMIDILearnWizard,
+    openMIDILearnPresetsPanel,
 
     // Collaboration Session Recording
     CollaborationSessionRecording,
@@ -1609,6 +1610,7 @@ async function initializeSnugOS() {
         if (typeof initTrackGhostSignals === 'function') initTrackGhostSignals(appServices); // Track Ghost Signals initialization
         if (typeof initQuickRename === 'function') initQuickRename(appServices); // Quick Rename initialization
         if (typeof initBulkAssign === 'function') initBulkAssign(); // MIDI Bulk Assign initialization
+        if (typeof initMIDILearnPresets === 'function') initMIDILearnPresets(appServices); // MIDI Learn Presets initialization
         if (typeof initBeatDetective === 'function') initBeatDetective(appServices); // Beat Detective initialization
         if (typeof initTransportLoopCount === 'function') initTransportLoopCount(appServices); // Transport Loop Count initialization
         if (window.TransportMemory && typeof window.TransportMemory.init === 'function') window.TransportMemory.init(); // Transport Memory restoration
