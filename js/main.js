@@ -38,6 +38,7 @@ import { SmartFXChain } from './SmartFXChain.js';
 import { MidiMonitor } from './MidiMonitor.js';
 import { initMIDILearnWizard, openMIDILearnWizard } from './MIDILearnWizard.js';
 import { initBulkAssign, startBulkAssign, stopBulkAssign, isBulkAssignActive } from './MIDILearnBulkAssign.js';
+import { initMIDILearnPresets, openMIDILearnPresetsPanel } from './MIDILearnPresets.js';
 import { AudioFingerprinting } from './AudioFingerprinting.js';
 import { initAudioTapTempo } from './AudioTapTempo.js';
 import { initAudioNormalizer, openAudioNormalizerPanel } from './AudioNormalizer.js';
@@ -102,6 +103,8 @@ import { initTrackCompressorVisualizer, openTrackCompressorVisualizer } from './
 import { initPhaseCorrelationMeter, openPhaseCorrelationMeterPanel } from './PhaseCorrelationMeter.js';
 // Track Color Palette
 import { initTrackColorPalette, openTrackColorPalettePanel } from './TrackColorPalette.js';
+// Track Scroll To Center
+import { initTrackScrollToCenter, openTrackScrollToCenterPanel, getScrollToCenterFn } from './TrackScrollToCenter.js';
 // Rhythm Randomizer
 import { initRhythmRandomizer, openRhythmRandomizerPanel, getRhythmRandomizerSettings } from './RhythmRandomizer.js';
 // Arrangement Snap Grid
@@ -1578,6 +1581,7 @@ async function initializeSnugOS() {
         if (typeof initTrackContextMenu === 'function') initTrackContextMenu(appServices); // Track context menu with duplicate
         if (typeof initTrackDuplicateOffset === 'function') initTrackDuplicateOffset(appServices); // Track Duplicate with Offset
         if (typeof initTrackColorPanel === 'function') initTrackColorPanel(appServices); // Track Color Panel initialization
+        if (typeof initTrackScrollToCenter === 'function') initTrackScrollToCenter(appServices); // Track Scroll To Center initialization
         if (typeof initSamplerLoopTrim === 'function') initSamplerLoopTrim(appServices); // Sampler Loop Trim initialization
         if (typeof initTrackIconPicker === 'function') initTrackIconPicker(appServices); // Track Icon Picker initialization
         if (typeof initChordVoicingModes === 'function') initChordVoicingModes(appServices); // Chord Voicing Modes initialization

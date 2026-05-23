@@ -234,6 +234,7 @@ export function initializePrimaryEventListeners(appContext) {
                     { label: "Track Export Solo", action: () => { if(localAppServices.openTrackExportSoloPanel) localAppServices.openTrackExportSoloPanel(); } },
                     { label: "Track Solo Chain", action: () => { if(localAppServices.openSoloChainPanel) localAppServices.openSoloChainPanel(); } },
                     { label: "Track Send Routing", action: () => { if(localAppServices.openTrackSendRoutingPanel) localAppServices.openTrackSendRoutingPanel(); } },
+                    { label: "Scroll Track to Center", action: () => { if(localAppServices.showNotification) localAppServices.showNotification('Ctrl+Shift+Click any track to scroll it to center', 3000); } },
                     { label: "Toggle Full Screen", action: toggleFullScreen }
                 ];
                 if (typeof createContextMenu === 'function') {
