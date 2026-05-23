@@ -455,6 +455,8 @@ const KEYBOARD_SHORTCUTS = [
     { category: 'Navigation', shortcuts: [
         { keys: '←', description: 'Decrease tempo by 0.1 BPM' },
         { keys: '→', description: 'Increase tempo by 0.1 BPM' },
+        { keys: '[', description: 'Nudge tempo down (fine)' },
+        { keys: ']', description: 'Nudge tempo up (fine)' },
         { keys: 'Z', description: 'Shift octave down' },
         { keys: 'X', description: 'Shift octave up' },
     ]},
