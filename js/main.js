@@ -110,6 +110,8 @@ import { initTrackScrollToCenter, openTrackScrollToCenterPanel, getScrollToCente
 import { initRhythmRandomizer, openRhythmRandomizerPanel, getRhythmRandomizerSettings } from './RhythmRandomizer.js';
 // Arrangement Snap Grid
 import { initArrangementSnapGrid, openSnapGridPanel, getSnapValue, setSnapValue, snapTimeToGrid, toggleSnapEnabled, getSnapInfo } from './ArrangementSnapGrid.js';
+// Timeline Snap Resolution
+import { initTimelineSnapResolution, openSnapResolutionPanel, getSnapResolution, setSnapResolution, toggleSnapResolutionPanel } from './TimelineSnapResolution.js';
 // Clip Ghost Trails
 import { initClipGhostTrails, openGhostTrailsPanel, getGhostTrails, addGhostTrail, removeGhostTrail, clearAllGhostTrails, createGhostFromClip, renderGhostTrailsOnCanvas, getGhostTrailCount, exportGhostTrailsData, importGhostTrailsData } from './ClipGhostTrails.js';
 // Track Ghost Signals - Show faint visual overlay of other tracks' waveforms for visual reference
@@ -1654,6 +1656,7 @@ async function initializeSnugOS() {
         if (typeof initTempoSyncHelper === 'function') initTempoSyncHelper(appServices); // Tempo Sync Helper initialization
         if (typeof setupTempoSyncMenuItem === 'function') setupTempoSyncMenuItem(); // Add to start menu
         if (typeof initArrangementSnapGrid === 'function') initArrangementSnapGrid(appServices); // Arrangement Snap Grid initialization
+        if (typeof initTimelineSnapResolution === 'function') initTimelineSnapResolution(appServices); // Timeline Snap Resolution initialization
         if (typeof initTempoRamperVisual === 'function') initTempoRamperVisual(appServices); // Tempo Ramper Visual initialization
         if (typeof initSidechainVolumeEnvelope === 'function') initSidechainVolumeEnvelope(appServices); // Sidechain Volume Envelope initialization
         if (typeof initSidechainVisualizer === 'function') initSidechainVisualizer(appServices); // Sidechain Visualizer initialization

@@ -4,77 +4,27 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-**All features from the original queue have been implemented.** The codebase has **493 JS files** with **259,000+ lines of code** covering a complete DAW feature set.
-
-### Original Queue (Complete):
-1. ~~**Piano Roll Editor** - Clickable piano roll with note editing~~ ✅ (see `js/PianoRollEditor.js`)
-2. ~~**Audio Recording** - Record audio from microphone into tracks~~ ✅ (see `js/AudioRecorder.js`)
-3. ~~**VST Plugin Support** - Load WebAudio plugins via AudioWorklet~~ ✅ (limited to browser-compatible formats)
-4. ~~**MIDI File Import/Export** - Drag & drop .mid files~~ ✅
-5. ~~**Track Effects Presets** - Save/load effect chain presets per track~~ ✅ (see `js/ClipFadePresets.js`)
-6. ~~**Quantize Selection** - Quantize selected notes to grid~~ ✅ (see `js/ScaleQuantize.js`, `js/SmartQuantize.js`)
-7. ~~**Undo/Redo Visual Stack** - Show undo history in a panel~~ ✅ (see `js/UndoHistoryPanel.js`)
-8. ~~**Keyboard Shortcuts Panel** - Press `?` to show all shortcuts~~ ✅ (see `js/KeyboardShortcuts.js`)
-9. ~~**Waveform Visualization** - Draw waveform on audio clips~~ ✅ (see `js/WaveformVisualization.js`)
-10. ~~**Track Color Coding** - Assign colors to tracks for visual grouping~~ ✅ (see `js/TrackColorPanel.js`)
-
-### Additional Features (Pre-Implemented):
-- Audio Reverse ✅
-- Velocity Curve Editor ✅
-- Track Send Routing ✅
-- MIDITranspose ✅
-- Clip Batch Transpose ✅
-- Track Grouping ✅
-- Click Track Generator ✅
-- Track Lane Reorder ✅
-- Audio Waveform Annotation ✅
-- Clip Probability Distribution ✅
-- Real-time Spectrum Visualizer ✅
-- Track Lane Solo Mode ✅
-- MIDI CC Automation Lanes ✅
-- Adaptive BPM Detection ✅
-- Clip Fade Shape Presets ✅
-- Track Color Themes ✅
-- MIDI Learn Presets ✅
-- Clip Ghost Preview ✅
-- Tap Tempo / Tap History ✅
-- Drum Pattern Generator ✅
-- Melody Generator ✅
-- Tempo Ramper ✅
-- Lyrics Track ✅
-- Video Export ✅
-- Cloud Sync ✅
-- Notation Export ✅
-- Clipboard History Manager ✅
-
-## When Queue is Empty
-
-Since all features are implemented, generate new ideas when needed:
-
-```
-Based on SnugOS being a browser-based DAW with:
-- Tone.js audio engine
-- Multi-track timeline
-- Effects rack
-- Sequencer mode
-- MIDI support
-
-Generate 10 NEW feature ideas that are:
-1. Achievable in a single session
-2. Complement existing features
-3. Enhance creative workflow
-```
+1. **Multi-Select Clip Operations** - Select multiple clips and move/delete/duplicate them together
+2. **Timeline Marker Notes** - Add text notes to timeline markers for session reminders
+3. **Track Freeze Quick** - Instantly freeze a track to flatten all effects for CPU saving
+4. **Clip Opacity Slider** - Adjust opacity of audio clips for visual layering
+5. **MIDI Velocity Editor** - Draw velocity curves on selected MIDI notes visually
+6. **Loop Length Quick Adjust** - Keyboard shortcuts to double/halve loop region length
+7. **Track Solo Type** - Options for solo: mute others, solo in place, or solo chain
+8. **Snap Grid Intensity** - Visual feedback showing current snap strength on timeline
+9. **Audio Clip Normalize** - One-click normalize audio clip to peak level
 
 ## Workflow
 
-### Step 1: Check Queue
-- Read this instruction to see current status
-- If queue is empty, generate new ideas and update this file
+### Step 1: Pick Next Feature
+- Read this instruction to see which feature you're on
+- Work on features IN ORDER (1, then 2, then 3...)
 
-### Step 2: Implement Feature (if new)
+### Step 2: Implement Feature
 - Keep it SIMPLE and MINIMAL
 - Follow existing code patterns
 - Add necessary UI, state, and audio logic
+- Test locally before committing
 
 ### Step 3: Commit & Push
 - Commit: `feat: [feature name]`
@@ -89,8 +39,28 @@ Generate 10 NEW feature ideas that are:
 ### Step 5: Update Queue
 After successfully implementing a feature:
 - Remove it from the queue
-- Renumber remaining features
-- Update this instruction
+- Renumber the remaining features
+- Update this instruction with new queue
+
+## When Queue is Empty
+
+Run this brainstorming process:
+
+```
+Based on SnugOS being a browser-based DAW with:
+- Tone.js audio engine
+- Multi-track timeline
+- Effects rack
+- Sequencer mode
+- MIDI support
+
+Generate 10 NEW feature ideas that are:
+1. Achievable in a single session
+2. Complement existing features
+3. Enhance creative workflow
+
+Output as numbered list and update this instruction.
+```
 
 ## Rules
 
