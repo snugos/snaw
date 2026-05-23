@@ -72,6 +72,7 @@ const KeyboardShortcuts = (function() {
     register('v', ['ctrl'], () => { if (typeof pasteSelection === 'function') pasteSelection(); }, 'Paste', 'Edit');
     register('x', ['ctrl'], () => { if (typeof cutSelection === 'function') cutSelection(); }, 'Cut', 'Edit');
     register('f', ['ctrl', 'shift'], () => { if (typeof openAudioFadePresetPanel === 'function') openAudioFadePresetPanel({ getSelectedClips: () => { if (typeof getSelectedObjects === 'function') { const selected = getSelectedObjects(); return selected.filter(obj => obj && obj.type === 'clip'); } return []; }, applyFadeToClip: (clipId, buffer) => { if (typeof updateClipAudio === 'function') updateClipAudio(clipId, buffer); } }); }, 'Audio Fade Presets', 'Edit');
+    register('?', [], () => { if (typeof openKeyboardShortcutsPanel === 'function') openKeyboardShortcutsPanel(); }, 'Show Keyboard Shortcuts Panel', 'General');
 
     return { register, enable, disable, isEnabled, clear, getShortcutsByCategory, exportShortcuts };
 })();
