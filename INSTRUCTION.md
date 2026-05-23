@@ -45,6 +45,7 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 - Video Export ✅
 - Cloud Sync ✅
 - Notation Export ✅
+- Clipboard History Manager ✅
 
 ## When Queue is Empty
 
