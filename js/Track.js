@@ -2114,6 +2114,7 @@ export class Track {
      * @param {boolean} fromInteraction - Whether this is from a user interaction
      */
     setPan(pan, fromInteraction = false) {
+        if (!fromInteraction) this._captureUndoState(`Set pan on ${this.name}`);
         // Clamp pan value to valid range
         this.pan = Math.max(-1, Math.min(1, parseFloat(pan) || 0));
         
@@ -2143,6 +2144,7 @@ export class Track {
      * @param {boolean} fromInteraction - Whether this is from a user interaction
      */
     setColor(color, fromInteraction = false) {
+        if (!fromInteraction) this._captureUndoState(`Set color on ${this.name}`);
         // Validate color format
         const isValidHex = /^#[0-9A-Fa-f]{6}$/.test(color);
         if (!isValidHex) {
@@ -2170,6 +2172,7 @@ export class Track {
      * @param {boolean} fromInteraction - Whether this is from a user interaction
      */
     setMidiChannel(channel, fromInteraction = false) {
+        if (!fromInteraction) this._captureUndoState(`Set MIDI channel on ${this.name}`);
         // Clamp channel value to valid range (0 = omni, 1-16 = specific channel)
         this.midiChannel = Math.max(0, Math.min(16, parseInt(channel) || 0));
         console.log(`[Track ${this.id}] Set MIDI channel to ${this.midiChannel === 0 ? 'Omni (All)' : this.midiChannel}`);

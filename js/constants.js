@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.18"; // Daily merge 2026-05-22 - Bug fixes: Fixed undo capture order in addAudioClip and pasteSequenceSection (moved _captureUndoState BEFORE mutation following Day 559 pattern from app). All features verified present: tap tempo, auto-save, crash recovery, sidechain routing, MIDI import/export, automation, sequence tools.
+export const APP_VERSION = "0.3.19"; // Daily merge 2026-05-23 - Added missing undo captures to setPan, setColor, and setMidiChannel methods in Track.js (following setVolume pattern). All features verified present: tap tempo, auto-save, crash recovery, sidechain routing, MIDI import/export, automation, sequence tools.
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks
