@@ -4,15 +4,14 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Multi-Select Clip Operations** - Select multiple clips and move/delete/duplicate them together
-2. **Timeline Marker Notes** - Add text notes to timeline markers for session reminders
-3. **Track Freeze Quick** - Instantly freeze a track to flatten all effects for CPU saving
-4. **Clip Opacity Slider** - Adjust opacity of audio clips for visual layering
-5. **MIDI Velocity Editor** - Draw velocity curves on selected MIDI notes visually
-6. **Loop Length Quick Adjust** - Keyboard shortcuts to double/halve loop region length
-7. **Track Solo Type** - Options for solo: mute others, solo in place, or solo chain
-8. **Snap Grid Intensity** - Visual feedback showing current snap strength on timeline
-9. **Audio Clip Normalize** - One-click normalize audio clip to peak level
+1. **Timeline Marker Notes** - Add text notes to timeline markers for session reminders
+2. **Track Freeze Quick** - Instantly freeze a track to flatten all effects for CPU saving
+3. **Clip Opacity Slider** - Adjust opacity of audio clips for visual layering
+4. **MIDI Velocity Editor** - Draw velocity curves on selected MIDI notes visually
+5. **Loop Length Quick Adjust** - Keyboard shortcuts to double/halve loop region length
+6. **Track Solo Type** - Options for solo: mute others, solo in place, or solo chain
+7. **Snap Grid Intensity** - Visual feedback showing current snap strength on timeline
+8. **Audio Clip Normalize** - One-click normalize audio clip to peak level
 
 ## Workflow
 
