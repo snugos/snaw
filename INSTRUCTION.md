@@ -13,7 +13,6 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 7. **Clip Start/End Fine Tune** - Hold Shift + drag clip edge for pixel-perfect trim
 8. **Mute Selected Tracks** - Press M to mute/unmute all currently selected tracks
 9. **Project Template Quick Save** - Save current project state as template with one shortcut
-10. **Scale Highlight Intensity** - Slider to adjust how prominently scale notes are highlighted
 
 ## Workflow
 
