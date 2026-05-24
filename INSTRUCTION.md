@@ -4,7 +4,7 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Track Freeze Quick** - Instantly freeze a track to flatten all effects for CPU saving
+1. **Track Freeze Quick** - Instantly freeze a track to flatten all effects for CPU saving (F key on selected track)
 2. **Clip Opacity Slider** - Adjust opacity of audio clips for visual layering
 3. **MIDI Velocity Editor** - Draw velocity curves on selected MIDI notes visually
 4. **Loop Length Quick Adjust** - Keyboard shortcuts to double/halve loop region length
