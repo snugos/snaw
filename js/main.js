@@ -1659,6 +1659,8 @@ async function initializeSnugOS() {
         if (typeof initTempoSyncHelper === 'function') initTempoSyncHelper(appServices); // Tempo Sync Helper initialization
         if (typeof setupTempoSyncMenuItem === 'function') setupTempoSyncMenuItem(); // Add to start menu
         if (typeof initArrangementSnapGrid === 'function') initArrangementSnapGrid(appServices); // Arrangement Snap Grid initialization
+        if (typeof initAudioNormalizer === 'function') initAudioNormalizer(); // Audio Normalizer initialization
+        if (typeof initVelocityCurveEditor === 'function') initVelocityCurveEditor(appServices); // Velocity Curve Editor initialization
         if (typeof initTimelineSnapResolution === 'function') initTimelineSnapResolution(appServices); // Timeline Snap Resolution initialization
         if (typeof initTempoRamperVisual === 'function') initTempoRamperVisual(appServices); // Tempo Ramper Visual initialization
         if (typeof initSidechainVolumeEnvelope === 'function') initSidechainVolumeEnvelope(appServices); // Sidechain Volume Envelope initialization
