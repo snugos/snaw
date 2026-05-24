@@ -3,6 +3,7 @@
 // --- Module Imports ---
 import { SnugWindow } from './SnugWindow.js';
 import * as Constants from './constants.js';
+import { initTrackSwap, swapTwoTracks, clearTrackSwapSelection } from './TrackSwap.js';
 import { AICompositionAssistant, openAICompositionPanel } from './AICompositionAssistant.js';
 import { DrumPatternGenerator, initDrumPatternGenerator, getDrumGenerator, generateDrumPattern, DRUM_STYLES, COMPLEXITY_LEVELS as DRUM_COMPLEXITY_LEVELS } from './DrumPatternGenerator.js';
 import { MelodyGenerator, initMelodyGenerator, getMelodyGenerator, generateMelody, MELODY_STYLES, MELODY_MOODS } from './MelodyGenerator.js';
@@ -1607,6 +1608,7 @@ async function initializeSnugOS() {
         if (typeof initDrumReplace === 'function') initDrumReplace(appServices); // Drum Replace initialization
         if (typeof initDrumPatternSplitter === 'function') initDrumPatternSplitter(appServices); // Drum Pattern Splitter initialization
         if (typeof initTrackContextMenu === 'function') initTrackContextMenu(appServices); // Track context menu with duplicate
+        if (typeof initTrackSwap === 'function') initTrackSwap(appServices); // Track Swap - Ctrl+Right-click two tracks to swap
         if (typeof initTimelineClipOperations === 'function') initTimelineClipOperations(appServices); // Timeline Clip Operations (multi-select)
         if (typeof initTrackDuplicateOffset === 'function') initTrackDuplicateOffset(appServices); // Track Duplicate with Offset
         if (typeof initTrackColorPanel === 'function') initTrackColorPanel(appServices); // Track Color Panel initialization
