@@ -15,27 +15,106 @@ function getAudioContext() {
     return audioContext;
 }
 
+// Sound types for metronome
+const SOUND_TYPES = ['classic', 'wooden', 'electronic', 'voice'];
+const SOUND_LABELS = {
+    'classic': 'Classic',
+    'wooden': 'Wooden Block',
+    'electronic': 'Electronic',
+    'voice': 'Voice Count'
+};
+
 // Generate a click sound using Tone.js if available, otherwise Web Audio
-export function playClick(accent = false) {
+// Supports multiple sound types: classic, wooden, electronic, voice
+export function playClick(accent = false, soundType = 'classic') {
+    const settings = getMetronomeSettings();
+    const type = soundType || settings.soundType || 'classic';
+    const volume = settings.volume !== undefined ? settings.volume : 0.5;
+    
     try {
+        // Voice count - use SpeechSynthesis for "1, 2, 3, 4"
+        if (type === 'voice') {
+            if (typeof window.speechSynthesis !== 'undefined') {
+                const utterance = new SpeechSynthesisUtterance(accent ? '1' : (currentBeat % settings.numerator + 1).toString());
+                utterance.volume = volume;
+                utterance.rate = 1.2;
+                utterance.pitch = 1.0;
+                window.speechSynthesis.speak(utterance);
+            }
+            return;
+        }
+        
+        // Web Audio approach for synthesized sounds
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        
+        let frequency, oscType, attackTime, decayTime, sustainLevel, releaseTime;
+        
+        switch (type) {
+            case 'wooden':
+                // Lower, warmer click like a wood block
+                frequency = accent ? 600 : 400;
+                oscType = 'triangle';
+                attackTime = 0.002;
+                decayTime = 0.08;
+                sustainLevel = 0.3;
+                releaseTime = 0.05;
+                break;
+            case 'electronic':
+                // Clean, sharp digital beep
+                frequency = accent ? 1200 : 1000;
+                oscType = 'square';
+                attackTime = 0.001;
+                decayTime = 0.03;
+                sustainLevel = 0.1;
+                releaseTime = 0.02;
+                break;
+            case 'classic':
+            default:
+                // Default balanced click
+                frequency = accent ? 1000 : 800;
+                oscType = 'sine';
+                attackTime = 0.002;
+                decayTime = 0.05;
+                sustainLevel = 0.2;
+                releaseTime = 0.03;
+                break;
+        }
+        
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = frequency;
+        osc.type = oscType;
+        
+        const now = ctx.currentTime;
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(volume, now + attackTime);
+        gain.gain.exponentialRampToValueAtTime(Math.max(sustainLevel * volume, 0.001), now + attackTime + decayTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + attackTime + decayTime + releaseTime);
+        
+        osc.start(now);
+        osc.stop(now + attackTime + decayTime + releaseTime + 0.01);
+        
+        // Also try Tone.js if available for better quality
         if (typeof Tone !== 'undefined') {
-            const osc = new Tone.Oscillator(accent ? 1000 : 800, "sine").toDestination();
-            const env = new Tone.AmplitudeEnvelope().release;
-            osc.start();
-            osc.stop(Tone.now() + 0.05);
-        } else {
-            const ctx = getAudioContext();
-            if (!ctx) return;
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.frequency.value = accent ? 1000 : 800;
-            osc.type = 'sine';
-            gain.gain.setValueAtTime(0.3, ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
-            osc.start(ctx.currentTime);
-            osc.stop(ctx.currentTime + 0.05);
+            try {
+                const toneOsc = new Tone.Oscillator(frequency, oscType).toDestination();
+                const toneEnv = new Tone.AmplitudeEnvelope({
+                    attack: attackTime,
+                    decay: decayTime,
+                    sustain: sustainLevel,
+                    release: releaseTime
+                }).release;
+                toneOsc.connect(toneEnv);
+                toneEnv.toDestination();
+                toneOsc.volume.value = Tone.gainToDb(volume);
+                toneOsc.start();
+                toneOsc.stop(Tone.now() + attackTime + decayTime + releaseTime + 0.01);
+            } catch (e) {
+                // Fall back to Web Audio
+            }
         }
     } catch (e) {
         // Silently fail if audio not available
@@ -50,7 +129,7 @@ function tick() {
     const isAccent = currentBeat === 1;
     
     if (settings.audioEnabled) {
-        playClick(isAccent);
+        playClick(isAccent, settings.soundType);
     }
     
     updateVisualBeat(currentBeat, isAccent, totalBeats);
@@ -88,7 +167,19 @@ function getMetronomeSettings() {
         audioEnabled: globalState.metronomeAudioEnabled !== false,
         visualEnabled: globalState.metronomeVisualEnabled !== false,
         cpuSaver: globalState.metronomeCpuSaver || false,
+        soundType: globalState.metronomeSoundType || 'classic',
+        volume: globalState.metronomeVolume !== undefined ? globalState.metronomeVolume : 0.5,
     };
+}
+
+export function setMetronomeSoundType(type) {
+    if (SOUND_TYPES.includes(type)) {
+        if (window.state) window.state.metronomeSoundType = type;
+    }
+}
+
+export function getMetronomeSoundType() {
+    return getMetronomeSettings().soundType;
 }
 
 export function startMetronome() {
@@ -241,6 +332,13 @@ function renderMetronomeContent() {
                 <input type="checkbox" id="metronomeAudioEnabled" ${settings.audioEnabled ? 'checked' : ''} class="w-4 h-4 accent-blue-500">
                 <span class="text-xs text-gray-600 dark:text-gray-300">Audio Click</span>
             </label>
+            
+            <div class="flex items-center gap-2">
+                <label class="text-xs text-gray-600 dark:text-gray-300">Sound:</label>
+                <select id="metronomeSoundType" class="px-2 py-1 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-500 rounded text-sm">
+                    ${SOUND_TYPES.map(t => `<option value="${t}" ${settings.soundType === t ? 'selected' : ''}>${SOUND_LABELS[t]}</option>`).join('')}
+                </select>
+            </div>
         </div>
     `;
     
@@ -280,6 +378,10 @@ function renderMetronomeContent() {
     
     document.getElementById('metronomeAudioEnabled')?.addEventListener('change', (e) => {
         if (window.state) window.state.metronomeAudioEnabled = e.target.checked;
+    });
+    
+    document.getElementById('metronomeSoundType')?.addEventListener('change', (e) => {
+        setMetronomeSoundType(e.target.value);
     });
     
     // Tap tempo
