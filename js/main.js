@@ -1909,6 +1909,30 @@ async function restoreDesktopBackground() {
 }
 
 
+// --- Enhancement: Timeline Ruler Click Time Tooltip ---
+// Shows time position tooltip when clicking on the timeline ruler
+function showPlayheadTooltip(clientX, clientY) {
+    const tooltip = document.getElementById('playheadTooltip') || createPlayheadTooltip();
+    const time = getCurrentTimelinePosition?.() || 0;
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    const ms = Math.floor((time % 1) * 1000);
+    tooltip.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}:${ms.toString().padStart(3, '0')}`;
+    tooltip.style.left = (clientX + 10) + 'px';
+    tooltip.style.top = (clientY + 10) + 'px';
+    tooltip.style.display = 'block';
+    clearTimeout(window._playheadTooltipTimeout);
+    window._playheadTooltipTimeout = setTimeout(() => { tooltip.style.display = 'none'; }, 2000);
+}
+
+function createPlayheadTooltip() {
+    const tooltip = document.createElement('div');
+    tooltip.id = 'playheadTooltip';
+    tooltip.style.cssText = 'position:fixed;background:rgba(0,0,0,0.85);color:#fff;padding:4px 8px;border-radius:4px;font-size:12px;pointer-events:none;z-index:100000;display:none;';
+    document.body.appendChild(tooltip);
+    return tooltip;
+}
+
 // --- Global Event Listeners ---
 if (typeof window !== 'undefined') {
 window.addEventListener('load', initializeSnugOS);
