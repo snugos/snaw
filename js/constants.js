@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.19"; // Daily merge 2026-05-23 - Added missing undo captures to setPan, setColor, and setMidiChannel methods in Track.js (following setVolume pattern). All features verified present: tap tempo, auto-save, crash recovery, sidechain routing, MIDI import/export, automation, sequence tools.
+export const APP_VERSION = "0.3.20"; // Daily merge 2026-05-24 - All features verified present: tap tempo, auto-save, crash recovery, sidechain routing, MIDI import/export, automation, sequence tools. No changes required - snaw is the complete super-repo.
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks
