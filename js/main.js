@@ -82,6 +82,8 @@ import { initClipSelectionManager } from './ClipSelectionManager.js';
 import { initClipFadePresets, openClipFadePresetsPanel, closeClipFadePresetsPanel, addFadePreset, getFadePresets, getClipFadeMenuItems, getClipFadeMenuItemsSimple, applyFadePresetToClip } from './ClipFadePresets.js';
 import { initClipGroupManager } from './ClipGroupManager.js';
 import { initTrackContextMenu } from './TrackContextMenu.js';
+// Timeline Clip Operations
+import { initTimelineClipOperations } from './TimelineClipOperations.js';
 // Track Duplicate with Offset
 import { initTrackDuplicateOffset, openDuplicateOffsetDialog, duplicateTrackWithOffset } from './TrackDuplicateOffset.js';
 import { initSamplerLoopTrim, openSamplerLoopTrimPanel } from './SamplerLoopTrim.js';
