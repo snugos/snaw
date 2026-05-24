@@ -1,3 +1,32 @@
+## Session: 2026-05-23 17:15 UTC (Snaw Feature Builder Agent Run)
+
+**Status:** FEATURE IMPLEMENTED ✅
+
+### Feature Completed:
+- **Timeline Clip Operations** - `js/TimelineClipOperations.js` (NEW)
+  - Multi-select clip operations for timeline clips
+  - Functions: moveSelectedClips, copySelectedClips, cutSelectedClips, pasteClips, deleteTimelineClips, duplicateTimelineClips, groupEditClips
+  - Integrated into main.js with proper initialization
+
+### Files Modified:
+- `js/TimelineClipOperations.js` (NEW) - Main module
+- `js/main.js` - Import and initialization added
+- `INSTRUCTION.md` - Updated feature queue (removed completed feature)
+
+### Commit: `e24fb2b` - feat: Timeline Clip Operations - Multi-select clip operations
+
+### Updated Feature Queue (2026-05-23):
+1. **Timeline Marker Notes** - Add text notes to timeline markers for session reminders
+2. **Track Freeze Quick** - Instantly freeze a track to flatten all effects for CPU saving
+3. **Clip Opacity Slider** - Adjust opacity of audio clips for visual layering
+4. **MIDI Velocity Editor** - Draw velocity curves on selected MIDI notes visually
+5. **Loop Length Quick Adjust** - Keyboard shortcuts to double/halve loop region length
+6. **Track Solo Type** - Options for solo: mute others, solo in place, or solo chain
+7. **Snap Grid Intensity** - Visual feedback showing current snap strength on timeline
+8. **Audio Clip Normalize** - One-click normalize audio clip to peak level
+
+---
+
 ## Session: 2026-05-22 01:15 UTC (Snaw Feature Completion Agent Run)
 
 **Status:** No incomplete features detected — Snaw remains feature-complete.
