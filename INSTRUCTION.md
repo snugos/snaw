@@ -4,14 +4,13 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Metronome Sound Selector** - Choose different click sounds (wooden, electronic, voice count)
-2. **Tempo Jump Markers** - Set quick tempo jump points during playback with single click
-3. **Clip Fade Shape Presets** - Choose fade curves: linear, exponential, S-curve, logarithmic
-4. **Track Mute Automation** - Draw mute/unmute automation points on any track
-5. **Quick Track Color** - Right-click track header for fast color picker palette
-6. **Clip Start/End Fine Tune** - Hold Shift + drag clip edge for pixel-perfect trim
-7. **Mute Selected Tracks** - Press M to mute/unmute all currently selected tracks
-8. **Project Template Quick Save** - Save current project state as template with one shortcut
+1. **Tempo Jump Markers** - Set quick tempo jump points during playback with single click
+2. **Clip Fade Shape Presets** - Choose fade curves: linear, exponential, S-curve, logarithmic
+3. **Track Mute Automation** - Draw mute/unmute automation points on any track
+4. **Quick Track Color** - Right-click track header for fast color picker palette
+5. **Clip Start/End Fine Tune** - Hold Shift + drag clip edge for pixel-perfect trim
+6. **Mute Selected Tracks** - Press M to mute/unmute all currently selected tracks
+7. **Project Template Quick Save** - Save current project state as template with one shortcut
 
 ## Workflow
 
