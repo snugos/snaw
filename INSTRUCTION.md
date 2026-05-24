@@ -4,16 +4,16 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Track Duplicate with Shift** - Duplicate selected track upward/downward with time offset for quick harmonization
+1. **Track Quick Swap** - Right-click two track headers to swap their positions instantly
 2. **Metronome Sound Selector** - Choose different click sounds (wooden, electronic, voice count)
-3. **Track Quick Swap** - Swap positions of two tracks instantly via drag or shortcut
-4. **Tempo Jump Markers** - Set quick tempo jump points during playback with single click
-5. **Clip Fade Shape Presets** - Choose fade curves: linear, exponential, S-curve, logarithmic
-6. **Track Mute Automation** - Draw mute/unmute automation points on any track
-7. **Quick Track Color** - Right-click track header for fast color picker palette
-8. **Clip Start/End Fine Tune** - Hold Shift + drag clip edge for pixel-perfect trim
-9. **Mute Selected Tracks** - Press M to mute/unmute all currently selected tracks
-10. **Project Template Quick Save** - Save current project state as template with one shortcut
+3. **Tempo Jump Markers** - Set quick tempo jump points during playback with single click
+4. **Clip Fade Shape Presets** - Choose fade curves: linear, exponential, S-curve, logarithmic
+5. **Track Mute Automation** - Draw mute/unmute automation points on any track
+6. **Quick Track Color** - Right-click track header for fast color picker palette
+7. **Clip Start/End Fine Tune** - Hold Shift + drag clip edge for pixel-perfect trim
+8. **Mute Selected Tracks** - Press M to mute/unmute all currently selected tracks
+9. **Project Template Quick Save** - Save current project state as template with one shortcut
+10. **Scale Highlight Intensity** - Slider to adjust how prominently scale notes are highlighted
 
 ## Workflow
 

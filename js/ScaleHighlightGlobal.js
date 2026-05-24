@@ -13,6 +13,7 @@ let isPanelVisible = false;
 
 // Current global state
 let globalEnabled = false;
+let globalIntensity = 0.8; // Scale highlight intensity (0.3 to 1.0)
 
 /**
  * Initialize the Global Scale Highlight module
@@ -193,6 +194,12 @@ function updatePanelContent() {
         </div>
         
         <div style="margin-bottom: 10px;">
+            <label style="display: block; color: #888; font-size: 10px; margin-bottom: 4px;">Highlight Intensity: <span id="scaleIntensityValue">${Math.round(globalIntensity * 100)}%</span></label>
+            <input type="range" id="scaleGlobalIntensity" min="30" max="100" value="${Math.round(globalIntensity * 100)}" 
+                   class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+        </div>
+        
+        <div style="margin-bottom: 10px;">
             <div style="color: #888; font-size: 10px; margin-bottom: 4px;">Scale Notes (C = root)</div>
             <div style="display: flex; gap: 3px; flex-wrap: wrap;">
                 ${scaleNotesHtml}
@@ -242,6 +249,20 @@ function updatePanelContent() {
         setGlobalScale(e.target.value);
     });
     
+    globalPanel.querySelector('#scaleGlobalIntensity').addEventListener('input', (e) => {
+        globalIntensity = parseInt(e.target.value, 10) / 100;
+        const valueDisplay = globalPanel.querySelector('#scaleIntensityValue');
+        if (valueDisplay) valueDisplay.textContent = `${Math.round(globalIntensity * 100)}%`;
+    });
+    
+    globalPanel.querySelector('#scaleGlobalIntensity').addEventListener('change', (e) => {
+        globalIntensity = parseInt(e.target.value, 10) / 100;
+        if (globalEnabled) {
+            clearGlobalHighlights();
+            applyGlobalHighlights();
+        }
+    });
+    
     globalPanel.querySelector('#scaleGlobalToggleBtn').addEventListener('click', () => {
         toggleGlobalScaleHighlight();
     });
@@ -263,23 +284,26 @@ function applyGlobalHighlights() {
     const settings = getCurrentScaleSettings();
     if (!settings.enabled) return;
     
+    // Calculate alpha based on intensity (0.3 = 0.5 alpha, 1.0 = 1.0 alpha)
+    const alpha = 0.5 + (globalIntensity * 0.5);
+    
     // Find and highlight all piano key elements
     document.querySelectorAll('.piano-key, [data-pitch], [data-display-pitch], .key-element').forEach(el => {
         // Try to get MIDI note from element
         const pitch = parseInt(el.dataset.pitch || el.dataset.displayPitch || el.dataset.note);
         if (!isNaN(pitch)) {
-            const scaleClass = getNoteScaleClass(pitch, 0.8);
+            const scaleClass = getNoteScaleClass(pitch, globalIntensity);
             
-            // Apply scale-based background color
+            // Apply scale-based background color with intensity-adjusted alpha
             if (scaleClass.bgClass.includes('purple')) {
-                el.style.backgroundColor = 'rgba(147, 51, 234, 0.8)';
+                el.style.backgroundColor = `rgba(147, 51, 234, ${alpha})`;
             } else if (scaleClass.bgClass.includes('blue')) {
-                el.style.backgroundColor = 'rgba(59, 130, 246, 0.8)';
+                el.style.backgroundColor = `rgba(59, 130, 246, ${alpha})`;
             } else if (scaleClass.bgClass.includes('cyan')) {
-                el.style.backgroundColor = 'rgba(6, 182, 212, 0.8)';
+                el.style.backgroundColor = `rgba(6, 182, 212, ${alpha})`;
             } else if (scaleClass.bgClass.includes('orange')) {
-                el.style.backgroundColor = 'rgba(234, 88, 12, 0.8)';
-                el.style.borderLeft = '2px solid #ef4444';
+                el.style.backgroundColor = `rgba(234, 88, 12, ${alpha})`;
+                el.style.borderLeft = globalIntensity > 0.7 ? '2px solid #ef4444' : 'none';
             }
             
             el.dataset.scaleHighlighted = 'true';
@@ -333,6 +357,28 @@ export function getGlobalScaleInfo() {
         scale: settings.scale,
         rootNote: settings.rootNote,
         scaleName: preset?.name || 'Unknown',
-        description: preset?.description || ''
+        description: preset?.description || '',
+        intensity: globalIntensity
     };
+}
+
+/**
+ * Get the current scale highlight intensity
+ * @returns {number} Intensity value (0.3 to 1.0)
+ */
+export function getGlobalScaleIntensity() {
+    return globalIntensity;
+}
+
+/**
+ * Set the global scale highlight intensity
+ * @param {number} intensity - Intensity value (0.3 to 1.0)
+ */
+export function setGlobalScaleIntensity(intensity) {
+    globalIntensity = Math.max(0.3, Math.min(1.0, intensity));
+    if (globalEnabled) {
+        clearGlobalHighlights();
+        applyGlobalHighlights();
+        updatePanelContent();
+    }
 }

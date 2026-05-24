@@ -87,3 +87,6 @@ export { initDrumPatternSplitter, openDrumPatternSplitterPanel } from './DrumPat
 export { initAutoKeyDetection, detectKeyFromNotes, analyzeProjectKey, getDetectedKey, applyKeyToProject, openAutoKeyDetectionPanel, closeAutoKeyDetectionPanel } from './AutoKeyDetection.js';
 // Timeline Snap Resolution - Quick buttons to switch snap between 1/4, 1/8, 1/16, 1/32
 export { initTimelineSnapResolution, openSnapResolutionPanel, getSnapResolution, setSnapResolution, toggleSnapResolutionPanel } from './TimelineSnapResolution.js';
+
+// Scale Highlight Intensity - Feature #10
+export { initScaleHighlightGlobal, openScaleHighlightGlobalPanel, isGlobalScaleHighlightEnabled, toggleGlobalScaleHighlight, setGlobalScale, setGlobalRootNote, getGlobalScaleInfo, getGlobalScaleIntensity, setGlobalScaleIntensity } from './ScaleHighlightGlobal.js';
