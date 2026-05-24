@@ -15,13 +15,14 @@ export function getTimelineMarkers() {
     return Array.from(markers.values());
 }
 
-export function addTimelineMarker(time, name = '', color = '#ff6b6b') {
+export function addTimelineMarker(time, name = '', color = '#ff6b6b', note = '') {
     const id = `marker_${++markerIdCounter}`;
     const marker = {
         id,
         time: Math.max(0, time),
         name: name || `Marker ${markerIdCounter}`,
         color,
+        note: note,
         createdAt: Date.now()
     };
     markers.set(id, marker);
@@ -101,7 +102,8 @@ function renderTimelineMarkers() {
             pointer-events: auto;
             cursor: pointer;
         `;
-        el.title = `${marker.name} (${marker.time.toFixed(2)}s)`;
+        const noteText = marker.note ? `\n📝 ${marker.note}` : '';
+        el.title = `${marker.name} (${marker.time.toFixed(2)}s)${noteText}`;
         el.onclick = () => jumpToMarker(marker.id);
         container.appendChild(el);
     });
@@ -154,6 +156,12 @@ export function openTimelineMarkersPanel() {
     return win;
 }
 
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 function refreshMarkersPanel() {
     const list = document.getElementById('markersList');
     if (!list) return;
@@ -165,14 +173,21 @@ function refreshMarkersPanel() {
     }
 
     list.innerHTML = arr.map(m => `
-        <div class="flex items-center gap-2 p-2 bg-gray-800 rounded" data-id="${m.id}">
-            <div class="w-4 h-4 rounded" style="background:${m.color}"></div>
-            <div class="flex-1 min-w-0">
-                <div class="text-sm font-medium truncate">${m.name}</div>
-                <div class="text-xs text-gray-400">${m.time.toFixed(2)}s</div>
+        <div class="flex flex-col gap-1 p-2 bg-gray-800 rounded" data-id="${m.id}">
+            <div class="flex items-center gap-2">
+                <div class="w-4 h-4 rounded flex-shrink-0" style="background:${m.color}"></div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-sm font-medium truncate marker-name">${m.name}</div>
+                    <div class="text-xs text-gray-400">${m.time.toFixed(2)}s</div>
+                </div>
+                <button class="go-btn px-2 py-1 bg-blue-600 rounded text-xs hover:bg-blue-500">Go</button>
+                <button class="del-btn px-2 py-1 bg-red-600 rounded text-xs hover:bg-red-500">×</button>
             </div>
-            <button class="go-btn px-2 py-1 bg-blue-600 rounded text-xs hover:bg-blue-500">Go</button>
-            <button class="del-btn px-2 py-1 bg-red-600 rounded text-xs hover:bg-red-500">×</button>
+            ${m.note ? `<div class="text-xs text-gray-300 italic pl-6 marker-note-preview truncate">${escapeHtml(m.note)}</div>` : ''}
+            <div class="flex items-center gap-1 pl-6">
+                <input type="text" class="note-input flex-1 px-2 py-1 bg-gray-700 rounded text-xs text-white placeholder-gray-400" placeholder="Add note..." value="${m.note ? escapeHtml(m.note) : ''}">
+                <button class="save-note-btn px-2 py-1 bg-green-600 rounded text-xs hover:bg-green-500">Save</button>
+            </div>
         </div>
     `).join('');
 
@@ -187,6 +202,15 @@ function refreshMarkersPanel() {
         btn.onclick = () => {
             const id = btn.closest('[data-id]').dataset.id;
             removeTimelineMarker(id);
+            refreshMarkersPanel();
+        };
+    });
+
+    list.querySelectorAll('.save-note-btn').forEach(btn => {
+        btn.onclick = () => {
+            const id = btn.closest('[data-id]').dataset.id;
+            const note = btn.parentElement.querySelector('.note-input').value;
+            updateTimelineMarker(id, { note });
             refreshMarkersPanel();
         };
     });
