@@ -639,6 +639,65 @@ export function refreshTempoRampScheduling(tempoRamps) {
     }
 }
 
+// --- Tempo Jump Markers Scheduling ---
+let tempoJumpScheduleId = null;
+let activeTempoJumps = []; // Cached from state
+
+/**
+ * Sets up tempo jump scheduling. Tempo jumps are immediate tempo changes at specific bar positions.
+ */
+export function setupTempoJumpScheduling(tempoJumps) {
+    clearTempoJumpScheduling();
+    
+    if (!tempoJumps || tempoJumps.length === 0) {
+        console.log('[Audio setupTempoJumpScheduling] No tempo jumps to schedule.');
+        return;
+    }
+    
+    activeTempoJumps = [...tempoJumps].sort((a, b) => a.barPosition - b.barPosition);
+    
+    tempoJumpScheduleId = Tone.Transport.scheduleRepeat((time) => {
+        if (activeTempoJumps.length === 0) return;
+        
+        const pos = Tone.Transport.position;
+        const parts = pos.split(':');
+        const bars = parseInt(parts[0], 10);
+        const beats = parseInt(parts[1], 10);
+        const subBeats = parseFloat(parts[2] || '0');
+        const currentBarFloat = bars + (beats / 4) + (subBeats / 16);
+        
+        for (let i = activeTempoJumps.length - 1; i >= 0; i--) {
+            if (currentBarFloat >= activeTempoJumps[i].barPosition) {
+                const targetBpm = activeTempoJumps[i].bpm;
+                if (Math.abs(Tone.Transport.bpm.value - targetBpm) > 0.01) {
+                    Tone.Transport.bpm.value = targetBpm;
+                    console.log(`[Audio tempoJump] Bar ${currentBarFloat.toFixed(2)} -> BPM ${targetBpm}`);
+                }
+                // Remove this jump from active list so it only fires once
+                activeTempoJumps.splice(i, 1);
+                break;
+            }
+        }
+    }, '16n');
+    
+    console.log('[Audio setupTempoJumpScheduling] Tempo jump scheduling started with', tempoJumps.length, 'jumps.');
+}
+
+export function clearTempoJumpScheduling() {
+    if (tempoJumpScheduleId !== null) {
+        Tone.Transport.clear(tempoJumpScheduleId);
+        tempoJumpScheduleId = null;
+        activeTempoJumps = [];
+        console.log('[Audio clearTempoJumpScheduling] Tempo jump scheduling cleared.');
+    }
+}
+
+export function refreshTempoJumpScheduling(tempoJumps) {
+    if (Tone.Transport.state === 'started') {
+        setupTempoJumpScheduling(tempoJumps);
+    }
+}
+
 export function initializeAudioModule(appServicesFromMain) {
     localAppServices = appServicesFromMain;
     // MODIFICATION START: Debug to confirm function reference

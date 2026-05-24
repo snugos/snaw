@@ -11,6 +11,7 @@ import { initQuickActionsMenu, openQuickActionsMenu, closeQuickActionsMenu } fro
 import { initTimelineMarkers, openTimelineMarkersPanel } from './TimelineMarkers.js';
 import { initPlayheadMarkerDrop, openPlayheadMarkerDropSettings } from './PlayheadMarkerDrop.js';
 import { initTimelineRulerClick, openTimelineRulerClickSettings } from './TimelineRulerClick.js';
+import { initTempoJumpMarkers } from './TempoJumpMarkers.js';
 import { AIMasteringEnhancement, initAIMasteringEnhancement, openAIMasteringEnhancementPanel } from './AIMasteringEnhancement.js';
 import { AudioStemExportEnhancement, initAudioStemExportEnhancement, openAudioStemExportEnhancementPanel } from './AudioStemExportEnhancement.js';
 import { MIDIPatternVariationEnhancement, initMIDIPatternVariationEnhancement, openMIDIPatternVariationEnhancementPanel } from './MIDIPatternVariationEnhancement.js';
@@ -1582,6 +1583,7 @@ async function initializeSnugOS() {
         if (typeof initTrackHeadphoneMix === 'function') initTrackHeadphoneMix(appServices); // Headphone Mix initialization
         if (typeof initTrackSoloChain === 'function') initTrackSoloChain(appServices); // Track Solo Chain initialization
         if (typeof initMetronomeVisual === 'function') initMetronomeVisual(appServices); // Metronome Visual Beat Indicator
+        if (typeof initTempoJumpMarkers === 'function') initTempoJumpMarkers(appServices); // Tempo Jump Markers initialization
         if (typeof initLoopRegionQuickSet === 'function') initLoopRegionQuickSet(appServices); // Loop Region Quick Set initialization
         if (typeof initLoopRegionMarkers === 'function') initLoopRegionMarkers(appServices); // Loop Region Markers initialization
         if (typeof initLoopRegionSnap === 'function') initLoopRegionSnap(appServices); // Loop Region Snap initialization
@@ -1632,6 +1634,7 @@ async function initializeSnugOS() {
         if (typeof initTimelineMarkers === 'function') initTimelineMarkers(appServices); // Auto-Beat Sync initialization
         if (typeof initPlayheadMarkerDrop === 'function') initPlayheadMarkerDrop(appServices); // Playhead Marker Drop - double-click to add marker
         if (typeof initTimelineRulerClick === 'function') initTimelineRulerClick(appServices); // Timeline Ruler Click - click to jump playhead
+        if (typeof initTempoJumpMarkers === 'function') initTempoJumpMarkers(appServices); // Tempo Jump Markers - click to set tempo jump point
         if (typeof initMidiChordDisplay === 'function') initMidiChordDisplay(appServices); // MIDI Chord Display initialization
         if (typeof initClipOpacity === 'function') initClipOpacity(appServices); // Clip Opacity initialization
         if (typeof initClipStartOffset === 'function') initClipStartOffset(appServices); // Clip Start Offset initialization
