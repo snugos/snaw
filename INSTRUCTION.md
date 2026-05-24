@@ -4,13 +4,16 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Track Freeze Quick** - Instantly freeze a track to flatten all effects for CPU saving (F key on selected track)
-2. **Clip Opacity Slider** - Adjust opacity of audio clips for visual layering
-3. **MIDI Velocity Editor** - Draw velocity curves on selected MIDI notes visually
-4. **Loop Length Quick Adjust** - Keyboard shortcuts to double/halve loop region length
-5. **Track Solo Type** - Options for solo: mute others, solo in place, or solo chain
-6. **Snap Grid Intensity** - Visual feedback showing current snap strength on timeline
-7. **Audio Clip Normalize** - One-click normalize audio clip to peak level
+1. **Track Duplicate with Shift** - Duplicate selected track upward/downward with time offset for quick harmonization
+2. **Metronome Sound Selector** - Choose different click sounds (wooden, electronic, voice count)
+3. **Track Quick Swap** - Swap positions of two tracks instantly via drag or shortcut
+4. **Tempo Jump Markers** - Set quick tempo jump points during playback with single click
+5. **Clip Fade Shape Presets** - Choose fade curves: linear, exponential, S-curve, logarithmic
+6. **Track Mute Automation** - Draw mute/unmute automation points on any track
+7. **Quick Track Color** - Right-click track header for fast color picker palette
+8. **Clip Start/End Fine Tune** - Hold Shift + drag clip edge for pixel-perfect trim
+9. **Mute Selected Tracks** - Press M to mute/unmute all currently selected tracks
+10. **Project Template Quick Save** - Save current project state as template with one shortcut
 
 ## Workflow
 
