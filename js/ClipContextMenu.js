@@ -143,12 +143,12 @@ function showClipContextMenu(x, y, clipId, trackId) {
             <span>Group Clips${selectedCount > 1 ? ` (${selectedCount})` : ''}</span>
         </button>
         <div class="border-t border-gray-700 mt-1 pt-1" id="fade-presets-section">
-            <div class="px-3 py-1.5 text-xs text-gray-500">Fade Presets</div>
+            <div class="px-3 py-1.5 text-xs text-gray-500">Fade Curves</div>
             <div class="flex flex-wrap gap-1 px-2 py-1">
                 ${getFadePresets().map(p => `
-                    <button class="fade-preset-btn px-2 py-1 text-xs rounded ${clip.fadePoints?.in?.length || clip.fadePoints?.out?.length ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-800 hover:bg-gray-700'} text-white" 
-                        data-preset-id="${p.id}" data-clip-id="${clipId}" data-track-id="${trackId}" title="${p.name}">
-                        ${p.name.replace(' In', '↗').replace(' Out', '↘')}
+                    <button class="fade-preset-btn px-2 py-1 text-xs rounded bg-gray-800 hover:bg-gray-700 text-white" 
+                        data-preset-id="${p.id}" data-clip-id="${clipId}" data-track-id="${trackId}" title="${p.name}: In=${p.fadeInCurve}, Out=${p.fadeOutCurve}">
+                        ${p.name}
                     </button>
                 `).join('')}
                 <button class="fade-preset-btn px-2 py-1 text-xs rounded bg-red-900 hover:bg-red-800 text-white" 

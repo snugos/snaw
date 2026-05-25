@@ -5301,6 +5301,37 @@ export class Track {
         return null;
     }
 
+    /**
+     * Set fade curve type for a clip.
+     * @param {string} clipId - The clip ID
+     * @param {string} fadeInCurve - Fade in curve type ('linear', 'exponential', 's-curve', etc.)
+     * @param {string} fadeOutCurve - Fade out curve type
+     */
+    setClipFadeCurve(clipId, fadeInCurve, fadeOutCurve) {
+        const clip = this.timelineClips.find(c => c.id === clipId);
+        if (clip) {
+            if (fadeInCurve) clip.fadeInCurve = fadeInCurve;
+            if (fadeOutCurve) clip.fadeOutCurve = fadeOutCurve;
+            console.log(`[Track ${this.id}] Set clip "${clip.name}" fade curve: in=${clip.fadeInCurve}, out=${clip.fadeOutCurve}`);
+            this._captureUndoState(`Set fade curve for clip "${clip.name || clipId.slice(-4)}" on ${this.name}`);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Get fade curve types for a clip.
+     * @param {string} clipId - The clip ID
+     * @returns {Object} Fade curve settings {fadeInCurve, fadeOutCurve}
+     */
+    getClipFadeCurve(clipId) {
+        const clip = this.timelineClips.find(c => c.id === clipId);
+        if (clip) {
+            return { fadeInCurve: clip.fadeInCurve || 'linear', fadeOutCurve: clip.fadeOutCurve || 'linear' };
+        }
+        return null;
+    }
+
     // --- Clip Gain Envelope Methods ---
     /**
      * Set gain envelope for an audio clip.

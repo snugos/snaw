@@ -295,10 +295,8 @@ function applyFadeToClip(clipId, type, value) {
             if (clip) {
                 if (type === 'fadeIn') {
                     clip.fadeIn = value;
-                    clipEl.dataset.fadeIn = value;
                 } else {
                     clip.fadeOut = value;
-                    clipEl.dataset.fadeOut = value;
                 }
                 
                 // Trigger UI update
