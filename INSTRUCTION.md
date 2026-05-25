@@ -4,16 +4,16 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Tempo Tap Pad** - Visual tap pad to set tempo by tapping rhythmically
-2. **Chord Memory** - Store and recall favorite chord progressions with one click
-3. **Time Stretch Presets** - Quick presets for different time-stretch ratios
-4. **Track Solo Mode Toggle** - Hold to solo, release to return to previous state
-5. **Clip Fade Quick Menu** - Right-click clip for instant fade in/out options
-6. **Metronome Visual Flash** - Visual beat indicator synced with metronome
-7. **Scale Snap Toggle** - Global toggle to snap all MIDI input to selected scale
-8. **Track Rename Hotkey** - Press F2 to rename selected track inline
-9. **Loop Region Double-Click** - Double-click timeline to set loop in/out points
-10. **MIDI Velocity Curve** - Adjust how MIDI velocity translates to volume response
+1. **Track Rename Hotkey (F2)** - Press F2 to rename selected track inline
+2. **Arrangement Navigator Mini-Map** - Overview mini-map of full arrangement for quick navigation
+3. **MIDI Velocity Randomizer** - Add random variation to MIDI note velocities for humanization
+4. **Crossfade Loop Preview** - Preview loop transitions before committing
+5. **Track Freeze** - Freeze track to audio to reduce CPU usage
+6. **MIDI Chord Splitter** - Split chord MIDI input into separate notes on different tracks
+7. **BPM/Ratio Calculator** - Calculate BPM relationships between tracks (e.g., 120 BPM split into 3 against 140 BPM)
+8. **Quick Quantize Panel** - Floating panel with common quantize values (1/4, 1/8, 1/16, 1/4T, 1/8T)
+9. **Audio Bit-Depth Display** - Show current audio bit-depth in status bar
+10. **Track Duplicate with Offset** - Duplicate track with option for time/pitch offset
 
 ## Workflow
 

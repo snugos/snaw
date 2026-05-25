@@ -2156,6 +2156,20 @@ document.addEventListener('keydown', (event) => {
             }
             return;
         }
+        // F2 key - Track Rename Hotkey
+        if (event.key === 'F2' || (event.key === 'F2')) {
+            event.preventDefault();
+            if (localAppServices.handleTrackRenameKey) {
+                localAppServices.handleTrackRenameKey();
+            } else if (typeof handleTrackRenameKey === 'function') {
+                handleTrackRenameKey();
+            } else {
+                import('./TrackRenameHotkey.js').then(m => {
+                    if (m.handleTrackRenameKey) m.handleTrackRenameKey();
+                });
+            }
+            return;
+        }
         // ? key - Open keyboard shortcuts panel
         if (event.key === '?' || event.key === '/') {
             if (event.shiftKey) {
