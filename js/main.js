@@ -12,6 +12,7 @@ import { initTimelineMarkers, openTimelineMarkersPanel } from './TimelineMarkers
 import { initPlayheadMarkerDrop, openPlayheadMarkerDropSettings } from './PlayheadMarkerDrop.js';
 import { initTimelineRulerClick, openTimelineRulerClickSettings } from './TimelineRulerClick.js';
 import { initTempoJumpMarkers } from './TempoJumpMarkers.js';
+import { initMuteSelectedTracks } from './MuteSelectedTracks.js';
 import { AIMasteringEnhancement, initAIMasteringEnhancement, openAIMasteringEnhancementPanel } from './AIMasteringEnhancement.js';
 import { AudioStemExportEnhancement, initAudioStemExportEnhancement, openAudioStemExportEnhancementPanel } from './AudioStemExportEnhancement.js';
 import { MIDIPatternVariationEnhancement, initMIDIPatternVariationEnhancement, openMIDIPatternVariationEnhancementPanel } from './MIDIPatternVariationEnhancement.js';
@@ -1592,6 +1593,7 @@ async function initializeSnugOS() {
         if (typeof initTimeSignaturePerTrack === 'function') initTimeSignaturePerTrack(appServices); // Time Signature Per Track initialization
         if (typeof initClipContextMenu === 'function') initClipContextMenu(appServices); // Clip context menu with reverse
         if (typeof initClipboardHistoryManager === 'function') initClipboardHistoryManager(appServices); // Clipboard History Manager
+        if (typeof initClipSelectionManager === 'function') initClipSelectionManager(appServices); // Clip selection manager initialization
         if (typeof initClipFadePresets === 'function') initClipFadePresets(appServices); // Clip Fade Presets initialization
         if (typeof initClipGroupManager === 'function') initClipGroupManager(appServices); // Clip Group Manager
         if (typeof openStepSequencerView === 'function') openStepSequencerView(appServices); // Step Sequencer View initialization
@@ -1635,6 +1637,7 @@ async function initializeSnugOS() {
         if (typeof initPlayheadMarkerDrop === 'function') initPlayheadMarkerDrop(appServices); // Playhead Marker Drop - double-click to add marker
         if (typeof initTimelineRulerClick === 'function') initTimelineRulerClick(appServices); // Timeline Ruler Click - click to jump playhead
         if (typeof initTempoJumpMarkers === 'function') initTempoJumpMarkers(appServices); // Tempo Jump Markers - click to set tempo jump point
+        if (typeof initMuteSelectedTracks === 'function') initMuteSelectedTracks(appServices); // Mute Selected Tracks - M to mute/unmute selected
         if (typeof initMidiChordDisplay === 'function') initMidiChordDisplay(appServices); // MIDI Chord Display initialization
         if (typeof initClipOpacity === 'function') initClipOpacity(appServices); // Clip Opacity initialization
         if (typeof initClipStartOffset === 'function') initClipStartOffset(appServices); // Clip Start Offset initialization
