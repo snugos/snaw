@@ -4,10 +4,16 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Track Mute Automation** - Draw mute/unmute automation points on any track
-2. **Quick Track Color** - Right-click track header for fast color picker palette
-3. **Clip Start/End Fine Tune** - Hold Shift + drag clip edge for pixel-perfect trim
-4. **Project Template Quick Save** - Save current project state as template with one shortcut
+1. **Tempo Tap Pad** - Visual tap pad to set tempo by tapping rhythmically
+2. **Chord Memory** - Store and recall favorite chord progressions with one click
+3. **Time Stretch Presets** - Quick presets for different time-stretch ratios
+4. **Track Solo Mode Toggle** - Hold to solo, release to return to previous state
+5. **Clip Fade Quick Menu** - Right-click clip for instant fade in/out options
+6. **Metronome Visual Flash** - Visual beat indicator synced with metronome
+7. **Scale Snap Toggle** - Global toggle to snap all MIDI input to selected scale
+8. **Track Rename Hotkey** - Press F2 to rename selected track inline
+9. **Loop Region Double-Click** - Double-click timeline to set loop in/out points
+10. **MIDI Velocity Curve** - Adjust how MIDI velocity translates to volume response
 
 ## Workflow
 
