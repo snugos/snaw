@@ -4,11 +4,10 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Clip Fade Shape Presets** - Choose fade curves: linear, exponential, S-curve, logarithmic
-2. **Track Mute Automation** - Draw mute/unmute automation points on any track
-3. **Quick Track Color** - Right-click track header for fast color picker palette
-4. **Clip Start/End Fine Tune** - Hold Shift + drag clip edge for pixel-perfect trim
-5. **Project Template Quick Save** - Save current project state as template with one shortcut
+1. **Track Mute Automation** - Draw mute/unmute automation points on any track
+2. **Quick Track Color** - Right-click track header for fast color picker palette
+3. **Clip Start/End Fine Tune** - Hold Shift + drag clip edge for pixel-perfect trim
+4. **Project Template Quick Save** - Save current project state as template with one shortcut
 
 ## Workflow
 
