@@ -48,8 +48,6 @@ export function getRandomTrackColor(palette = 'vibrant') {
     return pal[Math.floor(Math.random() * pal.length)];
 }
 
-}
-
 export class Track {
     constructor(id, type, initialData = null, appServices = {}) {
         this.id = initialData?.id || id;
