@@ -6,10 +6,51 @@ let mediaRecorder = null;
 let audioChunks = [];
 let isRecording = false;
 let recordingStream = null;
+let recordingIndicatorElement = null;
 
 export function initAudioRecorder(services) {
     localAppServices = services;
+    // Create recording indicator element
+    createRecordingIndicator();
     console.log('[AudioRecorder] Initialized');
+}
+
+function createRecordingIndicator() {
+    const existing = document.getElementById('recordingPulseIndicator');
+    if (existing) {
+        recordingIndicatorElement = existing;
+        return;
+    }
+    const indicator = document.createElement('div');
+    indicator.id = 'recordingPulseIndicator';
+    indicator.innerHTML = `<span style="display:inline-block;width:8px;height:8px;background:#fff;border-radius:50%;margin-right:8px;animation:recordingDot 1s ease-in-out infinite;"></span>REC`;
+    Object.assign(indicator.style, {
+        display: 'none',
+        position: 'fixed',
+        top: '12px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: '9999',
+        background: 'rgba(220,38,38,0.9)',
+        color: 'white',
+        padding: '6px 16px',
+        borderRadius: '20px',
+        fontFamily: 'Inter,sans-serif',
+        fontSize: '13px',
+        fontWeight: '600',
+        boxShadow: '0 4px 12px rgba(220,38,38,0.4)'
+    });
+    const style = document.createElement('style');
+    style.textContent = '@keyframes recordingDot{0%,100%{opacity:1}50%{opacity:0.4}}';
+    document.head.appendChild(style);
+    document.body.appendChild(indicator);
+    recordingIndicatorElement = indicator;
+}
+
+export function setRecordingIndicatorVisible(visible) {
+    if (recordingIndicatorElement) {
+        recordingIndicatorElement.style.display = visible ? 'block' : 'none';
+    }
 }
 
 /**
@@ -72,6 +113,7 @@ export async function startRecording(trackId) {
         isRecording = true;
         
         // Update UI
+        setRecordingIndicatorVisible(true);
         localAppServices.showNotification?.('Recording started', 1500);
         if (localAppServices.setIsRecordingState) {
             localAppServices.setIsRecordingState(true);
@@ -104,6 +146,7 @@ export function stopRecording() {
     try {
         mediaRecorder.stop();
         isRecording = false;
+        setRecordingIndicatorVisible(false);
         
         localAppServices.showNotification?.('Recording stopped', 1500);
         if (localAppServices.setIsRecordingState) {
