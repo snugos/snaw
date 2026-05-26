@@ -109,6 +109,8 @@ import { initTrackCompressorVisualizer, openTrackCompressorVisualizer } from './
 import { initPhaseCorrelationMeter, openPhaseCorrelationMeterPanel } from './PhaseCorrelationMeter.js';
 // Track Color Palette
 import { initTrackColorPalette, openTrackColorPalettePanel } from './TrackColorPalette.js';
+// Tempo Sync LFO - Tempo-synced LFO for effect modulation
+import { initTempoSyncLFOPanel, openTempoSyncLFOPanel } from './TempoSyncLFOPanel.js';
 // Track Scroll To Center
 import { initTrackScrollToCenter, openTrackScrollToCenterPanel, getScrollToCenterFn } from './TrackScrollToCenter.js';
 // Rhythm Randomizer
@@ -886,6 +888,7 @@ import {
     openPhaseCorrelationMeterPanel,
     openTrackColorPalettePanel,
     openTrackColorPanel,
+    openTempoSyncLFOPanel,
     openGuitarTabEditor,
     openSamplerLoopTrimPanel,
     openDuplicateOffsetDialog,
@@ -1665,6 +1668,7 @@ async function initializeSnugOS() {
         if (typeof initGuitarTabEditor === 'function') initGuitarTabEditor(appServices); // Guitar Tab Editor initialization
         if (typeof initSpectrumAnalyzer === 'function') initSpectrumAnalyzer(appServices); // Spectrum Analyzer initialization
         if (typeof initBeatSyncedLFOPanel === 'function') initBeatSyncedLFOPanel(appServices); // Beat-synced LFO panel initialization
+        if (typeof initTempoSyncLFOPanel === 'function') initTempoSyncLFOPanel(appServices); // Tempo Sync LFO panel initialization
         if (typeof initTempoSyncVisualizer === 'function') initTempoSyncVisualizer(appServices); // Tempo Sync Visualizer initialization
         if (typeof initPhaseCorrelationMeter === 'function') initPhaseCorrelationMeter(appServices); // Phase Correlation Meter initialization
         if (typeof initAutoBeatSync === 'function') initAutoBeatSync(appServices); // Auto-Beat Sync initialization
