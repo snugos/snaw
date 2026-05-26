@@ -70,6 +70,7 @@ import { initAudioRecorder, startRecording, stopRecording, isRecordingActive, re
 import { initCountInAudio, setupCountInUI, playCountIn, isCountInActive } from './CountInAudio.js';
 import { initMIDArpeggiatorPanel, openMIDArpeggiatorPanel } from './MIDArpeggiatorPanel.js';
 import { initTrackTemplateLibrary, openTrackTemplateLibraryPanel, getTrackTemplateNames, getTrackTemplate, saveTrackTemplate, deleteTrackTemplate, exportTemplates, importTemplates } from './TrackTemplateLibrary.js';
+import { initMixerChannelStripPresets, openMixerChannelStripPresetsPanel, exportChannelStripPresets, importChannelStripPresets } from './MixerChannelStripPresets.js';
 import { showClipEnvelopeShaper } from './ClipEnvelopeShaper.js';
 import { initEnvelopeIntegration } from './EnvelopeIntegration.js';
 import { enableSoloChain, disableSoloChain, toggleTrackInChain, clearChain, getSoloedTrackIds, getIsActive } from './TrackSoloChain.js';
@@ -914,6 +915,7 @@ import {
     openSmartFXChainPanel,
     openTrackDelayCompensationPanel,
     openLyricsTrackPanel,
+    openMixerChannelStripPresetsPanel,
     openExportSelectionPanel,
     openTimeSignaturePanel,
     toggleClipLoopPreview,
@@ -1658,6 +1660,7 @@ async function initializeSnugOS() {
         if (typeof initTrackScrollToCenter === 'function') initTrackScrollToCenter(appServices); // Track Scroll To Center initialization
         if (typeof initSamplerLoopTrim === 'function') initSamplerLoopTrim(appServices); // Sampler Loop Trim initialization
         if (typeof initTrackIconPicker === 'function') initTrackIconPicker(appServices); // Track Icon Picker initialization
+        if (typeof initMixerChannelStripPresets === 'function') initMixerChannelStripPresets(appServices); // Mixer Channel Strip Presets initialization
         if (typeof initChordVoicingModes === 'function') initChordVoicingModes(appServices); // Chord Voicing Modes initialization
         if (typeof initChordTriggerMode === 'function') initChordTriggerMode(appServices); // Chord Trigger Mode initialization
         if (typeof initRhythmRandomizer === 'function') initRhythmRandomizer(appServices); // Rhythm Randomizer initialization

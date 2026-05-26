@@ -4,14 +4,16 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Drum Replace** - One-click replacement of drum samples from a library
-2. **Sidechain Routing Matrix** - Visual matrix for routing sidechain compression
-3. **Clip Envelope Automation** - Draw automation curves directly on clips
-4. **Chord Player Mode** - Press one key and play a full chord voicing
-5. **Master Limiter** - Brick-wall limiter on master for loudness
-6. **Sampler Slices** - Automatic beat slicing of one-shots for remixing
-7. **Multi-out Instrument Routing** - Route internal instruments to multiple tracks
-8. **Project Templates** - Save/load complete project templates with all tracks
+1. **Track Freeze Quick Toggle** - Instantly freeze/unfreeze selected track to save CPU
+2. **Ghost Track Signals** - Show faint waveform overlay of other tracks for visual reference while mixing
+3. **Mixer Channel Strip Presets** - Save/load complete channel strip settings (gain, pan, EQ, sends)
+4. **MIDI Velocity Curve Editor** - Adjust how hard/soft notes map to velocity response
+5. **BPM Tap Tempo** - Tap to set tempo manually by clicking rhythm
+6. **Audio Normalizer** - Automatic loudness normalization for imported audio clips
+7. **Track Icon Picker** - Assign visual icons to tracks for quick identification
+8. **Groove Extractor** - Extract timing/velocity groove from audio and apply to other clips
+9. **Count-in Metronome** - Play count-in bars before recording starts
+10. **Loop Region Quick Set** - Set loop start/end by clicking timeline positions
 
 ## Workflow
 

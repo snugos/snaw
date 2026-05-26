@@ -130,6 +130,10 @@ function showTrackContextMenu(x, y, trackId) {
                 <span class="w-4">📏</span>
                 <span>Adjust Height</span>
             </button>
+            <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="channelStripPresets" data-track-id="${trackId}">
+                <span class="w-4">💾</span>
+                <span>Channel Strip Presets</span>
+            </button>
         </div>
         <div class="border-t border-gray-700 mt-1 pt-1">
             ${freezeMenuItems}
@@ -259,6 +263,14 @@ function handleTrackAction(action, trackId) {
                 }
                 localAppServices.showNotification?.(`Track height set to ${heightKeys[heightIndex]}`, 1500);
                 if (localAppServices.renderTracks) localAppServices.renderTracks();
+            }
+            break;
+            
+        case 'channelStripPresets':
+            if (localAppServices.openMixerChannelStripPresetsPanel) {
+                localAppServices.openMixerChannelStripPresetsPanel();
+            } else {
+                localAppServices.showNotification?.('Channel Strip Presets not available', 2000);
             }
             break;
             
