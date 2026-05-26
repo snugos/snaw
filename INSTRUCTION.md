@@ -4,15 +4,14 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Audio Stretching** - Time-stretch audio clips without pitch change using Web Audio
-2. **Drum Replace** - One-click replacement of drum samples from a library
-3. **Sidechain Routing Matrix** - Visual matrix for routing sidechain compression
-4. **Clip Envelope Automation** - Draw automation curves directly on clips
-5. **Chord Player Mode** - Press one key and play a full chord voicing
-6. **Master Limiter** - Brick-wall limiter on master for loudness
-7. **Sampler Slices** - Automatic beat slicing of one-shots for remixing
-8. **Multi-out Instrument Routing** - Route internal instruments to multiple tracks
-9. **Project Templates** - Save/load complete project templates with all tracks
+1. **Drum Replace** - One-click replacement of drum samples from a library
+2. **Sidechain Routing Matrix** - Visual matrix for routing sidechain compression
+3. **Clip Envelope Automation** - Draw automation curves directly on clips
+4. **Chord Player Mode** - Press one key and play a full chord voicing
+5. **Master Limiter** - Brick-wall limiter on master for loudness
+6. **Sampler Slices** - Automatic beat slicing of one-shots for remixing
+7. **Multi-out Instrument Routing** - Route internal instruments to multiple tracks
+8. **Project Templates** - Save/load complete project templates with all tracks
 
 ## Workflow
 
