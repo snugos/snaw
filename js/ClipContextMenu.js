@@ -5,6 +5,7 @@ import { reverseAudioClip } from './ClipReverse.js';
 import { getFadePresets, applyFadePresetToClip, clearFadePoints } from './ClipFadePresets.js';
 import { createClipGroup, getCurrentClipSelections } from './ClipGroupManager.js';
 import { openClipStartOffsetPanel } from './ClipStartOffset.js';
+import { openStretchPanel, getClipStretchInfo } from './AudioStretching.js';
 
 let localAppServices = {};
 let contextMenuListenersInitialized = false;
@@ -112,10 +113,21 @@ function showClipContextMenu(x, y, clipId, trackId) {
     
     const isReversed = clip.reversed || false;
     const isPhaseInverted = clip.phaseInverted || false;
+    const isAudioClip = clip.type === 'audio';
+    const stretchInfo = isAudioClip ? getClipStretchInfo(clipId) : null;
+    const hasStretch = stretchInfo?.hasStretch || false;
     
     // Build menu HTML - get selected clips count for grouping
     const selectedClips = getCurrentClipSelections();
     const selectedCount = selectedClips.length;
+    
+    // Only show stretch option for audio clips
+    const stretchMenuItem = isAudioClip ? `
+        <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="stretch" data-clip-id="${clipId}" data-track-id="${trackId}">
+            <span class="w-4">⏱</span>
+            <span>${hasStretch ? `Stretch: ${stretchInfo.stretchFactor.toFixed(2)}x` : 'Time Stretch'}</span>
+        </button>
+    ` : '';
     
     let menuHTML = `
         <div class="px-3 py-1.5 text-xs text-gray-400 border-b border-gray-700">
@@ -142,6 +154,7 @@ function showClipContextMenu(x, y, clipId, trackId) {
             <span class="w-4">📦</span>
             <span>Group Clips${selectedCount > 1 ? ` (${selectedCount})` : ''}</span>
         </button>
+        ${stretchMenuItem}
         <div class="border-t border-gray-700 mt-1 pt-1" id="fade-presets-section">
             <div class="px-3 py-1.5 text-xs text-gray-500">Fade Curves</div>
             <div class="flex flex-wrap gap-1 px-2 py-1">
@@ -310,6 +323,10 @@ function handleClipAction(action, clipId, trackId) {
 
         case 'startOffset':
             openClipStartOffsetPanel(clipId);
+            break;
+
+        case 'stretch':
+            openStretchPanel(clipId);
             break;
 
         default:

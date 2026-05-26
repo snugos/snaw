@@ -48,6 +48,7 @@ import { initAudioNormalizer, openAudioNormalizerPanel } from './AudioNormalizer
 import { initAudioFadePreset, openAudioFadePresetPanel } from './AudioFadePreset.js';
 import { initClipFadeHandles, openClipFadeHandlesPanel } from './ClipFadeHandles.js';
 import { openAudioStretchQualityPanel, openStretchQualityPanel, closeAudioStretchQualityPanel, getAudioStretchingQuality } from './AudioStretchQualityPanel.js';
+import { initAudioStretching, openStretchPanel, quickStretchSelectedClip, applyStretchToClip, removeStretchFromClip, getStretchParamsForClip } from './AudioStretching.js';
 import { initAITempoSuggestion, openAITempoSuggestionPanel } from './AITempoSuggestion.js';
 import { initAutoScrollSync, toggleAutoScroll, autoScrollTimeline } from './AutoScrollSync.js';
 import { initProjectRecoveryManager, createManualBackup, listBackups, restoreBackup, setRecoveryEnabled, getRecoveryStatus } from './ProjectRecoveryManager.js';
@@ -1716,6 +1717,7 @@ async function initializeSnugOS() {
         if (typeof initClipFadeHandles === 'function') initClipFadeHandles(); // Clip Fade Handles initialization
         if (typeof initEnvelopeIntegration === 'function') initEnvelopeIntegration(); // Envelope Integration initialization
         if (typeof initAudioClipStretchMarkers === 'function') initAudioClipStretchMarkers(appServices); // Audio Clip Stretch Markers initialization
+        if (typeof initAudioStretching === 'function') initAudioStretching(appServices); // Audio Stretching initialization
         if (typeof initClipStretchWithHandles === 'function') initClipStretchWithHandles(appServices); // Clip Stretch With Handles initialization
         if (typeof initAudioScrubbing === 'function') initAudioScrubbing(appServices); // Audio Scrubbing initialization - audible scrub on timeline drag
         if (typeof initAudioPhaseFlip === 'function') initAudioPhaseFlip(appServices); // Audio Phase Flip - invert clip phase by 180 degrees

@@ -3,6 +3,7 @@
 import * as Constants from './constants.js';
 import { createEffectInstance, getEffectDefaultParams as getEffectDefaultParamsFromRegistry, AVAILABLE_EFFECTS } from './effectsRegistry.js';
 import { storeAudio, getAudio } from './db.js';
+import { getStretchParamsForClip } from './AudioStretching.js';
 
 // Predefined color palette for tracks
 export const TRACK_COLORS = [
@@ -4503,6 +4504,14 @@ export class Track {
                             const url = URL.createObjectURL(audioBlob);
                             const player = new Tone.Player(url);
                             this.clipPlayers.set(clip.id, player);
+                            
+                            // Apply stretch parameters if clip is stretched
+                            const stretchParams = getStretchParamsForClip(clip);
+                            if (stretchParams.playbackRate !== 1.0) {
+                                player.playbackRate = stretchParams.playbackRate;
+                                player.detune = stretchParams.detune;
+                            }
+                            
                             player.onload = () => {
                                 URL.revokeObjectURL(url);
                                 const destNode = (this.activeEffects.length > 0 && this.activeEffects[0].toneNode && !this.activeEffects[0].toneNode.disposed)
@@ -4564,12 +4573,16 @@ export class Track {
                     console.log(`[Track ${this.id}] Timeline: Scheduling AUDIO clip "${clip.name}" (ID: ${clip.id}) at ${effectivePlayStart.toFixed(2)}s for ${playDurationInWindow.toFixed(2)}s (offset ${offsetIntoSource.toFixed(2)}s)`);
                     const player = new Tone.Player();
                     
-                    // Calculate effective playback rate: track rate × pitch shift rate
+                    // Apply stretch parameters if clip is stretched
+                    const stretchParams = getStretchParamsForClip(clip);
+                    
+                    // Calculate effective playback rate: track rate × pitch shift rate × stretch rate
                     const pitchShiftRate = clip.pitchShift ? Math.pow(2, clip.pitchShift / 12) : 1.0;
-                    const effectiveRate = this.timelinePlaybackRate * pitchShiftRate;
+                    const effectiveRate = this.timelinePlaybackRate * pitchShiftRate * stretchParams.playbackRate;
                     if (effectiveRate !== 1.0) {
                         player.playbackRate = effectiveRate;
-                        console.log(`[Track ${this.id}] Set playback rate ${effectiveRate}x for clip ${clip.id} (track: ${this.timelinePlaybackRate}x, pitch: ${clip.pitchShift || 0} st)`);
+                        player.detune = stretchParams.detune;
+                        console.log(`[Track ${this.id}] Set playback rate ${effectiveRate}x (detune: ${stretchParams.detune.toFixed(0)} cents) for clip ${clip.id}`);
                     }
                     this.clipPlayers.set(clip.id, player);
                     try {
