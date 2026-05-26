@@ -6,14 +6,13 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 1. **Track Freeze Quick Toggle** - Instantly freeze/unfreeze selected track to save CPU
 2. **Ghost Track Signals** - Show faint waveform overlay of other tracks for visual reference while mixing
-3. **Mixer Channel Strip Presets** - Save/load complete channel strip settings (gain, pan, EQ, sends)
-4. **MIDI Velocity Curve Editor** - Adjust how hard/soft notes map to velocity response
-5. **BPM Tap Tempo** - Tap to set tempo manually by clicking rhythm
-6. **Audio Normalizer** - Automatic loudness normalization for imported audio clips
-7. **Track Icon Picker** - Assign visual icons to tracks for quick identification
-8. **Groove Extractor** - Extract timing/velocity groove from audio and apply to other clips
-9. **Count-in Metronome** - Play count-in bars before recording starts
-10. **Loop Region Quick Set** - Set loop start/end by clicking timeline positions
+3. **MIDI Velocity Curve Editor** - Adjust how hard/soft notes map to velocity response
+4. **BPM Tap Tempo** - Tap to set tempo manually by clicking rhythm
+5. **Audio Normalizer** - Automatic loudness normalization for imported audio clips
+6. **Track Icon Picker** - Assign visual icons to tracks for quick identification
+7. **Groove Extractor** - Extract timing/velocity groove from audio and apply to other clips
+8. **Count-in Metronome** - Play count-in bars before recording starts
+9. **Loop Region Quick Set** - Set loop start/end by clicking timeline positions
 
 ## Workflow
 
