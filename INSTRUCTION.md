@@ -4,16 +4,15 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Track Rename Hotkey (F2)** - Press F2 to rename selected track inline
-2. **Arrangement Navigator Mini-Map** - Overview mini-map of full arrangement for quick navigation
-3. **MIDI Velocity Randomizer** - Add random variation to MIDI note velocities for humanization
-4. **Crossfade Loop Preview** - Preview loop transitions before committing
-5. **Track Freeze** - Freeze track to audio to reduce CPU usage
-6. **MIDI Chord Splitter** - Split chord MIDI input into separate notes on different tracks
-7. **BPM/Ratio Calculator** - Calculate BPM relationships between tracks (e.g., 120 BPM split into 3 against 140 BPM)
-8. **Quick Quantize Panel** - Floating panel with common quantize values (1/4, 1/8, 1/16, 1/4T, 1/8T)
-9. **Audio Bit-Depth Display** - Show current audio bit-depth in status bar
-10. **Track Duplicate with Offset** - Duplicate track with option for time/pitch offset
+1. **Audio Stretching** - Time-stretch audio clips without pitch change using Web Audio
+2. **Drum Replace** - One-click replacement of drum samples from a library
+3. **Sidechain Routing Matrix** - Visual matrix for routing sidechain compression
+4. **Clip Envelope Automation** - Draw automation curves directly on clips
+5. **Chord Player Mode** - Press one key and play a full chord voicing
+6. **Master Limiter** - Brick-wall limiter on master for loudness
+7. **Sampler Slices** - Automatic beat slicing of one-shots for remixing
+8. **Multi-out Instrument Routing** - Route internal instruments to multiple tracks
+9. **Project Templates** - Save/load complete project templates with all tracks
 
 ## Workflow
 
