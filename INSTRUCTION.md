@@ -4,7 +4,7 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Clickable Piano Roll** - Make the piano roll editor notes click-draggable for repositioning
+1. ~~**Clickable Piano Roll** - Make the piano roll editor notes click-draggable for repositioning~~ ✅ Done
 2. **MIDI File Import** - Drag & drop .mid files onto tracks to import MIDI data
 3. **MIDI File Export** - Export selected MIDI patterns as .mid files
 4. **Plugin Preset Browser** - Browse and load VST3/AudioWorklet plugin presets from a panel
