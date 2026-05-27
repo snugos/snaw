@@ -5,6 +5,7 @@ import { synthPitches, STEPS_PER_BAR } from './constants.js';
 import { getCurrentScaleSettings, isNoteInScale, getNoteScaleClass } from './ScaleHighlightMode.js';
 
 let localAppServices = {};
+let dragState = { active: false, trackId: null, row: null, step: null };
 
 export function initPianoRollSequencer(services) {
     localAppServices = services;
@@ -357,10 +358,29 @@ function setupPianoRollEvents(trackId, track) {
     if (grid) {
         let isMouseDown = false;
         let paintValue = false;
+        let isDragging = false;
+        let dragOverCell = null;
+        let sourceRow = null;
+        let sourceStep = null;
         
         grid.addEventListener('mousedown', (e) => {
             const cell = e.target.closest('.step-cell');
             if (cell) {
+                const row = parseInt(cell.dataset.row, 10);
+                const step = parseInt(cell.dataset.step, 10);
+                const sequence = track.getActiveSequence?.();
+                
+                // Check if this cell has an active note - if so, start drag
+                if (sequence?.data?.[row]?.[step]?.active) {
+                    isDragging = true;
+                    sourceRow = row;
+                    sourceStep = step;
+                    dragState = { active: true, trackId, row, step };
+                    e.preventDefault();
+                    return;
+                }
+                
+                // Otherwise, normal click-to-toggle behavior
                 isMouseDown = true;
                 paintValue = !cell.classList.contains('bg-green-500') && !cell.classList.contains('bg-green-600') && !cell.classList.contains('bg-green-700');
                 toggleStep(trackId, track, cell);
@@ -368,7 +388,18 @@ function setupPianoRollEvents(trackId, track) {
         });
         
         grid.addEventListener('mousemove', (e) => {
-            if (isMouseDown) {
+            if (isDragging && dragState.active) {
+                const cell = e.target.closest('.step-cell');
+                if (cell && cell !== dragOverCell) {
+                    // Clear previous highlight
+                    if (dragOverCell) {
+                        dragOverCell.style.outline = '';
+                    }
+                    // Highlight new target
+                    dragOverCell = cell;
+                    cell.style.outline = '2px solid yellow';
+                }
+            } else if (isMouseDown) {
                 const cell = e.target.closest('.step-cell');
                 if (cell) {
                     const currentActive = cell.classList.contains('bg-green-500') || cell.classList.contains('bg-green-600') || cell.classList.contains('bg-green-700');
@@ -381,12 +412,42 @@ function setupPianoRollEvents(trackId, track) {
             }
         });
         
+        grid.addEventListener('mouseleave', () => {
+            if (dragOverCell) {
+                dragOverCell.style.outline = '';
+                dragOverCell = null;
+            }
+        });
+        
         document.addEventListener('mouseup', () => {
+            if (isDragging && dragState.active && dragOverCell) {
+                const toRow = parseInt(dragOverCell.dataset.row, 10);
+                const toStep = parseInt(dragOverCell.dataset.step, 10);
+                
+                if (sourceRow !== toRow || sourceStep !== toStep) {
+                    // Move the note
+                    const moved = moveNote(track, sourceRow, sourceStep, toRow, toStep);
+                    if (moved) {
+                        localAppServices.captureStateForUndo?.('Move note');
+                        // Refresh the grid
+                        renderPianoRollContent(trackId);
+                        localAppServices.updateTrackUI?.(trackId, 'sequencerContentChanged');
+                    }
+                }
+                
+                dragOverCell.style.outline = '';
+                dragOverCell = null;
+            }
+            
             if (isMouseDown) {
                 isMouseDown = false;
-                // Notify track changed
                 localAppServices.updateTrackUI?.(trackId, 'sequencerContentChanged');
             }
+            
+            isDragging = false;
+            dragState.active = false;
+            sourceRow = null;
+            sourceStep = null;
         });
     }
 }
@@ -425,6 +486,52 @@ function toggleStep(trackId, track, cell) {
         cell.classList.remove('bg-gray-800');
         cell.classList.add('bg-green-500');
     }
+}
+
+/**
+ * Gets the cell element at a position from a mouse event
+ */
+function getCellAtPosition(e, container) {
+    const rect = container.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const cellWidth = 20; // w-5 = 1.25rem = 20px
+    const headerWidth = 40; // piano keys width
+    const rowHeight = 16; // h-4 = 1rem = 16px
+    
+    const step = Math.floor((x - headerWidth) / cellWidth);
+    const row = Math.floor((y - 32) / rowHeight); // 32px for controls
+    
+    return { row, step };
+}
+
+/**
+ * Moves a note from source to destination in the sequence
+ */
+function moveNote(track, fromRow, fromStep, toRow, toStep) {
+    const sequence = track.getActiveSequence?.();
+    if (!sequence?.data) return false;
+    
+    // Bounds check
+    if (fromRow < 0 || fromStep < 0 || toRow < 0 || toStep < 0) return false;
+    if (!sequence.data[fromRow] || !sequence.data[fromRow][fromStep]) return false;
+    
+    // Get the note data
+    const noteData = sequence.data[fromRow][fromStep];
+    if (!noteData?.active) return false;
+    
+    // Clear source
+    sequence.data[fromRow][fromStep] = null;
+    
+    // Ensure target row exists
+    if (!sequence.data[toRow]) {
+        sequence.data[toRow] = [];
+    }
+    
+    // Place at destination
+    sequence.data[toRow][toStep] = noteData;
+    
+    return true;
 }
 
 /**
