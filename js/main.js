@@ -166,6 +166,8 @@ import { initAudioScrubbing, openScrubSettingsPanel, setScrubOnDragEnabled, isAu
 import { initAudioPhaseFlip, flipAudioBufferPhase, toggleClipPhaseFlip, isClipPhaseInverted, openAudioPhaseFlipPanel } from './AudioPhaseFlip.js';
 // Audio Waveform Annotation - Add text notes directly onto audio waveforms
 import { initAudioWaveformAnnotation, openAnnotationPanel, addAnnotation, getAnnotations, renderAnnotationMarkers } from './AudioWaveformAnnotation.js';
+// Waveform Visualization - Draw real-time waveform on audio clips in timeline
+import { initWaveformVisualization, updateWaveformDisplay, renderTrackWaveforms } from './WaveformVisualization.js';
 // Clip Reverse - Reverse audio clips with one click
 import { initClipReverse, openClipReversePanel, reverseAudioClip, reverseMIDISequence, isClipReversed, isSequenceReversed } from './ClipReverse.js';
 // Sidechain Volume Envelope - Draw ducking curves on clips for sidechain effects
@@ -1726,6 +1728,7 @@ async function initializeSnugOS() {
         if (typeof initAudioScrubbing === 'function') initAudioScrubbing(appServices); // Audio Scrubbing initialization - audible scrub on timeline drag
         if (typeof initAudioPhaseFlip === 'function') initAudioPhaseFlip(appServices); // Audio Phase Flip - invert clip phase by 180 degrees
         if (typeof initAudioWaveformAnnotation === 'function') initAudioWaveformAnnotation(appServices); // Audio Waveform Annotation - add notes on waveforms
+        if (typeof initWaveformVisualization === 'function') initWaveformVisualization(appServices); // Waveform Visualization - draw waveform on audio clips
         
         if (typeof initializePrimaryEventListeners === 'function') {
              initializePrimaryEventListeners(appServices);

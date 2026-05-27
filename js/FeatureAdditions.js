@@ -94,3 +94,5 @@ export { initScaleHighlightGlobal, openScaleHighlightGlobalPanel, isGlobalScaleH
 export { initTrackRenameHotkey, handleTrackRenameKey } from './TrackRenameHotkey.js';
 // Quick Slice Tool - Press Shift+S to slice selected clip at playhead
 export { initQuickSliceTool, setQuickSliceEnabled, isQuickSliceEnabled } from './QuickSliceTool.js';
+// Waveform Visualization - Draw real-time waveform on audio clips in timeline
+export { initWaveformVisualization, openWaveformSettingsPanel, updateWaveformDisplay, renderTrackWaveforms, getWaveformPeaks, computeWaveformPeaks, clearWaveformCache, clearAllWaveformCache } from './WaveformVisualization.js';

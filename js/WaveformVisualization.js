@@ -8,6 +8,42 @@ const CACHE_PREFIX = 'wf_';
 export function initWaveformVisualization(services) {
     localAppServices = services;
     console.log('[WaveformVisualization] Initialized');
+    
+    // Wrap renderTimeline to apply waveforms after each render
+    if (localAppServices.renderTimeline) {
+        const originalRender = localAppServices.renderTimeline;
+        localAppServices.renderTimeline = function(...args) {
+            const result = originalRender.apply(this, args);
+            // Apply waveforms to all audio clips after render
+            setTimeout(() => applyWaveformsDeferred(), 100);
+            return result;
+        };
+    }
+}
+
+/**
+ * Deferred waveform application - called after timeline render
+ */
+function applyWaveformsDeferred() {
+    const settings = JSON.parse(localStorage.getItem('snaw_waveform_settings') || '{}');
+    if (settings.enabled === false) return;
+    
+    const tracks = localAppServices.getTracks ? localAppServices.getTracks() : [];
+    tracks.forEach(track => {
+        if (!track.timelineClips) return;
+        track.timelineClips.forEach(clip => {
+            if (clip.type === 'Audio') {
+                const clipEl = document.querySelector(`[data-clip-id="${clip.id}"]`);
+                if (clipEl) {
+                    updateWaveformDisplay(clipEl, clip, {
+                        color: settings.color || '#4ade80',
+                        barWidth: settings.barWidth || 2,
+                        barGap: settings.barGap || 1
+                    });
+                }
+            }
+        });
+    });
 }
 
 /**
