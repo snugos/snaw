@@ -4,15 +4,18 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Track Freeze Quick Toggle** - Instantly freeze/unfreeze selected track to save CPU
-2. **Ghost Track Signals** - Show faint waveform overlay of other tracks for visual reference while mixing
-3. **MIDI Velocity Curve Editor** - Adjust how hard/soft notes map to velocity response
-4. **BPM Tap Tempo** - Tap to set tempo manually by clicking rhythm
-5. **Audio Normalizer** - Automatic loudness normalization for imported audio clips
-6. **Track Icon Picker** - Assign visual icons to tracks for quick identification
-7. **Groove Extractor** - Extract timing/velocity groove from audio and apply to other clips
-8. **Count-in Metronome** - Play count-in bars before recording starts
-9. **Loop Region Quick Set** - Set loop start/end by clicking timeline positions
+1. **Waveform Visualization** - Draw real-time waveform on audio clips in the timeline (needs hook-up to clip rendering)
+2. **Clickable Piano Roll** - Make the piano roll editor notes click-draggable for repositioning
+3. **MIDI File Import** - Drag & drop .mid files onto tracks to import MIDI data
+4. **MIDI File Export** - Export selected MIDI patterns as .mid files
+5. **Plugin Preset Browser** - Browse and load VST3/AudioWorklet plugin presets from a panel
+6. **Track Effects Presets** - Save/load effect chain configurations as named presets per track
+7. **Keyboard Shortcuts Panel** - Full keyboard shortcuts reference panel (press `?` to show)
+8. **Waveform Overview** - Mini overview waveform in track header showing full clip range
+9. **Track Color Coding** - Assign custom colors from palette to tracks for visual grouping
+10. **Quick Slice Tool** - Split audio clips at playhead with a single keyboard shortcut
+
+When queue is empty, run the brainstorming process described in Step 5.
 
 ## Workflow
 

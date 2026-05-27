@@ -1642,6 +1642,7 @@ async function initializeSnugOS() {
         if (typeof initScaleHighlightMode === 'function') initScaleHighlightMode(appServices); // Scale Highlight Mode initialization
         if (typeof initScaleHighlightGlobal === 'function') initScaleHighlightGlobal(appServices); // Scale Highlight Global initialization
         if (typeof initTrackRenameHotkey === 'function') initTrackRenameHotkey(appServices); // Track Rename Hotkey initialization
+        if (typeof initQuickSliceTool === 'function') initQuickSliceTool(appServices); // Quick Slice Tool - Shift+S to slice
         if (typeof initAudioRecorder === 'function') initAudioRecorder(appServices); // Audio Recorder initialization
         if (typeof initCountInAudio === 'function') initCountInAudio(appServices); // Count-In Audio initialization
         setTimeout(() => { if (typeof setupCountInUI === 'function') setupCountInUI(); }, 100); // Setup count-in UI controls

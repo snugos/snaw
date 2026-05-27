@@ -90,6 +90,7 @@ export { initTimelineSnapResolution, openSnapResolutionPanel, getSnapResolution,
 
 // Scale Highlight Intensity - Feature #10
 export { initScaleHighlightGlobal, openScaleHighlightGlobalPanel, isGlobalScaleHighlightEnabled, toggleGlobalScaleHighlight, setGlobalScale, setGlobalRootNote, getGlobalScaleInfo, getGlobalScaleIntensity, setGlobalScaleIntensity } from './ScaleHighlightGlobal.js';
-
 // Track Rename Hotkey - Press F2 to rename selected track inline
 export { initTrackRenameHotkey, handleTrackRenameKey } from './TrackRenameHotkey.js';
+// Quick Slice Tool - Press Shift+S to slice selected clip at playhead
+export { initQuickSliceTool, setQuickSliceEnabled, isQuickSliceEnabled } from './QuickSliceTool.js';
