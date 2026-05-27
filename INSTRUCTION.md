@@ -13,7 +13,6 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 7. **Keyboard Shortcuts Panel** - Full keyboard shortcuts reference panel (press `?` to show)
 8. **Waveform Overview** - Mini overview waveform in track header showing full clip range
 9. **Track Color Coding** - Assign custom colors from palette to tracks for visual grouping
-10. **Quick Slice Tool** - Split audio clips at playhead with a single keyboard shortcut
 
 When queue is empty, run the brainstorming process described in Step 5.
 
