@@ -4,15 +4,14 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Waveform Visualization** - Draw real-time waveform on audio clips in the timeline (needs hook-up to clip rendering)
-2. **Clickable Piano Roll** - Make the piano roll editor notes click-draggable for repositioning
-3. **MIDI File Import** - Drag & drop .mid files onto tracks to import MIDI data
-4. **MIDI File Export** - Export selected MIDI patterns as .mid files
-5. **Plugin Preset Browser** - Browse and load VST3/AudioWorklet plugin presets from a panel
-6. **Track Effects Presets** - Save/load effect chain configurations as named presets per track
-7. **Keyboard Shortcuts Panel** - Full keyboard shortcuts reference panel (press `?` to show)
-8. **Waveform Overview** - Mini overview waveform in track header showing full clip range
-9. **Track Color Coding** - Assign custom colors from palette to tracks for visual grouping
+1. **Clickable Piano Roll** - Make the piano roll editor notes click-draggable for repositioning
+2. **MIDI File Import** - Drag & drop .mid files onto tracks to import MIDI data
+3. **MIDI File Export** - Export selected MIDI patterns as .mid files
+4. **Plugin Preset Browser** - Browse and load VST3/AudioWorklet plugin presets from a panel
+5. **Track Effects Presets** - Save/load effect chain configurations as named presets per track
+6. **Keyboard Shortcuts Panel** - Full keyboard shortcuts reference panel (press `?` to show)
+7. **Waveform Overview** - Mini overview waveform in track header showing full clip range
+8. **Track Color Coding** - Assign custom colors from palette to tracks for visual grouping
 
 When queue is empty, run the brainstorming process described in Step 5.
 
