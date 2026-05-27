@@ -491,21 +491,53 @@ export function openKeyboardShortcutsPanel(savedState = null) {
     const contentContainer = document.createElement('div');
     contentContainer.id = 'keyboardShortcutsContent';
     contentContainer.className = 'p-4 h-full overflow-y-auto bg-gray-100 dark:bg-slate-800';
+    let html = '<div class="text-sm font-medium mb-3 text-gray-600 dark:text-gray-400 flex items-center justify-between">';
+    html += '<span>Press <kbd class="px-2 py-0.5 bg-gray-200 dark:bg-slate-700 rounded text-xs">?</kbd> to toggle</span>';
+    html += '<input id="shortcutSearchInput" type="text" placeholder="Search shortcuts..." class="px-2 py-1 text-sm border rounded w-36 dark:bg-slate-700 dark:border-slate-600 dark:text-gray-200">';
+    html += '</div>';
+    html += '<div id="shortcutsListContainer"><div id="shortcutsListContent">';
 
-    let html = '<div class="text-sm font-medium mb-4 text-gray-600 dark:text-gray-400">Press <kbd class="px-2 py-0.5 bg-gray-200 dark:bg-slate-700 rounded text-xs">?</kbd> to toggle this panel</div>';
-    
-    KEYBOARD_SHORTCUTS.forEach(section => {
-        html += `<div class="mb-4">
-            <div class="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-2">${section.category}</div>
-            <div class="space-y-1">`;
-        section.shortcuts.forEach(shortcut => {
-            html += `<div class="flex items-center justify-between py-1 px-2 bg-white dark:bg-slate-700 rounded border border-gray-200 dark:border-slate-600">
-                <span class="text-sm text-gray-700 dark:text-gray-300">${shortcut.description}</span>
-                <kbd class="px-2 py-1 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-500 rounded text-xs font-mono">${shortcut.keys}</kbd>
-            </div>`;
+    function renderShortcuts(filterQuery = '') {
+        const listEl = document.getElementById('shortcutsListContent');
+        if (!listEl) return;
+        let filtered = KEYBOARD_SHORTCUTS;
+        if (filterQuery.trim()) {
+            const q = filterQuery.toLowerCase();
+            filtered = KEYBOARD_SHORTCUTS.filter(section => {
+                const hasCategory = section.category.toLowerCase().includes(q);
+                const hasShortcut = section.shortcuts.some(shortcut => {
+                    const keys = Array.isArray(shortcut.keys) ? shortcut.keys.join('') : shortcut.keys || '';
+                    const desc = shortcut.description || '';
+                    return (keys + desc).toLowerCase().includes(q);
+                });
+                return hasCategory || hasShortcut;
+            });
+        }
+        listEl.innerHTML = '';
+        filtered.forEach(section => {
+            const sectionEl = document.createElement('div');
+            sectionEl.className = 'mb-4';
+            const categoryEl = document.createElement('div');
+            categoryEl.className = 'text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-2';
+            categoryEl.textContent = section.category;
+            sectionEl.appendChild(categoryEl);
+            const shortcutsListEl = document.createElement('div');
+            shortcutsListEl.className = 'space-y-1';
+            section.shortcuts.forEach(shortcut => {
+                const shortcutEl = document.createElement('div');
+                shortcutEl.className = 'flex items-center justify-between py-1 px-2 bg-white dark:bg-slate-700 rounded border border-gray-200 dark:border-slate-600';
+                shortcutEl.innerHTML = `
+                    <span class="text-sm text-gray-700 dark:text-gray-300">${shortcut.description}</span>
+                    <kbd class="px-2 py-1 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-500 rounded text-xs font-mono">${shortcut.keys}</kbd>
+                `;
+                shortcutsListEl.appendChild(shortcutEl);
+            });
+            sectionEl.appendChild(shortcutsListEl);
+            listEl.appendChild(sectionEl);
         });
-        html += '</div></div>';
-    });
+    }
+
+    renderShortcuts();
 
     contentContainer.innerHTML = html;
 
@@ -517,6 +549,18 @@ export function openKeyboardShortcutsPanel(savedState = null) {
 
     return localAppServices.createWindow(windowId, 'Keyboard Shortcuts', contentContainer, options);
 }
+
+function renderKeyboardShortcutsSearch() {
+    const searchInput = document.getElementById('shortcutSearchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            renderShortcuts(e.target.value);
+        });
+    }
+}
+
+// Call search setup after window is created
+setTimeout(renderKeyboardShortcutsSearch, 50);
 
 function renderTimeSignatureContent() {
     const container = document.getElementById('timeSignatureContent');
