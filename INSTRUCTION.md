@@ -9,9 +9,9 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 3. **MIDI File Export** - Export selected MIDI patterns as .mid files
 4. **Plugin Preset Browser** - Browse and load VST3/AudioWorklet plugin presets from a panel
 5. **Track Effects Presets** - Save/load effect chain configurations as named presets per track
-6. **Keyboard Shortcuts Panel** - Full keyboard shortcuts reference panel (press `?` to show)
-7. **Waveform Overview** - Mini overview waveform in track header showing full clip range
-8. **Track Color Coding** - Assign custom colors from palette to tracks for visual grouping
+6. ~~**Keyboard Shortcuts Panel** - Full keyboard shortcuts reference panel (press `?` to show)~~ ✅ Done
+7. ~~**Waveform Overview** - Mini overview waveform in track header showing full clip range~~ ✅ Done
+8. ~~**Track Color Coding** - Assign custom colors from palette to tracks for visual grouping~~ ✅ Done
 
 When queue is empty, run the brainstorming process described in Step 5.
 
