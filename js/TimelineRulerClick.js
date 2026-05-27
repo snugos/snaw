@@ -14,6 +14,7 @@ export function initTimelineRulerClick(appServices) {
     // Wait for timeline to be ready
     setTimeout(() => {
         setupRulerClickHandler();
+        setupRulerHoverTooltip();
     }, 500);
     
     console.log('[TimelineRulerClick] Initialized');
@@ -186,6 +187,87 @@ function showJumpFeedback(time) {
     feedback.hideTimeout = setTimeout(() => {
         feedback.style.opacity = '0';
     }, 800);
+}
+
+// --- Enhancement: Timeline Ruler Hover Time Tooltip ---
+// Shows time position tooltip when hovering over the timeline ruler
+
+let rulerHoverTooltip = null;
+let lastRulerHoverX = 0;
+let rulerHoverThrottle = null;
+
+/**
+ * Get or create the ruler hover tooltip element
+ * @returns {HTMLElement}
+ */
+function getRulerHoverTooltip() {
+    if (rulerHoverTooltip) return rulerHoverTooltip;
+    
+    rulerHoverTooltip = document.createElement('div');
+    rulerHoverTooltip.id = 'timeline-ruler-hover-tooltip';
+    rulerHoverTooltip.style.cssText = `
+        position: fixed;
+        background: rgba(20, 20, 30, 0.95);
+        color: #00ff88;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-family: ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+        font-size: 12px;
+        font-weight: 600;
+        pointer-events: none;
+        z-index: 10001;
+        opacity: 0;
+        transition: opacity 0.15s ease;
+        border: 1px solid rgba(0, 255, 136, 0.3);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    `;
+    document.body.appendChild(rulerHoverTooltip);
+    return rulerHoverTooltip;
+}
+
+/**
+ * Handle mouse move over timeline ruler - show time tooltip
+ * @param {MouseEvent} event
+ */
+function handleRulerMouseMove(event) {
+    if (!isEnabled) return;
+    
+    // Throttle updates to 60fps
+    if (rulerHoverThrottle) return;
+    rulerHoverThrottle = setTimeout(() => { rulerHoverThrottle = null; }, 16);
+    
+    const time = getTimeFromEvent(event);
+    if (time === null) return;
+    
+    lastRulerHoverX = event.clientX;
+    const tooltip = getRulerHoverTooltip();
+    
+    tooltip.textContent = `${time.toFixed(2)}s`;
+    tooltip.style.left = (event.clientX + 12) + 'px';
+    tooltip.style.top = (event.clientY + 12) + 'px';
+    tooltip.style.opacity = '1';
+}
+
+/**
+ * Handle mouse leave from timeline ruler - hide tooltip
+ */
+function handleRulerMouseLeave() {
+    if (rulerHoverTooltip) {
+        rulerHoverTooltip.style.opacity = '0';
+    }
+}
+
+/**
+ * Setup hover tooltip handlers on timeline ruler
+ */
+function setupRulerHoverTooltip() {
+    const timelineRuler = findTimelineRuler();
+    if (!timelineRuler) return;
+    
+    timelineRuler.addEventListener('mousemove', handleRulerMouseMove);
+    timelineRuler.addEventListener('mouseleave', handleRulerMouseLeave);
+    
+    console.log('[TimelineRulerClick] Hover tooltip enabled');
 }
 
 /**
