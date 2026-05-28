@@ -378,7 +378,7 @@ import {
                 tx.onerror = () => reject(tx.error);
             });
             if (typeof showSafeNotification === 'function') showSafeNotification("Custom background removed.", 2000);
-            if (typeof refreshDesktopBackground === 'function') refreshDesktopBackground();
+            if (typeof restoreDesktopBackground === 'function') restoreDesktopBackground();
         } catch (e) {
             console.error('[removeCustomDesktopBackground] Error:', e);
             if (typeof showSafeNotification === 'function') showSafeNotification("Failed to remove background.", 2000);
