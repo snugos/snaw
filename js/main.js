@@ -213,7 +213,8 @@ import {
     handleOpenTrackInspector as eventHandleOpenTrackInspector,
     handleOpenEffectsRack as eventHandleOpenEffectsRack,
     handleOpenSequencer as eventHandleOpenSequencer,
-    handleTimelineLaneDrop
+    handleTimelineLaneDrop,
+    exportTrackToMIDI
 } from './eventHandlers.js';
 import {
     initializeStateModule,
@@ -273,6 +274,7 @@ import {
     handleOpenEffectsRack: eventHandleOpenEffectsRack,
     handleOpenSequencer: eventHandleOpenSequencer,
     handleTimelineLaneDrop: handleTimelineLaneDrop,
+    exportTrackToMIDI: exportTrackToMIDI,
     attachGlobalControlEvents: attachGlobalControlEvents, // FIX: Expose for reconstruction
 
     getAudioBlobFromSoundBrowserItem: async (soundData) => {

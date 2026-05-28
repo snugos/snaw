@@ -141,6 +141,12 @@ function showTrackContextMenu(x, y, trackId) {
                 <span class="w-4">🎛️</span>
                 <span>Bounce Track to WAV</span>
             </button>
+            ${trackType !== 'Audio' ? `
+            <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="exportMidi" data-track-id="${trackId}">
+                <span class="w-4">🎹</span>
+                <span>Export to MIDI</span>
+            </button>
+            ` : ''}
         </div>
         <div class="border-t border-gray-700 mt-1 pt-1">
             <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="delete" data-track-id="${trackId}">
@@ -329,6 +335,14 @@ function handleTrackAction(action, trackId) {
                 }
             } else {
                 localAppServices.showNotification?.('Bounce not available for this track type', 2000);
+            }
+            break;
+            
+        case 'exportMidi':
+            if (localAppServices.exportTrackToMIDI) {
+                localAppServices.exportTrackToMIDI(trackId);
+            } else {
+                localAppServices.showNotification?.('MIDI export not available', 2000);
             }
             break;
             
