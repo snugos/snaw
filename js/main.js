@@ -200,7 +200,7 @@ import * as FeatureAdditions from './FeatureAdditions.js';
 import { showNotification as utilShowNotification, createContextMenu, createDropZoneHTML, setupGenericDropZoneListeners } from './utils.js';
 import { openKeyboardShortcutsPanel } from './ui.js';
 import {
-    initializeEventHandlersModule, initializePrimaryEventListeners, setupMIDI, attachGlobalControlEvents,
+    initializeEventHandlersModule, initializePrimaryEventListeners, initializeMIDIDropZone, setupMIDI, attachGlobalControlEvents,
     selectMIDIInput as eventSelectMIDIInput, 
     handleTrackMute as eventHandleTrackMute,
     handleTrackSolo as eventHandleTrackSolo,
@@ -1733,6 +1733,11 @@ async function initializeSnugOS() {
         if (typeof initializePrimaryEventListeners === 'function') {
              initializePrimaryEventListeners(appServices);
         } else { console.error("initializePrimaryEventListeners is not a function");}
+
+        // Initialize MIDI drop zone on desktop for drag-and-drop .mid file import
+        if (typeof initializeMIDIDropZone === 'function' && appServices.uiElementsCache?.desktop) {
+            initializeMIDIDropZone(appServices.uiElementsCache.desktop);
+        }
 
         if (typeof setupMIDI === 'function') setupMIDI(); else console.error("setupMIDI is not a function");
 
