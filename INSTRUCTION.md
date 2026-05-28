@@ -7,11 +7,24 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 1. ~~**Clickable Piano Roll** - Make the piano roll editor notes click-draggable for repositioning~~ ✅ Done
 2. ~~**MIDI File Import** - Drag & drop .mid files onto tracks to import MIDI data~~ ✅ Done
 3. ~~**MIDI File Export** - Export selected MIDI patterns as .mid files~~ ✅ Done
-4. **Plugin Preset Browser** - Browse and load VST3/AudioWorklet plugin presets from a panel
-5. **Track Effects Presets** - Save/load effect chain configurations as named presets per track
+4. ~~**Plugin Preset Browser** - Browse and load VST3/AudioWorklet plugin presets from a panel~~ ✅ Done
+5. ~~**Track Effects Presets** - Save/load effect chain configurations as named presets per track~~ ✅ Done
 6. ~~**Keyboard Shortcuts Panel** - Full keyboard shortcuts reference panel (press `?` to show)~~ ✅ Done
 7. ~~**Waveform Overview** - Mini overview waveform in track header showing full clip range~~ ✅ Done
 8. ~~**Track Color Coding** - Assign custom colors from palette to tracks for visual grouping~~ ✅ Done
+
+## Next Features Queue
+
+1. **Tempo Per Track** - Allow different tracks to have independent playback rates/tempo multipliers
+2. **Audio Scrubbing** - Click and drag on timeline to scrub audio with preview
+3. **Track Snap Resolution** - Per-track snap-to-grid sensitivity settings
+4. **Loop Region Presets** - Save and recall loop region positions as named presets
+5. **Ghost Notes Preview** - Show MIDI ghost notes from other tracks while recording
+6. **Scale Quantize Panel** - Dedicated panel to set scale/key and quantize notes accordingly
+7. **Tap Tempo Visual** - Visual tap tempo with average display and beat confirmation
+8. **Lyrics Track** - Dedicated track type for storing and displaying song lyrics
+9. **Marker Navigation** - Add named markers for quick navigation to specific positions
+10. **Auto-save Indicator** - Visual indicator showing when project was last auto-saved
 
 When queue is empty, run the brainstorming process described in Step 5.
 
