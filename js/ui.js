@@ -7821,6 +7821,20 @@ function renderTrackStrip(track) {
                     })()}
                 </div>
             </div>
+            
+            <!-- Playback Rate section -->
+            <div class="strip-rate-section mt-1 border-t border-gray-700 pt-2">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs text-gray-400">Rate:</span>
+                    <div class="flex items-center gap-1">
+                        <input type="range" class="strip-rate-input w-16 h-3" 
+                               data-track-id="${track.id}" 
+                               min="0.25" max="2" step="0.05" 
+                               value="${track.timelinePlaybackRate || 1.0}">
+                        <span class="text-xs text-cyan-400 font-mono w-10 text-right">${((track.timelinePlaybackRate || 1.0) * 100).toFixed(0)}%</span>
+                    </div>
+                </div>
+            </div>
         </div>
     `;
 }
@@ -8015,6 +8029,28 @@ function setupMixerChannelStripEvents(container, tracks) {
             }
             // Update display value
             e.target.nextElementSibling.textContent = Math.round(amount * 100);
+        });
+    });
+
+    // Playback rate input events
+    container.querySelectorAll('.strip-rate-input').forEach(input => {
+        input.addEventListener('input', (e) => {
+            const trackId = e.target.dataset.trackId;
+            const rate = parseFloat(e.target.value);
+            const display = e.target.nextElementSibling;
+            if (display) display.textContent = Math.round(rate * 100) + '%';
+        });
+        input.addEventListener('change', (e) => {
+            const trackId = e.target.dataset.trackId;
+            const rate = parseFloat(e.target.value);
+            const tracks = localAppServices.getTracks ? localAppServices.getTracks() : [];
+            const track = tracks.find(t => t.id === trackId);
+            if (track && typeof track.setPlaybackRate === 'function') {
+                track.setPlaybackRate(rate, true);
+            }
+            if (localAppServices.captureStateForUndo) {
+                localAppServices.captureStateForUndo(`Set playback rate for track ${trackId} to ${Math.round(rate * 100)}%`);
+            }
         });
     });
 
