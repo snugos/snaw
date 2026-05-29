@@ -359,7 +359,7 @@ import {
     removeCustomDesktopBackground: async () => {
         const hasStoredBg = localStorage.getItem('snugosDesktopBackground') || localStorage.getItem('snugosDesktopBgType');
         if (!hasStoredBg) {
-            const db = await bgDb.init();
+            const db = await this.init();
             const stored = await new Promise((resolve) => {
                 const tx = db.transaction('backgrounds', 'readonly');
                 const store = tx.objectStore('backgrounds');
@@ -375,7 +375,7 @@ import {
         try {
             localStorage.removeItem('snugosDesktopBackground');
             localStorage.removeItem('snugosDesktopBgType');
-            const db = await bgDb.init();
+            const db = await this.init();
             await new Promise((resolve, reject) => {
                 const tx = db.transaction('backgrounds', 'readwrite');
                 const store = tx.objectStore('backgrounds');
@@ -786,7 +786,7 @@ import {
     removeCustomDesktopBackground: async () => {
         const hasStoredBg = localStorage.getItem('snugosDesktopBackground') || localStorage.getItem('snugosDesktopBgType');
         if (!hasStoredBg) {
-            const db = await bgDb.init();
+            const db = await this.init();
             const stored = await new Promise((resolve) => {
                 const tx = db.transaction('backgrounds', 'readonly');
                 const store = tx.objectStore('backgrounds');
@@ -802,7 +802,7 @@ import {
         try {
             localStorage.removeItem('snugosDesktopBackground');
             localStorage.removeItem('snugosDesktopBgType');
-            const db = await bgDb.init();
+            const db = await this.init();
             await new Promise((resolve, reject) => {
                 const tx = db.transaction('backgrounds', 'readwrite');
                 const store = tx.objectStore('backgrounds');
@@ -1375,7 +1375,7 @@ import {
     removeCustomDesktopBackground: async () => {
         const hasStoredBg = localStorage.getItem('snugosDesktopBackground') || localStorage.getItem('snugosDesktopBgType');
         if (!hasStoredBg) {
-            const db = await bgDb.init();
+            const db = await this.init();
             const stored = await new Promise((resolve) => {
                 const tx = db.transaction('backgrounds', 'readonly');
                 const store = tx.objectStore('backgrounds');
@@ -1391,7 +1391,7 @@ import {
         try {
             localStorage.removeItem('snugosDesktopBackground');
             localStorage.removeItem('snugosDesktopBgType');
-            const db = await bgDb.init();
+            const db = await this.init();
             await new Promise((resolve, reject) => {
                 const tx = db.transaction('backgrounds', 'readwrite');
                 const store = tx.objectStore('backgrounds');
