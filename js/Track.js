@@ -81,6 +81,10 @@ export class Track {
         // Track color for visual grouping
         this.color = initialData?.color || getRandomTrackColor();
 
+        // Track snap resolution - per-track grid snap sensitivity
+        // null means inherit from global snap resolution
+        this.snapResolution = initialData?.snapResolution ?? null;
+
         // Track icon for visual identification
         this.icon = initialData?.icon || null;
 

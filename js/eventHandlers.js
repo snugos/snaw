@@ -1556,6 +1556,10 @@ export function attachGlobalControlEvents(elements) {
                     tapBtnGlobal.style.backgroundColor = '#3a3a3a';
                     setTimeout(() => { tapBtnGlobal.style.backgroundColor = ''; }, 100);
                 }
+                // Show visual tap tempo indicator
+                if (window.TapTempo) {
+                    window.TapTempo.addTap(tappedBpm || 120);
+                }
             } catch (error) {
                 console.error("[EventHandlers TapTempo] Error:", error);
             }
@@ -2009,6 +2013,13 @@ document.addEventListener('keydown', (event) => {
         if (key === 'q' && !(event.ctrlKey || event.metaKey)) {
             if (localAppServices.openSmartQuantizePanel) {
                 localAppServices.openSmartQuantizePanel();
+            }
+            return;
+        }
+        // T key - Tap Tempo (trigger visual indicator)
+        if (key === 't' && !(event.ctrlKey || event.metaKey)) {
+            if (window.TapTempo) {
+                window.TapTempo.showIndicator();
             }
             return;
         }
