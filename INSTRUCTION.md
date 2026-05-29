@@ -16,7 +16,7 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 ## Next Features Queue
 
 1. ~~**Tempo Per Track** - Allow different tracks to have independent playback rates/tempo multipliers~~ ✅ Done
-2. **Audio Scrubbing** - Click and drag on timeline to scrub audio with preview
+2. ~~**Audio Scrubbing** - Click and drag on timeline to scrub audio with preview~~ ✅ Done
 3. **Track Snap Resolution** - Per-track snap-to-grid sensitivity settings
 4. **Loop Region Presets** - Save and recall loop region positions as named presets
 5. **Ghost Notes Preview** - Show MIDI ghost notes from other tracks while recording
