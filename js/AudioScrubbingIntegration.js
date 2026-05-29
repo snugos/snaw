@@ -11,6 +11,7 @@ let isScrubActive = false;
 let scrubTargetClipId = null;
 let scrubTargetDbKey = null;
 let scrubOnDragEnabled = true;
+let isScrubEnabled = false;
 let localAppServices = {};
 
 // Initialize audio scrubbing with app services
