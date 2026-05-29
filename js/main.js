@@ -96,6 +96,7 @@ import { initSamplerLoopTrim, openSamplerLoopTrimPanel } from './SamplerLoopTrim
 // Guitar Tab Editor
 import { initGuitarTabEditor, openGuitarTabEditor } from './GuitarTabEditor.js';
 import { initTrackColorPanel, openTrackColorPanel } from './TrackColorPanel.js';
+import { initTrackSnapResolutionPanel, openTrackSnapResolutionPanel } from './TrackSnapResolutionPanel.js';
 import { initTrackIconPicker, openTrackIconPickerPanel } from './TrackIconPicker.js';
 import { initChordVoicingModes, openChordVoicingPanel } from './ChordVoicingModes.js';
 import { initChordTriggerMode, toggleChordTriggerMode, openChordTriggerPanel, isChordTriggerEnabled, handleChordTriggerKeyDown, handleChordTriggerKeyUp, getChordKeyMappings, setChordKeyMapping } from './ChordTriggerMode.js';
@@ -895,6 +896,7 @@ import {
     openPhaseCorrelationMeterPanel,
     openTrackColorPalettePanel,
     openTrackColorPanel,
+    openTrackSnapResolutionPanel,
     openTempoSyncLFOPanel,
     openGuitarTabEditor,
     openSamplerLoopTrimPanel,
@@ -1664,6 +1666,7 @@ async function initializeSnugOS() {
         if (typeof initTimelineClipOperations === 'function') initTimelineClipOperations(appServices); // Timeline Clip Operations (multi-select)
         if (typeof initTrackDuplicateOffset === 'function') initTrackDuplicateOffset(appServices); // Track Duplicate with Offset
         if (typeof initTrackColorPanel === 'function') initTrackColorPanel(appServices); // Track Color Panel initialization
+        if (typeof initTrackSnapResolutionPanel === 'function') initTrackSnapResolutionPanel(appServices); // Track Snap Resolution Panel initialization
         if (typeof initTrackScrollToCenter === 'function') initTrackScrollToCenter(appServices); // Track Scroll To Center initialization
         if (typeof initSamplerLoopTrim === 'function') initSamplerLoopTrim(appServices); // Sampler Loop Trim initialization
         if (typeof initTrackIconPicker === 'function') initTrackIconPicker(appServices); // Track Icon Picker initialization

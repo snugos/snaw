@@ -126,6 +126,10 @@ function showTrackContextMenu(x, y, trackId) {
                 <span class="w-4">🎨</span>
                 <span>Change Color</span>
             </button>
+            <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="snapResolution" data-track-id="${trackId}">
+                <span class="w-4">⌗</span>
+                <span>Snap Resolution</span>
+            </button>
             <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="height" data-track-id="${trackId}">
                 <span class="w-4">📏</span>
                 <span>Adjust Height</span>
@@ -258,6 +262,14 @@ function handleTrackAction(action, trackId) {
                     if (localAppServices.renderTracks) localAppServices.renderTracks();
                     localAppServices.showNotification?.('Track color changed', 1500);
                 }
+            }
+            break;
+
+        case 'snapResolution':
+            if (localAppServices.openTrackSnapResolutionPanel) {
+                localAppServices.openTrackSnapResolutionPanel(trackId);
+            } else {
+                localAppServices.showNotification?.('Snap resolution panel not available', 2000);
             }
             break;
             

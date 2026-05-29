@@ -2170,6 +2170,36 @@ export class Track {
     }
 
     /**
+     * Get the snap resolution for this track.
+     * Returns null if using global snap resolution.
+     * @returns {number|null} Track-specific snap resolution in beats, or null for global
+     */
+    getSnapResolution() {
+        return this.snapResolution;
+    }
+
+    /**
+     * Set the snap resolution for this track.
+     * @param {number|null} resolution - Snap resolution in beats (0.0625=32nd, 0.125=16th, 0.25=16th, 0.5=8th, 1=quarter), or null to use global
+     * @param {boolean} fromInteraction - Whether this is from a user interaction
+     */
+    setSnapResolution(resolution, fromInteraction = false) {
+        if (!fromInteraction) this._captureUndoState?.(`Set snap resolution on ${this.name}`);
+        // null means inherit from global, otherwise clamp to valid range
+        if (resolution !== null) {
+            resolution = Math.max(0.0625, Math.min(4, parseFloat(resolution) || 0.25));
+        }
+        this.snapResolution = resolution;
+        console.log(`[Track ${this.id}] Set snap resolution to ${resolution === null ? 'global' : resolution}`);
+        if (fromInteraction && this.appServices.captureStateForUndo) {
+            this.appServices.captureStateForUndo(`Set ${this.name} snap resolution`);
+        }
+        if (this.appServices.updateTrackUI) {
+            this.appServices.updateTrackUI(this.id, 'snapResolutionChanged');
+        }
+    }
+
+    /**
      * Set the MIDI channel for this track.
      * @param {number} channel - MIDI channel (1-16, or 0 for omni/all channels)
      * @param {boolean} fromInteraction - Whether this is from a user interaction
