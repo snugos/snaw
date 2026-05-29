@@ -18,13 +18,26 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 1. ~~**Tempo Per Track** - Allow different tracks to have independent playback rates/tempo multipliers~~ ✅ Done
 2. ~~**Audio Scrubbing** - Click and drag on timeline to scrub audio with preview~~ ✅ Done
 3. ~~**Track Snap Resolution** - Per-track snap-to-grid sensitivity settings~~ ✅ Done
-4. **Loop Region Presets** - Save and recall loop region positions as named presets
-5. **Ghost Notes Preview** - Show MIDI ghost notes from other tracks while recording
-6. **Scale Quantize Panel** - Dedicated panel to set scale/key and quantize notes accordingly
-7. **Tap Tempo Visual** - Visual tap tempo with average display and beat confirmation
-8. **Lyrics Track** - Dedicated track type for storing and displaying song lyrics
-9. **Marker Navigation** - Add named markers for quick navigation to specific positions
-10. **Auto-save Indicator** - Visual indicator showing when project was last auto-saved
+4. ~~**Loop Region Presets** - Save and recall loop region positions as named presets~~ ✅ Done
+5. ~~**Ghost Notes Preview** - Show MIDI ghost notes from other tracks while recording~~ ✅ Done
+6. ~~**Scale Quantize Panel** - Dedicated panel to set scale/key and quantize notes accordingly~~ ✅ Done
+7. ~~**Tap Tempo Visual** - Visual tap tempo with average display and beat confirmation~~ ✅ Done
+8. ~~**Lyrics Track** - Dedicated track type for storing and displaying song lyrics~~ ✅ Done
+9. ~~**Marker Navigation** - Add named markers for quick navigation to specific positions~~ ✅ Done
+10. ~~**Auto-save Indicator** - Visual indicator showing when project was last auto-saved~~ ✅ Done
+
+## New Features Queue
+
+1. **Arpeggiator Pattern Panel** - Visual panel showing arpeggiator pattern with step editing
+2. **Audio Normalization** - One-click loudness normalization for tracks and clips
+3. **Tempo Tap History** - List of recent tap tempo values with one-click recall
+4. **Track Import/Export** - Export single track as project file and import into other projects
+5. **Clip Fade Curve Types** - Choose between linear, exponential, logarithmic fade curves
+6. **Bounce Selected to Audio** - Render selected clips to audio track
+7. **Metronome Count-In Settings** - Configure count-in bars, sound, and visual countdown
+8. **Keyboard Octave Shift** - Quick octave up/down buttons for MIDI keyboard input
+9. **Timeline Zoom Memory** - Remember zoom level per project
+10. **Clip Choppper Grid** - Slice audio clip with automatic grid-based slice points
 
 When queue is empty, run the brainstorming process described in Step 5.
 

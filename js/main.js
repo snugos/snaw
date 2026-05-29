@@ -78,6 +78,8 @@ import { enableSoloChain, disableSoloChain, toggleTrackInChain, clearChain, getS
 import { initLoopRegionQuickSet, openLoopRegionQuickSetSettings } from './LoopRegionQuickSet.js';
 import { initLoopRegionMarkers, openLoopRegionMarkersPanel, addLoopRegionMarker } from './LoopRegionMarkers.js';
 import { initLoopRegionSnap, openLoopSnapPanel, isLoopSnapEnabled, toggleLoopSnap, getSnapConfig } from './LoopRegionSnap.js';
+import { initLoopRegionPresets, openLoopRegionPresetsPanel } from './LoopRegionPresets.js';
+import { initAutoSaveIndicator, showSaveStatus, getSaveStatus } from './AutoSaveIndicator.js';
 import { initExportSelection, openExportSelectionPanel } from './ExportSelection.js';
 import { initLyricsTrack, openLyricsTrackPanel, getLyrics, addLyric, importLyricsText, setLyricsTrackEnabled, getCurrentLyric } from './LyricsTrack.js';
 import { openTempoRamperPanel } from './TempoRamperUI.js';
@@ -917,6 +919,7 @@ import {
     openTempoRamperVisual,
     openLoopRegionQuickSetSettings,
     openLoopRegionMarkersPanel,
+    openLoopRegionPresetsPanel,
     openLoopSnapPanel,
     openGrooveExtractorPanel,
     openSmartFXChainPanel,
@@ -1636,6 +1639,8 @@ async function initializeSnugOS() {
         if (typeof initLoopRegionQuickSet === 'function') initLoopRegionQuickSet(appServices); // Loop Region Quick Set initialization
         if (typeof initLoopRegionMarkers === 'function') initLoopRegionMarkers(appServices); // Loop Region Markers initialization
         if (typeof initLoopRegionSnap === 'function') initLoopRegionSnap(appServices); // Loop Region Snap initialization
+        if (typeof initLoopRegionPresets === 'function') initLoopRegionPresets(appServices); // Loop Region Presets initialization
+        if (typeof initAutoSaveIndicator === 'function') initAutoSaveIndicator(appServices); // Auto-save Indicator initialization
         if (typeof initLyricsTrack === 'function') initLyricsTrack(appServices); // Lyrics Track initialization
         if (typeof initLyricsDisplay === 'function') initLyricsDisplay(appServices); // Lyrics Display Karaoke Mode
         if (typeof initTimeSignaturePerTrack === 'function') initTimeSignaturePerTrack(appServices); // Time Signature Per Track initialization
