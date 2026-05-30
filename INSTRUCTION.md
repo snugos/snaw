@@ -28,7 +28,7 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## New Features Queue
 
-1. **Arpeggiator Pattern Panel** - Visual panel showing arpeggiator pattern with step editing
+1. ~~**Arpeggiator Pattern Panel** - Visual panel showing arpeggiator pattern with step editing~~ ✅ Done
 2. **Audio Normalization** - One-click loudness normalization for tracks and clips
 3. **Tempo Tap History** - List of recent tap tempo values with one-click recall
 4. **Track Import/Export** - Export single track as project file and import into other projects
