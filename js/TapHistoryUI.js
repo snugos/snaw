@@ -201,8 +201,11 @@ function updatePanelContent() {
     document.getElementById('tapHistoryApplyBtn').addEventListener('click', () => {
         const avg = getAverageTap(5); // Use last 5 taps
         if (avg !== null) {
-            localAppServices.setTempo?.(avg);
-            localAppServices.showNotification?.(`Tempo set to ${avg} BPM (avg of last 5 taps)`, 2000);
+            if (window.Tone) Tone.Transport.bpm.value = avg;
+            // Update the tempo input field
+            const tempoInput = document.getElementById('tempoGlobalInput');
+            if (tempoInput) tempoInput.value = avg;
+            if (localAppServices.showNotification) localAppServices.showNotification(`Tempo set to ${avg} BPM (avg of last 5 taps)`, 2000);
         }
     });
     document.getElementById('tapHistoryClearBtn').addEventListener('click', () => clearHistory());
