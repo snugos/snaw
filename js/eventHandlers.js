@@ -546,6 +546,12 @@ export function initializePrimaryEventListeners(appContext) {
             menuUndo: () => { console.log('[Menu] Undo clicked'); localAppServices.undoLastAction?.(); },
             menuRedo: () => { console.log('[Menu] Redo clicked'); localAppServices.redoLastAction?.(); },
             menuOpenHistory: () => { console.log('[Menu] History Panel clicked'); localAppServices.openUndoHistoryPanel?.(); },
+            menuCountInSettings: () => {
+                console.log('[Menu] Count-In Settings clicked');
+                try {
+                    localAppServices.openCountInSettingsPanel?.();
+                } catch(e) { console.error('[Menu] Count-In Settings error:', e); }
+            },
             menuSaveProject: () => { console.log('[Menu] Save clicked'); localAppServices.saveProject?.(); },
             menuLoadProject: () => { console.log('[Menu] Load clicked'); localAppServices.loadProject?.(); },
             menuExportWav: () => { console.log('[Menu] Export clicked'); localAppServices.exportToWav?.(); },

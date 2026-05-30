@@ -68,6 +68,7 @@ import { initScaleHighlightMode, openScaleHighlightPanel, isNoteInScale, getNote
 import { initScaleHighlightGlobal, openScaleHighlightGlobalPanel, toggleGlobalScaleHighlight, setGlobalScale, setGlobalRootNote, isGlobalScaleHighlightEnabled } from './ScaleHighlightGlobal.js';
 import { initAudioRecorder, startRecording, stopRecording, isRecordingActive, requestMicAccess, getRecordingStatus, cleanupRecording } from './AudioRecorder.js';
 import { initCountInAudio, setupCountInUI, playCountIn, isCountInActive } from './CountInAudio.js';
+import { initCountInSettingsPanel, openCountInSettingsPanel, getCountInSettings, setCountInBars, setCountInSoundEnabled, setCountInVisualCountdown, setCountInAccentFirstBeat, setCountInVolume } from './CountInSettingsPanel.js';
 import { initMIDArpeggiatorPanel, openMIDArpeggiatorPanel } from './MIDArpeggiatorPanel.js';
 import { initTrackTemplateLibrary, openTrackTemplateLibraryPanel, getTrackTemplateNames, getTrackTemplate, saveTrackTemplate, deleteTrackTemplate, exportTemplates, importTemplates } from './TrackTemplateLibrary.js';
 import { initMixerChannelStripPresets, openMixerChannelStripPresetsPanel, exportChannelStripPresets, importChannelStripPresets } from './MixerChannelStripPresets.js';
@@ -390,6 +391,7 @@ import {
             if (typeof showSafeNotification === 'function') showSafeNotification("Failed to remove background.", 2000);
         }
     },
+    window.removeCustomDesktopBackground = removeCustomDesktopBackground,
 
     // MIDI Chord Player Services
     playMidiChord: (trackId, rootNote, octave, chordType, options = {}) => {
@@ -898,6 +900,7 @@ import {
     openPhaseCorrelationMeterPanel,
     openTrackColorPalettePanel,
     openTrackColorPanel,
+    openCountInSettingsPanel,
     openTrackSnapResolutionPanel,
     openTempoSyncLFOPanel,
     openGuitarTabEditor,
@@ -1658,6 +1661,7 @@ async function initializeSnugOS() {
         if (typeof initQuickSliceTool === 'function') initQuickSliceTool(appServices); // Quick Slice Tool - Shift+S to slice
         if (typeof initAudioRecorder === 'function') initAudioRecorder(appServices); // Audio Recorder initialization
         if (typeof initCountInAudio === 'function') initCountInAudio(appServices); // Count-In Audio initialization
+        if (typeof initCountInSettingsPanel === 'function') initCountInSettingsPanel(appServices); // Count-In Settings Panel initialization
         setTimeout(() => { if (typeof setupCountInUI === 'function') setupCountInUI(); }, 100); // Setup count-in UI controls
         if (typeof initMIDArpeggiatorPanel === 'function') initMIDArpeggiatorPanel(appServices); // MIDI Arpeggiator Panel initialization
         if (typeof initTrackTemplateLibrary === 'function') initTrackTemplateLibrary(appServices); // Track Template Library initialization
