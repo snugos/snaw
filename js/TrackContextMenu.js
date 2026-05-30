@@ -157,6 +157,14 @@ function showTrackContextMenu(x, y, trackId) {
             ` : ''}
         </div>
         <div class="border-t border-gray-700 mt-1 pt-1">
+            <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="importTrack" data-track-id="${trackId}">
+                <span class="w-4">📥</span>
+                <span>Import Track</span>
+            </button>
+            <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="exportTrack" data-track-id="${trackId}">
+                <span class="w-4">📤</span>
+                <span>Export Track</span>
+            </button>
             <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="delete" data-track-id="${trackId}">
                 <span class="w-4">🗑️</span>
                 <span>Delete Track</span>
@@ -370,6 +378,14 @@ function handleTrackAction(action, trackId) {
             }
             break;
             
+        case 'importTrack':
+            triggerTrackImport();
+            break;
+            
+        case 'exportTrack':
+            exportTrackToFile(trackId);
+            break;
+            
         case 'delete':
             if (confirm(`Delete track "${track.name || 'Unnamed Track'}"?`)) {
                 if (localAppServices.captureStateForUndo) {
@@ -382,6 +398,129 @@ function handleTrackAction(action, trackId) {
             }
             break;
     }
+}
+
+
+/**
+ * Export a track to a JSON file for sharing
+ * @param {number} trackId - Track ID to export
+ */
+function exportTrackToFile(trackId) {
+    const tracks = localAppServices.getTracks ? localAppServices.getTracks() : [];
+    const track = tracks.find(t => t.id === trackId);
+    if (!track) {
+        console.warn('[TrackContextMenu] Track not found for export');
+        return false;
+    }
+    
+    const exportData = {
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        track: {
+            name: track.name,
+            type: track.type,
+            color: track.color,
+            volume: track.volume,
+            pan: track.pan,
+            mute: track.isMuted,
+            solo: track.isSoloed,
+            synthParams: track.synthParams ? JSON.parse(JSON.stringify(track.synthParams)) : null,
+            samplerSettings: track.samplerAudioData ? JSON.parse(JSON.stringify(track.samplerAudioData)) : null,
+            instrumentSamplerSettings: track.instrumentSamplerSettings ? JSON.parse(JSON.stringify(track.instrumentSamplerSettings)) : null,
+            drumSamplerPads: track.drumSamplerPads ? JSON.parse(JSON.stringify(track.drumSamplerPads)) : null,
+            effects: track.activeEffects ? track.activeEffects.map(e => ({
+                type: e.type,
+                params: e.params ? JSON.parse(JSON.stringify(e.params)) : {}
+            })) : [],
+            steps: track.steps ? JSON.parse(JSON.stringify(track.steps)) : null,
+            sendLevels: track.sendLevels ? JSON.parse(JSON.stringify(track.sendLevels)) : {},
+            lyrics: track.lyrics ? JSON.parse(JSON.stringify(track.lyrics)) : []
+        }
+    };
+    
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const filename = `${track.name.replace(/[^a-z0-9]/gi, '_')}_track.json`;
+    downloadBlob(blob, filename);
+    
+    if (localAppServices.showNotification) {
+        localAppServices.showNotification(`Exported track "${track.name}"`, 2000);
+    }
+    
+    return true;
+}
+
+/**
+ * Import a track from a JSON file
+ * @param {File} file - The JSON file to import
+ */
+function importTrackFromFile(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const data = JSON.parse(e.target.result);
+            if (!data.track) {
+                throw new Error('Invalid track file format');
+            }
+            
+            const trackData = data.track;
+            
+            if (localAppServices.createTrack) {
+                const newTrack = localAppServices.createTrack(trackData.type || 'Synth', {
+                    name: trackData.name || 'Imported Track',
+                    color: trackData.color,
+                    volume: trackData.volume,
+                    pan: trackData.pan,
+                    muted: trackData.mute,
+                    synthParams: trackData.synthParams,
+                    samplerAudioData: trackData.samplerSettings,
+                    instrumentSamplerSettings: trackData.instrumentSamplerSettings,
+                    drumSamplerPads: trackData.drumSamplerPads,
+                    activeEffects: trackData.effects,
+                    steps: trackData.steps,
+                    sendLevels: trackData.sendLevels,
+                    lyrics: trackData.lyrics
+                });
+                
+                if (newTrack) {
+                    if (localAppServices.showNotification) {
+                        localAppServices.showNotification(`Imported track "${trackData.name}"`, 2000);
+                    }
+                    if (localAppServices.renderTracks) {
+                        localAppServices.renderTracks();
+                    }
+                }
+            }
+        } catch (err) {
+            console.error('[TrackContextMenu] Failed to import track:', err);
+            if (localAppServices.showNotification) {
+                localAppServices.showNotification('Failed to import track: ' + err.message, 3000);
+            }
+        }
+    };
+    reader.readAsText(file);
+}
+
+function createImportInput() {
+    if (document.getElementById('trackImportInput')) return;
+    const input = document.createElement('input');
+    input.id = 'trackImportInput';
+    input.type = 'file';
+    input.accept = '.json';
+    input.style.display = 'none';
+    input.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            importTrackFromFile(file);
+            e.target.value = '';
+        }
+    });
+    document.body.appendChild(input);
+}
+
+function triggerTrackImport() {
+    createImportInput();
+    const input = document.getElementById('trackImportInput');
+    if (input) input.click();
 }
 
 /**
