@@ -28,16 +28,19 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## New Features Queue
 
+### Completed
 1. ~~**Arpeggiator Pattern Panel** - Visual panel showing arpeggiator pattern with step editing~~ ✅ Done
-2. **Audio Normalization** - One-click loudness normalization for tracks and clips
-3. **Tempo Tap History** - List of recent tap tempo values with one-click recall
-4. **Track Import/Export** - Export single track as project file and import into other projects
-5. **Clip Fade Curve Types** - Choose between linear, exponential, logarithmic fade curves
-6. **Bounce Selected to Audio** - Render selected clips to audio track
-7. ~~**Metronome Count-In Settings** - Configure count-in bars, sound, and visual countdown~~ ✅ Done
-8. **Keyboard Octave Shift** - Quick octave up/down buttons for MIDI keyboard input
-9. **Timeline Zoom Memory** - Remember zoom level per project
-10. **Clip Choppper Grid** - Slice audio clip with automatic grid-based slice points
+2. ~~**Audio Normalization** - One-click loudness normalization for tracks and clips~~ ✅ Done
+3. ~~**Tempo Tap History** - List of recent tap tempo values with one-click recall~~ ✅ Done
+4. ~~**Track Import/Export** - Export single track as project file and import into other projects~~ ✅ Done
+5. ~~**Metronome Count-In Settings** - Configure count-in bars, sound, and visual countdown~~ ✅ Done
+6. ~~**Clip Chopper Grid** - Slice audio clip with automatic grid-based slice points~~ ✅ Done
+
+### Remaining
+1. **Clip Fade Curve Types** - Choose between linear, exponential, logarithmic fade curves
+2. **Bounce Selected to Audio** - Render selected clips to audio track
+3. **Keyboard Octave Shift** - Quick octave up/down buttons for MIDI keyboard input
+4. **Timeline Zoom Memory** - Remember zoom level per project
 
 When queue is empty, run the brainstorming process described in Step 5.
 
