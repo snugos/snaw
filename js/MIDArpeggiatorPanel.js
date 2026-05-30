@@ -8,6 +8,7 @@ let arpeggiatorState = {
     octaveRange: 1,
     direction: 'up', // 'up', 'down', 'updown', 'random', 'order'
     pattern: [], // Array of note offsets
+    patternLength: 4, // Number of steps in the arpeggio pattern
     gate: 0.8, // 0-1, note length percentage
     hold: false,
     lastInputNotes: [],
@@ -146,13 +147,13 @@ function renderArpeggiatorContent() {
                 </label>
             </div>
 
-            <!-- Arpeggio Preview -->
+            <!-- Arpeggio Preview - Visual Step Grid
             <div class="bg-gray-800 rounded p-3">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs text-gray-400">Arpeggio Pattern</span>
+                    <span class="text-xs text-gray-400">Arpeggio Pattern (Click steps to toggle)</span>
                     <button id="arpClearBtn" class="px-2 py-1 text-xs bg-red-600/30 hover:bg-red-600/50 rounded text-red-300">Clear</button>
                 </div>
-                <div id="arpPatternDisplay" class="flex flex-wrap gap-1 min-h-[40px] p-2 bg-gray-900 rounded">
+                <div id="arpPatternDisplay" class="flex flex-wrap gap-1 min-h-[40px] p-2 bg-gray-900 rounded mb-3">
                     ${arpeggiatorState.pattern.length === 0 ? 
                         '<span class="text-xs text-gray-600">Play notes to build pattern...</span>' :
                         arpeggiatorState.pattern.map((note, i) => `
@@ -162,12 +163,36 @@ function renderArpeggiatorContent() {
                         `).join('')
                     }
                 </div>
+                <!-- Visual Step Grid -->
+                <div id="arpStepGrid" class="flex gap-1 p-2 bg-gray-900 rounded">
+                    ${[0,1,2,3,4,5,6,7].map(s => {
+                        const stepNote = arpeggiatorState.pattern[s] || null;
+                        const isActive = stepNote !== null;
+                        return `
+                            <div class="arp-step w-10 h-10 rounded cursor-pointer flex items-center justify-center text-xs font-bold transition-all ${isActive ? 'bg-green-600 text-white' : 'bg-gray-700 text-gray-500 hover:bg-gray-600'}" 
+                                 data-step="${s}" title="Step ${s + 1}">
+                                ${s + 1}
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+
+            <!-- Pattern Length -->
+            <div class="bg-gray-800 rounded p-3">
+                <label class="block text-xs text-gray-400 mb-2">Pattern Length</label>
+                <div class="grid grid-cols-8 gap-1">
+                    ${[1,2,3,4,5,6,7,8].map(len => `
+                        <button class="arp-len-btn px-2 py-1 rounded text-xs font-medium transition-colors ${arpeggiatorState.patternLength === len ? 'bg-green-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}" 
+                                data-len="${len}">${len}</button>
+                    `).join('')}
+                </div>
             </div>
 
             <!-- Status -->
             <div class="flex items-center justify-between text-xs text-gray-500 border-t border-gray-700 pt-3">
                 <span>Mode: ${arpeggiatorState.direction}</span>
-                <span>Notes: ${arpeggiatorState.pattern.length}</span>
+                <span>Steps: ${arpeggiatorState.patternLength}/8</span>
             </div>
         </div>
     `;
@@ -245,6 +270,32 @@ function setupArpeggiatorEvents() {
             renderArpeggiatorContent();
         });
     }
+
+    // Step grid click handlers
+    container.querySelectorAll('.arp-step').forEach(stepEl => {
+        stepEl.addEventListener('click', (e) => {
+            const step = parseInt(stepEl.dataset.step);
+            const existingNote = arpeggiatorState.pattern[step];
+            if (existingNote) {
+                // Remove this step from pattern
+                arpeggiatorState.pattern.splice(step, 1);
+            } else if (arpeggiatorState.lastInputNotes.length > 0) {
+                // Add a note at this step (use last input note)
+                const noteToAdd = arpeggiatorState.lastInputNotes[arpeggiatorState.lastInputNotes.length - 1];
+                arpeggiatorState.pattern[step] = { note: noteToAdd.note || noteToAdd, velocity: noteToAdd.velocity || 0.8 };
+            }
+            renderArpeggiatorContent();
+        });
+    });
+
+    // Pattern length button handlers
+    container.querySelectorAll('.arp-len-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const len = parseInt(e.target.dataset.len);
+            arpeggiatorState.patternLength = len;
+            renderArpeggiatorContent();
+        });
+    });
 }
 
 /**
