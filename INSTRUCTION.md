@@ -35,14 +35,24 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 4. ~~**Track Import/Export** - Export single track as project file and import into other projects~~ ✅ Done
 5. ~~**Metronome Count-In Settings** - Configure count-in bars, sound, and visual countdown~~ ✅ Done
 6. ~~**Clip Chopper Grid** - Slice audio clip with automatic grid-based slice points~~ ✅ Done
+7. ~~**Clip Fade Curve Types** - Choose between linear, exponential, logarithmic fade curves~~ ✅ Done
 
-### Remaining
-1. **Clip Fade Curve Types** - Choose between linear, exponential, logarithmic fade curves
-2. **Bounce Selected to Audio** - Render selected clips to audio track
-3. **Keyboard Octave Shift** - Quick octave up/down buttons for MIDI keyboard input
-4. **Timeline Zoom Memory** - Remember zoom level per project
+### Remaining from Original Queue
+1. **Bounce Selected to Audio** - Render selected clips to audio track
+2. **Keyboard Octave Shift** - Quick octave up/down buttons for MIDI keyboard input
+3. **Timeline Zoom Memory** - Remember zoom level per project
 
-When queue is empty, run the brainstorming process described in Step 5.
+### New Brainstormed Features
+1. **MIDI Learn Visual Feedback** - Highlight knobs/controls that are MIDI-mapped with a glow
+2. **Track Marker Comments** - Add text notes at specific positions on a track timeline
+3. **Scale Highlight Playback** - Highlight notes in scale during playback for practice
+4. **BPM Ramp Automation** - Draw tempo automation points directly on timeline ruler
+5. **Drum Pattern Randomizer** - Generate random but musical drum patterns from templates
+6. **Velocity Curve Per-Track** - Separate velocity curve settings for each track
+7. **Audio Buffer Quality Presets** - Quick toggle between low-latency and high-quality buffer
+8. **Loop Quantum** - Snap loop start/end to nearest beat/bar with one hotkey
+9. **Clip Gain Per-Instance** - Per-clip volume knob independent of track gain
+10. **Keyboard Vintage Keys** - Emulate classic keyboard sounds (Rhodes, Wurlitzer, etc.)
 
 ## Workflow
 
