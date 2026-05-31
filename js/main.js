@@ -68,6 +68,7 @@ import { initScaleHighlightMode, openScaleHighlightPanel, isNoteInScale, getNote
 import { initScaleHighlightGlobal, openScaleHighlightGlobalPanel, toggleGlobalScaleHighlight, setGlobalScale, setGlobalRootNote, isGlobalScaleHighlightEnabled } from './ScaleHighlightGlobal.js';
 import { initAudioRecorder, startRecording, stopRecording, isRecordingActive, requestMicAccess, getRecordingStatus, cleanupRecording } from './AudioRecorder.js';
 import { initBounceSelectedToAudio, bounceSelectedClipsToAudio, openBounceDialog } from './BounceSelectedToAudio.js';
+import { initKeyboardOctaveShift, getCurrentOctaveShift, setOctaveShift, resetOctaveShift } from './KeyboardOctaveShift.js';
 import { initCountInAudio, setupCountInUI, playCountIn, isCountInActive } from './CountInAudio.js';
 import { initCountInSettingsPanel, openCountInSettingsPanel, getCountInSettings, setCountInBars, setCountInSoundEnabled, setCountInVisualCountdown, setCountInAccentFirstBeat, setCountInVolume } from './CountInSettingsPanel.js';
 import { initMIDArpeggiatorPanel, openMIDArpeggiatorPanel } from './MIDArpeggiatorPanel.js';
@@ -1029,6 +1030,12 @@ import {
     initBounceSelectedToAudio,
     bounceSelectedClipsToAudio,
     openBounceDialog,
+    
+    // Keyboard Octave Shift
+    initKeyboardOctaveShift,
+    getCurrentOctaveShift,
+    setOctaveShift,
+    resetOctaveShift,
 
     // Pattern Generation and Frequency Processing
     AIPatternGenerator,
@@ -1669,6 +1676,7 @@ async function initializeSnugOS() {
         if (typeof initClipChopperGridMenu === 'function') { initClipChopperGridMenu(); } // Quick Slice Tool - Shift+S to slice
         if (typeof initAudioRecorder === 'function') initAudioRecorder(appServices); // Audio Recorder initialization
         if (typeof initBounceSelectedToAudio === 'function') initBounceSelectedToAudio(appServices); // Bounce Selected to Audio initialization
+        if (typeof initKeyboardOctaveShift === 'function') initKeyboardOctaveShift(appServices); // Keyboard Octave Shift - quick octave up/down
         if (typeof initCountInAudio === 'function') initCountInAudio(appServices); // Count-In Audio initialization
         if (typeof initCountInSettingsPanel === 'function') initCountInSettingsPanel(appServices); // Count-In Settings Panel initialization
         setTimeout(() => { if (typeof setupCountInUI === 'function') setupCountInUI(); }, 100); // Setup count-in UI controls
