@@ -46,6 +46,7 @@ import { AudioFingerprinting } from './AudioFingerprinting.js';
 import { initAudioTapTempo } from './AudioTapTempo.js';
 import { initAudioNormalizer, openAudioNormalizerPanel } from './AudioNormalizer.js';
 import { initAudioFadePreset, openAudioFadePresetPanel } from './AudioFadePreset.js';
+import { initAudioBufferQualityPresets, openBufferQualityPanel, getCurrentPreset, cycleToNextPreset, createQuickToggleButton } from './AudioBufferQualityPresets.js';
 import { initClipFadeHandles, openClipFadeHandlesPanel } from './ClipFadeHandles.js';
 import { openAudioStretchQualityPanel, openStretchQualityPanel, closeAudioStretchQualityPanel, getAudioStretchingQuality } from './AudioStretchQualityPanel.js';
 import { initAudioStretching, openStretchPanel, quickStretchSelectedClip, applyStretchToClip, removeStretchFromClip, getStretchParamsForClip } from './AudioStretching.js';
@@ -1761,6 +1762,7 @@ async function initializeSnugOS() {
         if (typeof initSidechainVolumeEnvelope === 'function') initSidechainVolumeEnvelope(appServices); // Sidechain Volume Envelope initialization
         if (typeof initSidechainVisualizer === 'function') initSidechainVisualizer(appServices); // Sidechain Visualizer initialization
         if (typeof initAudioFadePreset === 'function') initAudioFadePreset(); // Audio Fade Presets initialization
+        if (typeof initAudioBufferQualityPresets === 'function') initAudioBufferQualityPresets(appServices); // Audio Buffer Quality Presets - quick toggle between latency/quality
         if (typeof initClipFadeHandles === 'function') initClipFadeHandles(); // Clip Fade Handles initialization
         if (typeof initEnvelopeIntegration === 'function') initEnvelopeIntegration(); // Envelope Integration initialization
         if (typeof initAudioClipStretchMarkers === 'function') initAudioClipStretchMarkers(appServices); // Audio Clip Stretch Markers initialization
