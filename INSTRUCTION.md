@@ -39,7 +39,7 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ### Remaining from Original Queue
 1. ~~**Bounce Selected to Audio** - Render selected clips to audio track~~ ✅ Done
-2. **Keyboard Octave Shift** - Quick octave up/down buttons for MIDI keyboard input
+2. ~~**Keyboard Octave Shift** - Quick octave up/down buttons for MIDI keyboard input~~ ✅ Done
 3. **Timeline Zoom Memory** - Remember zoom level per project
 
 ### New Brainstormed Features
