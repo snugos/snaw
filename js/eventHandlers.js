@@ -2099,6 +2099,41 @@ document.addEventListener('keydown', (event) => {
             
             return;
         }
+        // Ctrl+B - Bounce selected clips to audio
+        if (key === 'b' && (event.ctrlKey || event.metaKey)) {
+            event.preventDefault();
+            
+            const selectedClipIds = localAppServices.getSelectedClipIds?.() || [];
+            if (selectedClipIds.length === 0) {
+                if (localAppServices.showNotification) {
+                    localAppServices.showNotification('No clips selected. Select clips first.', 2000);
+                }
+                return;
+            }
+            
+            // Get the track that contains the selected clips
+            const tracks = localAppServices.getTracks?.() || [];
+            let targetTrackId = null;
+            for (const track of tracks) {
+                if (track.clips?.some(c => selectedClipIds.includes(c.id))) {
+                    targetTrackId = track.id;
+                    break;
+                }
+            }
+            
+            if (targetTrackId) {
+                if (localAppServices.openBounceDialog) {
+                    localAppServices.openBounceDialog(targetTrackId);
+                } else if (localAppServices.bounceSelectedClipsToAudio) {
+                    localAppServices.bounceSelectedClipsToAudio(targetTrackId, selectedClipIds);
+                } else {
+                    if (localAppServices.showNotification) {
+                        localAppServices.showNotification('Bounce feature not available', 2000);
+                    }
+                }
+            }
+            return;
+        }
         // Ctrl+D - Duplicate selected clips or notes
         if (key === 'd' && (event.ctrlKey || event.metaKey)) {
             event.preventDefault();
