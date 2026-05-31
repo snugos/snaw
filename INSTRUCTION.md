@@ -2,69 +2,31 @@
 
 You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job is to add new features — no bug fixing.
 
+## Completed Features
+
+- **Piano Roll Editor** - Clickable piano roll with note editing, drag to move, velocity edit ✅
+- **Audio Recording** - Record audio from microphone into tracks ✅
+- **Track Effects Presets** - Save/load effect chain presets per track ✅
+- **Undo/Redo Visual Stack** - Show undo history in a panel ✅
+- **Keyboard Shortcuts Panel** - Press `?` to show all shortcuts ✅
+- **Waveform Visualization** - Draw waveform on audio clips ✅
+- **Track Color Coding** - Assign colors to tracks for visual grouping ✅
+- **Quantize Selection** - Quantize selected notes to grid ✅
+- **Tempo Ramper UI** - Draw tempo automation points for gradual tempo changes ✅
+- **Ripple Edit** - When deleting, close gaps by rippling following clips ✅
+
 ## Current Feature Queue
 
-1. ~~**Clickable Piano Roll** - Make the piano roll editor notes click-draggable for repositioning~~ ✅ Done
-2. ~~**MIDI File Import** - Drag & drop .mid files onto tracks to import MIDI data~~ ✅ Done
-3. ~~**MIDI File Export** - Export selected MIDI patterns as .mid files~~ ✅ Done
-4. ~~**Plugin Preset Browser** - Browse and load VST3/AudioWorklet plugin presets from a panel~~ ✅ Done
-5. ~~**Track Effects Presets** - Save/load effect chain configurations as named presets per track~~ ✅ Done
-6. ~~**Keyboard Shortcuts Panel** - Full keyboard shortcuts reference panel (press `?` to show)~~ ✅ Done
-7. ~~**Waveform Overview** - Mini overview waveform in track header showing full clip range~~ ✅ Done
-8. ~~**Track Color Coding** - Assign custom colors from palette to tracks for visual grouping~~ ✅ Done
-
-## Next Features Queue
-
-1. ~~**Tempo Per Track** - Allow different tracks to have independent playback rates/tempo multipliers~~ ✅ Done
-2. ~~**Audio Scrubbing** - Click and drag on timeline to scrub audio with preview~~ ✅ Done
-3. ~~**Track Snap Resolution** - Per-track snap-to-grid sensitivity settings~~ ✅ Done
-4. ~~**Loop Region Presets** - Save and recall loop region positions as named presets~~ ✅ Done
-5. ~~**Ghost Notes Preview** - Show MIDI ghost notes from other tracks while recording~~ ✅ Done
-6. ~~**Scale Quantize Panel** - Dedicated panel to set scale/key and quantize notes accordingly~~ ✅ Done
-7. ~~**Tap Tempo Visual** - Visual tap tempo with average display and beat confirmation~~ ✅ Done
-8. ~~**Lyrics Track** - Dedicated track type for storing and displaying song lyrics~~ ✅ Done
-9. ~~**Marker Navigation** - Add named markers for quick navigation to specific positions~~ ✅ Done
-10. ~~**Auto-save Indicator** - Visual indicator showing when project was last auto-saved~~ ✅ Done
-
-## New Features Queue
-
-### Completed
-1. ~~**Arpeggiator Pattern Panel** - Visual panel showing arpeggiator pattern with step editing~~ ✅ Done
-2. ~~**Audio Normalization** - One-click loudness normalization for tracks and clips~~ ✅ Done
-3. ~~**Tempo Tap History** - List of recent tap tempo values with one-click recall~~ ✅ Done
-4. ~~**Track Import/Export** - Export single track as project file and import into other projects~~ ✅ Done
-5. ~~**Metronome Count-In Settings** - Configure count-in bars, sound, and visual countdown~~ ✅ Done
-6. ~~**Clip Chopper Grid** - Slice audio clip with automatic grid-based slice points~~ ✅ Done
-7. ~~**Clip Fade Curve Types** - Choose between linear, exponential, logarithmic fade curves~~ ✅ Done
-
-### Remaining from Original Queue
-1. ~~**Bounce Selected to Audio** - Render selected clips to audio track~~ ✅ Done
-2. ~~**Keyboard Octave Shift** - Quick octave up/down buttons for MIDI keyboard input~~ ✅ Done
-3. ~~**Timeline Zoom Memory** - Remember zoom level per project~~ ✅ Done
-
-### New Brainstormed Features
-1. **MIDI Learn Visual Feedback** - Highlight knobs/controls that are MIDI-mapped with a glow
-2. **Track Marker Comments** - Add text notes at specific positions on a track timeline
-3. **Scale Highlight Playback** - Highlight notes in scale during playback for practice
-4. **BPM Ramp Automation** - Draw tempo automation points directly on timeline ruler
-5. **Drum Pattern Randomizer** - Generate random but musical drum patterns from templates
-6. **Velocity Curve Per-Track** - Separate velocity curve settings for each track
-7. ~~**Audio Buffer Quality Presets** - Quick toggle between low-latency and high-quality buffer~~ ✅ Done
-8. **Loop Quantum** - Snap loop start/end to nearest beat/bar with one hotkey
-9. **Clip Gain Per-Instance** - Per-clip volume knob independent of track gain
-10. **Keyboard Vintage Keys** - Emulate classic keyboard sounds (Rhodes, Wurlitzer, etc.)
-
-### New Session Features (2026-05-31)
-1. **Audio Panning Per-Step** - In step sequencer, allow per-step panning for dynamic patterns
-2. **Track Solo Safe Mode** - Mark tracks as "solo-safe" to never get muted during solo
-3. **Metronome Accent Patterns** - Customize which beats have accent sounds in metronome
-4. **Audio Ripple Edit** - When deleting region, ripple all following clips to close gap
-5. **MIDI Channel Per-Row** - Allow different MIDI rows to send on different MIDI channels
-6. **Clip Fade Handles** - Drag start/end of audio clips to set fade in/out curves
-7. **Step Sequencer Probability** - Each step has probability of triggering for variations
-8. **Track Latency Compensation** - Per-track delay to compensate for different plugin latencies
-9. **Audio Quantize Strength** - Control how strictly audio is snapped to grid
-10. **MIDI CC Learn Panel** - Assign MIDI CC messages to virtual knobs for hands-on control
+1. **MIDI Channel Per-Row** - Allow different rows in step sequencer to send on different MIDI channels
+2. **Clip Gain Per-Instance** - Per-clip volume knob independent of track gain for quick level adjustments
+3. **Drum Pattern Randomizer** - Generate random but musical drum patterns from template-based algorithms
+4. **Velocity Curve Per-Track** - Per-track velocity response curve for customizing MIDI input dynamics
+5. **Step Sequencer Probability** - Each step has configurable trigger probability for generative variations
+6. **Track Latency Compensation** - Per-track adjustable delay to compensate for plugin processing latency
+7. **MIDI CC Learn Panel** - Visual panel to assign and manage MIDI CC to virtual parameter mappings
+8. **Audio Quantize Strength** - Control how strictly audio snaps to grid (0-100% strength slider)
+9. **Clip Fade Handles** - Drag start/end of audio clips to set fade in/out curves
+10. **MIDI Learn Visual Feedback** - Highlight knobs/controls that are MIDI-mapped with a glow
 
 ## Workflow
 
