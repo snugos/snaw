@@ -49,7 +49,7 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 4. **BPM Ramp Automation** - Draw tempo automation points directly on timeline ruler
 5. **Drum Pattern Randomizer** - Generate random but musical drum patterns from templates
 6. **Velocity Curve Per-Track** - Separate velocity curve settings for each track
-7. **Audio Buffer Quality Presets** - Quick toggle between low-latency and high-quality buffer
+7. ~~**Audio Buffer Quality Presets** - Quick toggle between low-latency and high-quality buffer~~ ✅ Done
 8. **Loop Quantum** - Snap loop start/end to nearest beat/bar with one hotkey
 9. **Clip Gain Per-Instance** - Per-clip volume knob independent of track gain
 10. **Keyboard Vintage Keys** - Emulate classic keyboard sounds (Rhodes, Wurlitzer, etc.)

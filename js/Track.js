@@ -93,6 +93,7 @@ export class Track {
         this.isMonitoringEnabled = initialData?.isMonitoringEnabled !== undefined ? initialData.isMonitoringEnabled : (this.type === 'Audio'); 
         const currentSoloedId = this.appServices.getSoloedTrackId ? this.appServices.getSoloedTrackId() : null;
         this.isSoloed = currentSoloedId === this.id;
+        this.soloLocked = false; // Track Solo Safe Mode - when true, solo cannot be toggled off
         this.previousVolumeBeforeMute = initialData?.volume ?? 0.7;
         // MIDI channel for multi-channel MIDI support (1-16, 0 = omni/all channels)
         this.midiChannel = initialData?.midiChannel ?? 0;
