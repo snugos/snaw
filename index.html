@@ -212,6 +212,16 @@
             <span class="text-gray-500">MEM:</span>
             <span id="statusMemValue">0 MB</span>
         </div>
+        <div class="text-gray-600">|</div>
+        <div id="statusUndo" class="flex items-center gap-1 cursor-pointer hover:text-gray-300" title="Undo History">
+            <span class="text-gray-500">Undo:</span>
+            <span id="statusUndoCount">0</span>
+        </div>
+        <div class="text-gray-600">|</div>
+        <div id="statusRedo" class="flex items-center gap-1 cursor-pointer hover:text-gray-300" title="Redo History">
+            <span class="text-gray-500">Redo:</span>
+            <span id="statusRedoCount">0</span>
+        </div>
         <div class="flex-1"></div>
         <div id="statusCpuHistory" class="flex items-end gap-[1px] h-3 w-16">
             <!-- CPU history sparkline -->

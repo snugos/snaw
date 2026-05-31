@@ -236,7 +236,7 @@ import {
     getCurrentSoundFileTreeState, getCurrentSoundBrowserPathState, getPreviewPlayerState,
     getClipboardDataState, getAutomationClipboardState, getArmedTrackIdState, getSoloedTrackIdState, isTrackRecordingState,
     getRecordingTrackIdState,
-    getActiveSequencerTrackIdState, getUndoStackState, getRedoStackState, getPlaybackModeState,
+    getActiveSequencerTrackIdState, getUndoStackState, getRedoStackState, getUndoCount, getRedoCount, getPlaybackModeState,
     // State Setters
     addWindowToStoreState, removeWindowFromStoreState, setHighestZState, incrementHighestZState,
     setMasterEffectsState, setMasterGainValueState,
@@ -1884,6 +1884,12 @@ function updatePerformanceStats() {
                 memEl.textContent = `${usedMB} MB`;
             }
         }
+        
+        // Update undo/redo count display
+        const undoEl = document.getElementById('statusUndoCount');
+        const redoEl = document.getElementById('statusRedoCount');
+        if (undoEl) undoEl.textContent = getUndoCount ? getUndoCount() : 0;
+        if (redoEl) redoEl.textContent = getRedoCount ? getRedoCount() : 0;
     }
 }
 
