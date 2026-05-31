@@ -69,6 +69,7 @@ import { initScaleHighlightGlobal, openScaleHighlightGlobalPanel, toggleGlobalSc
 import { initAudioRecorder, startRecording, stopRecording, isRecordingActive, requestMicAccess, getRecordingStatus, cleanupRecording } from './AudioRecorder.js';
 import { initBounceSelectedToAudio, bounceSelectedClipsToAudio, openBounceDialog } from './BounceSelectedToAudio.js';
 import { initKeyboardOctaveShift, getCurrentOctaveShift, setOctaveShift, resetOctaveShift } from './KeyboardOctaveShift.js';
+import { initTimelineZoomMemory, getStoredZoom, saveZoom } from './TimelineZoomMemory.js';
 import { initCountInAudio, setupCountInUI, playCountIn, isCountInActive } from './CountInAudio.js';
 import { initCountInSettingsPanel, openCountInSettingsPanel, getCountInSettings, setCountInBars, setCountInSoundEnabled, setCountInVisualCountdown, setCountInAccentFirstBeat, setCountInVolume } from './CountInSettingsPanel.js';
 import { initMIDArpeggiatorPanel, openMIDArpeggiatorPanel } from './MIDArpeggiatorPanel.js';
@@ -1036,6 +1037,11 @@ import {
     getCurrentOctaveShift,
     setOctaveShift,
     resetOctaveShift,
+    
+    // Timeline Zoom Memory
+    initTimelineZoomMemory,
+    getStoredZoom,
+    saveZoom,
 
     // Pattern Generation and Frequency Processing
     AIPatternGenerator,
@@ -1677,6 +1683,7 @@ async function initializeSnugOS() {
         if (typeof initAudioRecorder === 'function') initAudioRecorder(appServices); // Audio Recorder initialization
         if (typeof initBounceSelectedToAudio === 'function') initBounceSelectedToAudio(appServices); // Bounce Selected to Audio initialization
         if (typeof initKeyboardOctaveShift === 'function') initKeyboardOctaveShift(appServices); // Keyboard Octave Shift - quick octave up/down
+        if (typeof initTimelineZoomMemory === 'function') initTimelineZoomMemory(appServices); // Timeline Zoom Memory - remember zoom per project
         if (typeof initCountInAudio === 'function') initCountInAudio(appServices); // Count-In Audio initialization
         if (typeof initCountInSettingsPanel === 'function') initCountInSettingsPanel(appServices); // Count-In Settings Panel initialization
         setTimeout(() => { if (typeof setupCountInUI === 'function') setupCountInUI(); }, 100); // Setup count-in UI controls
