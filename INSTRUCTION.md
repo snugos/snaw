@@ -54,6 +54,18 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 9. **Clip Gain Per-Instance** - Per-clip volume knob independent of track gain
 10. **Keyboard Vintage Keys** - Emulate classic keyboard sounds (Rhodes, Wurlitzer, etc.)
 
+### New Session Features (2026-05-31)
+1. **Audio Panning Per-Step** - In step sequencer, allow per-step panning for dynamic patterns
+2. **Track Solo Safe Mode** - Mark tracks as "solo-safe" to never get muted during solo
+3. **Metronome Accent Patterns** - Customize which beats have accent sounds in metronome
+4. **Audio Ripple Edit** - When deleting region, ripple all following clips to close gap
+5. **MIDI Channel Per-Row** - Allow different MIDI rows to send on different MIDI channels
+6. **Clip Fade Handles** - Drag start/end of audio clips to set fade in/out curves
+7. **Step Sequencer Probability** - Each step has probability of triggering for variations
+8. **Track Latency Compensation** - Per-track delay to compensate for different plugin latencies
+9. **Audio Quantize Strength** - Control how strictly audio is snapped to grid
+10. **MIDI CC Learn Panel** - Assign MIDI CC messages to virtual knobs for hands-on control
+
 ## Workflow
 
 ### Step 1: Pick Next Feature
