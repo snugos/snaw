@@ -397,6 +397,13 @@ import {
     },
     window.removeCustomDesktopBackground = removeCustomDesktopBackground,
 
+    // --- Custom Background Helpers ---
+    hasCustomBackground: () => {
+        const hasLocalStorage = localStorage.getItem('snugosDesktopBackground') || localStorage.getItem('snugosDesktopBgType');
+        if (hasLocalStorage) return true;
+        return false; // IndexedDB check would be async, checked by caller if needed
+    },
+
     // MIDI Chord Player Services
     playMidiChord: (trackId, rootNote, octave, chordType, options = {}) => {
         const track = getTrackByIdState(trackId);
