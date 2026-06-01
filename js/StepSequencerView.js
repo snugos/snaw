@@ -6,6 +6,7 @@ let localAppServices = {};
 let stepSequencerWindow = null;
 let currentStepSequencerTrackId = null;
 let selectedCells = new Set(); // Track selected cells for batch editing
+let rowChannels = []; // Per-row MIDI channel assignments (1-16)
 
 // Velocity lane drag state
 let velocityDragState = {
@@ -14,6 +15,14 @@ let velocityDragState = {
     startY: 0,
     startVelocity: 0
 };
+
+// Initialize row channels for a track
+function initRowChannels(numRows) {
+    // Default all rows to channel 1, or preserve existing if same length
+    if (rowChannels.length !== numRows) {
+        rowChannels = Array(numRows).fill(1);
+    }
+}
 
 // Initialize the step sequencer module
 export function initStepSequencerView(appServicesFromMain) {
@@ -95,6 +104,9 @@ function renderStepSequencerContent(trackId = null) {
     const isDrumTrack = track.type === 'DrumSampler';
     const isMelodicTrack = track.type === 'Synth' || track.type === 'Sampler';
     
+    // Initialize row channels for this track
+    initRowChannels(numRows);
+    
     // Build header HTML
     let headerHtml = `
         <div class="mb-3 flex items-center justify-between flex-shrink-0">
@@ -115,6 +127,17 @@ function renderStepSequencerContent(trackId = null) {
             </div>
         </div>
     `;
+
+    // Build channel row header
+    let channelRowHtml = '<div class="flex mb-1 pl-[60px]">';
+    for (let s = 0; s < numSteps; s++) {
+        const isDownbeat = s % 4 === 0;
+        channelRowHtml += `
+            <div class="flex-shrink-0 text-center text-[9px] ${isDownbeat ? 'text-purple-500 font-bold' : 'text-gray-400'}" 
+                 style="width: ${100/numSteps}%;">${isDownbeat ? '| Ch' : ''}</div>
+        `;
+    }
+    channelRowHtml += '</div>';
 
     // Build step numbers header
     let stepNumbersHtml = '<div class="flex mb-1 pl-[60px]">';
@@ -184,12 +207,17 @@ function renderStepSequencerContent(trackId = null) {
             rowLabel = `${noteName}${octave}`;
         }
 
+        const rowChannel = rowChannels[r] || 1;
+        const channelColor = getChannelColor(rowChannel);
+        
         gridHtml += `<div class="flex step-row" data-row="${r}">`;
         
-        // Row label cell
+        // Row label cell with channel indicator
         gridHtml += `
-            <div class="flex-shrink-0 w-[60px] flex items-center justify-end pr-2 text-xs text-gray-600 dark:text-gray-400 border-r border-gray-300 dark:border-slate-600">
-                ${rowLabel}
+            <div class="flex-shrink-0 w-[60px] flex flex-col items-end pr-1 text-xs border-r border-gray-300 dark:border-slate-600 cursor-pointer hover:bg-purple-50 dark:hover:bg-purple-900 transition-colors"
+                 data-row="${r}" title="Click to set row MIDI channel">
+                <span class="text-[10px] text-gray-600 dark:text-gray-400 truncate w-full text-right">${rowLabel}</span>
+                <span class="text-[9px] font-medium px-1 rounded" style="background-color: ${channelColor.bg}; color: ${channelColor.text};">${rowChannel}</span>
             </div>
         `;
 
@@ -201,16 +229,16 @@ function renderStepSequencerContent(trackId = null) {
             const isDownbeat = s % 4 === 0;
             const isSelected = selectedCells.has(`${r}-${s}`);
             
-            // Calculate color intensity based on velocity
-            const bgColor = hasNote ? `rgba(59, 130, 246, ${0.3 + velocity * 0.7})` : '';
+            // Calculate color intensity based on velocity and channel
+            const baseColor = hasNote ? `rgba(59, 130, 246, ${0.3 + velocity * 0.7})` : '';
             const borderClass = isDownbeat ? 'border-l-2 border-blue-400' : 'border-l border-gray-200 dark:border-slate-700';
             const selectedClass = isSelected ? 'ring-2 ring-yellow-400' : '';
             
             gridHtml += `
                 <div class="step-cell flex-shrink-0 border-r border-gray-200 dark:border-slate-700 ${borderClass} ${selectedClass} cursor-pointer transition-colors hover:bg-blue-100 dark:hover:bg-blue-900"
                      data-row="${r}" data-step="${s}"
-                     style="width: ${100/numSteps}%; min-height: 32px; background-color: ${bgColor};">
-                    ${hasNote ? `<div class="w-full h-full flex items-center justify-center"><div class="w-3 h-3 rounded-full bg-blue-500 opacity-80"></div></div>` : ''}
+                     style="width: ${100/numSteps}%; min-height: 32px; background-color: ${baseColor};">
+                    ${hasNote ? `<div class="w-full h-full flex items-center justify-center"><div class="w-3 h-3 rounded-full" style="background-color: ${channelColor.accent};"></div></div>` : ''}
                 </div>
             `;
         }
@@ -218,6 +246,29 @@ function renderStepSequencerContent(trackId = null) {
         gridHtml += '</div>';
     }
     gridHtml += '</div>';
+    
+    // Get channel color
+    function getChannelColor(channel) {
+        const colors = [
+            { bg: '#fee2e2', text: '#991b1b', accent: '#dc2626' }, // red
+            { bg: '#fef3c7', text: '#92400e', accent: '#d97706' }, // orange
+            { bg: '#fef9c3', text: '#854d0e', accent: '#ca8a04' }, // yellow
+            { bg: '#dcfce7', text: '#166534', accent: '#16a34a' }, // green
+            { bg: '#ccfbf1', text: '#115e59', accent: '#0d9488' }, // teal
+            { bg: '#dbeafe', text: '#1e40af', accent: '#2563eb' }, // blue
+            { bg: '#ede9fe', text: '#5b21b6', accent: '#7c3aed' }, // violet
+            { bg: '#fce7f3', text: '#9d174d', accent: '#db2777' }, // pink
+            { bg: '#e0e7ff', text: '#3730a3', accent: '#4f46e5' }, // indigo
+            { bg: '#ecfccb', text: '#3f6212', accent: '#65a30d' }, // lime
+            { bg: '#cffafe', text: '#155e75', accent: '#06b6d4' }, // cyan
+            { bg: '#f3e8ff', text: '#6b21a8', accent: '#a855f7' }, // purple
+            { bg: '#ffedd5', text: '#9a3412', accent: '#ea580c' }, // orange-dark
+            { bg: '#f0fdf4', text: '#15803d', accent: '#22c55e' }, // green-light
+            { bg: '#fdf4ff', text: '#86198f', accent: '#c026d3' }, // fuchsia
+            { bg: '#f8fafc', text: '#475569', accent: '#64748b' }  // slate
+        ];
+        return colors[(channel - 1) % colors.length];
+    }
 
     // Velocity scale legend
     let velocityLegendHtml = `
@@ -241,11 +292,12 @@ function renderStepSequencerContent(trackId = null) {
         </div>
     `;
 
-    container.innerHTML = headerHtml + stepNumbersHtml + velocityLaneHtml + gridHtml + velocityLegendHtml;
+    container.innerHTML = headerHtml + stepNumbersHtml + channelRowHtml + velocityLaneHtml + gridHtml + velocityLegendHtml;
     
     // Attach event listeners
     setupStepSequencerEvents(container, track);
     setupVelocityLaneEvents(container, track);
+    setupChannelSelectorEvents(container, track);
 }
 
 // Setup event handlers for the step sequencer
@@ -700,4 +752,66 @@ function applyVelocityToStep(track, step, velocity) {
     if (track.appServices?.updateTrackUI) {
         track.appServices.updateTrackUI(track.id, 'sequenceChanged');
     }
+}
+
+// Setup event handlers for row channel selection
+function setupChannelSelectorEvents(container, track) {
+    container.querySelectorAll('.step-row > div[data-row]').forEach(labelCell => {
+        labelCell.addEventListener('click', (e) => {
+            const row = parseInt(labelCell.dataset.row);
+            showChannelSelector(track, row, e.clientX, e.clientY);
+        });
+    });
+}
+
+// Show channel selector popup
+function showChannelSelector(track, row, x, y) {
+    // Remove existing popup
+    const existing = document.getElementById('channelSelectorPopup');
+    if (existing) existing.remove();
+
+    const popup = document.createElement('div');
+    popup.id = 'channelSelectorPopup';
+    popup.className = 'fixed bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg shadow-xl z-[9999] p-2';
+    popup.style.left = `${Math.min(x, window.innerWidth - 200)}px`;
+    popup.style.top = `${Math.min(y, window.innerHeight - 350)}px`;
+
+    let html = '<div class="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-2 px-1">MIDI Channel</div>';
+    html += '<div class="grid grid-cols-4 gap-1">';
+    for (let ch = 1; ch <= 16; ch++) {
+        const color = getChannelColor(ch);
+        const isSelected = rowChannels[row] === ch;
+        html += `
+            <button class="w-10 h-8 rounded text-xs font-medium border-2 transition-all hover:scale-105 ${isSelected ? 'border-blue-500' : 'border-transparent'}"
+                    style="background-color: ${color.bg}; color: ${color.text};"
+                    data-channel="${ch}">
+                ${ch}
+            </button>
+        `;
+    }
+    html += '</div>';
+    html += '<div class="mt-2 pt-2 border-t border-gray-200 dark:border-slate-600">';
+    html += `<div class="text-[10px] text-gray-500 text-center">Row ${row + 1} channel: <span class="font-bold">${rowChannels[row]}</span></div>`;
+    html += '</div>';
+
+    popup.innerHTML = html;
+    document.body.appendChild(popup);
+
+    popup.querySelectorAll('button[data-channel]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const ch = parseInt(btn.dataset.channel);
+            rowChannels[row] = ch;
+            popup.remove();
+            renderStepSequencerContent(track.id);
+        });
+    });
+
+    // Close on outside click
+    const closeHandler = (e) => {
+        if (!popup.contains(e.target)) {
+            popup.remove();
+            document.removeEventListener('click', closeHandler);
+        }
+    };
+    setTimeout(() => document.addEventListener('click', closeHandler), 10);
 }
