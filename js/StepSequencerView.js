@@ -7,6 +7,7 @@ let stepSequencerWindow = null;
 let currentStepSequencerTrackId = null;
 let selectedCells = new Set(); // Track selected cells for batch editing
 let rowChannels = []; // Per-row MIDI channel assignments (1-16)
+let probabilityEnabled = false; // Toggle probability mode
 
 // Velocity lane drag state
 let velocityDragState = {
@@ -123,6 +124,7 @@ function renderStepSequencerContent(trackId = null) {
                     <option value="16" selected>1/16</option>
                     <option value="32">1/32</option>
                 </select>
+                <button id="stepSeqProbToggle" class="px-2 py-1 text-xs ${probabilityEnabled ? 'bg-purple-600 text-white' : 'bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200'} rounded">Prob</button>
                 <button id="stepSeqClear" class="px-2 py-1 text-xs bg-red-500 hover:bg-red-600 rounded text-white">Clear All</button>
             </div>
         </div>
@@ -234,11 +236,20 @@ function renderStepSequencerContent(trackId = null) {
             const borderClass = isDownbeat ? 'border-l-2 border-blue-400' : 'border-l border-gray-200 dark:border-slate-700';
             const selectedClass = isSelected ? 'ring-2 ring-yellow-400' : '';
             
+            // Probability overlay
+            let probIndicator = '';
+            if (probabilityEnabled && hasNote) {
+                const prob = getStepProbability(track.id, r, s);
+                const probColor = getProbabilityColor(prob);
+                probIndicator = `<div class="absolute inset-0 rounded" style="background: ${probColor}; opacity: 0.4; pointer-events: none;"></div>`;
+            }
+            
             gridHtml += `
-                <div class="step-cell flex-shrink-0 border-r border-gray-200 dark:border-slate-700 ${borderClass} ${selectedClass} cursor-pointer transition-colors hover:bg-blue-100 dark:hover:bg-blue-900"
+                <div class="step-cell flex-shrink-0 border-r border-gray-200 dark:border-slate-700 ${borderClass} ${selectedClass} cursor-pointer transition-colors hover:bg-blue-100 dark:hover:bg-blue-900 relative"
                      data-row="${r}" data-step="${s}"
                      style="width: ${100/numSteps}%; min-height: 32px; background-color: ${baseColor};">
-                    ${hasNote ? `<div class="w-full h-full flex items-center justify-center"><div class="w-3 h-3 rounded-full" style="background-color: ${channelColor.accent};"></div></div>` : ''}
+                    ${probIndicator}
+                    ${hasNote ? `<div class="w-full h-full flex items-center justify-center relative z-10"><div class="w-3 h-3 rounded-full" style="background-color: ${channelColor.accent};"></div></div>` : ''}
                 </div>
             `;
         }
@@ -286,8 +297,23 @@ function renderStepSequencerContent(trackId = null) {
                 <div class="w-4 h-4 rounded" style="background-color: rgba(59, 130, 246, 1)"></div>
                 <span class="text-xs text-gray-500">High</span>
             </div>
+            ${probabilityEnabled ? `
+            <span class="text-xs text-gray-400 border-l border-gray-300 pl-3">Probability:</span>
+            <div class="flex items-center gap-1">
+                <div class="w-4 h-4 rounded" style="background-color: rgba(34, 197, 94, 0.8)"></div>
+                <span class="text-xs text-gray-500">100%</span>
+            </div>
+            <div class="flex items-center gap-1">
+                <div class="w-4 h-4 rounded" style="background-color: rgba(249, 115, 22, 0.8)"></div>
+                <span class="text-xs text-gray-500">50%</span>
+            </div>
+            <div class="flex items-center gap-1">
+                <div class="w-4 h-4 rounded" style="background-color: rgba(239, 68, 68, 0.8)"></div>
+                <span class="text-xs text-gray-500">25%</span>
+            </div>
+            ` : ''}
             <div class="ml-auto text-xs text-gray-500">
-                Click to add/toggle • Drag velocity bars to adjust • Shift+Click to select range
+                Click to add/toggle • Drag velocity bars • Shift+Click select • Alt+Click probability
             </div>
         </div>
     `;
@@ -322,6 +348,15 @@ function setupStepSequencerEvents(container, track) {
         });
     }
 
+    // Probability toggle button
+    const probBtn = container.querySelector('#stepSeqProbToggle');
+    if (probBtn) {
+        probBtn.addEventListener('click', () => {
+            probabilityEnabled = !probabilityEnabled;
+            renderStepSequencerContent(track.id);
+        });
+    }
+
     // Step cell click - toggle note
     let isDragging = false;
     let isSettingVelocity = false;
@@ -343,7 +378,16 @@ function setupStepSequencerEvents(container, track) {
                 isDragging = true;
                 dragStartRow = row;
                 dragStartStep = step;
-                toggleNote(track, row, step, e.altKey);
+                
+                // If probability mode and note exists, open probability editor instead of toggling
+                const activeSeq = track.sequences?.find(s => s.id === track.activeSequenceId) || track.sequences?.[0];
+                const noteExists = activeSeq?.data?.[row]?.[step] !== null && activeSeq?.data?.[row]?.[step] !== undefined;
+                
+                if (probabilityEnabled && noteExists && e.altKey) {
+                    showProbabilityEditor(track, row, step);
+                } else {
+                    toggleNote(track, row, step, e.altKey);
+                }
             }
             
             e.preventDefault();
@@ -622,6 +666,35 @@ function showVelocityEditor(track, step) {
             track.appServices.updateTrackUI(track.id, 'sequenceChanged');
         }
 
+        renderStepSequencerContent(track.id);
+    }
+}
+
+// Show probability editor for a specific step
+function showProbabilityEditor(track, row, step) {
+    const activeSeq = track.sequences?.find(s => s.id === track.activeSequenceId) || track.sequences?.[0];
+    if (!activeSeq || !activeSeq.data) return;
+
+    // Check if note exists at this position
+    const noteExists = activeSeq.data[row]?.[step] !== null && activeSeq.data[row]?.[step] !== undefined;
+    if (!noteExists) {
+        if (track.appServices?.showNotification) {
+            track.appServices.showNotification('Add a note first before setting probability', 1500);
+        }
+        return;
+    }
+
+    const currentProb = getStepProbability(track.id, row, step);
+    const newProbStr = prompt(`Set probability for row ${row + 1}, step ${step + 1} (current: ${Math.round(currentProb * 100)}%):`, Math.round(currentProb * 100));
+
+    if (newProbStr !== null) {
+        const newProb = Math.max(0, Math.min(100, parseInt(newProbStr) || 100)) / 100;
+        
+        if (track.appServices?.captureStateForUndo) {
+            track.appServices.captureStateForUndo('Adjust probability');
+        }
+
+        setStepProbability(track.id, row, step, newProb);
         renderStepSequencerContent(track.id);
     }
 }

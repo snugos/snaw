@@ -1,153 +1,151 @@
-// js/StepSequencerProbability.js - Per-Step Probability for Step Sequencer
-// Adds configurable probability (0-100%) to each step for generative pattern creation
+/**
+ * StepSequencerProbability.js
+ * Per-step probability settings for generative variations in step sequencer
+ */
 
-let localAppServices = null;
+// Probability state storage - keyed by trackId then "row-step"
+let probabilityState = new Map();
 
-// Default probability for each step (100% = always triggers)
-const DEFAULT_STEP_PROBABILITY = 1.0;
-
-// Extended sequence data structure with probability per step
-// Sequence data format: [row][step] = { note, velocity, probability, ... }
-let extendedSequences = new Map(); // sequenceId -> Map<"row_step" -> probability>
+// Default probability
+const DEFAULT_PROBABILITY = 1.0; // 100% - always trigger
 
 /**
- * Initialize the Step Sequencer Probability module.
- * @param {Object} appServices - Application services
+ * Initialize the step sequencer probability module
  */
-export function initStepSequencerProbability(appServicesFromMain) {
-    localAppServices = appServicesFromMain || {};
+export function initStepSequencerProbability(appServices) {
     console.log('[StepSequencerProbability] Module initialized');
+    return {
+        setStepProbability,
+        getStepProbability,
+        getProbabilityColor,
+        shouldTriggerStep,
+        clearProbabilityForTrack
+    };
 }
 
 /**
- * Get the probability for a specific step in a sequence.
- * @param {number|string} sequenceId - The sequence ID
- * @param {number} row - The row index
- * @param {number} step - The step index
- * @returns {number} Probability (0-1)
+ * Set probability for a specific step
+ * @param {string} trackId - Track identifier
+ * @param {number} row - Row index
+ * @param {number} step - Step index
+ * @param {number} probability - Value between 0 and 1
  */
-export function getStepProbability(sequenceId, row, step) {
-    if (!extendedSequences.has(sequenceId)) {
-        return DEFAULT_STEP_PROBABILITY;
+export function setStepProbability(trackId, row, step, probability) {
+    const key = `${trackId}:${row}-${step}`;
+    probabilityState.set(key, Math.max(0, Math.min(1, probability)));
+}
+
+/**
+ * Get probability for a specific step
+ * @param {string} trackId - Track identifier
+ * @param {number} row - Row index
+ * @param {number} step - Step index
+ * @returns {number} Probability between 0 and 1
+ */
+export function getStepProbability(trackId, row, step) {
+    const key = `${trackId}:${row}-${step}`;
+    return probabilityState.get(key) ?? DEFAULT_PROBABILITY;
+}
+
+/**
+ * Get color for probability visualization
+ * @param {number} probability - Value between 0 and 1
+ * @returns {string} CSS color string
+ */
+export function getProbabilityColor(probability) {
+    if (probability >= 1.0) {
+        return 'rgba(34, 197, 94, 0.8)'; // Green - always triggers
+    } else if (probability >= 0.75) {
+        return 'rgba(132, 204, 22, 0.8)'; // Lime
+    } else if (probability >= 0.5) {
+        return 'rgba(234, 179, 8, 0.8)'; // Yellow
+    } else if (probability >= 0.25) {
+        return 'rgba(249, 115, 22, 0.8)'; // Orange
+    } else if (probability > 0) {
+        return 'rgba(239, 68, 68, 0.8)'; // Red - rarely triggers
+    } else {
+        return 'rgba(107, 114, 128, 0.5)'; // Gray - disabled
     }
-    const key = `${row}_${step}`;
-    return extendedSequences.get(sequenceId).get(key) ?? DEFAULT_STEP_PROBABILITY;
 }
 
 /**
- * Set the probability for a specific step.
- * @param {number|string} sequenceId - The sequence ID
- * @param {number} row - The row index
- * @param {number} step - The step index
- * @param {number} probability - Probability value (0-1)
+ * Determine if a step should trigger based on probability
+ * @param {string} trackId - Track identifier
+ * @param {number} row - Row index
+ * @param {number} step - Step index
+ * @returns {boolean} Whether the step should trigger
  */
-export function setStepProbability(sequenceId, row, step, probability) {
-    if (!extendedSequences.has(sequenceId)) {
-        extendedSequences.set(sequenceId, new Map());
-    }
-    const key = `${row}_${step}`;
-    const prob = Math.max(0, Math.min(1, probability));
-    extendedSequences.get(sequenceId).set(key, prob);
-    console.log(`[StepSequencerProbability] Set sequence ${sequenceId} row ${row} step ${step} probability: ${(prob * 100).toFixed(0)}%`);
-}
-
-/**
- * Clear all probability data for a sequence.
- * @param {number|string} sequenceId - The sequence ID
- */
-export function clearSequenceProbability(sequenceId) {
-    extendedSequences.delete(sequenceId);
-    console.log(`[StepSequencerProbability] Cleared probability data for sequence ${sequenceId}`);
-}
-
-/**
- * Check if a step should trigger based on probability.
- * @param {number|string} sequenceId - The sequence ID
- * @param {number} row - The row index
- * @param {number} step - The step index
- * @returns {boolean} True if the step should trigger
- */
-export function shouldTriggerStep(sequenceId, row, step) {
-    const probability = getStepProbability(sequenceId, row, step);
+export function shouldTriggerStep(trackId, row, step) {
+    const probability = getStepProbability(trackId, row, step);
     return Math.random() < probability;
 }
 
 /**
- * Get all probabilities for a sequence as an array.
- * @param {number|string} sequenceId - The sequence ID
+ * Clear probability state for a track
+ * @param {string} trackId - Track identifier
+ */
+export function clearProbabilityForTrack(trackId) {
+    const prefix = `${trackId}:`;
+    for (const key of probabilityState.keys()) {
+        if (key.startsWith(prefix)) {
+            probabilityState.delete(key);
+        }
+    }
+}
+
+/**
+ * Get all probability values for a track (for UI display)
+ * @param {string} trackId - Track identifier
  * @param {number} numRows - Number of rows
  * @param {number} numSteps - Number of steps
- * @returns {Array<Array<number>>} 2D array of probabilities
+ * @returns {Array} 2D array of probabilities
  */
-export function getSequenceProbabilities(sequenceId, numRows, numSteps) {
-    const probabilities = [];
+export function getTrackProbabilities(trackId, numRows, numSteps) {
+    const result = [];
     for (let r = 0; r < numRows; r++) {
         const row = [];
         for (let s = 0; s < numSteps; s++) {
-            row.push(getStepProbability(sequenceId, r, s));
+            row.push(getStepProbability(trackId, r, s));
         }
-        probabilities.push(row);
+        result.push(row);
     }
-    return probabilities;
+    return result;
 }
 
 /**
- * Set probabilities for an entire sequence from a 2D array.
- * @param {number|string} sequenceId - The sequence ID
- * @param {Array<Array<number>>} data - 2D array of probabilities
+ * Set probabilities for an entire row
+ * @param {string} trackId - Track identifier
+ * @param {number} row - Row index
+ * @param {number} probability - Value between 0 and 1
+ * @param {number} numSteps - Number of steps
  */
-export function setSequenceProbabilities(sequenceId, data) {
-    clearSequenceProbability(sequenceId);
-    if (!Array.isArray(data)) return;
-    
-    for (let r = 0; r < data.length; r++) {
-        if (!Array.isArray(data[r])) continue;
-        for (let s = 0; s < data[r].length; s++) {
-            if (data[r][s] !== DEFAULT_STEP_PROBABILITY) {
-                setStepProbability(sequenceId, r, s, data[r][s]);
-            }
-        }
+export function setRowProbability(trackId, row, probability, numSteps) {
+    for (let s = 0; s < numSteps; s++) {
+        setStepProbability(trackId, row, s, probability);
     }
 }
 
 /**
- * Process sequence data with probability filtering.
- * Returns a new data array with steps filtered based on probability.
- * @param {Array<Array>} sequenceData - Original sequence data
- * @param {number|string} sequenceId - The sequence ID
- * @returns {Array<Array>} Filtered sequence data with probability applied
+ * Set probabilities for an entire column (step)
+ * @param {string} trackId - Track identifier
+ * @param {number} step - Step index
+ * @param {number} probability - Value between 0 and 1
+ * @param {number} numRows - Number of rows
  */
-export function applyProbabilityToSequenceData(sequenceData, sequenceId) {
-    if (!sequenceData || !Array.isArray(sequenceData)) return sequenceData;
-    
-    return sequenceData.map((row, rowIndex) => {
-        return row.map((step, stepIndex) => {
-            if (!step) return step;
-            const shouldPlay = shouldTriggerStep(sequenceId, rowIndex, stepIndex);
-            // Return null to indicate step should not play, or keep original
-            return shouldPlay ? step : null;
-        });
-    });
+export function setColumnProbability(trackId, step, probability, numRows) {
+    for (let r = 0; r < numRows; r++) {
+        setStepProbability(trackId, r, step, probability);
+    }
 }
 
-/**
- * Get probability display color for UI.
- * @param {number} probability - Probability value (0-1)
- * @returns {string} CSS color string
- */
-export function getProbabilityColor(probability) {
-    if (probability >= 1.0) return ''; // No special color for 100%
-    if (probability >= 0.75) return 'rgba(34, 197, 94, 0.4)'; // Green for high
-    if (probability >= 0.5) return 'rgba(234, 179, 8, 0.4)'; // Yellow for medium
-    if (probability >= 0.25) return 'rgba(249, 115, 22, 0.4)'; // Orange for low
-    return 'rgba(239, 68, 68, 0.4)'; // Red for very low
-}
-
-// Export for use by other modules
-window.getStepProbability = getStepProbability;
-window.setStepProbability = setStepProbability;
-window.shouldTriggerStep = shouldTriggerStep;
-window.getSequenceProbabilities = getSequenceProbabilities;
-window.setSequenceProbabilities = setSequenceProbabilities;
-window.applyProbabilityToSequenceData = applyProbabilityToSequenceData;
-window.getProbabilityColor = getProbabilityColor;
+export default {
+    initStepSequencerProbability,
+    setStepProbability,
+    getStepProbability,
+    getProbabilityColor,
+    shouldTriggerStep,
+    clearProbabilityForTrack,
+    getTrackProbabilities,
+    setRowProbability,
+    setColumnProbability
+};
