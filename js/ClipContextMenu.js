@@ -146,6 +146,10 @@ function showClipContextMenu(x, y, clipId, trackId) {
             <span class="w-4">⏱</span>
             <span>Start Offset</span>
         </button>
+        <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="clipGain" data-clip-id="${clipId}" data-track-id="${trackId}">
+            <span class="w-4">🎚️</span>
+            <span>Clip Gain</span>
+        </button>
         <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="duplicate" data-clip-id="${clipId}" data-track-id="${trackId}">
             <span class="w-4">📋</span>
             <span>Duplicate</span>
@@ -323,6 +327,12 @@ function handleClipAction(action, clipId, trackId) {
 
         case 'startOffset':
             openClipStartOffsetPanel(clipId);
+            break;
+
+        case 'clipGain':
+            if (typeof window.openClipGainPanel === 'function') {
+                window.openClipGainPanel(clipId);
+            }
             break;
 
         case 'stretch':

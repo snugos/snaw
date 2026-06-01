@@ -4547,6 +4547,11 @@ export class Track {
                                 player.detune = stretchParams.detune;
                             }
                             
+                            // Apply per-clip gain if set (independent of track volume)
+                            if (clip.clipGain !== undefined && clip.clipGain !== 1.0) {
+                                player.volume.value = Tone.gainToDb(clip.clipGain);
+                            }
+                            
                             player.onload = () => {
                                 URL.revokeObjectURL(url);
                                 const destNode = (this.activeEffects.length > 0 && this.activeEffects[0].toneNode && !this.activeEffects[0].toneNode.disposed)

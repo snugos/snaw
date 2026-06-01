@@ -141,6 +141,8 @@ import { initDrumReplace, openDrumReplacePanel } from './DrumReplace.js';
 import { initDrumPatternSplitter, openDrumPatternSplitterPanel } from './DrumPatternSplitter.js';
 // Clip Opacity
 import { initClipOpacity, openClipOpacityPanel } from './ClipOpacity.js';
+// Clip Gain Per Instance - Per-clip volume knob
+import { initClipGainPerInstance, openClipGainPanel, getClipGain, setClipGain } from './ClipGainPerInstance.js';
 // Clip Start Offset
 import { initClipStartOffset, openClipStartOffsetPanel } from './ClipStartOffset.js';
 // Clip Fade Presets
@@ -1020,6 +1022,7 @@ import {
     openStepSequencerView,
     openPianoRollEditor,
     openCCStepSequencer,
+    openClipGainPanel,
     getCCPatternData,
     setCCPatternData,
     openScaleHighlightPanel,
@@ -1735,6 +1738,7 @@ async function initializeSnugOS() {
         if (typeof initMuteSelectedTracks === 'function') initMuteSelectedTracks(appServices); // Mute Selected Tracks - M to mute/unmute selected
         if (typeof initMidiChordDisplay === 'function') initMidiChordDisplay(appServices); // MIDI Chord Display initialization
         if (typeof initClipOpacity === 'function') initClipOpacity(appServices); // Clip Opacity initialization
+        if (typeof initClipGainPerInstance === 'function') initClipGainPerInstance(appServices); // Clip Gain Per Instance initialization
         if (typeof initClipStartOffset === 'function') initClipStartOffset(appServices); // Clip Start Offset initialization
         if (typeof initClipLoopPreview === 'function') initClipLoopPreview(appServices); // Clip Loop Preview - double-click to loop
         if (typeof initClipGhostTrails === 'function') initClipGhostTrails(appServices); // Clip Ghost Trails initialization
