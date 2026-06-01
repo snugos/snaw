@@ -16,17 +16,17 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 - **Ripple Edit** - When deleting, close gaps by rippling following clips ✅
 - **MIDI Channel Per-Row** - Allow different rows in step sequencer to send on different MIDI channels ✅
 - **Clip Gain Per-Instance** - Per-clip volume knob independent of track gain for quick level adjustments ✅
+- **Step Sequencer Probability** - Each step has configurable trigger probability for generative variations ✅
 
 ## Current Feature Queue
 
 1. **Drum Pattern Randomizer** - Generate random but musical drum patterns from template-based algorithms
 2. **Velocity Curve Per-Track** - Per-track velocity response curve for customizing MIDI input dynamics
-3. **Step Sequencer Probability** - Each step has configurable trigger probability for generative variations
-4. **Track Latency Compensation** - Per-track adjustable delay to compensate for plugin processing latency
-5. **MIDI CC Learn Panel** - Visual panel to assign and manage MIDI CC to virtual parameter mappings
-6. **Audio Quantize Strength** - Control how strictly audio snaps to grid (0-100% strength slider)
-7. **Clip Fade Handles** - Drag start/end of audio clips to set fade in/out curves
-8. **MIDI Learn Visual Feedback** - Highlight knobs/controls that are MIDI-mapped with a glow
+3. **Track Latency Compensation** - Per-track adjustable delay to compensate for plugin processing latency
+4. **MIDI CC Learn Panel** - Visual panel to assign and manage MIDI CC to virtual parameter mappings
+5. **Audio Quantize Strength** - Control how strictly audio snaps to grid (0-100% strength slider)
+6. **Clip Fade Handles** - Drag start/end of audio clips to set fade in/out curves
+7. **MIDI Learn Visual Feedback** - Highlight knobs/controls that are MIDI-mapped with a glow
 
 ## Workflow
 
