@@ -20,13 +20,13 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 - **Drum Pattern Randomizer** - Generate random but musical drum patterns from template-based algorithms ✅
 - **Velocity Curve Per-Track** - Per-track velocity response curve for customizing MIDI input dynamics ✅
 - **Track Latency Compensation** - Per-track adjustable delay to compensate for plugin processing latency ✅
+- **MIDI CC Learn Panel** - Visual panel to assign and manage MIDI CC to virtual parameter mappings ✅
 
 ## Current Feature Queue
 
-1. **MIDI CC Learn Panel** - Visual panel to assign and manage MIDI CC to virtual parameter mappings
-2. **Audio Quantize Strength** - Control how strictly audio snaps to grid (0-100% strength slider)
-3. **Clip Fade Handles** - Drag start/end of audio clips to set fade in/out curves
-4. **MIDI Learn Visual Feedback** - Highlight knobs/controls that are MIDI-mapped with a glow
+1. **Audio Quantize Strength** - Control how strictly audio snaps to grid (0-100% strength slider)
+2. **Clip Fade Handles** - Drag start/end of audio clips to set fade in/out curves
+3. **MIDI Learn Visual Feedback** - Highlight knobs/controls that are MIDI-mapped with a glow
 
 ## Workflow
 
