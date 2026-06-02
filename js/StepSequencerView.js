@@ -126,6 +126,7 @@ function renderStepSequencerContent(trackId = null) {
                 </select>
                 <button id="stepSeqProbToggle" class="px-2 py-1 text-xs ${probabilityEnabled ? 'bg-purple-600 text-white' : 'bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200'} rounded">Prob</button>
                 <button id="stepSeqClear" class="px-2 py-1 text-xs bg-red-500 hover:bg-red-600 rounded text-white">Clear All</button>
+                <button id="stepSeqRandomize" class="px-2 py-1 text-xs bg-green-600 hover:bg-green-700 rounded text-white">Randomize</button>
             </div>
         </div>
     `;
@@ -357,6 +358,16 @@ function setupStepSequencerEvents(container, track) {
         });
     }
 
+    // Randomize button
+    const randomizeBtn = container.querySelector('#stepSeqRandomize');
+    if (randomizeBtn) {
+        randomizeBtn.addEventListener('click', () => {
+            if (confirm('Generate random pattern? This will replace current notes.')) {
+                randomizePattern(track);
+            }
+        });
+    }
+
     // Step cell click - toggle note
     let isDragging = false;
     let isSettingVelocity = false;
@@ -555,6 +566,97 @@ function clearAllNotes(track) {
     }
     if (track.appServices?.updateTrackUI) {
         track.appServices.updateTrackUI(track.id, 'sequenceChanged');
+    }
+
+    renderStepSequencerContent(track.id);
+}
+
+// Randomize pattern with template-based musical rules
+function randomizePattern(track) {
+    if (track.appServices?.captureStateForUndo) {
+        track.appServices.captureStateForUndo('Randomize pattern');
+    }
+
+    const activeSeq = track.sequences?.find(s => s.id === track.activeSequenceId) || track.sequences?.[0];
+    if (!activeSeq || !activeSeq.data) return;
+
+    const numRows = activeSeq.data.length;
+    const numSteps = activeSeq.data[0]?.length || 16;
+    const isDrumTrack = track.type === 'DrumSampler';
+
+    // Template-based patterns for drums (classic 4-on-the-floor variations)
+    const drumTemplates = [
+        { name: 'Four on Floor', probability: [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0] },
+        { name: 'Backbeat', probability: [0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0] },
+        { name: 'Syncopated', probability: [1,0,0,1, 0,0,1,0, 1,0,0,1, 0,0,1,0] },
+        { name: 'House', probability: [1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0] },
+        { name: 'Breakbeat', probability: [1,0,0,1, 0,1,0,1, 1,0,0,1, 0,1,0,0] },
+    ];
+
+    // Template-based patterns for melodic (pentatonic scale-based)
+    const melodicTemplates = [
+        { name: 'Arpeggio Up', probability: [1,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0] },
+        { name: 'Up and Down', probability: [1,0,0,0, 0,0,0,1, 0,0,0,0, 0,0,1,0] },
+        { name: 'Chord Stabs', probability: [1,0,1,0, 0,0,1,0, 1,0,1,0, 0,0,1,0] },
+    ];
+
+    // Select random template based on track type
+    const templates = isDrumTrack ? drumTemplates : melodicTemplates;
+    const template = templates[Math.floor(Math.random() * templates.length)];
+
+    // Apply template with probability threshold and add variation
+    for (let r = 0; r < numRows; r++) {
+        for (let s = 0; s < numSteps; s++) {
+            // Base probability from template
+            let prob = template.probability[s] || 0;
+
+            // For drums, vary probability by row (kick/snare more likely than hi-hats)
+            if (isDrumTrack) {
+                // Kick row (row 0) - very high probability
+                if (r === 0) prob = Math.max(prob, 0.7);
+                // Snare row (row 1) - high probability
+                else if (r === 1) prob = Math.max(prob, 0.5);
+                // Hi-hat rows - use template directly with some randomness
+                else prob = prob > 0 ? 0.4 + Math.random() * 0.4 : 0.1 * Math.random();
+            } else {
+                // Melodic - higher rows (higher notes) slightly less likely
+                const rowFactor = 1 - (r / numRows) * 0.3;
+                prob = prob > 0 ? prob * rowFactor * (0.5 + Math.random() * 0.5) : 0.1 * Math.random();
+            }
+
+            // Apply velocity with some variation
+            if (Math.random() < prob) {
+                activeSeq.data[r][s] = {
+                    velocity: 0.6 + Math.random() * 0.35,
+                    duration: 1
+                };
+            } else {
+                activeSeq.data[r][s] = null;
+            }
+        }
+    }
+
+    // Add some off-beat fills randomly
+    if (isDrumTrack && Math.random() > 0.5) {
+        const fillStep = 4 + Math.floor(Math.random() * 8); // Somewhere in middle 8 steps
+        for (let r = 2; r < Math.min(numRows, 6); r++) {
+            if (Math.random() > 0.6) {
+                activeSeq.data[r][fillStep] = {
+                    velocity: 0.5 + Math.random() * 0.4,
+                    duration: 1
+                };
+            }
+        }
+    }
+
+    if (track.recreateToneSequence) {
+        track.recreateToneSequence(true);
+    }
+    if (track.appServices?.updateTrackUI) {
+        track.appServices.updateTrackUI(track.id, 'sequenceChanged');
+    }
+    if (track.appServices?.showNotification) {
+        track.appServices.showNotification(`Pattern randomized: ${template.name}`, 1500);
     }
 
     renderStepSequencerContent(track.id);
