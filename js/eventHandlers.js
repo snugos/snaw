@@ -1862,7 +1862,13 @@ function handleMIDIMessage(message) {
             if (armedTrack.toneSampler && !armedTrack.toneSampler.disposed && armedTrack.toneSampler.loaded) {
                 const freq = Tone.Frequency(note, "midi").toNote();
                 if (isNoteOn) {
-                    armedTrack.toneSampler.triggerAttack(freq, Tone.now(), velocity / 127);
+                    // Apply velocity curve if available
+                    let vel = velocity / 127;
+                    try {
+                        const { applyVelocityCurveToInput } = await import('./TrackVelocityCurve.js');
+                        vel = applyVelocityCurveToInput(armedTrack.id, vel);
+                    } catch (e) { /* module not loaded, use raw velocity */ }
+                    armedTrack.toneSampler.triggerAttack(freq, Tone.now(), vel);
                 } else if (isNoteOff) {
                     armedTrack.toneSampler.triggerRelease(freq, Tone.now() + 0.05);
                 }
@@ -1873,7 +1879,13 @@ function handleMIDIMessage(message) {
                 const freq = Tone.Frequency(note, "midi").toNote();
                 if (isNoteOn) {
                     if (typeof armedTrack.instrument.triggerAttack === 'function') {
-                        armedTrack.instrument.triggerAttack(freq, Tone.now(), velocity / 127);
+                        // Apply velocity curve if available
+                        let vel = velocity / 127;
+                        try {
+                            const { applyVelocityCurveToInput } = await import('./TrackVelocityCurve.js');
+                            vel = applyVelocityCurveToInput(armedTrack.id, vel);
+                        } catch (e) { /* module not loaded, use raw velocity */ }
+                        armedTrack.instrument.triggerAttack(freq, Tone.now(), vel);
                     }
                 } else if (isNoteOff) {
                     if (typeof armedTrack.instrument.triggerRelease === 'function') {

@@ -77,6 +77,7 @@ import { initMIDArpeggiatorPanel, openMIDArpeggiatorPanel } from './MIDArpeggiat
 import { initTrackTemplateLibrary, openTrackTemplateLibraryPanel, getTrackTemplateNames, getTrackTemplate, saveTrackTemplate, deleteTrackTemplate, exportTemplates, importTemplates } from './TrackTemplateLibrary.js';
 import { initMixerChannelStripPresets, openMixerChannelStripPresetsPanel, exportChannelStripPresets, importChannelStripPresets } from './MixerChannelStripPresets.js';
 import { initTrackEffectPresets, openTrackEffectPresetsPanel } from './TrackEffectPresets.js';
+import { initTrackVelocityCurve, openTrackVelocityCurvePanel } from './TrackVelocityCurve.js';
 import { showClipEnvelopeShaper } from './ClipEnvelopeShaper.js';
 import { initEnvelopeIntegration } from './EnvelopeIntegration.js';
 import { enableSoloChain, disableSoloChain, toggleTrackInChain, clearChain, getSoloedTrackIds, getIsActive } from './TrackSoloChain.js';
@@ -943,6 +944,7 @@ import {
     openLyricsTrackPanel,
     openMixerChannelStripPresetsPanel,
     openTrackEffectPresetsPanel,
+    openTrackVelocityCurvePanel,
     openExportSelectionPanel,
     openTimeSignaturePanel,
     toggleClipLoopPreview,
@@ -1716,6 +1718,7 @@ async function initializeSnugOS() {
         if (typeof initTrackIconPicker === 'function') initTrackIconPicker(appServices); // Track Icon Picker initialization
         if (typeof initMixerChannelStripPresets === 'function') initMixerChannelStripPresets(appServices); // Mixer Channel Strip Presets initialization
         if (typeof initTrackEffectPresets === 'function') initTrackEffectPresets(appServices); // Track Effect Presets initialization
+        if (typeof initTrackVelocityCurve === 'function') initTrackVelocityCurve(appServices); // Per-track Velocity Curve initialization
         if (typeof initChordVoicingModes === 'function') initChordVoicingModes(appServices); // Chord Voicing Modes initialization
         if (typeof initChordTriggerMode === 'function') initChordTriggerMode(appServices); // Chord Trigger Mode initialization
         if (typeof initRhythmRandomizer === 'function') initRhythmRandomizer(appServices); // Rhythm Randomizer initialization

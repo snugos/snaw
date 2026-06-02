@@ -207,6 +207,11 @@ export class Track {
         this.sidechainSource = initialData?.sidechainSource || null; // Track ID that this track triggers
         this.sidechainDestination = initialData?.sidechainDestination || null; // Track ID that ducks this track
         
+        // --- Velocity Response Curve ---
+        // Per-track velocity response curve for customizing MIDI input dynamics
+        // Array of 16 values (0-1) representing how velocity maps to output
+        this.velocityCurve = initialData?.velocityCurve || null; // null means use default (0.7 linear)
+        
         this.instrument = null; 
 
         this.sequences = [];

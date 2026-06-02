@@ -142,6 +142,10 @@ function showTrackContextMenu(x, y, trackId) {
                 <span class="w-4">🎛️</span>
                 <span>Effect Presets</span>
             </button>
+            <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="velocityCurve" data-track-id="${trackId}">
+                <span class="w-4">📊</span>
+                <span>Velocity Response</span>
+            </button>
         </div>
         <div class="border-t border-gray-700 mt-1 pt-1">
             ${freezeMenuItems}
@@ -309,6 +313,14 @@ function handleTrackAction(action, trackId) {
                 localAppServices.openTrackEffectPresetsPanel(trackId);
             } else {
                 localAppServices.showNotification?.('Effect Presets not available', 2000);
+            }
+            break;
+
+        case 'velocityCurve':
+            if (localAppServices.openTrackVelocityCurvePanel) {
+                localAppServices.openTrackVelocityCurvePanel(trackId);
+            } else {
+                localAppServices.showNotification?.('Velocity Response not available', 2000);
             }
             break;
             
