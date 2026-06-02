@@ -27,14 +27,37 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Track Solo Mode** - Dedicated solo button per track with solo-in-place and solo-safe options
-2. **Mute Group Assignment** - Group multiple tracks so muting one affects the group
-3. **Track Freeze Toggle** - Quick freeze/unfreeze track to render plugin processing
-4. **BPM Tap Tempo** - Tap keyboard to set tempo manually
-5. **Master Limiter** - Built-in brickwall limiter on master for loudness
-6. **Clip Duplicate** - Duplicate selected clips with offset
-7. **Track Duplicate** - Duplicate track with all settings
-8. **Audio Normalize** - Normalize audio clips to peak level
+1. **Track Solo Mode** - Dedicated solo button per track with solo-in-place and solo-safe options ✅ *(Already exists: SoloSafeMode.js)*
+2. **Mute Group Assignment** - Group multiple tracks so muting one affects the group ✅ *(Already exists: MuteGroups.js)*
+3. **Track Freeze Toggle** - Quick freeze/unfreeze track to render plugin processing ✅ *(Already exists: TrackFreezeQuickToggle.js)*
+4. **BPM Tap Tempo** - Tap keyboard to set tempo manually ✅ *(Already exists: AudioTapTempo.js)*
+5. **Master Limiter** - Built-in brickwall limiter on master for loudness ✅ *(Already exists: AIMasteringEnhancement.js)*
+6. **Clip Duplicate** - Duplicate selected clips with offset ✅ *(Already exists: TrackDuplicateOffset.js)*
+7. **Track Duplicate** - Duplicate track with all settings ✅ *(Already exists: TrackDuplicate.js)*
+8. **Audio Normalize** - Normalize audio clips to peak level ✅ *(Already exists: AudioNormalization.js)*
+9. **Tempo Nudge** - Nudge project tempo up/down by percentage with keyboard shortcut ✅ *(Already exists: TempoNudge.js)*
+10. **Track Reorder** - Drag tracks to reorder them in the arrangement ✅ *(Already exists: TrackSwap.js)*
+
+## When Queue is Empty
+
+The feature queue is complete - all listed features already exist in the codebase.
+Run this brainstorming process to add new features:
+
+```
+Based on SnugOS being a browser-based DAW with:
+- Tone.js audio engine
+- Multi-track timeline
+- Effects rack
+- Sequencer mode
+- MIDI support
+
+Generate 10 NEW feature ideas that are:
+1. Achievable in a single session
+2. Complement existing features
+3. Enhance creative workflow
+
+Output as numbered list and update this instruction.
+```
 
 ## Workflow
 
@@ -63,26 +86,6 @@ After successfully implementing a feature:
 - Remove it from the queue
 - Renumber the remaining features
 - Update this instruction with new queue
-
-## When Queue is Empty
-
-Run this brainstorming process:
-
-```
-Based on SnugOS being a browser-based DAW with:
-- Tone.js audio engine
-- Multi-track timeline
-- Effects rack
-- Sequencer mode
-- MIDI support
-
-Generate 10 NEW feature ideas that are:
-1. Achievable in a single session
-2. Complement existing features
-3. Enhance creative workflow
-
-Output as numbered list and update this instruction.
-```
 
 ## Rules
 
