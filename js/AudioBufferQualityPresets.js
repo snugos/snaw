@@ -19,6 +19,17 @@ const BUFFER_PRESETS = {
 };
 
 /**
+ * Update status bar buffer quality indicator
+ */
+function updateStatusBarIndicator() {
+    const statusEl = document.getElementById('statusBufferQualityValue');
+    if (statusEl) {
+        const preset = BUFFER_PRESETS[currentPreset];
+        statusEl.textContent = preset.name;
+    }
+}
+
+/**
  * Initialize the Audio Buffer Quality Presets module
  * @param {object} services - App services 
  */
@@ -27,6 +38,9 @@ export function initAudioBufferQualityPresets(services) {
     
     // Load saved preset from localStorage
     loadSavedPreset();
+    
+    // Initialize status bar indicator
+    updateStatusBarIndicator();
     
     console.log('[AudioBufferQualityPresets] Initialized with preset:', currentPreset);
 }
@@ -258,11 +272,13 @@ export function createQuickToggleButton() {
     btn.addEventListener('click', () => {
         const nextPreset = cycleToNextPreset();
         updateToggleButton(btn);
+        updateStatusBarIndicator();
     });
     
     // Listen for changes from other sources
     window.addEventListener('audioBufferSizeChanged', () => {
         updateToggleButton(btn);
+        updateStatusBarIndicator();
     });
     
     return btn;
@@ -293,5 +309,6 @@ export default {
     setBufferPreset,
     cycleToNextPreset,
     openBufferQualityPanel,
-    createQuickToggleButton
+    createQuickToggleButton,
+    updateStatusBarIndicator
 };
