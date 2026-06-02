@@ -38,27 +38,6 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 9. **Quick Volume Ramp** - Drag track volume to create quick fade in/out shapes
 10. **Keyboard octave display** - Show current octave shift value in transport bar
 
-## When Queue is Empty
-
-The feature queue is complete - all listed features already exist in the codebase.
-Run this brainstorming process to add new features:
-
-```
-Based on SnugOS being a browser-based DAW with:
-- Tone.js audio engine
-- Multi-track timeline
-- Effects rack
-- Sequencer mode
-- MIDI support
-
-Generate 10 NEW feature ideas that are:
-1. Achievable in a single session
-2. Complement existing features
-3. Enhance creative workflow
-
-Output as numbered list and update this instruction.
-```
-
 ## Workflow
 
 ### Step 1: Pick Next Feature
