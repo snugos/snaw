@@ -27,16 +27,16 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Track Solo Mode** - Dedicated solo button per track with solo-in-place and solo-safe options ✅ *(Already exists: SoloSafeMode.js)*
-2. **Mute Group Assignment** - Group multiple tracks so muting one affects the group ✅ *(Already exists: MuteGroups.js)*
-3. **Track Freeze Toggle** - Quick freeze/unfreeze track to render plugin processing ✅ *(Already exists: TrackFreezeQuickToggle.js)*
-4. **BPM Tap Tempo** - Tap keyboard to set tempo manually ✅ *(Already exists: AudioTapTempo.js)*
-5. **Master Limiter** - Built-in brickwall limiter on master for loudness ✅ *(Already exists: AIMasteringEnhancement.js)*
-6. **Clip Duplicate** - Duplicate selected clips with offset ✅ *(Already exists: TrackDuplicateOffset.js)*
-7. **Track Duplicate** - Duplicate track with all settings ✅ *(Already exists: TrackDuplicate.js)*
-8. **Audio Normalize** - Normalize audio clips to peak level ✅ *(Already exists: AudioNormalization.js)*
-9. **Tempo Nudge** - Nudge project tempo up/down by percentage with keyboard shortcut ✅ *(Already exists: TempoNudge.js)*
-10. **Track Reorder** - Drag tracks to reorder them in the arrangement ✅ *(Already exists: TrackSwap.js)*
+1. **Metronome Visual Flash** - Show a flashing indicator on beat during playback for visual timing
+2. **Clip Reverse** - Right-click clip to reverse audio playback direction
+3. **Track Mute Automation** - Draw mute/unmute automation on tracks for conditional silencing
+4. **Send Amount Knob** - Per-track send level knobs to aux sends for parallel processing
+5. **MIDI Velocity Editor** - Draw velocity curve on selected notes for dynamic shaping
+6. **Track Solo Automation** - Draw solo/unsolo automation for section-based listening
+7. **Crossfade Loop Points** - Set loop start/end within audio clip with crossfade preview
+8. **BPM Tap Average Display** - Show tap tempo average with standard deviation indicator
+9. **Quick Volume Ramp** - Drag track volume to create quick fade in/out shapes
+10. **Keyboard octave display** - Show current octave shift value in transport bar
 
 ## When Queue is Empty
 
