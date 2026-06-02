@@ -21,12 +21,20 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 - **Velocity Curve Per-Track** - Per-track velocity response curve for customizing MIDI input dynamics ✅
 - **Track Latency Compensation** - Per-track adjustable delay to compensate for plugin processing latency ✅
 - **MIDI CC Learn Panel** - Visual panel to assign and manage MIDI CC to virtual parameter mappings ✅
+- **Audio Quantize Strength** - Control how strictly audio snaps to grid (0-100% strength slider) ✅
+- **Clip Fade Handles** - Drag start/end of audio clips to set fade in/out curves ✅
+- **MIDI Learn Visual Feedback** - Highlight knobs/controls that are MIDI-mapped with a glow ✅
 
 ## Current Feature Queue
 
-1. **Audio Quantize Strength** - Control how strictly audio snaps to grid (0-100% strength slider)
-2. **Clip Fade Handles** - Drag start/end of audio clips to set fade in/out curves
-3. **MIDI Learn Visual Feedback** - Highlight knobs/controls that are MIDI-mapped with a glow
+1. **Track Solo Mode** - Dedicated solo button per track with solo-in-place and solo-safe options
+2. **Mute Group Assignment** - Group multiple tracks so muting one affects the group
+3. **Track Freeze Toggle** - Quick freeze/unfreeze track to render plugin processing
+4. **BPM Tap Tempo** - Tap keyboard to set tempo manually
+5. **Master Limiter** - Built-in brickwall limiter on master for loudness
+6. **Clip Duplicate** - Duplicate selected clips with offset
+7. **Track Duplicate** - Duplicate track with all settings
+8. **Audio Normalize** - Normalize audio clips to peak level
 
 ## Workflow
 
