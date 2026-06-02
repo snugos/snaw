@@ -1,4 +1,6 @@
 import { getTracksState, getTrackByIdState } from './state.js';
+import { openLatencyCompensationPanel } from './TrackLatencyCompensationUI.js';
+export { openLatencyCompensationPanel };
 
 /**
  * Track Delay Compensation - Automatically compensate for plugin latency per track
