@@ -24,12 +24,13 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 - **Audio Quantize Strength** - Control how strictly audio snaps to grid (0-100% strength slider) ✅
 - **Clip Fade Handles** - Drag start/end of audio clips to set fade in/out curves ✅
 - **MIDI Learn Visual Feedback** - Highlight knobs/controls that are MIDI-mapped with a glow ✅
+- **Track Mute Automation** - Draw mute/unmute automation on tracks for conditional silencing ✅
 
 ## Current Feature Queue
 
 1. ~~**Metronome Visual Flash** - Show a flashing indicator on beat during playback for visual timing~~ ✅ *Now shows during ANY playback*
 2. **Clip Reverse** - Right-click clip to reverse audio playback direction
-3. **Track Mute Automation** - Draw mute/unmute automation on tracks for conditional silencing
+3. ~~**Track Mute Automation** - Draw mute/unmute automation on tracks for conditional silencing~~ ✅ *(Implemented)*
 4. **Send Amount Knob** - Per-track send level knobs to aux sends for parallel processing
 5. **MIDI Velocity Editor** - Draw velocity curve on selected notes for dynamic shaping
 6. ~~**Track Solo Automation** - Draw solo/unsolo automation for section-based listening~~ ✅ *(Already implemented)*
