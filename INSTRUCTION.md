@@ -27,12 +27,12 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Metronome Visual Flash** - Show a flashing indicator on beat during playback for visual timing
+1. ~~**Metronome Visual Flash** - Show a flashing indicator on beat during playback for visual timing~~ ✅ *Now shows during ANY playback*
 2. **Clip Reverse** - Right-click clip to reverse audio playback direction
 3. **Track Mute Automation** - Draw mute/unmute automation on tracks for conditional silencing
 4. **Send Amount Knob** - Per-track send level knobs to aux sends for parallel processing
 5. **MIDI Velocity Editor** - Draw velocity curve on selected notes for dynamic shaping
-6. **Track Solo Automation** - Draw solo/unsolo automation for section-based listening ✅ *(Just implemented)*
+6. ~~**Track Solo Automation** - Draw solo/unsolo automation for section-based listening~~ ✅ *(Already implemented)*
 7. **Crossfade Loop Points** - Set loop start/end within audio clip with crossfade preview
 8. **BPM Tap Average Display** - Show tap tempo average with standard deviation indicator
 9. **Quick Volume Ramp** - Drag track volume to create quick fade in/out shapes
