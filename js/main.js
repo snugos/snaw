@@ -398,7 +398,7 @@ import {
             if (typeof showSafeNotification === 'function') showSafeNotification("Failed to remove background.", 2000);
         }
     },
-    window.removeCustomDesktopBackground = removeCustomDesktopBackground,
+    window.removeCustomDesktopBackground = removeCustomDesktopBackground;
 
     // --- Custom Background Helpers ---
     hasCustomBackground: () => {
