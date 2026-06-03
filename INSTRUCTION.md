@@ -25,6 +25,7 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 - **Clip Fade Handles** - Drag start/end of audio clips to set fade in/out curves ✅
 - **MIDI Learn Visual Feedback** - Highlight knobs/controls that are MIDI-mapped with a glow ✅
 - **Track Mute Automation** - Draw mute/unmute automation on tracks for conditional silencing ✅
+- **BPM Tap Average Display** - Show tap tempo average with standard deviation indicator ✅
 
 ## Current Feature Queue
 
@@ -35,9 +36,8 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 5. **MIDI Velocity Editor** - Draw velocity curve on selected notes for dynamic shaping
 6. ~~**Track Solo Automation** - Draw solo/unsolo automation for section-based listening~~ ✅ *(Already implemented)*
 7. **Crossfade Loop Points** - Set loop start/end within audio clip with crossfade preview
-8. **BPM Tap Average Display** - Show tap tempo average with standard deviation indicator
-9. **Quick Volume Ramp** - Drag track volume to create quick fade in/out shapes
-10. **Keyboard octave display** - Show current octave shift value in transport bar
+8. **Quick Volume Ramp** - Drag track volume to create quick fade in/out shapes
+9. **Keyboard octave display** - Show current octave shift value in transport bar
 
 ## Workflow
 
