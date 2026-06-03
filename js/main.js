@@ -393,6 +393,7 @@ import {
             });
             if (typeof showSafeNotification === 'function') showSafeNotification("Custom background removed.", 2000);
             if (typeof restoreDesktopBackground === 'function') restoreDesktopBackground();
+            if (typeof updateBgStatusIndicator === 'function') updateBgStatusIndicator();
         } catch (e) {
             console.error('[removeCustomDesktopBackground] Error:', e);
             if (typeof showSafeNotification === 'function') showSafeNotification("Failed to remove background.", 2000);
@@ -405,6 +406,18 @@ import {
         const hasLocalStorage = localStorage.getItem('snugosDesktopBackground') || localStorage.getItem('snugosDesktopBgType');
         if (hasLocalStorage) return true;
         return false; // IndexedDB check would be async, checked by caller if needed
+    },
+    updateBgStatusIndicator: () => {
+        const indicator = document.getElementById('statusBgIndicator');
+        if (!indicator) return;
+        const hasBg = localStorage.getItem('snugosDesktopBackground') || localStorage.getItem('snugosDesktopBgType');
+        if (hasBg) {
+            indicator.classList.remove('hidden');
+            indicator.classList.add('flex');
+        } else {
+            indicator.classList.add('hidden');
+            indicator.classList.remove('flex');
+        }
     },
 
     // MIDI Chord Player Services
@@ -1465,6 +1478,7 @@ async function handleCustomBackgroundUpload(event) {
                 localStorage.setItem('snugosDesktopBgType', 'image');
                 await applyDesktopBackground(dataURL, 'image');
                 if (typeof showSafeNotification === 'function') showSafeNotification("Image background applied.", 2000);
+                if (typeof updateBgStatusIndicator === 'function') updateBgStatusIndicator();
             };
             reader.readAsDataURL(file);
         } else if (isVideo) {
@@ -1475,6 +1489,7 @@ async function handleCustomBackgroundUpload(event) {
             const objectUrl = URL.createObjectURL(file);
             await applyDesktopBackground(objectUrl, 'video');
             if (typeof showSafeNotification === 'function') showSafeNotification("Video background applied.", 2000);
+            if (typeof updateBgStatusIndicator === 'function') updateBgStatusIndicator();
         }
     } catch (error) {
         console.error("Error saving background:", error);
