@@ -487,6 +487,10 @@ export function initializePrimaryEventListeners(appContext) {
                 console.log("[Menu] Mute Groups clicked");
                 try { localAppServices.openMuteGroupsPanel?(); } catch(e) { console.error("[Menu] Mute Groups error:", e); }
             },
+            menuTrackMuteAutomation: () => {
+                console.log('[Menu] Track Mute Automation clicked');
+                try { localAppServices.openTrackMuteAutomationPanel?.(); } catch(e) { console.error('[Menu] Track Mute Automation error:', e); }
+            },
             menuScaleHint: () => {
                 console.log('[Menu] Scale Hint Overlay clicked');
                 try {

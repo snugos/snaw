@@ -60,6 +60,7 @@ import { FrequencyBandSplitter, MultibandProcessor, getFrequencyBandSplitter, op
 import { openPerformanceTriggerPadsPanel, getPerformanceTriggerPads } from './PerformanceTriggerPads.js';
 import { initTrackHeadphoneMix, openTrackHeadphoneMixPanel } from './TrackHeadphoneMix.js';
 import { initTrackSendRouting, openTrackSendRoutingPanel } from './TrackSendRouting.js';
+import { initTrackMuteAutomation, openTrackMuteAutomationPanel } from './TrackMuteAutomation.js';
 import { openTrackDelayCompensationPanel, openLatencyCompensationPanel } from './TrackDelayCompensation.js';
 import { openGrooveExtractorPanel } from './GrooveExtractor.js';
 import { openStepSequencerView } from './StepSequencerView.js';
@@ -958,6 +959,7 @@ import {
     openLyricsTrackPanel,
     openMixerChannelStripPresetsPanel,
     openTrackEffectPresetsPanel,
+    openTrackMuteAutomationPanel,
     openTrackVelocityCurvePanel,
     openExportSelectionPanel,
     openTimeSignaturePanel,
@@ -1684,6 +1686,7 @@ async function initializeSnugOS() {
         if (typeof initClipReverse === 'function') initClipReverse(appServices); // Clip Reverse feature initialization
         if (typeof initAudioLegatoDetection === 'function') initAudioLegatoDetection(appServices); // Audio Legato Detection initialization
         if (typeof initTrackSendRouting === 'function') initTrackSendRouting(appServices); // Track Send Routing initialization
+        if (typeof initTrackMuteAutomation === 'function') initTrackMuteAutomation(appServices); // Track Mute Automation initialization
         if (typeof initTrackHeadphoneMix === 'function') initTrackHeadphoneMix(appServices); // Headphone Mix initialization
         if (typeof initTrackSoloChain === 'function') initTrackSoloChain(appServices); // Track Solo Chain initialization
         if (typeof initMetronomeVisual === 'function') initMetronomeVisual(appServices); // Metronome Visual Beat Indicator
