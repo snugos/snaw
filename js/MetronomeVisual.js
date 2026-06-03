@@ -89,11 +89,10 @@ function startVisualLoop() {
 function updateBeatVisualFromTransport() {
     if (!beatDotEl || !isActive) return;
     
-    // Check if metronome is enabled
-    const metronomeEnabled = typeof getMetronomeEnabled === 'function' ? getMetronomeEnabled() : false;
-    
-    if (typeof Tone === 'undefined' || Tone.Transport.state !== 'started' || !metronomeEnabled) {
-        // Transport stopped or metronome disabled - reset
+    // Beat visual indicator shows during ANY playback (independent of metronome audio)
+    // Check if transport is running (regardless of metronomeEnabled state)
+    if (typeof Tone === 'undefined' || Tone.Transport.state !== 'started') {
+        // Transport stopped - reset
         if (transportStarted) {
             transportStarted = false;
             currentBeatCount = 0;
