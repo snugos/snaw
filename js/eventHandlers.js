@@ -1633,6 +1633,15 @@ export function attachGlobalControlEvents(elements) {
             if (module.initTapAvgDisplay) module.initTapAvgDisplay(localAppServices);
         }).catch(err => console.error('[EventHandlers] Failed to load TapAvgDisplay:', err));
     }
+
+    // Initialize Tap Tempo StdDev Display
+    if (window.TapTempoStdDev && window.TapTempoStdDev.initTapTempoStdDev) {
+        window.TapTempoStdDev.initTapTempoStdDev(localAppServices);
+    } else {
+        import('./TapTempoStdDev.js').then(module => {
+            if (module.initTapTempoStdDev) module.initTapTempoStdDev(localAppServices);
+        }).catch(err => console.error('[EventHandlers] Failed to load TapTempoStdDev:', err));
+    }
 }
 
 
