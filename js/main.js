@@ -50,7 +50,6 @@ import { initAudioBufferQualityPresets, openBufferQualityPanel, getCurrentPreset
 import { initClipFadeHandles, openClipFadeHandlesPanel } from './ClipFadeHandles.js';
 import { openAudioStretchQualityPanel, openStretchQualityPanel, closeAudioStretchQualityPanel, getAudioStretchingQuality } from './AudioStretchQualityPanel.js';
 import { initAudioStretching, openStretchPanel, quickStretchSelectedClip, applyStretchToClip, removeStretchFromClip, getStretchParamsForClip } from './AudioStretching.js';
-import { initAITempoSuggestion, openAITempoSuggestionPanel } from './AITempoSuggestion.js';
 import { initAutoScrollSync, toggleAutoScroll, autoScrollTimeline } from './AutoScrollSync.js';
 import { initProjectRecoveryManager, createManualBackup, listBackups, restoreBackup, setRecoveryEnabled, getRecoveryStatus } from './ProjectRecoveryManager.js';
 // Pattern Generation & Frequency Processing
@@ -148,20 +147,11 @@ import { initClipGainPerInstance, openClipGainPanel, getClipGain, setClipGain } 
 // Clip Start Offset
 import { initClipStartOffset, openClipStartOffsetPanel } from './ClipStartOffset.js';
 // Clip Fade Presets
-import { initClipFadePresets, openClipFadePresetsPanel, closeClipFadePresetsPanel, addFadePreset, getFadePresets, getClipFadeMenuItems, getClipFadeMenuItemsSimple, applyFadePresetToClip } from './ClipFadePresets.js';
 
 // Export for external use (menu integration)
 export { getClipFadeMenuItems, getClipFadeMenuItemsSimple, applyFadePresetToClip };
 
 // Clip Fade Presets panel opener (used by menus)
-function openClipFadePresetsPanel(services = {}) {
-    const { label, submenu } = getClipFadeMenuItems({}, null);
-    // The panel is accessible via the Audio Fade Presets menu
-    // This function is kept for compatibility but delegates to the main panel
-    if (services.openAudioFadePresetPanel) {
-        services.openAudioFadePresetPanel();
-    }
-}
 
 // Clip Loop Preview
 import { initClipLoopPreview, toggleClipLoopPreview, deactivateClipLoopPreview, isClipInLoopPreview } from './ClipLoopPreview.js';
@@ -264,14 +254,14 @@ import {
     getLoopRegionEnabled, setLoopRegionEnabled, getLoopRegionStart, setLoopRegionStart, getLoopRegionEnd, setLoopRegionEnd, getLoopRegion,
     // Metronome
     getMetronomeEnabled, setMetronomeEnabled, getMetronomeVolume, setMetronomeVolume,
-    // Performance Monitor
-    getPerformanceSnapshot, openPerformancePanel,
     // Core State Actions
     addTrackToStateInternal, removeTrackFromStateInternal, reorderTrackInState,
     captureStateForUndoInternal, undoLastActionInternal, redoLastActionInternal,
     gatherProjectDataInternal, reconstructDAWInternal, saveProjectInternal,
     saveProjectTemplate, loadProjectTemplate, getProjectTemplateNames, getProjectTemplate, deleteProjectTemplate,
+} from './state.js';
     
+const appServices = {
     // Event Handler Passthroughs
     selectMIDIInput: eventSelectMIDIInput, 
     selectMidiOutput: selectMidiOutput,
@@ -400,7 +390,6 @@ import {
             if (typeof showSafeNotification === 'function') showSafeNotification("Failed to remove background.", 2000);
         }
     },
-    window.removeCustomDesktopBackground = removeCustomDesktopBackground;
 
     // --- Custom Background Helpers ---
     hasCustomBackground: () => {
@@ -2094,3 +2083,4 @@ window.addEventListener('beforeunload', (e) => {
 });
 }
 console.log(`SCRIPT EXECUTION FINISHED - SnugOS (main.js - Version ${Constants.APP_VERSION})`);
+appended test marker
