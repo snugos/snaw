@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.23"; // Daily merge 2026-05-30 - Verified: all features present (tap tempo, auto-save, crash recovery, sidechain routing, MIDI import/export, automation, sequence tools). New features from pull: ClipChopperGrid, CountInSettingsPanel, MIDArpeggiatorPanel updates, TapHistoryUI updates, TrackContextMenu. No typos, no broken imports, all undo captures in place. snaw remains the complete super-repo.
+export const APP_VERSION = "0.3.24"; // Daily merge 2026-06-05 - Verified: all features present (tap tempo, auto-save, crash recovery, sidechain routing, MIDI import/export, automation, sequence tools, undo captures). snaw remains the complete super-repo.
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks
