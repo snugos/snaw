@@ -390,7 +390,6 @@ const appServices = {
             if (typeof showSafeNotification === 'function') showSafeNotification("Failed to remove background.", 2000);
         }
     },
-    window.removeCustomDesktopBackground = removeCustomDesktopBackground;
 
     // --- Custom Background Helpers ---
     hasCustomBackground: () => {
@@ -1449,6 +1448,8 @@ const appServices = {
         }
     },
 };
+
+window.removeCustomDesktopBackground = removeCustomDesktopBackground;
 
 async function handleCustomBackgroundUpload(event) {
     if (!event?.target?.files?.[0]) return;
