@@ -1449,7 +1449,7 @@ const appServices = {
     },
 };
 
-window.removeCustomDesktopBackground = removeCustomDesktopBackground;
+window.removeCustomDesktopBackground = appServices.removeCustomDesktopBackground;
 
 async function handleCustomBackgroundUpload(event) {
     if (!event?.target?.files?.[0]) return;
