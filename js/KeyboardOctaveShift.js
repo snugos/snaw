@@ -62,7 +62,7 @@ function setupOctaveShiftUI() {
             currentOctaveShift = Math.min(MAX_OCTAVE_SHIFT, currentOctaveShift + 1);
             updateOctaveShiftDisplay(valueDisplay);
             showOctaveNotification();
-        }
+        });
     }
 }
 

@@ -2085,4 +2085,3 @@ window.addEventListener('beforeunload', (e) => {
 });
 }
 console.log(`SCRIPT EXECUTION FINISHED - SnugOS (main.js - Version ${Constants.APP_VERSION})`);
-appended test marker
