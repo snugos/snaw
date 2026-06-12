@@ -879,6 +879,7 @@ const appServices = {
                 tx.onerror = () => reject(tx.error);
             });
             if (typeof applyDesktopBackground === 'function') applyDesktopBackground(null, null);
+            if (typeof updateBgStatusIndicator === 'function') updateBgStatusIndicator();
             if (typeof showSafeNotification === 'function') showSafeNotification("Background removed.", 2000);
         } catch (e) {
             console.error("Error removing custom background:", e);
@@ -1491,6 +1492,7 @@ const appServices = {
                 tx.onerror = () => reject(tx.error);
             });
             if (typeof applyDesktopBackground === 'function') applyDesktopBackground(null, null);
+            if (typeof updateBgStatusIndicator === 'function') updateBgStatusIndicator();
             if (typeof showSafeNotification === 'function') showSafeNotification("Background removed.", 2000);
         } catch (e) {
             console.error("Error removing custom background:", e);
