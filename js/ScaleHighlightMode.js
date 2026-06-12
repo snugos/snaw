@@ -112,7 +112,7 @@ export function setScaleHighlightEnabled(enabled) {
  * @param {number} midiNote - MIDI note number (0-127)
  * @returns {boolean} True if note is in scale
  */
-export function isNoteInScale(midiNote) {
+function isNoteInScale(midiNote) {
     if (!scaleHighlightEnabled) return true; // All notes valid if disabled
     
     const noteInOctave = midiNote % 12;
@@ -132,7 +132,7 @@ export function isNoteInScale(midiNote) {
  * @param {number} midiNote - MIDI note number
  * @returns {number} Interval position in scale (-1 if not in scale)
  */
-export function getNoteScalePosition(midiNote) {
+function getNoteScalePosition(midiNote) {
     if (!scaleHighlightEnabled) return 0;
     
     const noteInOctave = midiNote % 12;
@@ -150,7 +150,7 @@ export function getNoteScalePosition(midiNote) {
  * @param {number[]} midiNotes - Array of MIDI note numbers
  * @returns {number[]} Notes not in scale
  */
-export function getNotesOutOfScale(midiNotes) {
+function getNotesOutOfScale(midiNotes) {
     if (!scaleHighlightEnabled) return [];
     return midiNotes.filter(note => !isNoteInScale(note));
 }
@@ -160,7 +160,7 @@ export function getNotesOutOfScale(midiNotes) {
  * @param {number} midiNote - MIDI note to quantize
  * @returns {number} Quantized MIDI note in scale
  */
-export function quantizeNoteToScale(midiNote) {
+function quantizeNoteToScale(midiNote) {
     const noteInOctave = midiNote % 12;
     let noteInterval = (noteInOctave - currentRootNote) % 12;
     if (noteInterval < 0) noteInterval += 12;
@@ -194,7 +194,7 @@ export function quantizeNoteToScale(midiNote) {
  * @param {number} velocity - Note velocity (0-1)
  * @returns {Object} { bgClass, borderClass, isInScale }
  */
-export function getNoteScaleClass(midiNote, velocity = 0.8) {
+function getNoteScaleClass(midiNote, velocity = 0.8) {
     const inScale = isNoteInScale(midiNote);
     
     if (!scaleHighlightEnabled) {

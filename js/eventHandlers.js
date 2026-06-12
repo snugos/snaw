@@ -601,6 +601,16 @@ export function initializePrimaryEventListeners(appContext) {
                     }
                 } catch(e) { console.error('[Menu] Clip Reverse error:', e); }
             },
+            menuQuickVolumeRamp: () => {
+                console.log("[Menu] Quick Volume Ramp clicked");
+                try {
+                    if (localAppServices.openQuickVolumeRampPanel) {
+                        localAppServices.openQuickVolumeRampPanel();
+                    } else {
+                        localAppServices.showNotification?.("Quick Volume Ramp not available", 2000);
+                    }
+                } catch(e) { console.error("[Menu] Quick Volume Ramp error:", e); }
+            },
             menuClipStretchMarkers: () => {
                 console.log('[Menu] Clip Stretch Markers clicked');
                 try {

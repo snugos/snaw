@@ -173,6 +173,7 @@ import { initAudioWaveformAnnotation, openAnnotationPanel, addAnnotation, getAnn
 import { initWaveformVisualization, updateWaveformDisplay, renderTrackWaveforms } from './WaveformVisualization.js';
 // Clip Reverse - Reverse audio clips with one click
 import { initClipReverse, openClipReversePanel, reverseAudioClip, reverseMIDISequence, isClipReversed, isSequenceReversed } from './ClipReverse.js';
+import { initQuickVolumeRamp, openQuickVolumeRampPanel, toggleQuickVolumeRampPanel } from './QuickVolumeRamp.js';
 // Sidechain Volume Envelope - Draw ducking curves on clips for sidechain effects
 import { initSidechainVolumeEnvelope, openSidechainVolumeEnvelopePanel, getSidechainEnvelope } from './SidechainVolumeEnvelope.js';
 // Sidechain Visualizer - Visual indicator for sidechain routing and ducking status
@@ -261,6 +262,53 @@ import {
     saveProjectTemplate, loadProjectTemplate, getProjectTemplateNames, getProjectTemplate, deleteProjectTemplate,
 } from './state.js';
     
+// --- removeCustomDesktopBackground ---
+// Properly defined at module level (hoisted) so it's accessible both as a method
+// on appServices and as window.removeCustomDesktopBackground. Uses appServices.bgDb
+// directly to avoid the broken `this.init()` arrow-function trap (in module scope,
+// `this` is undefined, so `this.init()` would throw "Cannot read properties of
+// undefined (reading 'init')" the moment the user clicks "Remove Custom Background").
+async function removeCustomDesktopBackground() {
+    const hasStoredBg = localStorage.getItem('snugosDesktopBackground') || localStorage.getItem('snugosDesktopBgType');
+    if (!hasStoredBg) {
+        try {
+            const db = await appServices.bgDb.init();
+            const stored = await new Promise((resolve) => {
+                const tx = db.transaction('backgrounds', 'readonly');
+                const store = tx.objectStore('backgrounds');
+                const req = store.get('desktopVideo');
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => resolve(null);
+            });
+            if (!stored) {
+                if (typeof showSafeNotification === 'function') showSafeNotification("No custom background to remove.", 2000);
+                return;
+            }
+        } catch (e) {
+            console.warn('[removeCustomDesktopBackground] IndexedDB check failed, continuing anyway:', e);
+        }
+    }
+    try {
+        localStorage.removeItem('snugosDesktopBackground');
+        localStorage.removeItem('snugosDesktopBgType');
+        const db = await appServices.bgDb.init();
+        await new Promise((resolve, reject) => {
+            const tx = db.transaction('backgrounds', 'readwrite');
+            const store = tx.objectStore('backgrounds');
+            store.delete('desktopVideo');
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => reject(tx.error);
+        });
+        if (typeof applyDesktopBackground === 'function') applyDesktopBackground(null, null);
+        if (typeof restoreDesktopBackground === 'function') restoreDesktopBackground();
+        if (typeof updateBgStatusIndicator === 'function') updateBgStatusIndicator();
+        if (typeof showSafeNotification === 'function') showSafeNotification("Custom background removed.", 2000);
+    } catch (e) {
+        console.error('[removeCustomDesktopBackground] Error:', e);
+        if (typeof showSafeNotification === 'function') showSafeNotification("Failed to remove background.", 2000);
+    }
+}
+
 const appServices = {
     // Event Handler Passthroughs
     selectMIDIInput: eventSelectMIDIInput, 
@@ -802,6 +850,7 @@ const appServices = {
         if (uiElementsCache.customBgInput) uiElementsCache.customBgInput.click();
         else console.warn("Custom background input element not found in cache.");
     },
+    removeCustomDesktopBackground,
     removeCustomDesktopBackground: async () => {
         const hasStoredBg = localStorage.getItem('snugosDesktopBackground') || localStorage.getItem('snugosDesktopBgType');
         if (!hasStoredBg) {
@@ -1203,6 +1252,7 @@ const appServices = {
     
     // Clip Reverse
     openClipReversePanel,
+    openQuickVolumeRampPanel,
     reverseAudioClip,
     reverseMIDISequence,
     isClipReversed,
@@ -1675,6 +1725,7 @@ async function initializeSnugOS() {
         if (typeof initPianoRollSequencer === 'function') initPianoRollSequencer(appServices); // Piano Roll Sequencer initialization
         if (typeof initScoreEditor === 'function') initScoreEditor(appServices); // Score Editor initialization
         if (typeof initClipReverse === 'function') initClipReverse(appServices); // Clip Reverse feature initialization
+        if (typeof initQuickVolumeRamp === 'function') initQuickVolumeRamp(appServices); // Quick Volume Ramp feature initialization
         if (typeof initAudioLegatoDetection === 'function') initAudioLegatoDetection(appServices); // Audio Legato Detection initialization
         if (typeof initTrackSendRouting === 'function') initTrackSendRouting(appServices); // Track Send Routing initialization
         if (typeof initTrackMuteAutomation === 'function') initTrackMuteAutomation(appServices); // Track Mute Automation initialization
