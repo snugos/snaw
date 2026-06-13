@@ -63,6 +63,7 @@ const KeyboardShortcuts = (function() {
     register(' ', [], () => { if (typeof togglePlayback === 'function') togglePlayback(); }, 'Play/Stop', 'Transport');
     register('enter', [], () => { if (typeof stopPlayback === 'function') stopPlayback(); }, 'Stop', 'Transport');
     register('m', ['ctrl'], () => { if (typeof toggleMetronome === 'function') toggleMetronome(); }, 'Toggle Metronome', 'Transport');
+    register('m', ['ctrl', 'shift'], () => { if (typeof openSoloMuteShortcutsPanel === 'function') openSoloMuteShortcutsPanel(); }, 'Open Solo/Mute Shortcuts Panel', 'Track');
     register('l', ['ctrl'], () => { if (typeof toggleLoop === 'function') toggleLoop(); }, 'Toggle Loop', 'Transport');
     register('n', ['ctrl'], () => { if (typeof addNewTrack === 'function') addNewTrack(); }, 'New Track', 'Track');
     register('d', ['ctrl'], () => { if (typeof duplicateCurrentTrack === 'function') duplicateCurrentTrack(); }, 'Duplicate Track', 'Track');

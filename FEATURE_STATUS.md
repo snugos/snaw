@@ -222,3 +222,22 @@ _None queued; the feature list is stable._
 
 ---
 
+
+## 2026-06-13 01:05 UTC - Solo/Mute Shortcut Panel Keyboard Binding
+
+**Type:** Enhancement (no new bug found this cycle)
+**Status:** Committed and pushed
+
+**What:** Wired the existing `js/SoloMuteShortcuts.js` panel into the global `KeyboardShortcuts` registry under **Ctrl+Shift+M** ("Open Solo/Mute Shortcuts Panel", category "Track"). The panel module was already loaded and exposed `window.openSoloMuteShortcutsPanel()`, but it was unreachable from the keyboard-shortcut manager and was not advertised anywhere in the Shortcuts help panel.
+
+**Files Modified:**
+- `js/KeyboardShortcuts.js` - added one `register()` call between the Ctrl+M (metronome) and Ctrl+L (loop) entries. No other code touched.
+
+**Behavior:** With the app focused and not inside an input/textarea, pressing **Ctrl+Shift+M** now opens the floating Solo/Mute Shortcuts panel. From there the user can hit S/M on a selected track, or Shift+S/M to solo/mute all other tracks in one keystroke. Escape closes the panel.
+
+**Verification:**
+- `node --check js/KeyboardShortcuts.js` → SYNTAX OK
+- `node --check js/main.js` → SYNTAX OK
+- `git status` clean before commit
+
+---
