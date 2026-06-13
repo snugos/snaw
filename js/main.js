@@ -64,6 +64,7 @@ import { openTrackDelayCompensationPanel, openLatencyCompensationPanel } from '.
 import { openGrooveExtractorPanel } from './GrooveExtractor.js';
 import { openStepSequencerView } from './StepSequencerView.js';
 import { openPianoRollEditor, initPianoRollEditor } from './PianoRollEditor.js';
+import { initMidiVelocityEditor, openMidiVelocityEditorPanel, setSelectedNotesVelocity, applyVelocityRamp, applyVelocityRandom } from './MidiVelocityEditor.js';
 import { initCCStepSequencer, openCCStepSequencer, getCCPatternData, setCCPatternData } from './CCStepSequencer.js';
 import { initScaleHighlightMode, openScaleHighlightPanel, isNoteInScale, getNoteScaleClass, quantizeNoteToScale } from './ScaleHighlightMode.js';
 import { initScaleHighlightGlobal, openScaleHighlightGlobalPanel, toggleGlobalScaleHighlight, setGlobalScale, setGlobalRootNote, isGlobalScaleHighlightEnabled } from './ScaleHighlightGlobal.js';
@@ -1082,6 +1083,10 @@ const appServices = {
     openGrooveExtractorPanel,
     openStepSequencerView,
     openPianoRollEditor,
+    openMidiVelocityEditorPanel,
+    setSelectedNotesVelocity,
+    applyVelocityRamp,
+    applyVelocityRandom,
     openCCStepSequencer,
     openClipGainPanel,
     getCCPatternData,
@@ -1753,6 +1758,7 @@ async function initializeSnugOS() {
         if (typeof initClipGroupManager === 'function') initClipGroupManager(appServices); // Clip Group Manager
         if (typeof openStepSequencerView === 'function') openStepSequencerView(appServices); // Step Sequencer View initialization
         if (typeof initPianoRollEditor === 'function') initPianoRollEditor(appServices); // Piano Roll Editor initialization
+        if (typeof initMidiVelocityEditor === 'function') initMidiVelocityEditor(appServices); // MIDI Velocity Editor initialization
         if (typeof initCCStepSequencer === 'function') initCCStepSequencer(appServices); // CC Step Sequencer initialization
         if (typeof initScaleHighlightMode === 'function') initScaleHighlightMode(appServices); // Scale Highlight Mode initialization
         if (typeof initScaleHighlightGlobal === 'function') initScaleHighlightGlobal(appServices); // Scale Highlight Global initialization

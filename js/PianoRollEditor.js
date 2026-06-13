@@ -130,6 +130,7 @@ function renderPianoRollContent(trackId = null) {
                 </div>
                 <button id="pianoRollDelete" class="px-2 py-1 text-xs bg-red-500 hover:bg-red-600 rounded text-white" title="Delete Selected">Delete</button>
                 <button id="pianoRollScaleLength" class="px-2 py-1 text-xs bg-blue-500 hover:bg-blue-600 rounded text-white" title="Scale Selected Note Lengths">Scale Len</button>
+                <button id="pianoRollVelocity" class="px-2 py-1 text-xs bg-purple-500 hover:bg-purple-600 rounded text-white" title="MIDI Velocity Editor">Velocity</button>
                 <button id="pianoRollClose" class="px-2 py-1 text-xs bg-gray-500 hover:bg-gray-600 rounded text-white">Close</button>
             </div>
         </div>
@@ -402,6 +403,21 @@ function setupPianoRollEvents(container, track, activeSeq) {
     if (closeBtn) {
         closeBtn.addEventListener('click', () => {
             if (pianoRollWindow?.close) pianoRollWindow.close();
+        });
+    }
+
+    // Velocity button - opens MIDI Velocity Editor
+    const velocityBtn = container.querySelector('#pianoRollVelocity');
+    if (velocityBtn) {
+        velocityBtn.addEventListener('click', () => {
+            window.selectedNotes = selectedNotes;
+            window.currentPianoRollTrackId = currentPianoRollTrackId;
+            import('./MidiVelocityEditor.js').then(m => {
+                if (m.openMidiVelocityEditorPanel) m.openMidiVelocityEditorPanel();
+            }).catch(err => {
+                console.error('[PianoRollEditor] Failed to load MidiVelocityEditor:', err);
+                localAppServices.showNotification?.('Velocity Editor unavailable', 2000);
+            });
         });
     }
 
