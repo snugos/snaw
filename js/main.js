@@ -200,6 +200,9 @@ import { EnvelopeGenerator, openEnvelopeGeneratorPanel } from './EnvelopeGenerat
 // Status bar display imports
 import { initSampleRateDisplay, startSampleRateDisplayLoop } from './SampleRateDisplay.js';
 import * as FeatureAdditions from './FeatureAdditions.js';
+// getMimeTypeFromFilename is used by getAudioBlobFromSoundBrowserItem (line ~342) to
+// build a File with the correct MIME type for the sound browser drop pipeline.
+import { getMimeTypeFromFilename } from './audio.js';
 // setupGenericDropZoneListeners is imported here but used via appServices by ui.js
 import { showNotification as utilShowNotification, createContextMenu, createDropZoneHTML, setupGenericDropZoneListeners } from './utils.js';
 import { openKeyboardShortcutsPanel } from './ui.js';
