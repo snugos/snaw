@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.30"; // Daily merge 2026-06-13 - No merge needed. Both repos synced. snaw retains all features. App has extended undo coverage.
+export const APP_VERSION = "0.3.31"; // 2026-06-13 - Fix duplicate removeCustomDesktopBackground method shadowing the working module-level function. The duplicate used `this.init()` which is undefined in module scope.
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks
