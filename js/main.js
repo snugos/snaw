@@ -1838,6 +1838,7 @@ async function initializeSnugOS() {
 }
 
 // Performance monitoring state
+let snawSessionStartTime = performance.now();
 let lastFrameTime = performance.now();
 let frameCount = 0;
 let fpsValue = 60;
@@ -1907,6 +1908,16 @@ function updatePerformanceStats() {
         const redoEl = document.getElementById('statusRedoCount');
         if (undoEl) undoEl.textContent = getUndoCount ? getUndoCount() : 0;
         if (redoEl) redoEl.textContent = getRedoCount ? getRedoCount() : 0;
+
+        // Update session timer
+        const sessionEl = document.getElementById('statusSessionTimerValue');
+        if (sessionEl) {
+            const totalSeconds = Math.floor((now - snawSessionStartTime) / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            sessionEl.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
     }
 }
 
