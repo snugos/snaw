@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.32"; // 2026-06-13 - Add session timer to status bar showing time since DAW load
+export const APP_VERSION = "0.3.33"; // 2026-06-15 - Automated merge & bug fix: verify all features present
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks
