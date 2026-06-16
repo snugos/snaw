@@ -103,6 +103,8 @@ import { initTimelineClipOperations } from './TimelineClipOperations.js';
 import { initTrackDuplicateOffset, openDuplicateOffsetDialog, duplicateTrackWithOffset } from './TrackDuplicateOffset.js';
 // Crossfade Loop Points
 import { initCrossfadeLoopPoints, openCrossfadeLoopPointsPanel } from './CrossfadeLoopPoints.js';
+// Tuner - live microphone pitch detection
+import { initTuner, openTunerPanel } from './Tuner.js';
 import { initSamplerLoopTrim, openSamplerLoopTrimPanel } from './SamplerLoopTrim.js';
 // Guitar Tab Editor
 import { initGuitarTabEditor, openGuitarTabEditor } from './GuitarTabEditor.js';
@@ -946,6 +948,7 @@ const appServices = {
     openGuitarTabEditor,
     openSamplerLoopTrimPanel,
     openCrossfadeLoopPointsPanel,
+    openTunerPanel,
     openDuplicateOffsetDialog,
     openTrackIconPickerPanel,
     openChordVoicingPanel,
@@ -1731,6 +1734,7 @@ async function initializeSnugOS() {
         if (typeof initTrackScrollToCenter === 'function') initTrackScrollToCenter(appServices); // Track Scroll To Center initialization
         if (typeof initSamplerLoopTrim === 'function') initSamplerLoopTrim(appServices); // Sampler Loop Trim initialization
         if (typeof initCrossfadeLoopPoints === 'function') initCrossfadeLoopPoints(appServices); // Crossfade Loop Points initialization
+        if (typeof initTuner === 'function') initTuner(appServices); // Tuner initialization
         if (typeof initTrackIconPicker === 'function') initTrackIconPicker(appServices); // Track Icon Picker initialization
         if (typeof initMixerChannelStripPresets === 'function') initMixerChannelStripPresets(appServices); // Mixer Channel Strip Presets initialization
         if (typeof initTrackEffectPresets === 'function') initTrackEffectPresets(appServices); // Track Effect Presets initialization
