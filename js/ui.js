@@ -7782,6 +7782,16 @@ function renderTrackStrip(track) {
                     <input type="hidden" class="strip-pan-input" data-track-id="${track.id}" value="${pan}">
                 </div>
             </div>
+
+            <!-- Detune (cents) -->
+            <div class="flex items-center justify-center gap-1" title="Per-track fine detune in cents (±100). Double-click to reset.">
+                <span class="text-xs text-gray-400">Tune:</span>
+                <input type="range" class="strip-detune-input w-20 h-3"
+                       data-track-id="${track.id}"
+                       min="-100" max="100" step="1"
+                       value="${track.detune || 0}">
+                <span class="strip-detune-display text-xs text-amber-300 font-mono w-12 text-right">${(track.detune || 0) === 0 ? '0¢' : ((track.detune || 0) > 0 ? '+' + Math.round(track.detune) + '¢' : Math.round(track.detune) + '¢')}</span>
+            </div>
             
             <!-- Volume fader -->
             <div class="flex flex-col items-center gap-1 flex-1">
@@ -8050,6 +8060,50 @@ function setupMixerChannelStripEvents(container, tracks) {
             }
             if (localAppServices.captureStateForUndo) {
                 localAppServices.captureStateForUndo(`Set playback rate for track ${trackId} to ${Math.round(rate * 100)}%`);
+            }
+        });
+    });
+
+    // Detune (cents) input events
+    container.querySelectorAll('.strip-detune-input').forEach(input => {
+        const trackId = input.dataset.trackId;
+        const formatCents = (c) => {
+            const rounded = Math.round(c);
+            if (rounded === 0) return '0¢';
+            return (rounded > 0 ? '+' : '') + rounded + '¢';
+        };
+        input.addEventListener('input', (e) => {
+            const cents = parseFloat(e.target.value);
+            const display = e.target.parentElement?.querySelector('.strip-detune-display');
+            if (display) display.textContent = formatCents(cents);
+        });
+        input.addEventListener('change', (e) => {
+            const cents = parseFloat(e.target.value);
+            const tracks = localAppServices.getTracks ? localAppServices.getTracks() : [];
+            const track = tracks.find(t => t.id === trackId);
+            if (track && typeof track.setDetune === 'function') {
+                track.setDetune(cents, true);
+            } else if (window.setTrackDetune) {
+                window.setTrackDetune(trackId, cents);
+            }
+            if (localAppServices.captureStateForUndo) {
+                localAppServices.captureStateForUndo(`Set detune for track ${trackId} to ${formatCents(cents)}`);
+            }
+        });
+        // Double-click to reset to 0
+        input.addEventListener('dblclick', () => {
+            input.value = '0';
+            const display = input.parentElement?.querySelector('.strip-detune-display');
+            if (display) display.textContent = '0¢';
+            const tracks = localAppServices.getTracks ? localAppServices.getTracks() : [];
+            const track = tracks.find(t => t.id === trackId);
+            if (track && typeof track.setDetune === 'function') {
+                track.setDetune(0, true);
+            } else if (window.setTrackDetune) {
+                window.setTrackDetune(trackId, 0);
+            }
+            if (localAppServices.captureStateForUndo) {
+                localAppServices.captureStateForUndo(`Reset detune for track ${trackId}`);
             }
         });
     });

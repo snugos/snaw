@@ -211,7 +211,13 @@ export class Track {
         // Per-track velocity response curve for customizing MIDI input dynamics
         // Array of 16 values (0-1) representing how velocity maps to output
         this.velocityCurve = initialData?.velocityCurve || null; // null means use default (0.7 linear)
-        
+
+        // --- Detune (Per-Track Fine Tune in Cents) ---
+        // Per-track pitch offset in cents (-100 to +100). Useful for parallel layering
+        // and stereo-width tricks (e.g. ±10 cents on a doubled track).
+        this.detune = initialData?.detune !== undefined ? initialData.detune : 0;
+        this.detuneNode = null; // Tone.PitchShift node, created in initializeAudioNodes
+
         this.instrument = null; 
 
         this.sequences = [];
@@ -1452,6 +1458,7 @@ export class Track {
             if (this.panNode && !this.panNode.disposed) try { this.panNode.dispose(); } catch(e) {console.warn(`[Track ${this.id}] Error disposing old panNode:`, e.message)}
             if (this.delayCompensationNode && !this.delayCompensationNode.disposed) try { this.delayCompensationNode.dispose(); } catch(e) {console.warn(`[Track ${this.id}] Error disposing old delayCompensationNode:`, e.message)}
             if (this.trackMeter && !this.trackMeter.disposed) try { this.trackMeter.dispose(); } catch(e) {console.warn(`[Track ${this.id}] Error disposing old trackMeter:`, e.message)}
+            if (this.detuneNode && !this.detuneNode.disposed) try { this.detuneNode.dispose(); } catch(e) {console.warn(`[Track ${this.id}] Error disposing old detuneNode:`, e.message)}
             if (this.inputChannel && !this.inputChannel.disposed && this.type === 'Audio') {
                 try { this.inputChannel.dispose(); } catch(e) {console.warn(`[Track ${this.id}] Error disposing old inputChannel:`, e.message)}
             }
@@ -1464,6 +1471,8 @@ export class Track {
             this.gainNode = new Tone.Gain(this.isMuted ? 0 : this.previousVolumeBeforeMute);
             this.panNode = new Tone.Panner(this.pan); // Stereo panner
             this.delayCompensationNode = new Tone.Delay(this.delayCompensationMs / 1000); // Delay node for compensation
+            // Per-track detune (PitchShift, pitch in semitones; detune is stored in cents)
+            this.detuneNode = new Tone.PitchShift({ pitch: Math.max(-1, Math.min(1, (this.detune || 0) / 100)), windowSize: 0.1, feedback: 0, wet: 1 });
             this.trackMeter = new Tone.Meter({ smoothing: 0.8 });
             this.outputNode = this.panNode; // Output is now through panNode
 
@@ -1573,39 +1582,61 @@ export class Track {
             }
         }
 
-        // Signal chain: gainNode -> panNode -> delayCompensationNode -> trackMeter
+        // Signal chain: gainNode -> panNode -> delayCompensationNode -> detuneNode -> trackMeter
         if (this.gainNode && !this.gainNode.disposed) {
             if (this.panNode && !this.panNode.disposed) {
-                try { 
-                    this.gainNode.connect(this.panNode); 
-                    // Connect panNode to delayCompensationNode, then to trackMeter
+                try {
+                    this.gainNode.connect(this.panNode);
+                    // Connect panNode -> delayCompensationNode -> detuneNode -> trackMeter
                     if (this.delayCompensationNode && !this.delayCompensationNode.disposed) {
                         this.panNode.connect(this.delayCompensationNode);
-                        this.delayCompensationNode.connect(this.trackMeter);
-                        console.log(`[Track ${this.id} rebuildEffectChain] Connected gainNode -> panNode -> delayCompensationNode -> trackMeter.`); 
+                        if (this.detuneNode && !this.detuneNode.disposed) {
+                            this.delayCompensationNode.connect(this.detuneNode);
+                            this.detuneNode.connect(this.trackMeter);
+                            console.log(`[Track ${this.id} rebuildEffectChain] Connected gainNode -> panNode -> delayCompensationNode -> detuneNode -> trackMeter.`);
+                        } else {
+                            this.delayCompensationNode.connect(this.trackMeter);
+                            console.log(`[Track ${this.id} rebuildEffectChain] Connected gainNode -> panNode -> delayCompensationNode -> trackMeter (no detune node).`);
+                        }
                     } else {
                         // Fallback if delay node not available
-                        this.panNode.connect(this.trackMeter);
-                        console.log(`[Track ${this.id} rebuildEffectChain] Connected gainNode -> panNode -> trackMeter (no delay node).`); 
+                        if (this.detuneNode && !this.detuneNode.disposed) {
+                            this.panNode.connect(this.detuneNode);
+                            this.detuneNode.connect(this.trackMeter);
+                            console.log(`[Track ${this.id} rebuildEffectChain] Connected gainNode -> panNode -> detuneNode -> trackMeter (no delay node).`);
+                        } else {
+                            this.panNode.connect(this.trackMeter);
+                            console.log(`[Track ${this.id} rebuildEffectChain] Connected gainNode -> panNode -> trackMeter (no delay/detune node).`);
+                        }
                     }
-                } catch (e) { console.error(`[Track ${this.id}] Error connecting gainNode->panNode->delayCompensationNode->trackMeter:`, e); }
+                } catch (e) { console.error(`[Track ${this.id}] Error connecting gainNode->panNode->delayCompensationNode->detuneNode->trackMeter:`, e); }
             } else {
                 // Fallback without panNode
                 if (this.delayCompensationNode && !this.delayCompensationNode.disposed) {
-                    try { 
-                        this.gainNode.connect(this.delayCompensationNode); 
-                        this.delayCompensationNode.connect(this.trackMeter);
-                        console.log(`[Track ${this.id} rebuildEffectChain] Connected gainNode -> delayCompensationNode -> trackMeter.`); 
-                    } catch (e) { console.error(`[Track ${this.id}] Error connecting gainNode->delayCompensationNode->trackMeter:`, e); }
+                    try {
+                        this.gainNode.connect(this.delayCompensationNode);
+                        if (this.detuneNode && !this.detuneNode.disposed) {
+                            this.delayCompensationNode.connect(this.detuneNode);
+                            this.detuneNode.connect(this.trackMeter);
+                        } else {
+                            this.delayCompensationNode.connect(this.trackMeter);
+                        }
+                        console.log(`[Track ${this.id} rebuildEffectChain] Connected gainNode -> delayCompensationNode -> [detuneNode ->] trackMeter.`);
+                    } catch (e) { console.error(`[Track ${this.id}] Error connecting gainNode->delayCompensationNode->[detuneNode->]trackMeter:`, e); }
                 } else {
-                    try { this.gainNode.connect(this.trackMeter); console.log(`[Track ${this.id} rebuildEffectChain] Connected gainNode to trackMeter.`); }
-                    catch (e) { console.error(`[Track ${this.id}] Error connecting gainNode to trackMeter:`, e); }
+                    if (this.detuneNode && !this.detuneNode.disposed) {
+                        try { this.gainNode.connect(this.detuneNode); this.detuneNode.connect(this.trackMeter); console.log(`[Track ${this.id} rebuildEffectChain] Connected gainNode -> detuneNode -> trackMeter.`); }
+                        catch (e) { console.error(`[Track ${this.id}] Error connecting gainNode->detuneNode->trackMeter:`, e); }
+                    } else {
+                        try { this.gainNode.connect(this.trackMeter); console.log(`[Track ${this.id} rebuildEffectChain] Connected gainNode to trackMeter.`); }
+                        catch (e) { console.error(`[Track ${this.id}] Error connecting gainNode to trackMeter:`, e); }
+                    }
                 }
             }
         }
 
         const masterBusInput = this.appServices.getMasterEffectsBusInputNode ? this.appServices.getMasterEffectsBusInputNode() : null;
-        const finalTrackOutput = (this.trackMeter && !this.trackMeter.disposed) ? this.trackMeter : (this.delayCompensationNode && !this.delayCompensationNode.disposed ? this.delayCompensationNode : (this.panNode && !this.panNode.disposed ? this.panNode : this.gainNode));
+        const finalTrackOutput = (this.trackMeter && !this.trackMeter.disposed) ? this.trackMeter : (this.detuneNode && !this.detuneNode.disposed ? this.detuneNode : (this.delayCompensationNode && !this.delayCompensationNode.disposed ? this.delayCompensationNode : (this.panNode && !this.panNode.disposed ? this.panNode : this.gainNode)));
 
         if (finalTrackOutput && !finalTrackOutput.disposed && masterBusInput && !masterBusInput.disposed) {
             try { finalTrackOutput.connect(masterBusInput); console.log(`[Track ${this.id} rebuildEffectChain] Connected final track output to masterBusInput.`); }
@@ -2145,6 +2176,37 @@ export class Track {
 
     getPan() {
         return this.pan;
+    }
+
+    /**
+     * Set per-track fine detune in cents for parallel layering and stereo width tricks.
+     * Internally uses a Tone.PitchShift node in the signal chain.
+     * @param {number} cents - Detune value in cents, range -100 to +100 (1 semitone each direction). 0 = no detune.
+     * @param {boolean} fromInteraction - Whether this is from a user interaction
+     */
+    setDetune(cents, fromInteraction = false) {
+        if (!fromInteraction) this._captureUndoState(`Set detune on ${this.name}`);
+        // Clamp to ±100 cents (±1 semitone). Convert to semitones for Tone.PitchShift.
+        this.detune = Math.max(-100, Math.min(100, parseFloat(cents) || 0));
+        const semitones = this.detune / 100;
+
+        if (this.detuneNode && !this.detuneNode.disposed && this.detuneNode.pitch) {
+            try {
+                this.detuneNode.pitch.setValueAtTime(semitones, Tone.now());
+                console.log(`[Track ${this.id}] Set detune to ${this.detune.toFixed(0)} cents (${semitones.toFixed(2)} semitones)`);
+            } catch (e) {
+                console.error(`[Track ${this.id}] Error setting detuneNode pitch:`, e);
+            }
+        }
+
+        if (fromInteraction && this.appServices.captureStateForUndo) {
+            const detuneDisplay = this.detune === 0 ? '0 cents' : (this.detune > 0 ? `+${this.detune.toFixed(0)} cents` : `${this.detune.toFixed(0)} cents`);
+            this.appServices.captureStateForUndo(`Set ${this.name} detune to ${detuneDisplay}`);
+        }
+    }
+
+    getDetune() {
+        return this.detune;
     }
 
     /**
