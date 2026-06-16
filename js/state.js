@@ -1106,6 +1106,26 @@ export function sendMidiCC(cc, value, channel = 0) {
     }
 }
 
+// Send MIDI All Notes Off (CC 123) on all 16 channels to clear stuck notes
+export function sendMidiAllNotesOff() {
+    if (!activeMidiOutputGlobal) {
+        console.warn('[MIDI Output] No active MIDI output device selected');
+        return 0;
+    }
+    let channelsSent = 0;
+    try {
+        for (let channel = 0; channel < 16; channel++) {
+            const ccMessage = [0xB0 | (channel & 0x0F), 123 & 0x7F, 0];
+            activeMidiOutputGlobal.send(ccMessage);
+            channelsSent++;
+        }
+        return channelsSent;
+    } catch (e) {
+        console.error('[MIDI Output] Error sending All Notes Off:', e);
+        return channelsSent;
+    }
+}
+
 // Select MIDI output device
 export function selectMidiOutput(deviceId) {
     if (!midiAccessGlobal || !midiAccessGlobal.outputs) {

@@ -230,7 +230,7 @@ import {
     getTracksState, getTrackByIdState, getOpenWindowsState, getWindowByIdState, getHighestZState,
     getMasterEffectsState, getMasterGainValueState,
     getMidiAccessState, getActiveMIDIInputState,
-    getMidiOutputDevices, sendMidiNoteOn, sendMidiNoteOff, sendMidiCC, selectMidiOutput, getActiveMidiOutputState,
+    getMidiOutputDevices, sendMidiNoteOn, sendMidiNoteOff, sendMidiCC, sendMidiAllNotesOff, selectMidiOutput, getActiveMidiOutputState,
     getLoadedZipFilesState, getSoundLibraryFileTreesState, getCurrentLibraryNameState,
     getCurrentSoundFileTreeState, getCurrentSoundBrowserPathState, getPreviewPlayerState,
     getClipboardDataState, getAutomationClipboardState, getArmedTrackIdState, getSoloedTrackIdState, isTrackRecordingState,
@@ -584,6 +584,17 @@ const appServices = {
                     });
                 }
             });
+        }
+
+        // Send MIDI All Notes Off (CC 123) on all 16 channels to clear any
+        // stuck/hanging notes on external MIDI hardware.
+        try {
+            const midiChannelsCleared = sendMidiAllNotesOff();
+            if (midiChannelsCleared > 0) {
+                console.log(`[AppServices Panic] Sent All Notes Off on ${midiChannelsCleared} MIDI channel(s).`);
+            }
+        } catch (midiPanicErr) {
+            console.warn('[AppServices Panic] Error sending MIDI All Notes Off:', midiPanicErr);
         }
 
         console.log("All audio and transport stopped via panic.");
