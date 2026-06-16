@@ -1,5 +1,23 @@
 # FEATURE_STATUS.md - SnugOS DAW
 
+## Day 711: Repair Agent — Custom Background 50MB Limit (2026-06-16)
+- **Run Type**: Repair & Enhancement Agent (10-min scheduled)
+- **Status**: No bugs found. Priority 1 bug (`removeCustomDesktopBackground is not defined`) was already fixed in commit 6277b70. Function is defined at `js/main.js:277`, exported on `appServices` (lines 412, 861) and on `window` (line 1447).
+- **Enhancement Added**: 50 MB file size limit on `handleCustomBackgroundUpload` to prevent oversized image/video backgrounds from filling IndexedDB or breaking the app.
+- **Files Modified**:
+  - `js/main.js`: Added 7-line size check block before FileReader / IndexedDB writes (line 1458-1464)
+  - `js/constants.js`: Bumped APP_VERSION to 0.3.37
+- **Constants**:
+  - `MAX_BG_SIZE = 50 * 1024 * 1024` (50 MB) — inline constant in handleCustomBackgroundUpload
+- **Behavior**:
+  - Triggers BEFORE FileReader reads the file or IndexedDB stores it (no wasted work)
+  - Notification: `"Background too large (X.X MB). Max 50 MB."` (4 second duration)
+  - Returns early without modifying localStorage or IndexedDB
+- **Commit**: `2a018cc feat: add 50MB file size limit to custom background upload (v0.3.37)`
+- **Deployed**: Verified live at https://snugos.github.io/snaw/
+- **Version**: 0.3.37
+- **Audit Note**: AGENTS.md references to `crescentNotes`/`staggerNotes`/`accentNotes`/`shuffleNotes`/`strumNotes`/`bounceNotes` methods (Days 703-709) do not exist in the current codebase. Those notes describe features that were never merged or were reverted. Future audits should not chase them.
+
 ## Session: 2026-06-15 01:10 UTC (Snaw Feature Completion Agent Run)
 
 **Status: NO INCOMPLETE FEATURES FOUND ✅**
@@ -1160,4 +1178,4 @@ export function getCanRedoState() { return redoStack.length > 0; }
 - GitHub Pages deploy verified - fix is live at https://snugos.github.io/snaw/js/Track.js
 - Commit: `0a1277c`
 
-**Note on `removeCustomDesktopBackground` error:** Investigation confirmed this is a FALSE POSITIVE. The function IS defined at main.js:740 and main.js:1324 within appServices. The line 342 reference in the error message is incorrect/minified code - there is no call to this function at line 342. The call site in eventHandlers.js:228 is properly guarded with `if(localAppServices.removeCustomDesktopBackground)`.
+**Note on `removeCustomDesktopBackground` error:** Investigation confirmed this is a FALSE POSITIVE. The function IS defined at main.js:740 and main.js:1324 within appServices. The line 342 reference in the error message is incorrect/minified code - there is no call to this function at line 342. The call site in eventHandlers.js:228 is properly guarded with `if(localAppServices.removeCustomDesktopBackground)`

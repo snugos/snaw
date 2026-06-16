@@ -1,5 +1,39 @@
 # FEATURE_STATUS.md - SnugOS DAW
 
+## Session: 2026-06-16 00:45 UTC (Snaw Repair & Enhancement Agent Run)
+
+**Status: NO BUGS FOUND ✅ — Small enhancement added**
+
+### Audit Results:
+- `git pull origin LWB-with-Bugs` → Already up to date
+- `git status` (pre-change) → Clean (working tree clean)
+- Priority 1 bug `removeCustomDesktopBackground is not defined` → Already fixed in commit 6277b70
+- Function now defined at `js/main.js:277` (module-level, hoisted), exported on `appServices` (line 412, 861), and on `window` (line 1447)
+- Syntax validation (`node --check`) for `js/main.js`, `js/state.js`, `js/audio.js`, `js/ui.js`, `js/eventHandlers.js`, `js/constants.js` all passed
+- No TODO/FIXME/XXX/HACK markers in key files
+- AGENTS.md references to "crescentNotes", "staggerNotes", "accentNotes", "shuffleNotes", "strumNotes", "bounceNotes" methods (Days 703-709) are stale — those methods/constants/menu items do not exist in the current codebase. The repo's actual code is what matters; the notes appear to describe aspirational/never-merged features
+
+### Enhancement Added This Session:
+- **Custom background 50MB size limit** (`js/main.js:handleCustomBackgroundUpload`)
+  - Rejects files larger than 50 MB with a user-friendly notification showing the actual file size
+  - Prevents oversized image/video backgrounds from filling IndexedDB or breaking the app
+  - Triggered BEFORE the file is read by FileReader or stored in IndexedDB (no wasted work)
+  - Notification: `"Background too large (X.X MB). Max 50 MB."` (4 second duration)
+- **Files Modified**:
+  - `js/main.js` — Added 7-line size check block (lines 1458-1464)
+  - `js/constants.js` — Bumped APP_VERSION to 0.3.37
+- **Commit**: `2a018cc feat: add 50MB file size limit to custom background upload (v0.3.37)`
+- **Deployed**: Verified live at `https://snugos.github.io/snaw/js/main.js` (MAX_BG_SIZE visible at line 1460) and `https://snugos.github.io/snaw/js/constants.js` (APP_VERSION 0.3.37)
+- **Version**: 0.3.37
+
+### Features Still in Progress:
+_None — all browser-implementable features currently implemented._
+
+### Next Features to Tackle:
+_None queued; the feature list is stable._
+
+---
+
 ## Session: 2026-06-16 00:40 UTC (Snaw Feature Completion Agent Run)
 
 **Status: NO INCOMPLETE FEATURES FOUND ✅**
