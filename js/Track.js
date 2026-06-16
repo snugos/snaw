@@ -4544,19 +4544,32 @@ export class Track {
                             const url = URL.createObjectURL(audioBlob);
                             const player = new Tone.Player(url);
                             this.clipPlayers.set(clip.id, player);
-                            
+
                             // Apply stretch parameters if clip is stretched
                             const stretchParams = getStretchParamsForClip(clip);
                             if (stretchParams.playbackRate !== 1.0) {
                                 player.playbackRate = stretchParams.playbackRate;
                                 player.detune = stretchParams.detune;
                             }
-                            
+
                             // Apply per-clip gain if set (independent of track volume)
                             if (clip.clipGain !== undefined && clip.clipGain !== 1.0) {
                                 player.volume.value = Tone.gainToDb(clip.clipGain);
                             }
-                            
+
+                            // Clip-level loop (loopEnabled + loopStart/loopEnd within the source)
+                            if (clip.loopEnabled && clip.loopEnd > (clip.loopStart || 0)) {
+                                player.loop = true;
+                                player.loopStart = (clip.loopStart || 0);
+                                player.loopEnd = (clip.loopEnd || clip.duration || 0);
+                                if (clip.loopCrossfade && clip.loopCrossfade > 0) {
+                                    try {
+                                        player.fadeIn = clip.loopCrossfade;
+                                        player.fadeOut = clip.loopCrossfade;
+                                    } catch (e) { /* ignore */ }
+                                }
+                            }
+
                             player.onload = () => {
                                 URL.revokeObjectURL(url);
                                 const destNode = (this.activeEffects.length > 0 && this.activeEffects[0].toneNode && !this.activeEffects[0].toneNode.disposed)
@@ -4617,7 +4630,21 @@ export class Track {
                     if (!clip.sourceId) { console.warn(`[Track ${this.id}] Audio clip ${clip.id} has no sourceId.`); continue; }
                     console.log(`[Track ${this.id}] Timeline: Scheduling AUDIO clip "${clip.name}" (ID: ${clip.id}) at ${effectivePlayStart.toFixed(2)}s for ${playDurationInWindow.toFixed(2)}s (offset ${offsetIntoSource.toFixed(2)}s)`);
                     const player = new Tone.Player();
-                    
+
+                    // Clip-level loop (loopEnabled + loopStart/loopEnd within the source)
+                    if (clip.loopEnabled && clip.loopEnd > (clip.loopStart || 0)) {
+                        player.loop = true;
+                        // Map stored seconds to the player buffer's timeline
+                        player.loopStart = (clip.loopStart || 0);
+                        player.loopEnd = (clip.loopEnd || clip.duration || 0);
+                        if (clip.loopCrossfade && clip.loopCrossfade > 0) {
+                            try {
+                                player.fadeIn = clip.loopCrossfade;
+                                player.fadeOut = clip.loopCrossfade;
+                            } catch (e) { /* older Tone.js may not support; ignore */ }
+                        }
+                    }
+
                     // Apply stretch parameters if clip is stretched
                     const stretchParams = getStretchParamsForClip(clip);
                     
