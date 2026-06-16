@@ -331,9 +331,11 @@ export function autoCorrelate(buf, sampleRate) {
 }
 
 // Expose on window for ad-hoc debugging / global lookup
-window.Tuner = {
-    initTuner,
-    openTunerPanel,
-    freqToNote,
-    autoCorrelate
-};
+if (typeof window !== 'undefined') {
+    window.Tuner = {
+        initTuner,
+        openTunerPanel,
+        freqToNote,
+        autoCorrelate
+    };
+}

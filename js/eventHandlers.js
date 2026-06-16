@@ -526,6 +526,12 @@ export function initializePrimaryEventListeners(appContext) {
                     localAppServices.openMicroTuningPanel?.();
                 } catch(e) { console.error('[Menu] Micro Tuning error:', e); }
             },
+            menuTuner: () => {
+                console.log('[Menu] Tuner clicked');
+                try {
+                    localAppServices.openTunerPanel?.();
+                } catch(e) { console.error('[Menu] Tuner error:', e); }
+            },
             menuGrooveTemplates: () => {
                 console.log('[Menu] Groove Templates clicked');
                 try {

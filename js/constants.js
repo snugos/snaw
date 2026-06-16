@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.37"; // 2026-06-16 - Repair agent: added 50MB file size limit to handleCustomBackgroundUpload to prevent oversized image/video backgrounds from breaking the app
+export const APP_VERSION = "0.3.38"; // 2026-06-16 - Feature builder: added Tuner (live microphone pitch detection panel)
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks

@@ -99,3 +99,5 @@ export { initWaveformVisualization, openWaveformSettingsPanel, updateWaveformDis
 
 // Crossfade Loop Points - Set loop start/end within an audio clip with crossfade preview
 export { initCrossfadeLoopPoints, openCrossfadeLoopPointsPanel } from './CrossfadeLoopPoints.js';
+// Tuner - Live microphone pitch detection with note + cents display
+export { initTuner, openTunerPanel } from './Tuner.js';
