@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.39"; // 2026-06-16 - Feature builder: added Per-Track Detune (±100 cents)
+export const APP_VERSION = "0.3.40"; // 2026-06-16 - Daily merge: trillNotes, driftNotes from app repo // 2026-06-16 - Feature builder: added Per-Track Detune (±100 cents)
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks
@@ -170,4 +170,47 @@ export const MIDI_CHORD_ROOT_NOTES = [
     { note: 'A', semitone: 9 },
     { note: 'A#', semitone: 10 },
     { note: 'B', semitone: 11 }
+
+// --- Trill Notes Constants ---
+export const TRILL_NOTES_MIN_TAPS = 2; // Minimum trill taps (2 = single up+down oscillation)
+export const TRILL_NOTES_MAX_TAPS = 16; // Maximum trill taps (16 = 8 full up-down oscillations)
+export const TRILL_NOTES_DEFAULT_TAPS = 6; // Default 6 taps (~3 cycles of up/down)
+export const TRILL_NOTES_MIN_INTERVAL = 1; // Minimum semitone interval from source (unison = no trill)
+export const TRILL_NOTES_MAX_INTERVAL = 12; // Maximum semitone interval (1 octave)
+export const TRILL_NOTES_DEFAULT_INTERVAL = 2; // Default 2 semitones (whole step) trill
+export const TRILL_NOTES_MIN_VELOCITY_FACTOR = 0.5; // Floor for velocity scaling
+export const TRILL_NOTES_MAX_VELOCITY_FACTOR = 1.0; // Maximum velocity factor (1.0 = no scaling)
+export const TRILL_NOTES_DEFAULT_VELOCITY_FACTOR = 0.95; // Default 95% velocity preservation
+export const TRILL_NOTES_DIRECTION_UP = 'up'; // Trill alternates: source, +N, source, +N...
+export const TRILL_NOTES_DIRECTION_DOWN = 'down'; // Trill alternates: source, -N, source, -N...
+export const TRILL_NOTES_DIRECTION_BOTH = 'both'; // Trill alternates: +N, -N, +N, -N (no source repeats)
+export const TRILL_NOTES_DIRECTIONS = [
+    TRILL_NOTES_DIRECTION_UP,
+    TRILL_NOTES_DIRECTION_DOWN,
+    TRILL_NOTES_DIRECTION_BOTH
+];
+
+// --- Drift Notes Constants ---
+export const DRIFT_NOTES_MIN_MAX_SHIFT = 1; // Minimum drift distance in steps
+export const DRIFT_NOTES_MAX_MAX_SHIFT = 8; // Maximum drift distance in steps (1/2 note)
+export const DRIFT_NOTES_DEFAULT_MAX_SHIFT = 4; // Default 4 steps (1/4 note) max drift
+export const DRIFT_NOTES_MIN_SKIP_CHANCE = 0.0; // Minimum probability of skipping a note
+export const DRIFT_NOTES_MAX_SKIP_CHANCE = 0.9; // Maximum probability of skipping a note
+export const DRIFT_NOTES_DEFAULT_SKIP_CHANCE = 0.0; // Default: all notes drift
+export const DRIFT_NOTES_MIN_VELOCITY_FACTOR = 0.1; // Minimum velocity factor (preserves 10% velocity at floor)
+export const DRIFT_NOTES_MAX_VELOCITY_FACTOR = 1.0; // Maximum velocity factor (1.0 = no change)
+export const DRIFT_NOTES_DEFAULT_VELOCITY_FACTOR = 0.95; // Default slight attenuation per drift step
+export const DRIFT_NOTES_MODE_LINEAR_UP = 'linear-up'; // Shift grows from 0 to maxShift
+export const DRIFT_NOTES_MODE_LINEAR_DOWN = 'linear-down'; // Shift shrinks from maxShift to 0
+export const DRIFT_NOTES_MODE_LINEAR_CENTER = 'linear-center'; // Shift peaks at the middle of the bar
+export const DRIFT_NOTES_MODE_RANDOM_PER_NOTE = 'random-per-note'; // Each note gets a random shift in [-maxShift, +maxShift]
+export const DRIFT_NOTES_MODE_MIRROR = 'mirror'; // Mirror of linear-up: notes start spread, then collapse back to origin
+export const DRIFT_NOTES_MODES = [
+    DRIFT_NOTES_MODE_LINEAR_UP,
+    DRIFT_NOTES_MODE_LINEAR_DOWN,
+    DRIFT_NOTES_MODE_LINEAR_CENTER,
+    DRIFT_NOTES_MODE_RANDOM_PER_NOTE,
+    DRIFT_NOTES_MODE_MIRROR
+];
+
 ];
