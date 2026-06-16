@@ -27,10 +27,21 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 - **Track Mute Automation** - Draw mute/unmute automation on tracks for conditional silencing ✅
 - **BPM Tap Average Display** - Show tap tempo average with standard deviation indicator ✅
 - **MIDI Velocity Editor** - Draw velocity curve on selected notes for dynamic shaping ✅
+- **Crossfade Loop Points** - Set loop start/end within audio clip with crossfade preview ✅
+- **Tuner** - Live microphone pitch detection panel with note/frequency/cents display ✅
 
 ## Current Feature Queue
 
-1. **Crossfade Loop Points** - Set loop start/end within audio clip with crossfade preview
+1. **Detune Per-Track** - Per-track fine detune in cents for parallel layering and stereo width tricks
+2. **Loop Practice Trainer** - Set loop region, count loops, track best/avg time-to-nail
+3. **Track Notes Panel** - Per-track text notes (lyrics, mix notes, performance cues) stored in project
+4. **One-Shot Preview Pad** - Click a pad to hear a track's currently active sequence without entering playback
+5. **Bounce To Track** - Render selected tracks/clips to a new audio track in place
+6. **MIDI Panic Button** - Send all-notes-off + reset controllers to all MIDI outputs (one-click panic)
+7. **Drum Kit Piece Selector** - Quickly swap drum kit pieces in a Sampler (Pads) track from a curated list
+8. **Loudness Meter (LUFS)** - Show integrated/short-term LUFS on master with true-peak readout
+9. **Sends Overview Panel** - Visual matrix of send levels from every track to every send bus
+10. **Step Sequencer Note Length** - Set default note length per step in the step sequencer (e.g., 1/16, 1/8, 1/4)
 
 ## Workflow
 
