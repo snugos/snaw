@@ -1451,9 +1451,16 @@ async function handleCustomBackgroundUpload(event) {
     const file = event.target.files[0];
     const isVideo = file.type.startsWith('video/');
     const isImage = file.type.startsWith('image/');
-    
+
     if (!isVideo && !isImage) {
         if (typeof showSafeNotification === 'function') showSafeNotification("Invalid file type. Please select an image or video.", 3000);
+        return;
+    }
+
+    const MAX_BG_SIZE = 50 * 1024 * 1024; // 50 MB
+    if (file.size > MAX_BG_SIZE) {
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+        if (typeof showSafeNotification === 'function') showSafeNotification(`Background too large (${sizeMB} MB). Max 50 MB.`, 4000);
         return;
     }
     

@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.36"; // 2026-06-15 - Repair agent: removed duplicate removeCustomDesktopBackground arrow function in appServices (shadowed by shorthand); single source of truth for the function
+export const APP_VERSION = "0.3.37"; // 2026-06-16 - Repair agent: added 50MB file size limit to handleCustomBackgroundUpload to prevent oversized image/video backgrounds from breaking the app
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks
