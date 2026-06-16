@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.33"; // 2026-06-15 - Automated merge & bug fix: verify all features present
+export const APP_VERSION = "0.3.34"; // 2026-06-15 - Repair agent: removed duplicate removeCustomDesktopBackground arrow function in appServices (shadowed by shorthand); single source of truth for the function
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks

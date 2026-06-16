@@ -407,41 +407,7 @@ const appServices = {
             });
         }
     },
-    removeCustomDesktopBackground: async () => {
-        const hasStoredBg = localStorage.getItem('snugosDesktopBackground') || localStorage.getItem('snugosDesktopBgType');
-        if (!hasStoredBg) {
-            const db = await this.init();
-            const stored = await new Promise((resolve) => {
-                const tx = db.transaction('backgrounds', 'readonly');
-                const store = tx.objectStore('backgrounds');
-                const req = store.get('desktopVideo');
-                req.onsuccess = () => resolve(req.result);
-                req.onerror = () => resolve(null);
-            });
-            if (!stored) {
-                if (typeof showSafeNotification === 'function') showSafeNotification("No custom background to remove.", 2000);
-                return;
-            }
-        }
-        try {
-            localStorage.removeItem('snugosDesktopBackground');
-            localStorage.removeItem('snugosDesktopBgType');
-            const db = await this.init();
-            await new Promise((resolve, reject) => {
-                const tx = db.transaction('backgrounds', 'readwrite');
-                const store = tx.objectStore('backgrounds');
-                store.delete('desktopVideo');
-                tx.oncomplete = () => resolve();
-                tx.onerror = () => reject(tx.error);
-            });
-            if (typeof showSafeNotification === 'function') showSafeNotification("Custom background removed.", 2000);
-            if (typeof restoreDesktopBackground === 'function') restoreDesktopBackground();
-            if (typeof updateBgStatusIndicator === 'function') updateBgStatusIndicator();
-        } catch (e) {
-            console.error('[removeCustomDesktopBackground] Error:', e);
-            if (typeof showSafeNotification === 'function') showSafeNotification("Failed to remove background.", 2000);
-        }
-    },
+    removeCustomDesktopBackground, // Shorthand → module-level async function (uses appServices.bgDb.init())
 
     // --- Custom Background Helpers ---
     hasCustomBackground: () => {
