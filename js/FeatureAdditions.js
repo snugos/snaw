@@ -96,3 +96,6 @@ export { initTrackRenameHotkey, handleTrackRenameKey } from './TrackRenameHotkey
 export { initQuickSliceTool, setQuickSliceEnabled, isQuickSliceEnabled } from './QuickSliceTool.js';
 // Waveform Visualization - Draw real-time waveform on audio clips in timeline
 export { initWaveformVisualization, openWaveformSettingsPanel, updateWaveformDisplay, renderTrackWaveforms, getWaveformPeaks, computeWaveformPeaks, clearWaveformCache, clearAllWaveformCache } from './WaveformVisualization.js';
+
+// Crossfade Loop Points - Set loop start/end within an audio clip with crossfade preview
+export { initCrossfadeLoopPoints, openCrossfadeLoopPointsPanel } from './CrossfadeLoopPoints.js';

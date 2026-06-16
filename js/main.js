@@ -101,6 +101,8 @@ import { initTrackContextMenu } from './TrackContextMenu.js';
 import { initTimelineClipOperations } from './TimelineClipOperations.js';
 // Track Duplicate with Offset
 import { initTrackDuplicateOffset, openDuplicateOffsetDialog, duplicateTrackWithOffset } from './TrackDuplicateOffset.js';
+// Crossfade Loop Points
+import { initCrossfadeLoopPoints, openCrossfadeLoopPointsPanel } from './CrossfadeLoopPoints.js';
 import { initSamplerLoopTrim, openSamplerLoopTrimPanel } from './SamplerLoopTrim.js';
 // Guitar Tab Editor
 import { initGuitarTabEditor, openGuitarTabEditor } from './GuitarTabEditor.js';
@@ -408,6 +410,31 @@ const appServices = {
         }
     },
     removeCustomDesktopBackground, // Shorthand → module-level async function (uses appServices.bgDb.init())
+
+    // --- Track access helpers ---
+    // Modules (e.g. CrossfadeLoopPoints) need a stable way to resolve a Track by id.
+    // Wraps the state-only getter so consumers don't need to import from state.js.
+    getTrackById: (trackId) => {
+        if (typeof getTrackByIdState === 'function') return getTrackByIdState(trackId);
+        return null;
+    },
+    // Audio destination for short-lived preview players (loop preview, etc.).
+    // Defaults to Tone.Destination; modules can override via appServices for routing.
+    getPreviewDestination: () => {
+        try { return (typeof Tone !== 'undefined' && Tone.Destination) ? Tone.Destination : null; }
+        catch (e) { return null; }
+    },
+    // Audio blob lookup helper for preview utilities.
+    getAudio: async (sourceId) => {
+        if (!sourceId) return null;
+        if (window.db && typeof window.db.getAudio === 'function') {
+            try { return await window.db.getAudio(sourceId); } catch (e) { /* fall through */ }
+        }
+        if (typeof getAudioBlobFromSoundBrowserItem === 'function') {
+            try { return await getAudioBlobFromSoundBrowserItem(sourceId); } catch (e) { /* fall through */ }
+        }
+        return null;
+    },
 
     // --- Custom Background Helpers ---
     hasCustomBackground: () => {
@@ -918,6 +945,7 @@ const appServices = {
     openTempoSyncLFOPanel,
     openGuitarTabEditor,
     openSamplerLoopTrimPanel,
+    openCrossfadeLoopPointsPanel,
     openDuplicateOffsetDialog,
     openTrackIconPickerPanel,
     openChordVoicingPanel,
@@ -1695,6 +1723,7 @@ async function initializeSnugOS() {
         if (typeof initTrackSnapResolutionPanel === 'function') initTrackSnapResolutionPanel(appServices); // Track Snap Resolution Panel initialization
         if (typeof initTrackScrollToCenter === 'function') initTrackScrollToCenter(appServices); // Track Scroll To Center initialization
         if (typeof initSamplerLoopTrim === 'function') initSamplerLoopTrim(appServices); // Sampler Loop Trim initialization
+        if (typeof initCrossfadeLoopPoints === 'function') initCrossfadeLoopPoints(appServices); // Crossfade Loop Points initialization
         if (typeof initTrackIconPicker === 'function') initTrackIconPicker(appServices); // Track Icon Picker initialization
         if (typeof initMixerChannelStripPresets === 'function') initMixerChannelStripPresets(appServices); // Mixer Channel Strip Presets initialization
         if (typeof initTrackEffectPresets === 'function') initTrackEffectPresets(appServices); // Track Effect Presets initialization

@@ -6319,9 +6319,10 @@ export class Track {
      * @param {boolean} enabled - Whether looping is enabled
      * @param {number} loopStart - Loop start point relative to clip start (seconds)
      * @param {number} loopEnd - Loop end point relative to clip start (seconds)
+     * @param {number} crossfadeDuration - Crossfade in seconds at the loop boundary (0 = no crossfade)
      * @returns {boolean} True if successful
      */
-    setClipLoopMode(clipId, enabled, loopStart = 0, loopEnd = 0) {
+    setClipLoopMode(clipId, enabled, loopStart = 0, loopEnd = 0, crossfadeDuration = 0) {
         const clip = this.timelineClips.find(c => c.id === clipId);
         if (!clip) {
             console.warn(`[Track ${this.id}] Clip ${clipId} not found for loop mode.`);
@@ -6332,7 +6333,13 @@ export class Track {
         clip.loopStart = Math.max(0, parseFloat(loopStart) || 0);
         clip.loopEnd = Math.min(clip.duration, parseFloat(loopEnd) || clip.duration);
 
-        console.log(`[Track ${this.id}] Set clip "${clip.name}" loop mode: ${clip.loopEnabled}, ${clip.loopStart}s - ${clip.loopEnd}s`);
+        // Crossfade is applied at the loop boundary (loopEnd - crossfadeDuration .. loopEnd) and (loopStart .. loopStart + crossfadeDuration)
+        const loopLen = Math.max(0, clip.loopEnd - clip.loopStart);
+        const maxCrossfade = loopLen / 2;
+        const requestedCrossfade = parseFloat(crossfadeDuration) || 0;
+        clip.loopCrossfade = Math.max(0, Math.min(requestedCrossfade, maxCrossfade));
+
+        console.log(`[Track ${this.id}] Set clip "${clip.name}" loop mode: enabled=${clip.loopEnabled}, ${clip.loopStart.toFixed(3)}s - ${clip.loopEnd.toFixed(3)}s, xfade=${clip.loopCrossfade.toFixed(3)}s`);
         this._captureUndoState(`Set loop mode for ${clip.name}`);
         if (this.appServices.renderTimeline) this.appServices.renderTimeline();
         return true;
@@ -6341,16 +6348,39 @@ export class Track {
     /**
      * Get loop mode settings for an audio clip.
      * @param {string} clipId - The clip ID
-     * @returns {Object} Loop settings {enabled, loopStart, loopEnd}
+     * @returns {Object} Loop settings {enabled, loopStart, loopEnd, crossfade}
      */
     getClipLoopMode(clipId) {
         const clip = this.timelineClips.find(c => c.id === clipId);
-        if (!clip) return { enabled: false, loopStart: 0, loopEnd: 0 };
+        if (!clip) return { enabled: false, loopStart: 0, loopEnd: 0, crossfade: 0 };
         return {
             enabled: clip.loopEnabled || false,
             loopStart: clip.loopStart || 0,
-            loopEnd: clip.loopEnd || clip.duration || 0
+            loopEnd: clip.loopEnd || clip.duration || 0,
+            crossfade: clip.loopCrossfade || 0
         };
+    }
+
+    /**
+     * Set the crossfade duration for a clip's loop boundary (no-op if loop mode disabled).
+     * @param {string} clipId - The clip ID
+     * @param {number} crossfadeDuration - Crossfade in seconds (0..half loop length)
+     * @returns {boolean} True if successful
+     */
+    setClipLoopCrossfade(clipId, crossfadeDuration = 0) {
+        const clip = this.timelineClips.find(c => c.id === clipId);
+        if (!clip) {
+            console.warn(`[Track ${this.id}] Clip ${clipId} not found for loop crossfade.`);
+            return false;
+        }
+        const loopLen = Math.max(0, (clip.loopEnd || 0) - (clip.loopStart || 0));
+        const maxCrossfade = loopLen / 2;
+        const requested = parseFloat(crossfadeDuration) || 0;
+        clip.loopCrossfade = Math.max(0, Math.min(requested, maxCrossfade));
+        console.log(`[Track ${this.id}] Set clip "${clip.name}" loop crossfade: ${clip.loopCrossfade.toFixed(3)}s`);
+        this._captureUndoState(`Set loop crossfade for ${clip.name}`);
+        if (this.appServices.renderTimeline) this.appServices.renderTimeline();
+        return true;
     }
 
     // --- Crossfade Between Clips ---
