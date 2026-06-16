@@ -1,5 +1,34 @@
 # FEATURE_STATUS.md - SnugOS DAW
 
+## Session: 2026-06-16 00:55 UTC (Snaw Repair & Enhancement Agent Run)
+
+**Status: NO BUGS FOUND ✅ — Tuner menu wiring completed**
+
+### Audit Results:
+- `git pull origin LWB-with-Bugs` → Already up to date
+- Priority 1 bug `removeCustomDesktopBackground is not defined` → Still fixed (commit 6277b70, function at `js/main.js:277`)
+- Function is properly defined, exposed on `appServices` (line 412, 861), and on `window` (line 1447)
+- All callers in `eventHandlers.js:230-234` resolve correctly via `localAppServices.removeCustomDesktopBackground`
+- Syntax validation (`node --check`) for `js/main.js`, `js/state.js`, `js/audio.js`, `js/ui.js`, `js/eventHandlers.js`, `js/Track.js`, `js/Tuner.js` all passed
+- No TODO/FIXME/XXX/HACK markers in key files
+
+### Enhancement Completed This Session:
+- **Tuner menu wiring** (v0.3.38) — finishes the Day 711 Tuner feature integration
+  - The Tuner module (`js/Tuner.js`, 339 lines, autocorrelation pitch detection) was added in commit 9785b02 but lacked menu/feature-additions wiring
+  - Added "Tuner" menu item to settings menu in `index.html` (after Micro Tuning)
+  - Wired `menuTuner` click handler in `eventHandlers.js` to call `localAppServices.openTunerPanel?.()`
+  - Exported `initTuner` and `openTunerPanel` from `js/FeatureAdditions.js` for plugin-style consumption
+  - Bumped `APP_VERSION` to 0.3.38
+- **Files Modified**:
+  - `index.html` — Added `<li id="menuTuner">Tuner</li>` to settings menu + `<script src="js/Tuner.js">` tag
+  - `js/FeatureAdditions.js` — Added 2-line export block
+  - `js/constants.js` — Bumped APP_VERSION to 0.3.38
+  - `js/eventHandlers.js` — Added `menuTuner` click handler (6 lines)
+- **Commit**: `470e362 feat: wire up Tuner menu item and FeatureAdditions export (v0.3.38)`
+- **Version**: 0.3.38
+
+---
+
 ## Session: 2026-06-16 00:50 UTC (Snaw Feature Completion Agent Run)
 
 **Status: NO INCOMPLETE FEATURES FOUND ✅ — New feature committed**
