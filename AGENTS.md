@@ -1,5 +1,24 @@
 # FEATURE_STATUS.md - SnugOS DAW
 
+## Day 714: Repair Agent — Track Notes Ship + removeCustomDesktopBackground Verification (2026-06-17)
+- **Run Type**: Repair & Enhancement Agent (10-min scheduled)
+- **Priority 1 bug status**: `removeCustomDesktopBackground is not defined` (main.js:342) — **already fixed** in commit `6277b70` and live on the deployed site. Function is module-level at `js/main.js:280` (hoisted), exposed on `appServices` (lines 415, 864) and on `window` (line 1452). Call site at `js/eventHandlers.js:230-234` uses `localAppServices.removeCustomDesktopBackground ?? window.removeCustomDesktopBackground` with a graceful `showNotification` fallback. Verified the deployed file at https://snugos.github.io/snaw/js/main.js has the function defined at line 280.
+- **Shipped**: Track Notes feature (in-progress edits left in the working tree from a prior run, ~33 lines across 5 files):
+  - `index.html`: Added "Track Notes" menu item + `<script src="js/TrackNotes.js">` tag.
+  - `js/TrackNotes.js`: Tightened `getTrackId` to coerce numeric IDs and reject `null`/`undefined` explicitly.
+  - `js/TrackContextMenu.js`: New per-track "Add/Edit Track Note" menu entry (`data-action="trackNote"`) wired to `openNoteForTrack` / `openNoteForCurrentTrack` with a graceful fallback.
+  - `js/main.js`: Import `{ initTrackNotes, openNotesPanel as openTrackNotesPanel, openNoteForCurrentTrack, refreshIndicators as refreshTrackNoteIndicators }`, expose them on `appServices`, call `initTrackNotes(appServices)` during `initializeSnugOS`.
+  - `js/eventHandlers.js`: New `menuTrackNotes` handler that calls `localAppServices.openTrackNotesPanel?.()` with try/catch and error logging.
+  - `js/constants.js`: Bumped `APP_VERSION` from `0.3.43` to `0.3.44`.
+- **Syntax check**: `node --check` on `js/main.js`, `js/TrackNotes.js`, `js/eventHandlers.js`, `js/TrackContextMenu.js`, `js/constants.js` — all OK.
+- **Behavior**:
+  - Start menu: "Track Notes" → opens overview panel with search + list of all track notes.
+  - Per-track right-click: "Add/Edit Track Note" → opens a per-track note editor (color picker + 2000-char text area).
+  - Notes persist to `localStorage` under `snaw_track_notes_v1`, indicators render on track headers via `updateTrackUI`.
+  - Exports include `setNote`, `getNote`, `removeNote`, `getAllNotes`, `searchNotes`, `exportNotes`, `importNotes`, `openNotesPanel`, `closeNotesPanel`, `openNoteForCurrentTrack`, `getTrackContextMenuEntry`, plus a `window.trackNotes` aggregate for ad-hoc dev access.
+- **Action Taken**: Committed and pushed to `LWB-with-Bugs`. Deployed site picks up via GitHub Pages on the next sync (~30s).
+- **Version**: 0.3.44
+
 ## Day 713: Agent Audit (2026-06-17)
 - **Audit**: Snaw Feature Completion Agent run completed successfully.
 - **Status**: No incomplete features found. One enhancement committed.
