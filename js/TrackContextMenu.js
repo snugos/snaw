@@ -146,6 +146,10 @@ function showTrackContextMenu(x, y, trackId) {
                 <span class="w-4">📊</span>
                 <span>Velocity Response</span>
             </button>
+            <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="trackNote" data-track-id="${trackId}">
+                <span class="w-4">📝</span>
+                <span>Add/Edit Track Note</span>
+            </button>
         </div>
         <div class="border-t border-gray-700 mt-1 pt-1">
             ${freezeMenuItems}
@@ -321,6 +325,18 @@ function handleTrackAction(action, trackId) {
                 localAppServices.openTrackVelocityCurvePanel(trackId);
             } else {
                 localAppServices.showNotification?.('Velocity Response not available', 2000);
+            }
+            break;
+
+        case 'trackNote':
+            if (localAppServices.openNoteForTrack) {
+                localAppServices.openNoteForTrack(trackId);
+            } else if (window.openNoteForTrack) {
+                window.openNoteForTrack(trackId);
+            } else if (localAppServices.openNoteForCurrentTrack) {
+                localAppServices.openNoteForCurrentTrack();
+            } else {
+                localAppServices.showNotification?.('Track Notes not available', 2000);
             }
             break;
             

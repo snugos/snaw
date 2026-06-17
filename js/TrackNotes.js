@@ -52,9 +52,9 @@ function clampLength(text) {
 }
 
 function getTrackId(track) {
-    if (!track) return null;
-    if (typeof track === 'string') return track;
-    return track.id || track.trackId || null;
+    if (track === null || track === undefined) return null;
+    if (typeof track === 'string' || typeof track === 'number') return String(track);
+    return track.id != null ? String(track.id) : (track.trackId != null ? String(track.trackId) : null);
 }
 
 function getTrackLabel(trackId) {

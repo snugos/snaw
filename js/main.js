@@ -107,6 +107,8 @@ import { initCrossfadeLoopPoints, openCrossfadeLoopPointsPanel } from './Crossfa
 import { initTuner, openTunerPanel } from './Tuner.js';
 // Loop Practice Trainer - track loop iteration time-to-nail stats
 import { initLoopPracticeTrainer, openLoopPracticeTrainerPanel, checkLoopPracticeTrainer, initLoopPracticeTrainerStateReferences, resetLoopPracticeTrainer, getLoopPracticeTrainerStats } from './LoopPracticeTrainer.js';
+// Track Notes - per-track text notes (lyrics, mix notes, performance cues)
+import { initTrackNotes, openNotesPanel as openTrackNotesPanel, openNoteForCurrentTrack, refreshIndicators as refreshTrackNoteIndicators } from './TrackNotes.js';
 // Guitar Tab Editor
 import { initGuitarTabEditor, openGuitarTabEditor } from './GuitarTabEditor.js';
 import { initTrackColorPanel, openTrackColorPanel } from './TrackColorPanel.js';
@@ -951,6 +953,9 @@ const appServices = {
     openCrossfadeLoopPointsPanel,
     openTunerPanel,
     openLoopPracticeTrainerPanel,
+    openTrackNotesPanel,
+    openNoteForCurrentTrack,
+    refreshTrackNoteIndicators,
     openDuplicateOffsetDialog,
     openTrackIconPickerPanel,
     openChordVoicingPanel,
@@ -1790,6 +1795,7 @@ async function initializeSnugOS() {
             () => getLoopRegionStart(),
             () => getLoopRegionEnd()
         ); // Connect loop trainer to state functions
+        if (typeof initTrackNotes === 'function') initTrackNotes(appServices); // Track Notes initialization
         if (typeof initAutoScrollSync === 'function') initAutoScrollSync(); // Auto-Scroll Sync initialization
         if (typeof initTrackLaneReorder === 'function') initTrackLaneReorder(appServices); // Track Lane Reorder initialization
         if (typeof enableTrackLaneReorder === 'function') enableTrackLaneReorder(); // Enable track lane drag-and-drop

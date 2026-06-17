@@ -740,6 +740,12 @@ export function initializePrimaryEventListeners(appContext) {
                     localAppServices.openLoopPracticeTrainerPanel?.();
                 } catch(e) { console.error('[Menu] Loop Practice Trainer error:', e); }
             },
+            menuTrackNotes: () => {
+                console.log('[Menu] Track Notes clicked');
+                try {
+                    localAppServices.openTrackNotesPanel?.();
+                } catch(e) { console.error('[Menu] Track Notes error:', e); }
+            },
             menuLoopRegionSnap: () => {
                 console.log('[Menu] Loop Region Snap clicked');
                 try {
