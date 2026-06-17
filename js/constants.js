@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.41"; // 2026-06-16 - Repair agent: added MIDI Panic button (Ctrl+Shift+P) for one-click all-notes-off + audio stop
+export const APP_VERSION = "0.3.42"; // 2026-06-16 - Feature agent: Loop Practice Trainer (track loop iteration time-to-nail stats)
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks

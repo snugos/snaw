@@ -1784,6 +1784,12 @@ async function initializeSnugOS() {
             () => getLoopRegionStart(),
             () => getLoopRegionEnd()
         ); // Connect loop count to state functions
+        if (typeof initLoopPracticeTrainer === 'function') initLoopPracticeTrainer(appServices); // Loop Practice Trainer initialization
+        if (typeof initLoopPracticeTrainerStateReferences === 'function') initLoopPracticeTrainerStateReferences(
+            () => getLoopRegionEnabled(),
+            () => getLoopRegionStart(),
+            () => getLoopRegionEnd()
+        ); // Connect loop trainer to state functions
         if (typeof initAutoScrollSync === 'function') initAutoScrollSync(); // Auto-Scroll Sync initialization
         if (typeof initTrackLaneReorder === 'function') initTrackLaneReorder(appServices); // Track Lane Reorder initialization
         if (typeof enableTrackLaneReorder === 'function') enableTrackLaneReorder(); // Enable track lane drag-and-drop
@@ -1999,6 +2005,16 @@ function updateMetersLoop() {
         if (typeof checkTransportLoopCount === 'function') {
             checkTransportLoopCount();
         }
+        // Loop Practice Trainer - Track loop iteration timings
+        if (typeof checkLoopPracticeTrainer === 'function') {
+            checkLoopPracticeTrainer();
+        }
+        if (typeof initLoopPracticeTrainer === 'function') initLoopPracticeTrainer(appServices); // Loop Practice Trainer initialization
+        if (typeof initLoopPracticeTrainerStateReferences === 'function') initLoopPracticeTrainerStateReferences(
+            () => getLoopRegionEnabled(),
+            () => getLoopRegionStart(),
+            () => getLoopRegionEnd()
+        ); // Connect loop trainer to state functions
     } catch (loopError) {
         console.warn("[Main updateMetersLoop] Error in UI update loop:", loopError);
     }

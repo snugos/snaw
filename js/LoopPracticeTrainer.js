@@ -1,6 +1,6 @@
 // js/LoopPracticeTrainer.js - Loop Practice Trainer feature
-// Track loop iterations, time each loop, and keep best/avg time-to-nail stats
-// for the currently active loop region. Persists per-region bests in localStorage.
+// Track loop iterations, time each loop completion (time-to-nail),
+// and report best/avg/total times. Per-region bests persist in localStorage.
 
 let localAppServices = {};
 let isEnabled = false;
@@ -11,53 +11,28 @@ let isRunning = false;
 let getLoopRegionEnabledState = null;
 let getLoopRegionStartState = null;
 let getLoopRegionEndState = null;
+let lastCheckPosition = 0;
+let lastCheckTime = 0;
 
-// Per-session stats
-let session = {
-    startedAt: 0,
-    loopCount: 0,
-    lastLoopStartTime: 0,
-    bestMs: Infinity,
-    sumMs: 0,
-    times: [],          // all loop completion times in ms
-    history: [],        // {iteration, ms} entries
-};
+// Session state
+let sessionStartTime = 0;
+let currentLoopStartTime = 0;
+let currentLoopRegion = null; // { start, end, key }
+let iterationCount = 0;
+let currentLoopTimes = []; // seconds for each completed loop in this session
+let bestThisSession = Infinity;
 
-// Per-region bests: { "<start>-<end>": { bestMs, count, updatedAt } }
-const STORAGE_KEY = 'snaw_practice_bests_v1';
-let regionBests = loadRegionBests();
+// Persisted per-region best times
+const STORAGE_KEY = 'snaw_loop_practice_bests';
+let regionBests = {}; // { regionKey: bestSeconds }
 
-const PANEL_ID = 'loopPracticeTrainerContent';
+// Window/panel tracking
 const WINDOW_ID = 'loopPracticeTrainer';
-const MAX_TIMES = 50;        // keep last N times in memory
-const MAX_HISTORY = 100;     // max history rows in panel
-
-function loadRegionBests() {
-    try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return {};
-        const parsed = JSON.parse(raw);
-        return parsed && typeof parsed === 'object' ? parsed : {};
-    } catch (e) {
-        console.warn('[LoopPracticeTrainer] Failed to load bests:', e);
-        return {};
-    }
-}
-
-function saveRegionBests() {
-    try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(regionBests));
-    } catch (e) {
-        console.warn('[LoopPracticeTrainer] Failed to save bests:', e);
-    }
-}
-
-function regionKey(start, end) {
-    return `${start.toFixed(3)}-${end.toFixed(3)}`;
-}
+const PANEL_CONTENT_ID = 'loopPracticeTrainerContent';
 
 export function initLoopPracticeTrainer(services) {
     localAppServices = services || {};
+    loadRegionBests();
     console.log('[LoopPracticeTrainer] Initialized');
 }
 
@@ -68,376 +43,332 @@ export function initLoopPracticeTrainerStateReferences(getEnabledFn, getStartFn,
     console.log('[LoopPracticeTrainer] State references initialized');
 }
 
-export function setLoopPracticeTrainerEnabled(enabled) {
-    isEnabled = !!enabled;
-    if (!isEnabled) {
-        stopSession(false);
-    } else {
-        // If transport is already playing and loop region is set, start tracking immediately
-        tryStartSession();
-    }
-    updatePanelUI();
-    console.log(`[LoopPracticeTrainer] ${isEnabled ? 'Enabled' : 'Disabled'}`);
-}
-
 export function isLoopPracticeTrainerEnabled() {
     return isEnabled;
 }
 
+export function setLoopPracticeTrainerEnabled(enabled) {
+    const wasEnabled = isEnabled;
+    isEnabled = !!enabled;
+    if (isEnabled && !wasEnabled) {
+        startSession();
+    } else if (!isEnabled && wasEnabled) {
+        stopSession();
+    }
+    console.log(`[LoopPracticeTrainer] ${isEnabled ? 'enabled' : 'disabled'}`);
+}
+
 export function startSession() {
     isRunning = true;
-    session.startedAt = Date.now();
-    session.loopCount = 0;
-    session.bestMs = Infinity;
-    session.sumMs = 0;
-    session.times = [];
-    session.history = [];
-    session.lastLoopStartTime = Date.now();
-    updatePanelUI();
-    localAppServices.showNotification?.('Practice trainer started', 1500);
+    sessionStartTime = performance.now();
+    currentLoopTimes = [];
+    iterationCount = 0;
+    bestThisSession = Infinity;
+    currentLoopStartTime = performance.now();
+    const region = getCurrentRegion();
+    if (region) {
+        currentLoopRegion = region;
+    }
+    lastCheckPosition = 0;
+    lastCheckTime = 0;
+    refreshPanel();
 }
 
-export function stopSession(notify = true) {
-    if (!isRunning) return;
+export function stopSession() {
     isRunning = false;
-    const regionK = currentRegionKey();
-    if (regionK && session.bestMs !== Infinity) {
-        // Persist best for this region
-        const existing = regionBests[regionK];
-        if (!existing || session.bestMs < existing.bestMs) {
-            regionBests[regionK] = {
-                bestMs: session.bestMs,
-                count: (existing?.count || 0) + session.loopCount,
-                updatedAt: Date.now(),
-            };
-            saveRegionBests();
-        } else {
-            regionBests[regionK] = {
-                bestMs: existing.bestMs,
-                count: (existing.count || 0) + session.loopCount,
-                updatedAt: existing.updatedAt,
-            };
-            saveRegionBests();
-        }
-    }
-    updatePanelUI();
-    if (notify) {
-        localAppServices.showNotification?.(
-            `Practice session ended (${session.loopCount} loops, best ${formatMs(session.bestMs === Infinity ? 0 : session.bestMs)})`,
-            2000
-        );
-    }
+    isEnabled = false;
+    if (isPanelOpen) refreshPanel();
 }
 
-export function resetSession() {
-    const hadSession = isRunning;
-    isRunning = false;
-    session = {
-        startedAt: 0,
-        loopCount: 0,
-        lastLoopStartTime: 0,
-        bestMs: Infinity,
-        sumMs: 0,
-        times: [],
-        history: [],
+export function resetLoopPracticeTrainer() {
+    currentLoopTimes = [];
+    iterationCount = 0;
+    bestThisSession = Infinity;
+    if (isEnabled) {
+        currentLoopStartTime = performance.now();
+        sessionStartTime = performance.now();
+    }
+    refreshPanel();
+}
+
+export function getLoopPracticeTrainerStats() {
+    const avg = currentLoopTimes.length > 0
+        ? currentLoopTimes.reduce((a, b) => a + b, 0) / currentLoopTimes.length
+        : 0;
+    const regionKey = currentLoopRegion ? getRegionKey(currentLoopRegion) : null;
+    const personalBest = regionKey && regionBests[regionKey] != null
+        ? regionBests[regionKey]
+        : null;
+    return {
+        enabled: isEnabled,
+        running: isRunning,
+        iterationCount,
+        bestThisSession: bestThisSession === Infinity ? null : bestThisSession,
+        averageTime: avg,
+        lastTime: currentLoopTimes.length > 0 ? currentLoopTimes[currentLoopTimes.length - 1] : null,
+        allTimes: currentLoopTimes.slice(),
+        sessionDurationSec: isRunning ? (performance.now() - sessionStartTime) / 1000 : 0,
+        currentRegion: currentLoopRegion,
+        personalBest,
+        personalBestKey: regionKey
     };
-    updatePanelUI();
-    if (hadSession) {
-        localAppServices.showNotification?.('Practice stats reset', 1500);
-    }
 }
-
-function tryStartSession() {
-    if (isRunning) return;
-    if (typeof Tone === 'undefined' || !Tone.Transport) return;
-    if (Tone.Transport.state !== 'started') return;
-    const loopEnabled = typeof getLoopRegionEnabledState === 'function' ? getLoopRegionEnabledState() : false;
-    if (!loopEnabled) return;
-    startSession();
-}
-
-function currentRegionKey() {
-    const start = typeof getLoopRegionStartState === 'function' ? getLoopRegionStartState() : 0;
-    const end = typeof getLoopRegionEndState === 'function' ? getLoopRegionEndState() : 0;
-    if (!start && !end) return null;
-    return regionKey(start, end);
-}
-
-function formatMs(ms) {
-    if (!isFinite(ms) || ms <= 0) return '—';
-    if (ms < 1000) return `${Math.round(ms)} ms`;
-    const totalSec = ms / 1000;
-    if (totalSec < 60) return `${totalSec.toFixed(2)} s`;
-    const m = Math.floor(totalSec / 60);
-    const s = (totalSec - m * 60).toFixed(1);
-    return `${m}m ${s}s`;
-}
-
-function avgMs() {
-    if (session.times.length === 0) return 0;
-    return session.sumMs / session.times.length;
-}
-
-function stdevMs() {
-    if (session.times.length < 2) return 0;
-    const m = avgMs();
-    const sq = session.times.reduce((acc, t) => acc + Math.pow(t - m, 2), 0) / session.times.length;
-    return Math.sqrt(sq);
-}
-
-let lastWrapPosition = -1;
-let lastWrapTime = 0;
 
 /**
- * Called from the UI update loop. Detects loop wraparound and records a completed loop time.
+ * Check whether the transport has wrapped around the loop region.
+ * Called from main.js updateMetersLoop.
  */
 export function checkLoopPracticeTrainer() {
-    if (!isEnabled) return;
+    if (!isEnabled || !isRunning) return;
+
+    const loopRegionEnabled = typeof getLoopRegionEnabledState === 'function'
+        ? getLoopRegionEnabledState() : false;
+    if (!loopRegionEnabled) {
+        if (isPanelOpen) refreshPanel();
+        return;
+    }
+
     if (typeof Tone === 'undefined' || !Tone.Transport) return;
+    if (Tone.Transport.state !== 'started') return;
 
-    const isPlaying = Tone.Transport.state === 'started';
-    if (!isPlaying) {
-        if (isRunning) stopSession(false);
-        return;
-    }
-
-    const loopEnabled = typeof getLoopRegionEnabledState === 'function' ? getLoopRegionEnabledState() : false;
-    if (!loopEnabled) {
-        if (isRunning) stopSession(false);
-        return;
-    }
-
-    const loopStart = typeof getLoopRegionStartState === 'function' ? getLoopRegionStartState() : 0;
+    const loopStart = typeof getLoopRegionStartState === 'function'
+        ? getLoopRegionStartState() : 0;
+    const loopEnd = typeof getLoopRegionEndState === 'function'
+        ? getLoopRegionEndState() : 16;
     const currentPosition = Tone.Transport.seconds;
 
-    if (!isRunning) {
-        startSession();
-    }
-
-    // Initialize baseline
-    if (lastWrapPosition < 0) {
-        lastWrapPosition = currentPosition;
-        lastWrapTime = Date.now();
+    // Update tracked region in case user moved it
+    if (!currentLoopRegion ||
+        currentLoopRegion.start !== loopStart ||
+        currentLoopRegion.end !== loopEnd) {
+        // Region changed; treat the current loop as a new region
+        currentLoopRegion = { start: loopStart, end: loopEnd };
+        currentLoopStartTime = performance.now();
+        lastCheckPosition = currentPosition;
+        lastCheckTime = currentPosition;
+        if (isPanelOpen) refreshPanel();
         return;
     }
 
-    // Detect wraparound: position crossed loopStart going forward
-    // (e.g., was at end of region, now back at start of region)
-    if (currentPosition >= loopStart && lastWrapPosition < loopStart) {
-        // A new loop iteration just began; record time since last wrap
-        const now = Date.now();
-        const elapsed = now - lastWrapTime;
-        if (elapsed > 50 && elapsed < 600000) { // ignore 0 or absurd values
-            session.times.push(elapsed);
-            session.sumMs += elapsed;
-            if (session.times.length > MAX_TIMES) {
-                const removed = session.times.shift();
-                session.sumMs -= removed;
+    // Detect wraparound
+    if (lastCheckPosition > loopStart + 0.1 && currentPosition <= loopStart + 0.1) {
+        // Just wrapped - record elapsed time
+        const now = performance.now();
+        const elapsed = (now - currentLoopStartTime) / 1000;
+        if (elapsed > 0.05) {
+            currentLoopTimes.push(elapsed);
+            iterationCount++;
+            if (elapsed < bestThisSession) {
+                bestThisSession = elapsed;
             }
-            if (elapsed < session.bestMs) session.bestMs = elapsed;
-            session.loopCount++;
-            session.history.unshift({ iteration: session.loopCount, ms: elapsed, at: now });
-            if (session.history.length > MAX_HISTORY) session.history.length = MAX_HISTORY;
-
-            const regionK = currentRegionKey();
-            if (regionK) {
-                const existing = regionBests[regionK];
-                if (!existing || elapsed < existing.bestMs) {
-                    regionBests[regionK] = {
-                        bestMs: elapsed,
-                        count: (existing?.count || 0) + 1,
-                        updatedAt: now,
-                    };
-                    saveRegionBests();
-                }
+            const regionKey = getRegionKey(currentLoopRegion);
+            if (!regionBests[regionKey] || elapsed < regionBests[regionKey]) {
+                regionBests[regionKey] = elapsed;
+                saveRegionBests();
             }
-
-            lastWrapTime = now;
-            updatePanelUI();
-        } else {
-            lastWrapTime = now;
         }
+        currentLoopStartTime = now;
+        if (isPanelOpen) refreshPanel();
     }
 
-    lastWrapPosition = currentPosition;
+    lastCheckPosition = currentPosition;
 }
 
 export function openLoopPracticeTrainerPanel() {
-    if (!localAppServices.createWindow) {
-        console.warn('[LoopPracticeTrainer] createWindow not available');
-        return null;
+    if (isPanelOpen && localAppServices.getOpenWindows) {
+        const openWindows = localAppServices.getOpenWindows();
+        if (openWindows.has(WINDOW_ID)) {
+            openWindows.get(WINDOW_ID).restore?.();
+            refreshPanel();
+            return openWindows.get(WINDOW_ID);
+        }
     }
-    const openWindows = localAppServices.getOpenWindows ? localAppServices.getOpenWindows() : new Map();
-    if (openWindows.has(WINDOW_ID)) {
-        const win = openWindows.get(WINDOW_ID);
-        if (win.restore) win.restore();
-        return win;
-    }
-    const content = document.createElement('div');
-    content.id = PANEL_ID;
-    content.className = 'p-4 h-full overflow-y-auto bg-gray-900 text-white';
+
+    const contentContainer = document.createElement('div');
+    contentContainer.id = PANEL_CONTENT_ID;
+    contentContainer.className = 'p-4 h-full flex flex-col bg-gray-900 text-white overflow-y-auto';
+
     const options = {
-        width: 360,
-        height: 520,
-        minWidth: 300,
+        width: 380,
+        height: 460,
+        minWidth: 320,
         minHeight: 400,
         initialContentKey: WINDOW_ID,
         closable: true,
         minimizable: true,
         resizable: true
     };
-    const win = localAppServices.createWindow(WINDOW_ID, 'Loop Practice Trainer', content, options);
+
+    const win = localAppServices.createWindow?.(WINDOW_ID, 'Loop Practice Trainer', contentContainer, options);
     if (win?.element) {
         isPanelOpen = true;
-        setTimeout(() => renderPanelContent(), 30);
+        renderPanelContent();
     }
     return win;
 }
 
 function renderPanelContent() {
-    const c = document.getElementById(PANEL_ID);
-    if (!c) return;
+    const container = document.getElementById(PANEL_CONTENT_ID);
+    if (!container) return;
 
-    const loopEnabled = typeof getLoopRegionEnabledState === 'function' ? getLoopRegionEnabledState() : false;
-    const loopStart = typeof getLoopRegionStartState === 'function' ? getLoopRegionStartState() : 0;
-    const loopEnd = typeof getLoopRegionEndState === 'function' ? getLoopRegionEndState() : 0;
-    const regionK = regionKey(loopStart, loopEnd);
-    const savedBest = regionBests[regionK] || null;
-    const bestStr = isFinite(session.bestMs) ? formatMs(session.bestMs) : '—';
-    const avg = avgMs();
-    const sd = stdevMs();
-    const isPlaying = typeof Tone !== 'undefined' && Tone.Transport && Tone.Transport.state === 'started';
+    const stats = getLoopPracticeTrainerStats();
+    const region = stats.currentRegion;
+    const regionLabel = region
+        ? `${region.start.toFixed(2)}s → ${region.end.toFixed(2)}s (${(region.end - region.start).toFixed(2)}s)`
+        : 'No loop region set';
 
-    const statusLabel = isRunning ? (isPlaying ? 'Running' : 'Paused') : 'Idle';
-    const statusColor = isRunning ? (isPlaying ? 'text-green-400' : 'text-yellow-400') : 'text-gray-400';
+    const fmtTime = (sec) => sec == null ? '—' : `${sec.toFixed(2)}s`;
 
-    c.innerHTML = `
-        <div class="mb-3 text-sm text-gray-400">
-            Track loop iterations, time each loop, and keep best/avg "time-to-nail" stats.
+    container.innerHTML = `
+        <div class="mb-3 text-sm text-gray-300">
+            Track loop iterations and your best time-to-nail per region.
         </div>
 
-        <div class="mb-3 p-3 bg-gray-800 rounded border border-gray-700">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-sm text-gray-400">Status:</span>
-                <span class="text-base font-bold ${statusColor}">${statusLabel}</span>
-            </div>
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-sm text-gray-400">Loop Region:</span>
-                <span class="text-sm ${loopEnabled ? 'text-green-400' : 'text-gray-500'}">${loopEnabled ? 'Enabled' : 'Disabled'}</span>
-            </div>
-            <div class="flex items-center justify-between">
-                <span class="text-sm text-gray-400">Bounds:</span>
-                <span class="text-sm text-white">${loopStart.toFixed(2)}s → ${loopEnd.toFixed(2)}s</span>
+        <div class="mb-3 p-2 bg-gray-800 rounded border border-gray-700 text-sm">
+            <div class="text-gray-400 text-xs mb-1">Current Loop Region</div>
+            <div class="text-white">${regionLabel}</div>
+        </div>
+
+        <div class="mb-3">
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" id="lptEnabled" ${stats.enabled ? 'checked' : ''} class="w-4 h-4 accent-green-500">
+                <span class="font-medium">Enable Practice Tracking</span>
+            </label>
+            <div class="text-xs text-gray-400 mt-1">
+                Requires Loop Region to be enabled in transport. Times are recorded each time the transport wraps back to the loop start.
             </div>
         </div>
 
-        <div class="mb-3 p-3 bg-gray-800 rounded border border-gray-700">
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <div class="text-xs text-gray-400">Loops</div>
-                    <div class="text-2xl font-bold text-white">${session.loopCount}</div>
-                </div>
-                <div>
-                    <div class="text-xs text-gray-400">Best (this session)</div>
-                    <div class="text-2xl font-bold text-yellow-400">${bestStr}</div>
-                </div>
-                <div>
-                    <div class="text-xs text-gray-400">Avg</div>
-                    <div class="text-lg font-semibold text-blue-400">${session.times.length ? formatMs(avg) : '—'}</div>
-                </div>
-                <div>
-                    <div class="text-xs text-gray-400">Std Dev</div>
-                    <div class="text-lg font-semibold text-purple-400">${session.times.length > 1 ? formatMs(sd) : '—'}</div>
-                </div>
+        <div class="grid grid-cols-2 gap-2 mb-3">
+            <div class="p-2 bg-gray-800 rounded border border-gray-700">
+                <div class="text-xs text-gray-400">Loops Completed</div>
+                <div class="text-2xl font-bold text-blue-400">${stats.iterationCount}</div>
+            </div>
+            <div class="p-2 bg-gray-800 rounded border border-gray-700">
+                <div class="text-xs text-gray-400">Avg Time</div>
+                <div class="text-2xl font-bold text-cyan-400">${fmtTime(stats.averageTime)}</div>
+            </div>
+            <div class="p-2 bg-gray-800 rounded border border-gray-700">
+                <div class="text-xs text-gray-400">Best (Session)</div>
+                <div class="text-2xl font-bold text-yellow-400">${fmtTime(stats.bestThisSession)}</div>
+            </div>
+            <div class="p-2 bg-gray-800 rounded border border-gray-700">
+                <div class="text-xs text-gray-400">Best (All-Time)</div>
+                <div class="text-2xl font-bold text-green-400">${fmtTime(stats.personalBest)}</div>
             </div>
         </div>
 
-        <div class="mb-3 p-3 bg-gray-800 rounded border border-gray-700">
-            <div class="text-xs text-gray-400 mb-1">All-time best for this region</div>
-            <div class="text-lg font-semibold ${savedBest ? 'text-green-400' : 'text-gray-500'}">
-                ${savedBest ? formatMs(savedBest.bestMs) : '—'}
+        <div class="mb-3 p-2 bg-gray-800 rounded border border-gray-700 text-sm">
+            <div class="flex justify-between">
+                <span class="text-gray-400">Last Loop:</span>
+                <span class="text-white">${fmtTime(stats.lastTime)}</span>
             </div>
-            ${savedBest ? `<div class="text-xs text-gray-500 mt-1">across ${savedBest.count} loops</div>` : ''}
+            <div class="flex justify-between">
+                <span class="text-gray-400">Session Duration:</span>
+                <span class="text-white">${stats.sessionDurationSec.toFixed(1)}s</span>
+            </div>
         </div>
 
-        <div class="mb-3 flex items-center gap-2 flex-wrap">
-            <button id="lptStartBtn" class="px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700">
-                ${isRunning ? 'Restart' : 'Start'}
+        <div class="mb-3">
+            <div class="text-xs text-gray-400 mb-1">Recent Loop Times</div>
+            <div id="lptTimesList" class="max-h-32 overflow-y-auto bg-gray-800 rounded border border-gray-700 p-2 text-xs font-mono">
+                ${renderTimesList(stats.allTimes)}
+            </div>
+        </div>
+
+        <div class="flex gap-2">
+            <button id="lptResetBtn" class="flex-1 px-3 py-2 text-sm bg-gray-700 text-white rounded hover:bg-gray-600">
+                Reset Session
             </button>
-            <button id="lptStopBtn" class="px-3 py-1.5 text-sm bg-yellow-600 text-white rounded hover:bg-yellow-700" ${isRunning ? '' : 'disabled'}>
-                Stop
-            </button>
-            <button id="lptResetBtn" class="px-3 py-1.5 text-sm bg-gray-600 text-white rounded hover:bg-gray-500">
-                Reset Stats
-            </button>
-            <button id="lptClearBestsBtn" class="px-3 py-1.5 text-sm bg-red-700 text-white rounded hover:bg-red-600" title="Clear all saved region bests">
+            <button id="lptClearBestsBtn" class="px-3 py-2 text-sm bg-red-700 text-white rounded hover:bg-red-600" title="Clear saved per-region bests">
                 Clear Bests
             </button>
         </div>
-
-        <div class="mb-2 text-sm text-gray-400 font-semibold">Recent Loops (${session.history.length})</div>
-        <div class="bg-gray-800 rounded border border-gray-700 max-h-40 overflow-y-auto">
-            ${session.history.length === 0
-                ? '<div class="p-3 text-sm text-gray-500 text-center">No loops recorded yet</div>'
-                : session.history.slice(0, 15).map(h => `
-                    <div class="flex items-center justify-between px-3 py-1 text-sm border-b border-gray-700">
-                        <span class="text-gray-400">#${h.iteration}</span>
-                        <span class="text-white">${formatMs(h.ms)}</span>
-                    </div>
-                `).join('')
-            }
-        </div>
     `;
 
-    c.querySelector('#lptStartBtn')?.addEventListener('click', () => {
-        if (!loopEnabled) {
-            localAppServices.showNotification?.('Enable a loop region first', 2000);
-            return;
+    container.querySelector('#lptEnabled')?.addEventListener('change', (e) => {
+        setLoopPracticeTrainerEnabled(e.target.checked);
+        if (localAppServices.showNotification) {
+            localAppServices.showNotification(
+                e.target.checked ? 'Loop Practice Trainer started' : 'Loop Practice Trainer stopped',
+                1500
+            );
         }
-        startSession();
         renderPanelContent();
     });
 
-    c.querySelector('#lptStopBtn')?.addEventListener('click', () => {
-        stopSession();
-        renderPanelContent();
+    container.querySelector('#lptResetBtn')?.addEventListener('click', () => {
+        resetLoopPracticeTrainer();
+        if (localAppServices.showNotification) {
+            localAppServices.showNotification('Session reset', 1200);
+        }
     });
 
-    c.querySelector('#lptResetBtn')?.addEventListener('click', () => {
-        resetSession();
-        renderPanelContent();
-    });
-
-    c.querySelector('#lptClearBestsBtn')?.addEventListener('click', () => {
-        if (confirm('Clear all saved region bests? This cannot be undone.')) {
+    container.querySelector('#lptClearBestsBtn')?.addEventListener('click', () => {
+        if (confirm('Clear all saved per-region best times?')) {
             regionBests = {};
             saveRegionBests();
+            if (localAppServices.showNotification) {
+                localAppServices.showNotification('Cleared all per-region bests', 1500);
+            }
             renderPanelContent();
-            localAppServices.showNotification?.('Region bests cleared', 1500);
         }
     });
 }
 
-function updatePanelUI() {
+function renderTimesList(times) {
+    if (!times || times.length === 0) {
+        return '<div class="text-gray-500">No loops completed yet — enable tracking and let the transport loop.</div>';
+    }
+    const recent = times.slice(-15).reverse();
+    return recent.map((t, idx) => {
+        const isBest = t === bestThisSession;
+        return `<div class="${isBest ? 'text-yellow-400' : 'text-gray-200'}">#${times.length - idx}: ${t.toFixed(2)}s</div>`;
+    }).join('');
+}
+
+function refreshPanel() {
     if (!isPanelOpen) return;
-    const c = document.getElementById(PANEL_ID);
-    if (!c) return;
+    const container = document.getElementById(PANEL_CONTENT_ID);
+    if (!container) {
+        isPanelOpen = false;
+        return;
+    }
     renderPanelContent();
 }
 
-export function getLoopPracticeStats() {
-    return {
-        isRunning,
-        loopCount: session.loopCount,
-        bestMs: isFinite(session.bestMs) ? session.bestMs : 0,
-        avgMs: avgMs(),
-        stdevMs: stdevMs(),
-        times: [...session.times],
-    };
+function getCurrentRegion() {
+    if (typeof getLoopRegionStartState !== 'function') return null;
+    const start = getLoopRegionStartState();
+    const end = getLoopRegionEndState();
+    if (start == null || end == null) return null;
+    return { start, end };
 }
 
-export function getRegionBests() {
-    return JSON.parse(JSON.stringify(regionBests));
+function getRegionKey(region) {
+    return `${region.start.toFixed(3)}_${region.end.toFixed(3)}`;
+}
+
+function loadRegionBests() {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            if (parsed && typeof parsed === 'object') {
+                regionBests = parsed;
+            }
+        }
+    } catch (e) {
+        console.warn('[LoopPracticeTrainer] Failed to load bests:', e);
+    }
+}
+
+function saveRegionBests() {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(regionBests));
+    } catch (e) {
+        console.warn('[LoopPracticeTrainer] Failed to save bests:', e);
+    }
 }
 
 console.log('[LoopPracticeTrainer] Module loaded');

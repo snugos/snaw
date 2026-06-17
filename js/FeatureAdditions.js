@@ -101,3 +101,5 @@ export { initWaveformVisualization, openWaveformSettingsPanel, updateWaveformDis
 export { initCrossfadeLoopPoints, openCrossfadeLoopPointsPanel } from './CrossfadeLoopPoints.js';
 // Tuner - Live microphone pitch detection with note + cents display
 export { initTuner, openTunerPanel } from './Tuner.js';
+// Loop Practice Trainer - Track loop iteration time-to-nail stats
+export { initLoopPracticeTrainer, openLoopPracticeTrainerPanel, checkLoopPracticeTrainer, initLoopPracticeTrainerStateReferences, resetLoopPracticeTrainer, getLoopPracticeTrainerStats } from './LoopPracticeTrainer.js';
