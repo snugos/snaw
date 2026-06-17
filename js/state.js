@@ -411,7 +411,9 @@ export function recordNoteTiming(deviationMs) {
     noteTimingHistory.push({ deviation: deviationMs });
     if (noteTimingHistory.length > MAX_TIMING_HISTORY) {
         noteTimingHistory.shift();
+    }
 }
+
 export function getAdaptiveTimingOffset() {
     if (noteTimingHistory.length < 4) return 0;
     const sum = noteTimingHistory.reduce((acc, item) => acc + item.deviation, 0);
@@ -693,14 +695,6 @@ export function isNoteInScale(midiNote, root, type) {
     const scaleNotes = getScaleNotes(root, type);
     const noteName = NOTE_NAMES[noteIndex];
     return scaleNotes.includes(noteName);
-}
-
-export function isNoteNameInScale(pitchName, root, type) {
-    if (!pitchName) return false;
-    const scaleNotes = getScaleNotes(root, type);
-    // pitchName could be like "C4", "C#4", "D4" - we just need the note letter part
-    const noteLetter = pitchName.replace(/[0-9]/g, '');
-    return scaleNotes.some(note => note === noteLetter || note === pitchName);
 }
 
 // --- Scale Lock State ---
@@ -1043,6 +1037,8 @@ export function getCcVisualizerValues() { return { ...ccVisualizerValues }; }
 export function updateCcVisualizerValue(ccNumber, channel, value) {
     const key = `cc${ccNumber}_channel${channel}`;
     ccVisualizerValues[key] = Math.max(0, Math.min(1, value));
+}
+
 // --- MIDI Output ---
 let activeMidiOutputGlobal = null; // Currently selected MIDI output device
 
@@ -1153,8 +1149,6 @@ export function selectMidiOutput(deviceId) {
     } else {
         setActiveMidiOutputState(null);
     }
-}
-
 }
 
 // --- Project Export Presets ---

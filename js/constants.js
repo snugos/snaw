@@ -170,6 +170,7 @@ export const MIDI_CHORD_ROOT_NOTES = [
     { note: 'A', semitone: 9 },
     { note: 'A#', semitone: 10 },
     { note: 'B', semitone: 11 }
+];
 
 // --- Trill Notes Constants ---
 export const TRILL_NOTES_MIN_TAPS = 2; // Minimum trill taps (2 = single up+down oscillation)

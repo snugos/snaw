@@ -1803,6 +1803,9 @@ async function initializeSnugOS() {
             () => getLoopRegionEnd()
         ); // Connect loop trainer to state functions
         if (typeof initTrackNotes === 'function') initTrackNotes(appServices); // Track Notes initialization
+        // After the timeline renders existing tracks, paint note indicators for any
+        // persisted notes that didn't get a 'trackRendered' callback (initial load).
+        setTimeout(() => { try { if (typeof refreshTrackNoteIndicators === 'function') refreshTrackNoteIndicators(); } catch (e) { /* ignore */ } }, 800);
         if (typeof initAutoScrollSync === 'function') initAutoScrollSync(); // Auto-Scroll Sync initialization
         if (typeof initTrackLaneReorder === 'function') initTrackLaneReorder(appServices); // Track Lane Reorder initialization
         if (typeof enableTrackLaneReorder === 'function') enableTrackLaneReorder(); // Enable track lane drag-and-drop
