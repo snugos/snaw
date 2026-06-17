@@ -108,7 +108,7 @@ import { initTuner, openTunerPanel } from './Tuner.js';
 // Loop Practice Trainer - track loop iteration time-to-nail stats
 import { initLoopPracticeTrainer, openLoopPracticeTrainerPanel, checkLoopPracticeTrainer, initLoopPracticeTrainerStateReferences, resetLoopPracticeTrainer, getLoopPracticeTrainerStats } from './LoopPracticeTrainer.js';
 // Track Notes - per-track text notes (lyrics, mix notes, performance cues)
-import { initTrackNotes, openNotesPanel as openTrackNotesPanel, openNoteForCurrentTrack, refreshIndicators as refreshTrackNoteIndicators, getNote, setNo } from './TrackNotes.js';
+import { initTrackNotes, openNotesPanel as openTrackNotesPanel, openNoteForCurrentTrack, openNoteForTrack, refreshIndicators as refreshTrackNoteIndicators } from './TrackNotes.js';
 // Guitar Tab Editor
 import { initGuitarTabEditor, openGuitarTabEditor } from './GuitarTabEditor.js';
 import { initTrackColorPanel, openTrackColorPanel } from './TrackColorPanel.js';
@@ -955,6 +955,7 @@ const appServices = {
     openLoopPracticeTrainerPanel,
     openTrackNotesPanel,
     openNoteForCurrentTrack,
+    openNoteForTrack,
     refreshTrackNoteIndicators,
     openDuplicateOffsetDialog,
     openTrackIconPickerPanel,
