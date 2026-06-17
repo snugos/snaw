@@ -1601,6 +1601,12 @@ function handleTrackUIUpdate(trackId, reason, detail) {
                     }
                 }
                 break;
+            case 'trackRendered':
+            case 'trackHeaderRendered':
+                try {
+                    if (typeof refreshTrackNoteIndicators === 'function') refreshTrackNoteIndicators();
+                } catch (e) { console.warn('[TrackNotes] refresh failed:', e); }
+                break;
             default:
                 console.warn(`[Main UI Update] Unhandled reason: ${reason} for track ${trackId}`);
         }
