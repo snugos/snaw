@@ -2009,12 +2009,6 @@ function updateMetersLoop() {
         if (typeof checkLoopPracticeTrainer === 'function') {
             checkLoopPracticeTrainer();
         }
-        if (typeof initLoopPracticeTrainer === 'function') initLoopPracticeTrainer(appServices); // Loop Practice Trainer initialization
-        if (typeof initLoopPracticeTrainerStateReferences === 'function') initLoopPracticeTrainerStateReferences(
-            () => getLoopRegionEnabled(),
-            () => getLoopRegionStart(),
-            () => getLoopRegionEnd()
-        ); // Connect loop trainer to state functions
     } catch (loopError) {
         console.warn("[Main updateMetersLoop] Error in UI update loop:", loopError);
     }
