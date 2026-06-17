@@ -105,7 +105,8 @@ import { initTrackDuplicateOffset, openDuplicateOffsetDialog, duplicateTrackWith
 import { initCrossfadeLoopPoints, openCrossfadeLoopPointsPanel } from './CrossfadeLoopPoints.js';
 // Tuner - live microphone pitch detection
 import { initTuner, openTunerPanel } from './Tuner.js';
-import { initSamplerLoopTrim, openSamplerLoopTrimPanel } from './SamplerLoopTrim.js';
+// Loop Practice Trainer - track loop iteration time-to-nail stats
+import { initLoopPracticeTrainer, openLoopPracticeTrainerPanel, checkLoopPracticeTrainer, initLoopPracticeTrainerStateReferences, resetLoopPracticeTrainer, getLoopPracticeTrainerStats } from './LoopPracticeTrainer.js';
 // Guitar Tab Editor
 import { initGuitarTabEditor, openGuitarTabEditor } from './GuitarTabEditor.js';
 import { initTrackColorPanel, openTrackColorPanel } from './TrackColorPanel.js';
@@ -949,6 +950,7 @@ const appServices = {
     openSamplerLoopTrimPanel,
     openCrossfadeLoopPointsPanel,
     openTunerPanel,
+    openLoopPracticeTrainerPanel,
     openDuplicateOffsetDialog,
     openTrackIconPickerPanel,
     openChordVoicingPanel,

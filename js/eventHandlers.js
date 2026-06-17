@@ -734,6 +734,12 @@ export function initializePrimaryEventListeners(appContext) {
                     localAppServices.openLoopRegionQuickSetSettings?.();
                 } catch(e) { console.error('[Menu] Loop Region Quick Set error:', e); }
             },
+            menuLoopPracticeTrainer: () => {
+                console.log('[Menu] Loop Practice Trainer clicked');
+                try {
+                    localAppServices.openLoopPracticeTrainerPanel?.();
+                } catch(e) { console.error('[Menu] Loop Practice Trainer error:', e); }
+            },
             menuLoopRegionSnap: () => {
                 console.log('[Menu] Loop Region Snap clicked');
                 try {
