@@ -81,7 +81,10 @@
             
             <!-- Stop Button -->
             <button id="stopBtnGlobal" title="Stop All Audio" class="transport-btn">Stop</button>
-            
+
+            <!-- MIDI Panic Button (Ctrl+Shift+P): Stops all audio + sends All-Notes-Off on all 16 MIDI channels -->
+            <button id="panicBtnGlobal" title="MIDI Panic: Stop all audio and send All-Notes-Off on all MIDI channels (Ctrl+Shift+P)" class="transport-btn !bg-[#7a1a1a] hover:!bg-[#a02020] !text-white border !border-[#a04040]">⚠ Panic</button>
+
             <!-- Record Button -->
             <button id="recordBtnGlobal" title="Record Arm/Disarm" class="transport-btn">Rec</button>
         </div>

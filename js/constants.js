@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.40"; // 2026-06-16 - Daily merge: trillNotes, driftNotes from app repo // 2026-06-16 - Feature builder: added Per-Track Detune (±100 cents)
+export const APP_VERSION = "0.3.41"; // 2026-06-16 - Repair agent: added MIDI Panic button (Ctrl+Shift+P) for one-click all-notes-off + audio stop
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks
@@ -211,6 +211,4 @@ export const DRIFT_NOTES_MODES = [
     DRIFT_NOTES_MODE_LINEAR_CENTER,
     DRIFT_NOTES_MODE_RANDOM_PER_NOTE,
     DRIFT_NOTES_MODE_MIRROR
-];
-
 ];

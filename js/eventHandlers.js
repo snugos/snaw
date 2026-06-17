@@ -1348,6 +1348,35 @@ export function attachGlobalControlEvents(elements) {
         console.warn("[EventHandlers] stopBtnGlobal not found in provided elements.");
     }
 
+    if (panicBtnGlobal) {
+        // Visual flash on the button when clicked, so the user gets a strong
+        // visual confirmation that the panic fired (in addition to the
+        // notification toast).
+        panicBtnGlobal.addEventListener('click', () => {
+            console.log("[EventHandlers Panic] MIDI Panic button clicked.");
+            if (localAppServices.panicStopAllAudio) {
+                localAppServices.panicStopAllAudio();
+            } else {
+                console.error("[EventHandlers Panic] panicStopAllAudio service not available.");
+                if (typeof Tone !== 'undefined') {
+                    Tone.Transport.stop();
+                    Tone.Transport.cancel(0);
+                    stopMetronomeScheduling();
+                }
+            }
+            // Brief red flash on the button itself for unmistakable feedback
+            panicBtnGlobal.classList.add('!bg-[#ff3030]');
+            setTimeout(() => panicBtnGlobal.classList.remove('!bg-[#ff3030]'), 180);
+            if (typeof showNotification === 'function') {
+                showNotification("MIDI Panic: All audio stopped, All-Notes-Off sent.", 2000);
+            } else if (typeof showSafeNotification === 'function') {
+                showSafeNotification("MIDI Panic: All audio stopped, All-Notes-Off sent.", 2000);
+            }
+        });
+    } else {
+        console.warn("[EventHandlers] panicBtnGlobal not found in provided elements.");
+    }
+
     if (recordBtnGlobal) {
         recordBtnGlobal.addEventListener('click', async () => {
             try {
@@ -2045,6 +2074,30 @@ document.addEventListener('keydown', (event) => {
             // Then close all windows
             const allWindows = localAppServices.getOpenWindows ? localAppServices.getOpenWindows() : [];
             allWindows.forEach(w => { if (w.close) w.close(); });
+            return;
+        }
+        if ((event.ctrlKey || event.metaKey) && event.shiftKey && (key === 'p' || key === 'P')) {
+            // MIDI Panic: stop all audio + send All-Notes-Off on all 16 MIDI channels
+            event.preventDefault();
+            console.log("[EventHandlers Panic] Ctrl+Shift+P triggered.");
+            if (localAppServices.panicStopAllAudio) {
+                localAppServices.panicStopAllAudio();
+            } else if (typeof Tone !== 'undefined') {
+                Tone.Transport.stop();
+                Tone.Transport.cancel(0);
+                if (typeof stopMetronomeScheduling === 'function') stopMetronomeScheduling();
+            }
+            // Visual flash on the panic button if present
+            const panicBtn = localAppServices.uiElementsCache?.panicBtnGlobal;
+            if (panicBtn) {
+                panicBtn.classList.add('!bg-[#ff3030]');
+                setTimeout(() => panicBtn.classList.remove('!bg-[#ff3030]'), 180);
+            }
+            if (typeof localAppServices.showNotification === 'function') {
+                localAppServices.showNotification("MIDI Panic: All audio stopped, All-Notes-Off sent.", 2000);
+            } else if (typeof showNotification === 'function') {
+                showNotification("MIDI Panic: All audio stopped, All-Notes-Off sent.", 2000);
+            }
             return;
         }
         if (key === 'arrowleft') {

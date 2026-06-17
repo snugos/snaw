@@ -1625,6 +1625,7 @@ async function initializeSnugOS() {
             playBtnGlobal: document.getElementById('playBtnGlobal'),
             recordBtnGlobal: document.getElementById('recordBtnGlobal'),
             stopBtnGlobal: document.getElementById('stopBtnGlobal'),
+            panicBtnGlobal: document.getElementById('panicBtnGlobal'),
             tempoGlobalInput: document.getElementById('tempoGlobalInput'),
             midiInputSelectGlobal: document.getElementById('midiInputSelectGlobal'),
             midiOutputSelectGlobal: document.getElementById('midiOutputSelectGlobal'),
