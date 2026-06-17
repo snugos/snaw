@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.42"; // 2026-06-16 - Feature agent: Loop Practice Trainer (track loop iteration time-to-nail stats)
+export const APP_VERSION = "0.3.43"; // 2026-06-17 - Repair agent: T key now actually triggers a tap tempo (previously only showed visual indicator)
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks

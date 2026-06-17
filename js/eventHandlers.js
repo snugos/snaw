@@ -2131,9 +2131,14 @@ document.addEventListener('keydown', (event) => {
             }
             return;
         }
-        // T key - Tap Tempo (trigger visual indicator)
+        // T key - Tap Tempo (register a tap AND trigger visual indicator)
         if (key === 't' && !(event.ctrlKey || event.metaKey)) {
-            if (window.TapTempo) {
+            event.preventDefault();
+            const tapBtn = localAppServices.uiElementsCache?.tapBtnGlobal;
+            if (tapBtn) {
+                tapBtn.click();
+            } else if (window.TapTempo) {
+                // Fallback: at least show the visual indicator
                 window.TapTempo.showIndicator();
             }
             return;

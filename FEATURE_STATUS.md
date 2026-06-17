@@ -1,5 +1,32 @@
 # FEATURE_STATUS.md - SnugOS DAW
 
+## Session: 2026-06-17 00:30 UTC (Snaw Repair Agent Run)
+
+**Status: BUG REPORT VERIFIED FIXED ✅ + Small enhancement shipped**
+
+### Repair Findings
+- **Reported bug**: `main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground is not defined`
+- **Status**: Already fixed in working tree. The function is defined at `js/main.js:280` (hoisted module-level `async function removeCustomDesktopBackground()`), exposed on `appServices` (line 415), on `window` (line 1452), and called from `eventHandlers.js:230-234` with proper `localAppServices.removeCustomDesktopBackground ?? window.removeCustomDesktopBackground` guards.
+- **Deployed site verification**: `curl https://snugos.github.io/snaw/js/main.js` confirms the fix is live (file 2120 lines, function present at line 280).
+- **Syntax check**: `node --check` passes for all core modules (`main.js`, `state.js`, `eventHandlers.js`, `audio.js`, `ui.js`).
+- **No active TODO/FIXME/XXX/HACK/STUB markers** found in `js/`.
+- **Working tree**: was clean on pull.
+
+### Enhancement Shipped
+- **T key now actually triggers a tap tempo** (previously the T key only called `window.TapTempo.showIndicator()`, which is purely visual and did not register a tap or change the BPM). The handler now clicks the cached `tapBtnGlobal` so the same code path as clicking the Tap button runs (imports `handleTapTempo` from `ui.js`, updates `Tone.Transport.bpm.value`, the tempo input, and the taskbar tempo display, then shows the visual indicator). Falls back to the visual-only path if the tap button is not yet in the cache.
+- **Files Modified**:
+  - `js/eventHandlers.js`: Updated T key handler at the keydown listener (line ~2133) to call `tapBtnGlobal.click()` with `localAppServices.uiElementsCache?.tapBtnGlobal`, plus `event.preventDefault()` to avoid the keypress being typed into any focused field.
+  - `js/constants.js`: Bumped `APP_VERSION` from `0.3.42` to `0.3.43`.
+- **Version**: 0.3.43
+
+### Features Still in Progress:
+_None — all browser-implementable features currently implemented._
+
+### Next Features to Tackle:
+_None queued; the feature list is stable._
+
+---
+
 ## Session: 2026-06-17 00:30 UTC (Snaw Feature Completion Agent Run)
 
 **Status: NO INCOMPLETE FEATURES FOUND ✅**
