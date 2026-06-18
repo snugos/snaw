@@ -1,4 +1,29 @@
 # FEATURE_STATUS.md - SnugOS DAW
+## Day 721: Humanize Velocity Submenu Ship + Allowlist Bug Fix (2026-06-18)
+- **Run Type**: Snaw Feature Completion Agent (scheduled)
+- **Status**: Incomplete feature found and fixed. Humanize Velocity submenu shipped (v0.3.50).
+- **Findings**:
+  - `git pull origin LWB-with-Bugs` → Already up to date
+  - `git status` (on entry) → Two uncommitted files from a parallel run: `js/TrackContextMenu.js` (+19 lines, Humanize Velocity submenu + handler) and `js/constants.js` (APP_VERSION 0.3.49 → 0.3.50, +6 HUMANIZE_VELOCITY_* constants)
+  - Last commit on entry: `2c8b3ca docs: Day 720 audit - repository clean, no incomplete features (v0.3.49)`
+  - TODO/FIXME/XXX/HACK/INCOMPLETE/STUB markers: None found in active code
+  - "Coming soon"/"Not implemented" messages found only in intentional fallback locations (`PluginSystem.js:199`, `MIDIPatternVariationEnhancement.js:287`, service-unavailable guard notifications in `eventHandlers.js`)
+  - Syntax validation (`node --check`) for `js/TrackContextMenu.js` and `js/constants.js` passed both before and after this run's fix
+  - Total files: 527 | Total lines: 266,892 (+65 vs Day 720)
+  - No untracked orphan files
+- **Feature Added**: Humanize Velocity context-menu submenu (v0.3.50)
+  - 4 presets on the per-track right-click context menu: Subtle (±5%), Medium (±15%), Heavy (±30%), Wild (±50%)
+  - Calls `track.humanizeVelocity(amount)` on the active sequence; captures undo BEFORE mutation; recreates Tone sequence; updates UI; notifies with count
+  - Audio tracks rejected with a notification
+  - Submenu parent toggles `hidden` class via `e.stopPropagation()` + early return (does not close the menu)
+- **Bug Fixed This Run**: The parallel run's handler had `allowedAmounts = [0.05, 0.15, 0.3]` — missing `0.50`. The "Wild (±50%)" menu option (`data-amount="0.50"`) was NOT in the allowlist, so the snap-to-closest-preset fallback silently downgraded it to `0.30` (Heavy). `constants.js` defines all 4 presets including `HUMANIZE_VELOCITY_PRESET_WILD = 0.50` and `HUMANIZE_VELOCITY_MAX_AMOUNT = 0.5`, so the omission was an oversight. **Fix**: `const allowedAmounts = [0.05, 0.15, 0.3, 0.5];` at `js/TrackContextMenu.js:360`.
+- **Files Modified**:
+  - `js/TrackContextMenu.js`: 1-line allowlist fix (line 360) + the parallel run's submenu UI + handler (committed together)
+  - `js/constants.js`: APP_VERSION bump + 6 HUMANIZE_VELOCITY_* constants (parallel run, committed unchanged)
+  - `FEATURE_STATUS.md`: Day 721 session entry prepended
+  - `AGENTS.md`: This entry prepended
+- **Version**: 0.3.50
+
 
 ## Day 720: Agent Audit (2026-06-18)
 - **Audit**: Snaw Feature Completion Agent run completed successfully.

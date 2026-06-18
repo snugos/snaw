@@ -1,4 +1,41 @@
 # FEATURE_STATUS.md - SnugOS DAW
+## Session: 2026-06-18 01:00 UTC (Snaw Feature Completion Agent Run — Day 721)
+
+**Status: INCOMPLETE FEATURE FOUND + FIXED ✅ — Humanize Velocity submenu shipped with allowlist bug fixed (v0.3.50)**
+
+### Automated Scan Results:
+- `git pull origin LWB-with-Bugs` → Already up to date
+- `git status` (on entry) → Two uncommitted files from a parallel run: `js/TrackContextMenu.js` (+19 lines) and `js/constants.js` (APP_VERSION bump 0.3.49 → 0.3.50)
+- Last commit on entry: `2c8b3ca docs: Day 720 audit - repository clean, no incomplete features (v0.3.49)`
+- Pattern sweeps (`TODO|FIXME|XXX|HACK|INCOMPLETE|STUB`) over `js/` returned no active-code hits
+- "Coming soon" / "not implemented" messages found only in intentional fallback locations (service-unavailable guard notifications in `eventHandlers.js`, base-class defaults in `PluginSystem.js:199`, algorithm-warning fallback in `MIDIPatternVariationEnhancement.js:287`)
+- Syntax validation (`node --check`) for `js/TrackContextMenu.js` and `js/constants.js` passed both before and after this run's fix
+- `find js -name "*.js" -type f | wc -l` → 527 files (unchanged from Day 720)
+- `find js -name "*.js" -type f -exec wc -l {} + | tail -1` → 266,892 total lines (+65 vs Day 720: the Humanize Velocity submenu + handler)
+- No untracked orphan files (`git ls-files --others --exclude-standard -- 'js/*.js'` → empty)
+- **Working-tree modification (mid-session, from a parallel run)**: `js/WaveformVisualizer.js` has an uncommitted refactor (497 deletions, 23 insertions — a large restructuring of the waveform drawing code). `node --check` passes on the working-tree version. Not authored by this run; left uncommitted for the parallel run to finish or a future run to review. Does not affect the committed `LWB-with-Bugs` branch.
+- Current `APP_VERSION`: 0.3.50 (bumped from 0.3.49 by the parallel run's constants.js change)
+
+### Feature Completed This Session:
+- **Humanize Velocity context-menu submenu** (`js/TrackContextMenu.js`, `js/constants.js`) — a parallel run authored this feature in the working tree but left it uncommitted. This run reviewed it, found and fixed one bug, then committed the complete feature.
+  - **What the feature does**: Adds a "🎲 Humanize Velocity" submenu to the per-track right-click context menu with 4 presets — Subtle (±5%), Medium (±15%), Heavy (±30%), Wild (±50%). Clicking a preset calls `track.humanizeVelocity(amount)` on the active sequence, applies random ±amount variation to each note's velocity (clamped 0.05–1.0, rounded to 2 dp), captures undo BEFORE mutation, recreates the Tone sequence, refreshes the sequencer UI, and shows a notification with the count of humanized notes (or "No notes to humanize" if the sequence is empty). Audio tracks are rejected with a notification.
+  - **Bug found and fixed by this run**: The handler's `allowedAmounts` allowlist was `[0.05, 0.15, 0.3]` — missing `0.50`. The menu's "Wild (±50%)" option sets `data-amount="0.50"`, which is NOT in the allowlist, so the snap-to-closest-preset fallback would silently downgrade it to `0.30` (Heavy). `constants.js` defines all 4 presets (`HUMANIZE_VELOCITY_PRESET_SUBTLE/MEDIUM/HEAVY/WILD` = 0.05/0.15/0.30/0.50) and `HUMANIZE_VELOCITY_MAX_AMOUNT = 0.5`, so the allowlist omission was a clear oversight. **Fix**: added `0.5` to the array → `const allowedAmounts = [0.05, 0.15, 0.3, 0.5];` at `js/TrackContextMenu.js:360`. Now all 4 menu presets are accepted as-is.
+  - **Wiring verified**: submenu parent (`data-action="humanizeVelocityMenu"`) toggles the submenu `hidden` class and does NOT close the menu (via `e.stopPropagation()` + early return); submenu children (`data-action="humanizeVelocity"` with `data-amount`) call `handleTrackAction(action, tId, e.currentTarget)` which reads `btn?.dataset?.amount`, clamps to `HUMANIZE_VELOCITY_MIN_AMOUNT`(0.01)/`HUMANIZE_VELOCITY_MAX_AMOUNT`(0.5), captures undo, calls `track.humanizeVelocity(amount)`, recreates the sequence, updates UI, and notifies.
+  - **Files modified this run**: `js/TrackContextMenu.js` (1-line allowlist fix at line 360). `js/constants.js` and the rest of `js/TrackContextMenu.js` were authored by the parallel run and committed unchanged alongside this fix.
+  - **Commit**: this run's commit (see Action Taken below) — atomic, one feature.
+- **Version**: 0.3.50
+
+### Features Still in Progress:
+_None — all browser-implementable features currently implemented._
+
+### Next Features to Tackle:
+_None queued; the feature list is stable._
+
+### Action Taken:
+Reviewed the parallel run's uncommitted Humanize Velocity submenu, found and fixed the `allowedAmounts` allowlist bug (Wild ±50% was silently downgrading to Heavy ±30%), re-validated syntax, updated FEATURE_STATUS.md and AGENTS.md, then committed the complete feature and pushed to `origin/LWB-with-Bugs`.
+
+---
+
 
 ## Session: 2026-06-18 00:50 UTC (Snaw Feature Completion Agent Run — Day 720)
 
