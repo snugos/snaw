@@ -1987,6 +1987,12 @@ function updatePerformanceStats() {
             const seconds = totalSeconds % 60;
             sessionEl.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         }
+
+        // Update track count
+        const trackCountEl = document.getElementById('statusTrackCountValue');
+        if (trackCountEl && typeof getTracksState === 'function') {
+            trackCountEl.textContent = getTracksState().length;
+        }
     }
 }
 
