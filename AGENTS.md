@@ -1,5 +1,17 @@
 # FEATURE_STATUS.md - SnugOS DAW
 
+## Day 715: Repair Agent — Working-Tree Recovery + Shift+Arrow Tempo Nudge (2026-06-17)
+- **Run Type**: Repair & Enhancement Agent (10-min scheduled)
+- **Priority 1 bug status**: `removeCustomDesktopBackground is not defined` (main.js:342) — **already fixed** in commit `6277b70` and live on the deployed site. Verified again this run: function is module-level at `js/main.js:284` (hoisted), exposed on `appServices` (lines 419, 868) and on `window` (line 1463). Call site at `js/eventHandlers.js:230-234` uses `localAppServices.removeCustomDesktopBackground ?? window.removeCustomDesktopBackground` with a graceful `showNotification` fallback. No reproduction possible.
+- **Working-tree corruption recovered**: Pulled fresh, then `git status` showed the working tree had been left in a half-built state from a prior run: `js/state.js` had **5071 lines deleted** (gutted from 8940 → 3870 lines, the entire second half of the file — would have broken the entire app), plus `js/OneShotSequencePreview.js` (untracked) had a broken import contract (main.js imported `previewSequenceOneShot`/`previewCurrentTrackSequence`/`stopOneShotPreview` but the file only exports `previewActiveSequenceOneShot`/`stopOneShotSequencePreview`/`isOneShotPreviewActive`). Plus `index.html`/`js/main.js`/`js/TrackContextMenu.js`/`js/eventHandlers.js` had partial in-progress wiring for this unfinished feature. **Action taken**: reverted state.js/index.html/main.js/TrackContextMenu.js/eventHandlers.js to HEAD with `git checkout HEAD -- <files>` and removed the untracked OneShotSequencePreview.js. After recovery: `node --check` passes on all 525 js files, working tree is clean.
+- **Enhancement shipped**: **Shift+arrow tempo nudge for 1.0 BPM coarse step**. Previously arrow-left/arrow-right only nudged the project tempo by 0.1 BPM per press, which is fine for fine adjustments but tedious for large tempo changes (e.g. jumping 60→120 BPM takes 600 presses). Now holding Shift while pressing arrow-left/arrow-right nudges by 1.0 BPM per press, clamped to `Constants.MIN_TEMPO`/`Constants.MAX_TEMPO`. Plain arrow keys still nudge by 0.1 BPM for fine control.
+- **Files modified**:
+  - `js/eventHandlers.js`: arrow-left/arrow-right handlers now compute `step = event.shiftKey ? 1.0 : 0.1`, then apply the same MIN/MAX clamp and update paths as before.
+  - `js/constants.js`: Bumped `APP_VERSION` from `0.3.44` to `0.3.45`.
+- **Commit**: `3819fd2 feat: Shift+arrow tempo nudge for 1.0 BPM coarse step (v0.3.45)`
+- **Pushed**: `474a585..3819fd2  LWB-with-Bugs -> LWB-with-Bugs`
+- **Version**: 0.3.45
+
 ## Day 714: Repair Agent — Track Notes Ship + removeCustomDesktopBackground Verification (2026-06-17)
 - **Run Type**: Repair & Enhancement Agent (10-min scheduled)
 - **Priority 1 bug status**: `removeCustomDesktopBackground is not defined` (main.js:342) — **already fixed** in commit `6277b70` and live on the deployed site. Function is module-level at `js/main.js:280` (hoisted), exposed on `appServices` (lines 415, 864) and on `window` (line 1452). Call site at `js/eventHandlers.js:230-234` uses `localAppServices.removeCustomDesktopBackground ?? window.removeCustomDesktopBackground` with a graceful `showNotification` fallback. Verified the deployed file at https://snugos.github.io/snaw/js/main.js has the function defined at line 280.

@@ -1,5 +1,33 @@
 # FEATURE_STATUS.md - SnugOS DAW
 
+## Session: 2026-06-17 00:55 UTC (Snaw Repair Agent Run)
+
+**Status: PRIORITY 1 BUG VERIFIED FIXED ✅ + Working-tree corruption recovered + Enhancement shipped**
+
+### Repair Findings
+- **Reported bug**: `main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground is not defined`
+- **Status**: Verified fixed (no reproduction). Function is defined at `js/main.js:284` as a hoisted module-level `async function removeCustomDesktopBackground()`, exposed on `appServices` (line 419, 868), on `window` (line 1463), and called from `eventHandlers.js:230-234` with proper `localAppServices.removeCustomDesktopBackground ?? window.removeCustomDesktopBackground` guards.
+- **Working-tree corruption recovered**: `js/state.js` had 5071 lines deleted in the working tree (gutted from 8940 → 3870 lines, the entire second half of the file). Also `js/OneShotSequencePreview.js` (untracked) referenced functions that didn't exist (`previewSequenceOneShot`/`previewCurrentTrackSequence` imported in main.js but the file only exports `previewActiveSequenceOneShot`), and `js/main.js`/`index.html`/`js/TrackContextMenu.js`/`js/eventHandlers.js` had partial in-progress wiring for this new feature. Restored all of those to HEAD with `git checkout HEAD -- <files>` and `rm js/OneShotSequencePreview.js`. The half-built feature had a broken import/export contract and would have broken the build if committed as-is. After recovery, `node --check` passes on all 525 js files and working tree is clean.
+- **Deployed site verification**: `curl https://snugos.github.io/snaw/js/main.js` confirms the `removeCustomDesktopBackground` fix is live.
+- **Syntax check**: `node --check` passes for all core modules (`main.js`, `state.js`, `eventHandlers.js`, `audio.js`, `ui.js`) and all 525 js files in `js/`.
+- **No active TODO/FIXME/XXX/HACK/STUB markers** found in `js/`.
+
+### Enhancement Shipped
+- **Shift+arrow tempo nudge for 1.0 BPM coarse step** (previously arrow keys only nudged by 0.1 BPM, which was fine for fine adjustments but tedious for large tempo changes). Now holding Shift while pressing arrow-left/arrow-right nudges the project tempo by 1.0 BPM per press, clamped to MIN_TEMPO/MAX_TEMPO. Plain arrow keys still nudge by 0.1 BPM for fine control.
+- **Files Modified**:
+  - `js/eventHandlers.js`: arrow-left/arrow-right handlers now compute `step = event.shiftKey ? 1.0 : 0.1`, then apply the same MIN/MAX clamp and update paths as before.
+  - `js/constants.js`: Bumped `APP_VERSION` from `0.3.44` to `0.3.45`.
+- **Commit**: `3819fd2 feat: Shift+arrow tempo nudge for 1.0 BPM coarse step (v0.3.45)`
+- **Version**: 0.3.45
+
+### Features Still in Progress:
+_None — all browser-implementable features currently implemented._
+
+### Next Features to Tackle:
+_None queued; the feature list is stable._
+
+---
+
 ## Session: 2026-06-17 00:45 UTC (Snaw Feature Completion Agent Run)
 
 **Status: NO INCOMPLETE FEATURES FOUND ✅ — TrackNotes enhancement committed**
