@@ -109,6 +109,8 @@ import { initTuner, openTunerPanel } from './Tuner.js';
 import { initLoopPracticeTrainer, openLoopPracticeTrainerPanel, checkLoopPracticeTrainer, initLoopPracticeTrainerStateReferences, resetLoopPracticeTrainer, getLoopPracticeTrainerStats } from './LoopPracticeTrainer.js';
 // Track Notes - per-track text notes (lyrics, mix notes, performance cues)
 import { initTrackNotes, openNotesPanel as openTrackNotesPanel, openNoteForCurrentTrack, openNoteForTrack, refreshIndicators as refreshTrackNoteIndicators } from './TrackNotes.js';
+// One-Shot Preview Pad - audition tracks without entering playback
+import { initOneShotPreviewPad, initOneShotPreviewPadStateReferences, openOneShotPreviewPadPanel, previewTrackOneShot, stopTrackOneShotPreview, stopAllOneShotPreviews, isTrackPreviewing } from './OneShotPreviewPad.js';
 // Guitar Tab Editor
 import { initGuitarTabEditor, openGuitarTabEditor } from './GuitarTabEditor.js';
 import { initTrackColorPanel, openTrackColorPanel } from './TrackColorPanel.js';
@@ -957,6 +959,11 @@ const appServices = {
     openNoteForCurrentTrack,
     openNoteForTrack,
     refreshTrackNoteIndicators,
+    openOneShotPreviewPadPanel,
+    previewTrackOneShot,
+    stopTrackOneShotPreview,
+    stopAllOneShotPreviews,
+    isTrackPreviewing,
     openDuplicateOffsetDialog,
     openTrackIconPickerPanel,
     openChordVoicingPanel,
@@ -1803,6 +1810,17 @@ async function initializeSnugOS() {
             () => getLoopRegionEnd()
         ); // Connect loop trainer to state functions
         if (typeof initTrackNotes === 'function') initTrackNotes(appServices); // Track Notes initialization
+        if (typeof initOneShotPreviewPad === 'function') initOneShotPreviewPad(appServices); // One-Shot Preview Pad initialization
+        if (typeof initOneShotPreviewPadStateReferences === 'function') initOneShotPreviewPadStateReferences(
+            () => getTracksState(),
+            () => getSoloedTrackIdState()
+        ); // Connect preview pad to track + solo state
+        // One-Shot Preview Pad: audition tracks without entering playback
+        if (typeof initOneShotPreviewPad === 'function') initOneShotPreviewPad(appServices);
+        if (typeof initOneShotPreviewPadStateReferences === 'function') initOneShotPreviewPadStateReferences(
+            () => (typeof getTracksState === 'function' ? getTracksState() : []),
+            () => (typeof getSoloedTrackIdState === 'function' ? getSoloedTrackIdState() : null)
+        );
         // After the timeline renders existing tracks, paint note indicators for any
         // persisted notes that didn't get a 'trackRendered' callback (initial load).
         setTimeout(() => { try { if (typeof refreshTrackNoteIndicators === 'function') refreshTrackNoteIndicators(); } catch (e) { /* ignore */ } }, 800);
