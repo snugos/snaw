@@ -1810,11 +1810,6 @@ async function initializeSnugOS() {
             () => getLoopRegionEnd()
         ); // Connect loop trainer to state functions
         if (typeof initTrackNotes === 'function') initTrackNotes(appServices); // Track Notes initialization
-        if (typeof initOneShotPreviewPad === 'function') initOneShotPreviewPad(appServices); // One-Shot Preview Pad initialization
-        if (typeof initOneShotPreviewPadStateReferences === 'function') initOneShotPreviewPadStateReferences(
-            () => getTracksState(),
-            () => getSoloedTrackIdState()
-        ); // Connect preview pad to track + solo state
         // One-Shot Preview Pad: audition tracks without entering playback
         if (typeof initOneShotPreviewPad === 'function') initOneShotPreviewPad(appServices);
         if (typeof initOneShotPreviewPadStateReferences === 'function') initOneShotPreviewPadStateReferences(
