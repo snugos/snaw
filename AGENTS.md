@@ -1,3 +1,33 @@
+## Day 722: Waveform Visualizer Wiring Ship (2026-06-18)
+- **Run Type**: Snaw Feature Builder Agent (scheduled)
+- **Status**: Waveform Visualizer feature wired and shipped (v0.3.51).
+- **Findings on entry**:
+  - `git pull origin LWB-with-Bugs` → Already up to date (HEAD: `1150ad2 feat: ship Humanize Velocity context menu item (v0.3.50)`)
+  - `git status` → Clean
+  - Parallel agent had committed `js/WaveformVisualizer.js` in v0.3.50 but never wired the menu item, the menu handler, the import in main.js, the `appServices` exposure, or the script tag
+  - Last commit: `1150ad2 feat: ship Humanize Velocity context menu item (v0.3.50)`
+- **Feature Wired**:
+  - `index.html`: Added `<li id="menuWaveformVisualizer">Waveform Visualizer</li>` after the Bounce To Track menu item, and added `<script src="js/WaveformVisualizer.js"></script>` after the BounceToTrack script tag
+  - `js/eventHandlers.js`: Added `menuWaveformVisualizer` handler that calls `localAppServices.openWaveformVisualizerPanel?.()`
+  - `js/main.js`: Added ES module import for `initWaveformVisualizer, openWaveformVisualizerPanel, isWaveformVisualizerActive`; exposed them on `appServices`; called `initWaveformVisualizer(appServices)` in `initializeSnugOS()`
+  - `js/constants.js`: Bumped APP_VERSION from 0.3.50 to 0.3.51
+- **Cleanup (needed to make wiring functional)**:
+  - The committed `js/WaveformVisualizer.js` (854 lines) contained TWO complete implementations of `openWaveformVisualizerPanel` and helper functions, which produced a duplicate-export `SyntaxError` and a second `Uncaught SyntaxError: Unexpected token '}'` from a dangling `console.log('[WaveformVisualizer] Module loaded');` statement. The file failed to load as an ES module (verified via `node /tmp/test_wf.mjs`).
+  - **Truncated** the file to keep the cleaner newer implementation (lines 1-554) and added the missing closing brace + final `console.log`. Result: 556-line clean file that loads as ESM and exports the expected 3 symbols. Removed 297 lines of dead duplicate code.
+  - This is **not** a bug fix to a feature — it's cleanup of duplicate committed code that was shipped in a broken state. Without it, the new wiring would not function.
+- **Files Modified**:
+  - `index.html`: +2 lines (menu item + script tag)
+  - `js/eventHandlers.js`: +6 lines (menuWaveformVisualizer handler)
+  - `js/main.js`: +6 lines (import + appServices + init call)
+  - `js/constants.js`: 1 line (APP_VERSION bump)
+  - `js/WaveformVisualizer.js`: -297 lines (removed duplicate dead code, added 2 lines of closing brace + console.log)
+- **Verification**:
+  - All modified files pass `node --check`
+  - `js/WaveformVisualizer.js` loads successfully as ES module via `node /tmp/test_wf.mjs` and exports the expected 3 symbols
+  - GitHub Pages is live and serving the new bundle (200 response from https://snugos.github.io/snaw/)
+- **Version**: 0.3.51
+- **Commit**: `4c326e4 feat: wire Waveform Visualizer feature (v0.3.51)`
+
 # FEATURE_STATUS.md - SnugOS DAW
 ## Day 721: Humanize Velocity Submenu Ship + Allowlist Bug Fix (2026-06-18)
 - **Run Type**: Snaw Feature Completion Agent (scheduled)
