@@ -20,6 +20,7 @@
 - `find js -name "*.js" -type f | wc -l` → 526 files
 - `find js -name "*.js" -type f -exec wc -l {} + | tail -1` → 266,451 total lines
 - No untracked orphan files — `js/OneShotPreviewPad.js` is fully wired (imported by `main.js:113`, exposed via appServices at `main.js:962`, initialized at `main.js:1814-1817`, menu item `menuOneShotPreviewPad` + `<script>` tag in `index.html`)
+- **Working-tree orphan (mid-session)**: After the docs commit (`1d2605d`), a new untracked file `js/BounceToTrack.js` (487 lines, 7 exports: `initBounceToTrack`, `isBounceToTrackActive`, `getLastBounceResult`, `bounceTrackToNewTrack`, `bounceAllSelectedToNewTracks`, `openBounceToTrackPanel`, `closeBounceToTrackPanel`) appeared in the working tree — likely authored by a parallel run. It is **not imported** by `main.js`, `index.html`, `eventHandlers.js`, or `ui.js` (no `<script>` tag, no `import` statement, no menu item wiring), so it is not loaded by the browser. This is the same unintegrated-module pattern as `OneShotSequencePreview.js` (Day 715, reverted) and `OneShotPreviewPad.js` (Day 717, quarantined then later wired up). Left untracked — not committed — for the user / a future run to wire up or delete. Does not affect the deployed site or the LWB-with-Bugs branch.
 - Current `APP_VERSION`: 0.3.47 (unchanged from Day 717)
 
 ### Feature Completed This Session:

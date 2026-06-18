@@ -13,6 +13,7 @@
     - `js/MIDIPatternVariationEnhancement.js:287` - Warning for unimplemented algorithms
   - Syntax validation (`node --check`) for all core modules passed
   - `js/OneShotPreviewPad.js` is fully wired (no longer an orphan): imported by `main.js:113`, exposed via appServices at `main.js:962`, initialized at `main.js:1814-1817`, menu item + script tag in `index.html`
+  - **Working-tree orphan (mid-session)**: A new untracked file `js/BounceToTrack.js` (487 lines, 7 exports) appeared after the docs commit `1d2605d`. Not imported by `main.js`/`index.html`/`eventHandlers.js`/`ui.js` — same unintegrated-module pattern as `OneShotSequencePreview.js` (Day 715) and `OneShotPreviewPad.js` (Day 717). Left untracked (not committed) for the user / a future run to wire up or delete.
   - Total files: 526 | Total lines: 266,451
 - **Action Taken**: Updated FEATURE_STATUS.md with session audit results. No code changes authored by this run.
 - **Commit**: (audit only — `7398168` was committed by a parallel run)
