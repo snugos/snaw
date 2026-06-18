@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.49"; // 2026-06-18 - Bounce To Track feature ship (v0.3.49)
+export const APP_VERSION = "0.3.50"; // 2026-06-18 - Humanize Velocity context menu item ship (v0.3.50)
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks
@@ -214,3 +214,12 @@ export const DRIFT_NOTES_MODES = [
     DRIFT_NOTES_MODE_RANDOM_PER_NOTE,
     DRIFT_NOTES_MODE_MIRROR
 ];
+// --- Humanize Velocity Constants ---
+// Used by Track.humanizeVelocity(amount) and the Humanize Velocity context menu submenu.
+export const HUMANIZE_VELOCITY_MIN_AMOUNT = 0.01;       // Minimum randomization (1% of velocity)
+export const HUMANIZE_VELOCITY_MAX_AMOUNT = 0.5;        // Maximum randomization (±50% of velocity)
+export const HUMANIZE_VELOCITY_DEFAULT_AMOUNT = 0.15;   // Default: 15% velocity variation
+export const HUMANIZE_VELOCITY_PRESET_SUBTLE = 0.05;    // Subtle preset (±5%)
+export const HUMANIZE_VELOCITY_PRESET_MEDIUM = 0.15;    // Medium preset (±15%)
+export const HUMANIZE_VELOCITY_PRESET_HEAVY = 0.30;     // Heavy preset (±30%)
+export const HUMANIZE_VELOCITY_PRESET_WILD = 0.50;      // Wild preset (±50%)

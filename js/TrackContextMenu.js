@@ -146,6 +146,17 @@ function showTrackContextMenu(x, y, trackId) {
                 <span class="w-4">📊</span>
                 <span>Velocity Response</span>
             </button>
+            <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="humanizeVelocityMenu" data-track-id="${trackId}">
+                <span class="w-4">🎲</span>
+                <span>Humanize Velocity</span>
+                <span class="ml-auto text-xs text-gray-500">▸</span>
+            </button>
+            <div id="humanizeVelocitySubmenu-${trackId}" class="hidden bg-gray-800 rounded mt-1 mb-1">
+                <button class="w-full text-left px-6 py-1.5 text-sm text-white hover:bg-gray-700" data-action="humanizeVelocity" data-amount="0.05" data-track-id="${trackId}">Subtle (±5%)</button>
+                <button class="w-full text-left px-6 py-1.5 text-sm text-white hover:bg-gray-700" data-action="humanizeVelocity" data-amount="0.15" data-track-id="${trackId}">Medium (±15%)</button>
+                <button class="w-full text-left px-6 py-1.5 text-sm text-white hover:bg-gray-700" data-action="humanizeVelocity" data-amount="0.30" data-track-id="${trackId}">Heavy (±30%)</button>
+                <button class="w-full text-left px-6 py-1.5 text-sm text-white hover:bg-gray-700" data-action="humanizeVelocity" data-amount="0.50" data-track-id="${trackId}">Wild (±50%)</button>
+            </div>
             <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="trackNote" data-track-id="${trackId}">
                 <span class="w-4">📝</span>
                 <span>Add/Edit Track Note</span>
@@ -186,8 +197,16 @@ function showTrackContextMenu(x, y, trackId) {
         btn.addEventListener('click', (e) => {
             const action = e.currentTarget.dataset.action;
             const tId = parseInt(e.currentTarget.dataset.trackId);
-            
-            handleTrackAction(action, tId);
+
+            // Submenu parent toggles its submenu and does NOT close the menu
+            if (action === 'humanizeVelocityMenu') {
+                e.stopPropagation();
+                const sub = menu.querySelector(`#humanizeVelocitySubmenu-${tId}`);
+                if (sub) sub.classList.toggle('hidden');
+                return;
+            }
+
+            handleTrackAction(action, tId, e.currentTarget);
             closeTrackContextMenu();
         });
     });
@@ -212,8 +231,9 @@ function closeTrackContextMenu() {
  * Handle track action from context menu
  * @param {string} action - Action to perform
  * @param {number} trackId - Track ID
+ * @param {HTMLElement} btn - Button element
  */
-function handleTrackAction(action, trackId) {
+function handleTrackAction(action, trackId, btn) {
     const track = localAppServices.getTrackById?.(trackId);
     if (!track) return;
     
@@ -327,6 +347,41 @@ function handleTrackAction(action, trackId) {
                 localAppServices.showNotification?.('Velocity Response not available', 2000);
             }
             break;
+
+        case 'humanizeVelocity': {
+            if (track.type === 'Audio') {
+                localAppServices.showNotification?.('Humanize is only available for sequencer tracks', 2000);
+                break;
+            }
+            const rawAmount = parseFloat(btn?.dataset?.amount);
+            const HUMANIZE_VELOCITY_MIN_AMOUNT = 0.01;
+            const HUMANIZE_VELOCITY_MAX_AMOUNT = 0.5;
+            const HUMANIZE_VELOCITY_DEFAULT_AMOUNT = 0.15;
+            const allowedAmounts = [0.05, 0.15, 0.3, 0.5];
+            let amount = Number.isFinite(rawAmount) ? rawAmount : HUMANIZE_VELOCITY_DEFAULT_AMOUNT;
+            if (!allowedAmounts.includes(amount)) {
+                // Snap unknown amount to the closest preset
+                allowedAmounts.sort((a, b) => Math.abs(a - amount) - Math.abs(b - amount));
+                amount = allowedAmounts[0];
+            }
+            amount = Math.min(HUMANIZE_VELOCITY_MAX_AMOUNT, Math.max(HUMANIZE_VELOCITY_MIN_AMOUNT, amount));
+            if (localAppServices.captureStateForUndo) {
+                localAppServices.captureStateForUndo(`Humanize Velocity (±${Math.round(amount * 100)}%) on ${track.name || 'Track'}`);
+            }
+            const affected = track.humanizeVelocity ? track.humanizeVelocity(amount) : 0;
+            if (affected > 0) {
+                if (typeof track.recreateToneSequence === 'function') {
+                    try { track.recreateToneSequence(true); } catch (e) { /* noop */ }
+                }
+                if (localAppServices.updateTrackUI) {
+                    localAppServices.updateTrackUI(trackId, 'sequencerContentChanged');
+                }
+                localAppServices.showNotification?.(`Humanized ${affected} note(s) (±${Math.round(amount * 100)}%)`, 2000);
+            } else {
+                localAppServices.showNotification?.('No notes to humanize', 1500);
+            }
+            break;
+        }
 
         case 'trackNote':
             if (localAppServices.openNoteForTrack) {
