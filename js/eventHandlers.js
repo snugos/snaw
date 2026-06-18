@@ -1493,6 +1493,14 @@ export function attachGlobalControlEvents(elements) {
     // Tempo Nudge Buttons
     if (tempoNudgeDown) {
         tempoNudgeDown.addEventListener("click", (event) => {
+            if (event.altKey) {
+                const newTempo = Constants.DEFAULT_TEMPO;
+                Tone.Transport.bpm.value = newTempo;
+                if (tempoGlobalInput) tempoGlobalInput.value = newTempo.toFixed(1);
+                if (localAppServices.updateTaskbarTempoDisplay) localAppServices.updateTaskbarTempoDisplay(newTempo);
+                localAppServices.captureStateForUndo?.(`Tempo reset to ${newTempo}`);
+                return;
+            }
             const step = event.shiftKey ? 1.0 : 0.1;
             const newTempo = Math.max(Constants.MIN_TEMPO, Tone.Transport.bpm.value - step);
             Tone.Transport.bpm.value = newTempo;
@@ -1503,6 +1511,14 @@ export function attachGlobalControlEvents(elements) {
     }
     if (tempoNudgeUp) {
         tempoNudgeUp.addEventListener("click", (event) => {
+            if (event.altKey) {
+                const newTempo = Constants.DEFAULT_TEMPO;
+                Tone.Transport.bpm.value = newTempo;
+                if (tempoGlobalInput) tempoGlobalInput.value = newTempo.toFixed(1);
+                if (localAppServices.updateTaskbarTempoDisplay) localAppServices.updateTaskbarTempoDisplay(newTempo);
+                localAppServices.captureStateForUndo?.(`Tempo reset to ${newTempo}`);
+                return;
+            }
             const step = event.shiftKey ? 1.0 : 0.1;
             const newTempo = Math.min(Constants.MAX_TEMPO, Tone.Transport.bpm.value + step);
             Tone.Transport.bpm.value = newTempo;

@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.47"; // 2026-06-18 - Feature agent: One-Shot Preview Pad - audition tracks without entering playback
+export const APP_VERSION = "0.3.48"; // 2026-06-18 - Feature agent: Alt+click tempo nudge reset
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks
@@ -8,6 +8,7 @@ export const MAX_BARS = 512; // Maximum number of bars a sequence can have
 
 export const MIN_TEMPO = 0; // Minimum tempo in BPM
 export const MAX_TEMPO = 999; // Maximum tempo in BPM
+export const DEFAULT_TEMPO = 120; // Default tempo for Alt+click reset on tempo nudge buttons
 
 // Note: Reversed for typical top-to-bottom piano roll display in a UI
 export const synthPitches = [
