@@ -113,6 +113,8 @@ import { initTrackNotes, openNotesPanel as openTrackNotesPanel, openNoteForCurre
 import { initOneShotPreviewPad, initOneShotPreviewPadStateReferences, openOneShotPreviewPadPanel, previewTrackOneShot, stopTrackOneShotPreview, stopAllOneShotPreviews, isTrackPreviewing } from './OneShotPreviewPad.js';
 // Bounce To Track - render track or selected clips to a new audio track
 import { initBounceToTrack, openBounceToTrackPanel, bounceSelectedToTrack, isBounceToTrackActive, getLastBounceResult } from './BounceToTrack.js';
+// Waveform Visualizer - draw waveform thumbnails + zoomable waveform for selected audio clip
+import { initWaveformVisualizer, openWaveformVisualizerPanel, isWaveformVisualizerActive } from './WaveformVisualizer.js';
 // Guitar Tab Editor
 import { initGuitarTabEditor, openGuitarTabEditor } from './GuitarTabEditor.js';
 import { initTrackColorPanel, openTrackColorPanel } from './TrackColorPanel.js';
@@ -970,6 +972,8 @@ const appServices = {
     bounceSelectedToTrack,
     isBounceToTrackActive,
     getLastBounceResult,
+    openWaveformVisualizerPanel,
+    isWaveformVisualizerActive,
     openDuplicateOffsetDialog,
     openTrackIconPickerPanel,
     openChordVoicingPanel,
@@ -1824,6 +1828,8 @@ async function initializeSnugOS() {
         );
         // Bounce To Track initialization
         if (typeof initBounceToTrack === 'function') initBounceToTrack(appServices);
+        // Waveform Visualizer initialization
+        if (typeof initWaveformVisualizer === 'function') initWaveformVisualizer(appServices);
         // After the timeline renders existing tracks, paint note indicators for any
         // persisted notes that didn't get a 'trackRendered' callback (initial load).
         setTimeout(() => { try { if (typeof refreshTrackNoteIndicators === 'function') refreshTrackNoteIndicators(); } catch (e) { /* ignore */ } }, 800);

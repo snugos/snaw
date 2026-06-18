@@ -758,6 +758,12 @@ export function initializePrimaryEventListeners(appContext) {
                     localAppServices.openBounceToTrackPanel?.();
                 } catch(e) { console.error('[Menu] Bounce To Track error:', e); }
             },
+            menuWaveformVisualizer: () => {
+                console.log('[Menu] Waveform Visualizer clicked');
+                try {
+                    localAppServices.openWaveformVisualizerPanel?.();
+                } catch(e) { console.error('[Menu] Waveform Visualizer error:', e); }
+            },
             menuLoopRegionSnap: () => {
                 console.log('[Menu] Loop Region Snap clicked');
                 try {
