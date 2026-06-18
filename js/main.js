@@ -111,6 +111,8 @@ import { initLoopPracticeTrainer, openLoopPracticeTrainerPanel, checkLoopPractic
 import { initTrackNotes, openNotesPanel as openTrackNotesPanel, openNoteForCurrentTrack, openNoteForTrack, refreshIndicators as refreshTrackNoteIndicators } from './TrackNotes.js';
 // One-Shot Preview Pad - audition tracks without entering playback
 import { initOneShotPreviewPad, initOneShotPreviewPadStateReferences, openOneShotPreviewPadPanel, previewTrackOneShot, stopTrackOneShotPreview, stopAllOneShotPreviews, isTrackPreviewing } from './OneShotPreviewPad.js';
+// Bounce To Track - render track or selected clips to a new audio track
+import { initBounceToTrack, openBounceToTrackPanel, bounceSelectedToTrack, isBounceToTrackActive, getLastBounceResult } from './BounceToTrack.js';
 // Guitar Tab Editor
 import { initGuitarTabEditor, openGuitarTabEditor } from './GuitarTabEditor.js';
 import { initTrackColorPanel, openTrackColorPanel } from './TrackColorPanel.js';
@@ -964,6 +966,10 @@ const appServices = {
     stopTrackOneShotPreview,
     stopAllOneShotPreviews,
     isTrackPreviewing,
+    openBounceToTrackPanel,
+    bounceSelectedToTrack,
+    isBounceToTrackActive,
+    getLastBounceResult,
     openDuplicateOffsetDialog,
     openTrackIconPickerPanel,
     openChordVoicingPanel,
@@ -1816,6 +1822,8 @@ async function initializeSnugOS() {
             () => (typeof getTracksState === 'function' ? getTracksState() : []),
             () => (typeof getSoloedTrackIdState === 'function' ? getSoloedTrackIdState() : null)
         );
+        // Bounce To Track initialization
+        if (typeof initBounceToTrack === 'function') initBounceToTrack(appServices);
         // After the timeline renders existing tracks, paint note indicators for any
         // persisted notes that didn't get a 'trackRendered' callback (initial load).
         setTimeout(() => { try { if (typeof refreshTrackNoteIndicators === 'function') refreshTrackNoteIndicators(); } catch (e) { /* ignore */ } }, 800);

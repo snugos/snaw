@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.48"; // 2026-06-18 - Feature agent: Alt+click tempo nudge reset
+export const APP_VERSION = "0.3.49"; // 2026-06-18 - Bounce To Track feature ship (v0.3.49)
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks

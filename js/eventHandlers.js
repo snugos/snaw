@@ -752,6 +752,12 @@ export function initializePrimaryEventListeners(appContext) {
                     localAppServices.openOneShotPreviewPadPanel?.();
                 } catch(e) { console.error('[Menu] One-Shot Preview Pad error:', e); }
             },
+            menuBounceToTrack: () => {
+                console.log('[Menu] Bounce To Track clicked');
+                try {
+                    localAppServices.openBounceToTrackPanel?.();
+                } catch(e) { console.error('[Menu] Bounce To Track error:', e); }
+            },
             menuLoopRegionSnap: () => {
                 console.log('[Menu] Loop Region Snap clicked');
                 try {
