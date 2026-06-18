@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.46"; // 2026-06-18 - Repair agent: Shift+click tempo nudge button (1.0 BPM coarse step)
+export const APP_VERSION = "0.3.47"; // 2026-06-18 - Feature agent: One-Shot Preview Pad - audition tracks without entering playback
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks
