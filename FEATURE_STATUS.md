@@ -1,5 +1,42 @@
 # FEATURE_STATUS.md - SnugOS DAW
 
+## Session: 2026-06-18 00:40 UTC (Snaw Feature Completion Agent Run — Day 719)
+
+**Status: NO INCOMPLETE FEATURES FOUND ✅ — Bounce To Track orphan wired up + shipped (by parallel run, v0.3.49)**
+
+### Automated Scan Results:
+- `git pull origin LWB-with-Bugs` → Already up to date (on entry); fetched again mid-session and parallel run's `c205cd6` was already on `origin/LWB-with-Bugs`
+- `git status` (final) → Clean (working tree clean)
+- Last commit: `c205cd6 fix: ship Bounce To Track feature (v0.3.49) - render track or selected clips to new audio track`
+- Pattern sweeps (`TODO|FIXME|XXX|HACK|INCOMPLETE|STUB`) over `js/` returned no active-code hits
+- "Coming soon" / "not implemented" messages found only in intentional fallback locations:
+  - `js/PluginSystem.js:199` - Default implementation in base class
+  - `js/MIDIPatternVariationEnhancement.js:287` - Warning for unimplemented algorithms (intentional fallback)
+- Syntax validation (`node --check`) for core modules `js/audio.js`, `js/Track.js`, `js/state.js`, `js/ui.js`, `js/eventHandlers.js`, `js/effectsRegistry.js`, `js/SnugWindow.js`, `js/main.js`, `js/constants.js`, `js/TrackNotes.js`, `js/TrackContextMenu.js`, `js/OneShotPreviewPad.js`, `js/BounceToTrack.js` all passed
+- `find js -name "*.js" -type f | wc -l` → 527 files (+1 vs Day 718: `js/BounceToTrack.js` is now tracked)
+- `find js -name "*.js" -type f -exec wc -l {} + | tail -1` → 266,827 total lines
+- No untracked orphan files — the Day 718 orphan `js/BounceToTrack.js` is now fully wired (see Feature Completed below)
+- Current `APP_VERSION`: 0.3.49 (bumped from 0.3.47 by the parallel run's `c205cd6`)
+
+### Feature Completed This Session:
+- **Bounce To Track** (`js/BounceToTrack.js`, `index.html`, `js/eventHandlers.js`, `js/main.js`, `js/constants.js`) — the orphan flagged by the Day 718 audit is now wired up and shipped. The module renders a source track (or its selected audio clips) into a new audio track containing a single rendered clip. Sequencer tracks render via `Tone.Offline`; Audio tracks concat selected clips via `OfflineAudioContext`. A floating panel (`openBounceToTrackPanel`) shows source name/type/clip-count and a Bounce button.
+  - **Wiring**: `index.html:293` menu item `menuBounceToTrack` + `<script src="js/BounceToTrack.js">` tag at `index.html:383`; `eventHandlers.js:755` `menuBounceToTrack` handler calling `localAppServices.openBounceToTrackPanel?.()`; `main.js:114` ESM import of `initBounceToTrack`, `openBounceToTrackPanel`, `bounceSelectedToTrack`, `isBounceToTrackActive`, `getLastBounceResult`; `main.js:969-972` appServices exposure; `main.js:1826` `initBounceToTrack(appServices)` call in `initializeSnugOS`.
+  - **Import contract verified**: all 5 names imported by `main.js` exist as `export` declarations in `BounceToTrack.js` (the Day 718 note's claim of 7 exports including `bounceTrackToNewTrack` / `bounceAllSelectedToNewTracks` / `closeBounceToTrackPanel` was inaccurate — the actual exports are `initBounceToTrack`, `isBounceToTrackActive`, `getLastBounceResult`, `bounceSelectedToTrack`, `openBounceToTrackPanel`).
+  - **Module pattern**: same ESM-export + non-module `<script src>` tag pattern as the already-shipped `OneShotPreviewPad.js` (Day 717) and `TrackNotes.js` (Day 714). The `<script>` tag without `type="module"` fails silently in the browser on the `export` keyword; the actual load path is `main.js`'s `<script type="module">` ESM `import`. No regression.
+  - **Commit**: `c205cd6` (authored by a parallel Snaw Repair Agent run during this session, before this audit's `git add` executed). This run's `git commit` returned "nothing to commit, working tree clean" — the ship was already on `origin/LWB-with-Bugs`.
+- **Version**: 0.3.49 (bumped by the parallel run)
+
+### Features Still in Progress:
+_None — all browser-implementable features currently implemented._
+
+### Next Features to Tackle:
+_None queued; the feature list is stable._
+
+### Action Taken:
+Updated FEATURE_STATUS.md and AGENTS.md with Day 719 session audit results. Verified the Bounce To Track wiring (import/export contract, syntax, menu/panel wiring) and confirmed the parallel run's `c205cd6` ship is sound. No code changes authored by this run.
+
+---
+
 ## Session: 2026-06-18 00:30 UTC (Snaw Feature Completion Agent Run — Day 718)
 
 **Status: NO INCOMPLETE FEATURES FOUND ✅ — Duplicate-init dedup committed (by parallel run)**
