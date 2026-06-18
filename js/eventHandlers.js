@@ -1486,8 +1486,9 @@ export function attachGlobalControlEvents(elements) {
 
     // Tempo Nudge Buttons
     if (tempoNudgeDown) {
-        tempoNudgeDown.addEventListener("click", () => {
-            const newTempo = Math.max(Constants.MIN_TEMPO, Tone.Transport.bpm.value - 0.1);
+        tempoNudgeDown.addEventListener("click", (event) => {
+            const step = event.shiftKey ? 1.0 : 0.1;
+            const newTempo = Math.max(Constants.MIN_TEMPO, Tone.Transport.bpm.value - step);
             Tone.Transport.bpm.value = newTempo;
             if (tempoGlobalInput) tempoGlobalInput.value = newTempo.toFixed(1);
             if (localAppServices.updateTaskbarTempoDisplay) localAppServices.updateTaskbarTempoDisplay(newTempo);
@@ -1495,8 +1496,9 @@ export function attachGlobalControlEvents(elements) {
         });
     }
     if (tempoNudgeUp) {
-        tempoNudgeUp.addEventListener("click", () => {
-            const newTempo = Math.min(Constants.MAX_TEMPO, Tone.Transport.bpm.value + 0.1);
+        tempoNudgeUp.addEventListener("click", (event) => {
+            const step = event.shiftKey ? 1.0 : 0.1;
+            const newTempo = Math.min(Constants.MAX_TEMPO, Tone.Transport.bpm.value + step);
             Tone.Transport.bpm.value = newTempo;
             if (tempoGlobalInput) tempoGlobalInput.value = newTempo.toFixed(1);
             if (localAppServices.updateTaskbarTempoDisplay) localAppServices.updateTaskbarTempoDisplay(newTempo);
