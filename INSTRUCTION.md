@@ -31,17 +31,22 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 - **Tuner** - Live microphone pitch detection panel with note/frequency/cents display ✅
 - **Detune Per-Track** - Per-track fine detune (±100 cents) via Tone.PitchShift for parallel layering and stereo width tricks ✅
 - **Loop Practice Trainer** - Set loop region, count loops, track best/avg time-to-nail ✅
+- **Track Notes Panel** - Per-track text notes (lyrics, mix notes, performance cues) stored in project ✅
+- **One-Shot Preview Pad** - Click a pad to hear a track's currently active sequence without entering playback ✅
+- **MIDI Panic Button** - Send all-notes-off + reset controllers to all MIDI outputs (one-click panic) ✅
+- **Step Sequencer Note Length** - Set default note length per step in the step sequencer (e.g., 1/16, 1/8, 1/4) ✅
+- **Bounce To Track** - Render a track or selected clips to a new audio track in place ✅
 
 ## Current Feature Queue
 
-1. **Track Notes Panel** - Per-track text notes (lyrics, mix notes, performance cues) stored in project
-2. **One-Shot Preview Pad** - Click a pad to hear a track's currently active sequence without entering playback
-3. **Bounce To Track** - Render selected tracks/clips to a new audio track in place
-4. **MIDI Panic Button** - Send all-notes-off + reset controllers to all MIDI outputs (one-click panic)
-5. **Drum Kit Piece Selector** - Quickly swap drum kit pieces in a Sampler (Pads) track from a curated list
-6. **Loudness Meter (LUFS)** - Show integrated/short-term LUFS on master with true-peak readout
-7. **Sends Overview Panel** - Visual matrix of send levels from every track to every send bus
-8. **Step Sequencer Note Length** - Set default note length per step in the step sequencer (e.g., 1/16, 1/8, 1/4)
+1. **Drum Kit Piece Selector** - Quickly swap drum kit pieces in a Sampler (Pads) track from a curated list
+2. **Loudness Meter (LUFS)** - Show integrated/short-term LUFS on master with true-peak readout
+3. **Sends Overview Panel** - Visual matrix of send levels from every track to every send bus
+4. **Mark Track As Bass / Drums / Vocal** - Quick-classify tracks for smart mix presets
+5. **Export Region Selection** - Export a specific time region (between two markers) instead of the full project
+6. **Loop Until Marker** - Auto-extend loop region to next timeline marker
+7. **Project Search** - Search all track names + clip names + notes for a substring
+8. **Master Limiter Toggle** - Quick on/off for a brick-wall master limiter to catch overs
 
 ## Workflow
 
