@@ -2114,7 +2114,8 @@ document.addEventListener('keydown', (event) => {
         }
         if (key === 'arrowleft') {
             const currentTempo = Tone.Transport.bpm.value;
-            const newTempo = Math.max(Constants.MIN_TEMPO, currentTempo - 0.1);
+            const step = event.shiftKey ? 1.0 : 0.1;
+            const newTempo = Math.max(Constants.MIN_TEMPO, currentTempo - step);
             Tone.Transport.bpm.value = newTempo;
             if (localAppServices.updateTaskbarTempoDisplay) localAppServices.updateTaskbarTempoDisplay(newTempo);
             const input = localAppServices.uiElementsCache?.tempoGlobalInput;
@@ -2123,7 +2124,8 @@ document.addEventListener('keydown', (event) => {
         }
         if (key === 'arrowright') {
             const currentTempo = Tone.Transport.bpm.value;
-            const newTempo = Math.min(Constants.MAX_TEMPO, currentTempo + 0.1);
+            const step = event.shiftKey ? 1.0 : 0.1;
+            const newTempo = Math.min(Constants.MAX_TEMPO, currentTempo + step);
             Tone.Transport.bpm.value = newTempo;
             if (localAppServices.updateTaskbarTempoDisplay) localAppServices.updateTaskbarTempoDisplay(newTempo);
             const input = localAppServices.uiElementsCache?.tempoGlobalInput;

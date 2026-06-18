@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.44"; // 2026-06-17 - Repair agent: ship in-progress Track Notes feature (per-track text notes, start menu + right-click)
+export const APP_VERSION = "0.3.45"; // 2026-06-17 - Repair agent: Shift+arrow tempo nudge (1.0 BPM coarse step)
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks
