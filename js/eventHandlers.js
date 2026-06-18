@@ -746,6 +746,12 @@ export function initializePrimaryEventListeners(appContext) {
                     localAppServices.openTrackNotesPanel?.();
                 } catch(e) { console.error('[Menu] Track Notes error:', e); }
             },
+            menuOneShotPreviewPad: () => {
+                console.log('[Menu] One-Shot Preview Pad clicked');
+                try {
+                    localAppServices.openOneShotPreviewPadPanel?.();
+                } catch(e) { console.error('[Menu] One-Shot Preview Pad error:', e); }
+            },
             menuLoopRegionSnap: () => {
                 console.log('[Menu] Loop Region Snap clicked');
                 try {
