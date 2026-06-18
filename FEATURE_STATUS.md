@@ -1,5 +1,35 @@
 # FEATURE_STATUS.md - SnugOS DAW
 
+## Session: 2026-06-18 00:10 UTC (Snaw Repair Agent Run — Day 717)
+
+**Status: PRIORITY 1 BUG ALREADY FIXED ✅ + Working-tree orphan quarantined + Small enhancement shipped**
+
+### Repair Findings
+- **Reported bug**: `main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground is not defined`
+- **Status**: Already fixed (verified, no reproduction). The function is defined at `js/main.js:282` as a hoisted module-level `async function removeCustomDesktopBackground()`, exposed on `appServices` (line 417, 866), on `window` (line 1458), and called from `eventHandlers.js:230-234` with proper `localAppServices.removeCustomDesktopBackground ?? window.removeCustomDesktopBackground` guards. `node --check js/main.js` passes. No work needed for the reported bug.
+- **Deployed site verification**: `curl https://snugos.github.io/snaw/js/main.js` confirms the fix is live from prior runs.
+- **Working-tree quarantine**: Found one untracked file `js/OneShotPreviewPad.js` (437 lines) that exports `initOneShotPreviewPad`, `openOneShotPreviewPadPanel`, etc., but is **never imported** by `index.html`, `main.js`, or any other file. This is the same pattern the Day 715 agent had to revert (`OneShotSequencePreview.js` with broken import/export contract). The file is left in the working tree (untracked, not committed) and explicitly excluded from this commit. The user's existing todo list still says "no features queued," and shipping an unintegrated module would just create another half-wired feature to clean up later.
+- **Syntax check**: `node --check` passes for all core modules (`main.js`, `state.js`, `eventHandlers.js`, `audio.js`, `ui.js`, `constants.js`).
+- **No active TODO/FIXME/XXX/HACK/STUB markers** found in `js/`.
+
+### Enhancement Shipped
+- **Shift+click tempo nudge button for 1.0 BPM coarse step** (v0.3.46). The on-screen +/− tempo nudge buttons previously only stepped by 0.1 BPM per click. The keyboard arrow-left/arrow-right handler (added Day 715) already supported Shift for a 1.0 BPM coarse step; this commit extends the same Shift+step behavior to the on-screen nudge buttons so the two control surfaces are consistent.
+  - Plain click on +/− buttons: nudge by 0.1 BPM (unchanged)
+  - Shift+click on +/− buttons: nudge by 1.0 BPM (new)
+- **Files Modified**:
+  - `js/eventHandlers.js`: Both `tempoNudgeDown` and `tempoNudgeUp` click handlers now receive the `MouseEvent` and compute `step = event.shiftKey ? 1.0 : 0.1`, then apply the same MIN/MAX clamp and update paths as before.
+  - `js/constants.js`: Bumped `APP_VERSION` from `0.3.45` to `0.3.46`.
+- **Commit**: `f845aad feat: Shift+click tempo nudge button for 1.0 BPM coarse step (v0.3.46)`
+- **Deployed site verification**: After 30s, `curl https://snugos.github.io/snaw/js/eventHandlers.js` shows the new `(event) => { const step = event.shiftKey ? 1.0 : 0.1; ... }` pattern, and `curl .../js/constants.js` shows `APP_VERSION = "0.3.46"`. The change is live.
+
+### Features Still in Progress:
+_None — all browser-implementable features currently implemented._
+
+### Next Features to Tackle:
+_None queued; the feature list is stable._
+
+---
+
 ## Session: 2026-06-18 00:10 UTC (Snaw Feature Completion Agent Run — Day 716)
 
 **Status: NO INCOMPLETE FEATURES FOUND ✅ — Repository clean, audit only**
