@@ -157,6 +157,18 @@ function showTrackContextMenu(x, y, trackId) {
                 <button class="w-full text-left px-6 py-1.5 text-sm text-white hover:bg-gray-700" data-action="humanizeVelocity" data-amount="0.30" data-track-id="${trackId}">Heavy (±30%)</button>
                 <button class="w-full text-left px-6 py-1.5 text-sm text-white hover:bg-gray-700" data-action="humanizeVelocity" data-amount="0.50" data-track-id="${trackId}">Wild (±50%)</button>
             </div>
+            ${trackType !== 'Audio' ? `
+            <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="trillNotesMenu" data-track-id="${trackId}">
+                <span class="w-4">🎵</span>
+                <span>Trill Notes</span>
+                <span class="ml-auto text-xs text-gray-500">▸</span>
+            </button>
+            <div id="trillNotesSubmenu-${trackId}" class="hidden bg-gray-800 rounded mt-1 mb-1">
+                <button class="w-full text-left px-6 py-1.5 text-sm text-white hover:bg-gray-700" data-action="trillNotes" data-direction="up" data-taps="6" data-interval="2" data-track-id="${trackId}">Trill Up (±2 st, 6 taps)</button>
+                <button class="w-full text-left px-6 py-1.5 text-sm text-white hover:bg-gray-700" data-action="trillNotes" data-direction="down" data-taps="6" data-interval="2" data-track-id="${trackId}">Trill Down (±2 st, 6 taps)</button>
+                <button class="w-full text-left px-6 py-1.5 text-sm text-white hover:bg-gray-700" data-action="trillNotes" data-direction="both" data-taps="8" data-interval="2" data-track-id="${trackId}">Trill Both (±2 st, 8 taps)</button>
+            </div>
+            ` : ''}
             <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="trackNote" data-track-id="${trackId}">
                 <span class="w-4">📝</span>
                 <span>Add/Edit Track Note</span>
@@ -202,6 +214,12 @@ function showTrackContextMenu(x, y, trackId) {
             if (action === 'humanizeVelocityMenu') {
                 e.stopPropagation();
                 const sub = menu.querySelector(`#humanizeVelocitySubmenu-${tId}`);
+                if (sub) sub.classList.toggle('hidden');
+                return;
+            }
+            if (action === 'trillNotesMenu') {
+                e.stopPropagation();
+                const sub = menu.querySelector(`#trillNotesSubmenu-${tId}`);
                 if (sub) sub.classList.toggle('hidden');
                 return;
             }
@@ -379,6 +397,35 @@ function handleTrackAction(action, trackId, btn) {
                 localAppServices.showNotification?.(`Humanized ${affected} note(s) (±${Math.round(amount * 100)}%)`, 2000);
             } else {
                 localAppServices.showNotification?.('No notes to humanize', 1500);
+            }
+            break;
+        }
+
+        case 'trillNotes': {
+            if (track.type === 'Audio') {
+                localAppServices.showNotification?.('Trill is only available for sequencer tracks', 2000);
+                break;
+            }
+            const tapsRaw = parseFloat(btn?.dataset?.taps);
+            const intervalRaw = parseFloat(btn?.dataset?.interval);
+            const direction = btn?.dataset?.direction || 'up';
+            const taps = Number.isFinite(tapsRaw) ? tapsRaw : 6;
+            const interval = Number.isFinite(intervalRaw) ? intervalRaw : 2;
+            const velocityFactor = 0.95;
+            if (localAppServices.captureStateForUndo) {
+                localAppServices.captureStateForUndo(`Trill Notes (${direction}, ${taps} taps, ±${interval} st) on ${track.name || 'Track'}`);
+            }
+            const affected = track.trillNotes ? track.trillNotes(taps, interval, velocityFactor, direction, true) : 0;
+            if (affected > 0) {
+                if (typeof track.recreateToneSequence === 'function') {
+                    try { track.recreateToneSequence(true); } catch (e) { /* noop */ }
+                }
+                if (localAppServices.updateTrackUI) {
+                    localAppServices.updateTrackUI(trackId, 'sequencerContentChanged');
+                }
+                localAppServices.showNotification?.(`Trilled ${affected} note(s) (${direction})`, 2000);
+            } else {
+                localAppServices.showNotification?.('No notes to trill', 1500);
             }
             break;
         }
