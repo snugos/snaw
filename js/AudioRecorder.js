@@ -257,3 +257,101 @@ export function getRecordingStatus() {
     }
     return { isRecording, duration };
 }
+
+// --- Audio Recording Panel UI ---
+let isPanelOpen = false;
+const WINDOW_ID = 'audioRecordingPanel';
+const PANEL_CONTENT_ID = 'audioRecordingPanelContent';
+
+export function openAudioRecordingPanel() {
+    if (isPanelOpen && localAppServices.getOpenWindows) {
+        const openWindows = localAppServices.getOpenWindows();
+        if (openWindows.has(WINDOW_ID)) {
+            openWindows.get(WINDOW_ID).restore?.();
+            renderPanelContent();
+            return openWindows.get(WINDOW_ID);
+        }
+    }
+
+    const contentContainer = document.createElement('div');
+    contentContainer.id = PANEL_CONTENT_ID;
+    contentContainer.className = 'p-4 h-full flex flex-col bg-gray-900 text-white overflow-y-auto';
+
+    const options = {
+        width: 380,
+        height: 280,
+        minWidth: 320,
+        minHeight: 240,
+        initialContentKey: WINDOW_ID,
+        closable: true,
+        minimizable: true,
+        resizable: true
+    };
+
+    const win = localAppServices.createWindow?.(WINDOW_ID, 'Audio Recording', contentContainer, options);
+    if (win?.element) {
+        isPanelOpen = true;
+        renderPanelContent();
+    }
+    return win;
+}
+
+export function isAudioRecordingPanelOpen() {
+    return isPanelOpen;
+}
+
+function renderPanelContent() {
+    const container = document.getElementById(PANEL_CONTENT_ID);
+    if (!container) return;
+
+    const tracks = (localAppServices.getTracksState?.() || []).filter(t => t && t.type === 'Audio');
+    const trackOptions = tracks.length === 0
+        ? '<option value="">(no Audio tracks — create one first)</option>'
+        : tracks.map(t => `<option value="${t.id}">${t.name || ('Track ' + t.id)}</option>`).join('');
+
+    const statusText = isRecording ? '🔴 Recording…' : 'Idle';
+
+    container.innerHTML = `
+        <div class="mb-3 text-sm text-gray-300">
+            Record audio from your microphone into an Audio track. The recording will be inserted at the current playhead position when stopped.
+        </div>
+        <label class="block text-xs text-gray-400 mb-1" for="recTrackSelect">Target Track</label>
+        <select id="recTrackSelect" class="w-full mb-4 px-2 py-2 rounded bg-gray-800 border border-gray-700 text-white text-sm">
+            ${trackOptions}
+        </select>
+        <div class="flex items-center gap-3 mb-3">
+            <button id="recStartBtn" class="px-4 py-2 rounded bg-red-600 hover:bg-red-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold">● Start Recording</button>
+            <button id="recStopBtn" class="px-4 py-2 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold" disabled>■ Stop</button>
+        </div>
+        <div id="recStatus" class="text-xs text-gray-400">Status: ${statusText}</div>
+    `;
+
+    const startBtn = container.querySelector('#recStartBtn');
+    const stopBtn = container.querySelector('#recStopBtn');
+    const trackSelect = container.querySelector('#recTrackSelect');
+    const statusDiv = container.querySelector('#recStatus');
+
+    function refreshButtons() {
+        startBtn.disabled = isRecording || tracks.length === 0;
+        stopBtn.disabled = !isRecording;
+        statusDiv.textContent = 'Status: ' + (isRecording ? '🔴 Recording…' : 'Idle');
+    }
+
+    startBtn.addEventListener('click', async () => {
+        const trackId = trackSelect.value;
+        if (!trackId) {
+            localAppServices.showNotification?.('Please select an Audio track first', 2000);
+            return;
+        }
+        await startRecording(trackId);
+        refreshButtons();
+    });
+
+    stopBtn.addEventListener('click', () => {
+        stopRecording();
+        // Status updates on mediaRecorder.onstop; give it a moment then refresh
+        setTimeout(refreshButtons, 250);
+    });
+
+    refreshButtons();
+}

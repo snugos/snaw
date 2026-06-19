@@ -764,6 +764,12 @@ export function initializePrimaryEventListeners(appContext) {
                     localAppServices.openWaveformVisualizerPanel?.();
                 } catch(e) { console.error('[Menu] Waveform Visualizer error:', e); }
             },
+            menuAudioRecording: () => {
+                console.log('[Menu] Audio Recording clicked');
+                try {
+                    localAppServices.openAudioRecordingPanel?.();
+                } catch(e) { console.error('[Menu] Audio Recording error:', e); }
+            },
             menuDrumKitPieceSelector: () => {
                 console.log('[Menu] Drum Kit Piece Selector clicked');
                 try {

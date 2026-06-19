@@ -68,7 +68,7 @@ import { initMidiVelocityEditor, openMidiVelocityEditorPanel, setSelectedNotesVe
 import { initCCStepSequencer, openCCStepSequencer, getCCPatternData, setCCPatternData } from './CCStepSequencer.js';
 import { initScaleHighlightMode, openScaleHighlightPanel, isNoteInScale, getNoteScaleClass, quantizeNoteToScale } from './ScaleHighlightMode.js';
 import { initScaleHighlightGlobal, openScaleHighlightGlobalPanel, toggleGlobalScaleHighlight, setGlobalScale, setGlobalRootNote, isGlobalScaleHighlightEnabled } from './ScaleHighlightGlobal.js';
-import { initAudioRecorder, startRecording, stopRecording, isRecordingActive, requestMicAccess, getRecordingStatus, cleanupRecording } from './AudioRecorder.js';
+import { initAudioRecorder, startRecording, stopRecording, isRecordingActive, requestMicAccess, getRecordingStatus, cleanupRecording, openAudioRecordingPanel } from './AudioRecorder.js';
 import { initBounceSelectedToAudio, bounceSelectedClipsToAudio, openBounceDialog } from './BounceSelectedToAudio.js';
 import { initKeyboardOctaveShift, getCurrentOctaveShift, setOctaveShift, resetOctaveShift } from './KeyboardOctaveShift.js';
 import { initTimelineZoomMemory, getStoredZoom, saveZoom } from './TimelineZoomMemory.js';
@@ -1106,6 +1106,7 @@ const appServices = {
     requestMicAccess,
     getRecordingStatus,
     cleanupRecording,
+    openAudioRecordingPanel,
     
     // Bounce Selected to Audio
     initBounceSelectedToAudio,
