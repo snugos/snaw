@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.56"; // 2026-06-19 - Notes count indicator in status bar (v0.3.56)
+export const APP_VERSION = "0.3.57"; // 2026-06-19 - Selection count + length status indicator (v0.3.57)
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks

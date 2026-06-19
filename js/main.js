@@ -2056,6 +2056,37 @@ function updatePerformanceStats() {
             }
             noteCountEl.textContent = totalNotes;
         }
+
+        // Update selection count + total selection length (mm:ss)
+        const selCountEl = document.getElementById('statusSelectionCountValue');
+        const selLenEl = document.getElementById('statusSelectionLengthValue');
+        if (selCountEl && selLenEl && typeof getTracksState === 'function') {
+            let selectedCount = 0;
+            let totalSelectionSeconds = 0;
+            try {
+                const selSet = (typeof appServices !== 'undefined' && typeof appServices.getSelectedClipIds === 'function')
+                    ? appServices.getSelectedClipIds()
+                    : null;
+                const allTracks = getTracksState();
+                if (Array.isArray(allTracks) && selSet && typeof selSet.has === 'function') {
+                    for (const t of allTracks) {
+                        if (!t || !Array.isArray(t.timelineClips)) continue;
+                        for (const clip of t.timelineClips) {
+                            if (!clip || !selSet.has(String(clip.id))) continue;
+                            selectedCount += 1;
+                            const dur = Number(clip.duration);
+                            if (Number.isFinite(dur) && dur > 0) totalSelectionSeconds += dur;
+                        }
+                    }
+                }
+            } catch (e) {
+                // Silently fall back to zero on any read error so the status bar stays usable
+            }
+            selCountEl.textContent = selectedCount;
+            const mins = Math.floor(totalSelectionSeconds / 60);
+            const secs = Math.floor(totalSelectionSeconds % 60);
+            selLenEl.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
     }
 }
 
