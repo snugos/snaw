@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.51"; // 2026-06-18 - Waveform Visualizer feature ship (v0.3.51)
+export const APP_VERSION = "0.3.53"; // 2026-06-18 - Clips count indicator in status bar (v0.3.53)
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks

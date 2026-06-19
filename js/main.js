@@ -1993,6 +1993,21 @@ function updatePerformanceStats() {
         if (trackCountEl && typeof getTracksState === 'function') {
             trackCountEl.textContent = getTracksState().length;
         }
+
+        // Update clip count (sum of timelineClips across all tracks)
+        const clipCountEl = document.getElementById('statusClipCountValue');
+        if (clipCountEl && typeof getTracksState === 'function') {
+            const allTracks = getTracksState();
+            let totalClips = 0;
+            if (Array.isArray(allTracks)) {
+                for (const t of allTracks) {
+                    if (t && Array.isArray(t.timelineClips)) {
+                        totalClips += t.timelineClips.length;
+                    }
+                }
+            }
+            clipCountEl.textContent = totalClips;
+        }
     }
 }
 
