@@ -115,6 +115,8 @@ import { initOneShotPreviewPad, initOneShotPreviewPadStateReferences, openOneSho
 import { initBounceToTrack, openBounceToTrackPanel, bounceSelectedToTrack, isBounceToTrackActive, getLastBounceResult } from './BounceToTrack.js';
 // Waveform Visualizer - draw waveform thumbnails + zoomable waveform for selected audio clip
 import { initWaveformVisualizer, openWaveformVisualizerPanel, isWaveformVisualizerActive } from './WaveformVisualizer.js';
+// Drum Kit Piece Selector - quickly load curated synthesized drum kit pieces into pads of a Sampler (Pads) track
+import { initDrumKitPieceSelector, openDrumKitPieceSelectorPanel, isDrumKitPieceSelectorActive, getDrumKitPieceList } from './DrumKitPieceSelector.js';
 // Guitar Tab Editor
 import { initGuitarTabEditor, openGuitarTabEditor } from './GuitarTabEditor.js';
 import { initTrackColorPanel, openTrackColorPanel } from './TrackColorPanel.js';
@@ -974,6 +976,9 @@ const appServices = {
     getLastBounceResult,
     openWaveformVisualizerPanel,
     isWaveformVisualizerActive,
+    openDrumKitPieceSelectorPanel,
+    isDrumKitPieceSelectorActive,
+    getDrumKitPieceList,
     openDuplicateOffsetDialog,
     openTrackIconPickerPanel,
     openChordVoicingPanel,
@@ -1846,6 +1851,8 @@ async function initializeSnugOS() {
         if (typeof initBounceToTrack === 'function') initBounceToTrack(appServices);
         // Waveform Visualizer initialization
         if (typeof initWaveformVisualizer === 'function') initWaveformVisualizer(appServices);
+        // Drum Kit Piece Selector initialization
+        if (typeof initDrumKitPieceSelector === 'function') initDrumKitPieceSelector(appServices);
         // After the timeline renders existing tracks, paint note indicators for any
         // persisted notes that didn't get a 'trackRendered' callback (initial load).
         setTimeout(() => { try { if (typeof refreshTrackNoteIndicators === 'function') refreshTrackNoteIndicators(); } catch (e) { /* ignore */ } }, 800);

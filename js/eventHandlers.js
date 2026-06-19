@@ -764,6 +764,12 @@ export function initializePrimaryEventListeners(appContext) {
                     localAppServices.openWaveformVisualizerPanel?.();
                 } catch(e) { console.error('[Menu] Waveform Visualizer error:', e); }
             },
+            menuDrumKitPieceSelector: () => {
+                console.log('[Menu] Drum Kit Piece Selector clicked');
+                try {
+                    localAppServices.openDrumKitPieceSelectorPanel?.();
+                } catch(e) { console.error('[Menu] Drum Kit Piece Selector error:', e); }
+            },
             menuLoopRegionSnap: () => {
                 console.log('[Menu] Loop Region Snap clicked');
                 try {
