@@ -12638,7 +12638,18 @@ export class Track {
         if (crossfade) {
             crossfade.curveType = curveType;
             crossfade.curvePoints = this.generateCrossfadeCurve(curveType);
-        
+        }
+    }
+
+    setCrossfadeDuration(crossfadeId, duration) {
+        if (!this.clipCrossfadeEditor) return;
+        const crossfade = this.clipCrossfadeEditor.crossfades.find(c => c.id === crossfadeId);
+        if (crossfade) {
+            const num = Number(duration);
+            crossfade.duration = (isFinite(num) && num > 0) ? num : this.clipCrossfadeEditor.defaultDuration;
+        }
+    }
+
     // Trill Notes - rapidly alternate source note with a neighbor (above or below) for `taps` cycles
     trillNotes(taps = Constants.TRILL_NOTES_DEFAULT_TAPS, interval = Constants.TRILL_NOTES_DEFAULT_INTERVAL, velocityFactor = Constants.TRILL_NOTES_DEFAULT_VELOCITY_FACTOR, direction = Constants.TRILL_NOTES_DIRECTION_UP, skipOccupied = true) {
         if (this.type === 'Audio') return 0;
@@ -12824,9 +12835,31 @@ export class Track {
         return driftedCount;
     }
 
-}
+    // Preview a pitch by name on this track's instrument (Synth/InstrumentSampler/Sampler).
+    // Used by UI hooks that want to audition a note without inserting it into the sequence.
+    // Returns true if the preview was triggered, false otherwise.
+    previewPitchFromName(pitchName, velocity = 0.8, duration = '8n') {
+        if (this.type === 'Audio') return false;
+        if (!pitchName || typeof pitchName !== 'string') return false;
+        const clampedVel = Math.max(0.05, Math.min(1, velocity || 0.8));
+        try {
+            if (this.type === 'Synth' || this.type === 'InstrumentSampler') {
+                if (this.instrument && !this.instrument.disposed && typeof this.instrument.triggerAttackRelease === 'function') {
+                    this.instrument.triggerAttackRelease(pitchName, duration, Tone.now(), clampedVel);
+                    return true;
+                }
+            } else if (this.type === 'Sampler') {
+                if (this.toneSampler && !this.toneSampler.disposed && typeof this.toneSampler.triggerAttackRelease === 'function') {
+                    this.toneSampler.triggerAttackRelease(Tone.Frequency(pitchName).toNote(), duration, Tone.now(), clampedVel);
+                    return true;
+                }
+            } else if (this.type === 'DrumSampler') {
+                // Drum pads use pad indices, not pitch names
+                return false;
+            }
+        } catch (e) {
+            console.warn(`[Track ${this.id}] previewPitchFromName error:`, e?.message || e);
+        }
+        return false;
     }
-
-    setCrossfadeDuration(crossfadeId, duration) {
-        if (!this.clipCrossfadeEditor) return;
-        const crossfade = this.clipCrossfadeEditor.crossfades.find(c => c.id === crossfadeId);
+}
