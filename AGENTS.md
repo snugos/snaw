@@ -1,3 +1,48 @@
+## Day 725 (Run 2): Note Count Indicator 2D-Array Bug Fix (2026-06-19)
+- **Run Type**: Snaw Feature Completion Agent (scheduled)
+- **Status**: Incomplete/broken feature found and fixed. The v0.3.56 Notes count indicator shipped non-functional — always displayed "Notes: 0". Fixed and pushed (v0.3.56, bug-fix commit).
+- **Findings on entry**:
+  - `git pull origin LWB-with-Bugs` (on entry) → Already up to date at `9a66607 docs: advance feature queue - Audio Recording panel shipped (v0.3.55)`
+  - `git status` (on entry) → Three modified files from a parallel run mid-flight: `index.html` (+5, `#statusNoteCount` block), `js/constants.js` (APP_VERSION bump 0.3.55 → 0.3.56), `js/main.js` (+20, note count update in `updatePerformanceStats`). The parallel run was building the "Notes count indicator" status bar feature.
+  - Last commit on entry: `9a66607 docs: advance feature queue - Audio Recording panel shipped (v0.3.55)`
+  - While this run was scanning, the parallel run committed `cb0b48a feat: Notes count indicator in status bar (v0.3.56)` to the remote (same pattern as Day 723's Clips count). This run stashed its local view, pulled `cb0b48a`, and inspected the **committed** version.
+  - TODO/FIXME/XXX/HACK/INCOMPLETE/STUB markers: None found in active code (`.backup` files ignored)
+  - "Coming soon"/"Not implemented" messages found only in intentional fallback locations (`js/PluginSystem.js:199` base-class default, `js/MIDIPatternVariationEnhancement.js:287` algorithm warning; `.backup` files ignored)
+  - Pre-existing `const abs = Math.abs(data[i];` syntax bug in `js/Track.js` (recurring on Days 713-721) — NOT present this run (line 3446 reads `const abs = Math.abs(audioData[i]);` with the correct closing paren — clean)
+  - Syntax validation (`node --check`) for all 15 core modules passed (audio.js, Track.js, state.js, ui.js, eventHandlers.js, effectsRegistry.js, SnugWindow.js, main.js, constants.js, TrackContextMenu.js, TrackNotes.js, BounceToTrack.js, OneShotPreviewPad.js, WaveformVisualizer.js, DrumKitPieceSelector.js)
+  - Total files: 529 (unchanged from Day 724) | Total lines: 268,257 (+125 vs Day 724's 268,132: the v0.3.56 Notes count indicator HTML + JS)
+  - No untracked orphan files (`git ls-files --others --exclude-standard -- 'js/*.js'` → empty)
+  - Current `APP_VERSION`: 0.3.56 (bumped from 0.3.55 by the parallel run's `cb0b48a`)
+- **Bug Found and Fixed This Run**: Note Count Indicator 2D-array iteration bug (v0.3.56)
+  - **What was broken**: The v0.3.56 commit `cb0b48a` added a "Notes:" count to the status bar (next to the v0.3.52 Tracks count and v0.3.53 Clips count) that sums active step notes across all instrument tracks' active sequences. However, the counting logic in `js/main.js` `updatePerformanceStats` iterated `activeSeq.data` as a flat list and checked `step.active` on each element — but `activeSeq.data` is a **2D array** (rows × cols), confirmed by `js/Track.js` `createNewSequence`: `const data = Array(numRows).fill(null).map(() => Array(length).fill(null));` with the comment "Create empty sequence data (2D array of nulls)". Iterating a 2D array yields **row arrays**, and a row array has no `.active` property, so `step.active` was always `undefined` and `totalNotes` was always **0**. The feature displayed "Notes: 0" regardless of how many notes were in the project — completely non-functional.
+  - **Confirmed against existing code**: `humanizeVelocity` and sibling methods in `js/Track.js` (lines ~3861, 3898, 3930) all access the data as `activeSeq.data.forEach(row => { ... const stepData = row[col]; if (stepData && stepData.active) ... })` — proving the 2D structure and the correct access pattern. The note count code was the only place that treated `data` as 1D.
+  - **Fix**: Replaced the flat loop with a nested loop in `js/main.js`:
+    ```js
+    // BEFORE (buggy — always 0):
+    for (const step of activeSeq.data) {
+        if (step && step.active) totalNotes += 1;
+    }
+    // AFTER (fixed):
+    for (const row of activeSeq.data) {
+        if (!Array.isArray(row)) continue;
+        for (const step of row) {
+            if (step && step.active) totalNotes += 1;
+        }
+    }
+    ```
+  - **Verified**: Wrote a Node ESM simulation (`/tmp/test_notecount.mjs`) with a 4-note 2D sequence — the fixed logic returns `4` (PASS), while the old logic returns `0`. `node --check js/main.js` passes. Deployed-site verification: `curl https://snugos.github.io/snaw/js/main.js` shows the fixed nested loop is live.
+  - **Files Modified This Run**:
+    - `js/main.js`: 6 insertions, 2 deletions in `updatePerformanceStats` note count block (the 2D-array fix + an explanatory comment)
+    - `FEATURE_STATUS.md`: Day 725 (Run 2) session entry prepended
+    - `AGENTS.md`: This entry prepended
+- **Commit**: `88b4644 fix: note count indicator counts 2D sequence data correctly (v0.3.56)` — atomic bug fix to the just-shipped v0.3.56 feature. No version bump (this is a fix to v0.3.56, same as the Day 721 Humanize Velocity allowlist fix was committed under v0.3.50).
+- **Verification**:
+  - All 15 core modules pass `node --check` (including the fixed `js/main.js`).
+  - Note count logic verified correct via simulation (4-note sequence → count 4).
+  - Fix is live on the deployed site (GitHub Pages serves the branch directly; no build step).
+  - APP_VERSION remains 0.3.56 (bug fix, not a new feature).
+- **Version**: 0.3.56 (unchanged — bug fix to the v0.3.56 feature)
+
 ## Day 725: Priority-1 Bug Already Fixed + DrumKitPieceSelector Push + Audio Recording Pull + Notes Count Indicator (2026-06-19)
 - **Run Type**: Snaw Feature Completion Agent (scheduled)
 - **Status**: Priority-1 bug (`removeCustomDesktopBackground is not defined`) already fixed in prior runs. Drum Kit Piece Selector commit pushed. Audio Recording panel pushed by parallel run. Notes count indicator pushed by parallel run.

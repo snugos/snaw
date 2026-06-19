@@ -1,4 +1,57 @@
 # FEATURE_STATUS.md - SnugOS DAW
+## Session: 2026-06-19 00:45 UTC (Snaw Feature Completion Agent Run — Day 725 / Run 2)
+
+**Status: INCOMPLETE/BROKEN FEATURE FOUND + FIXED ✅ — Note count indicator 2D-array bug fixed (v0.3.56)**
+
+### Automated Scan Results:
+- `git pull origin LWB-with-Bugs` (on entry) → Already up to date at `9a66607 docs: advance feature queue - Audio Recording panel shipped (v0.3.55)`
+- `git status` (on entry) → Three modified files from a parallel run mid-flight: `index.html` (+5, `#statusNoteCount` block), `js/constants.js` (APP_VERSION bump 0.3.55 → 0.3.56), `js/main.js` (+20, note count update in `updatePerformanceStats`). The parallel run was building the "Notes count indicator" feature.
+- While scanning, the parallel run committed `cb0b48a feat: Notes count indicator in status bar (v0.3.56)` to the remote. This run pulled `cb0b48a` and inspected the **committed** version.
+- Last commit on entry: `9a66607 docs: advance feature queue - Audio Recording panel shipped (v0.3.55)` → after pull: `cb0b48a feat: Notes count indicator in status bar (v0.3.56)`
+- Pattern sweeps (`TODO|FIXME|XXX|HACK|INCOMPLETE|STUB`) over `js/` (excluding `.backup` files) returned no active-code hits
+- "Coming soon" / "not implemented" messages found only in intentional fallback locations (`js/PluginSystem.js:199` base-class default, `js/MIDIPatternVariationEnhancement.js:287` algorithm warning; `.backup` files ignored)
+- Syntax validation (`node --check`) for all 15 core modules passed (`js/audio.js`, `js/Track.js`, `js/state.js`, `js/ui.js`, `js/eventHandlers.js`, `js/effectsRegistry.js`, `js/SnugWindow.js`, `js/main.js`, `js/constants.js`, `js/TrackContextMenu.js`, `js/TrackNotes.js`, `js/BounceToTrack.js`, `js/OneShotPreviewPad.js`, `js/WaveformVisualizer.js`, `js/DrumKitPieceSelector.js`)
+- `find js -name "*.js" -type f | wc -l` → 529 files (unchanged from Day 724)
+- `find js -name "*.js" -type f -exec wc -l {} + | tail -1` → 268,257 total lines (+125 vs Day 724's 268,132: the v0.3.56 Notes count indicator HTML + JS)
+- No untracked orphan files (`git ls-files --others --exclude-standard -- 'js/*.js'` → empty)
+- Pre-existing `const abs = Math.abs(data[i];` syntax bug in `js/Track.js` (recurring on Days 713-721) — NOT present this run (line 3446 reads `const abs = Math.abs(audioData[i]);` with the correct closing paren — clean)
+- Placeholder returns / disabled UI counts consistent with prior runs (all legitimate guard clauses / intentional state management)
+- No stub functions (console.log-only) found in core files
+- Current `APP_VERSION`: 0.3.56 (bumped from 0.3.55 by the parallel run's `cb0b48a`)
+
+### Incomplete/Broken Feature Found This Session:
+- **Note count indicator 2D-array iteration bug** (v0.3.56) — The parallel run's `cb0b48a` shipped a "Notes:" count in the status bar (sibling to the v0.3.52 Tracks count and v0.3.53 Clips count) that sums active step notes across all instrument tracks' active sequences. The counting logic in `js/main.js` `updatePerformanceStats` iterated `activeSeq.data` as a flat list and checked `step.active` on each element — but `activeSeq.data` is a **2D array** (rows × cols), confirmed by `js/Track.js` `createNewSequence`: `const data = Array(numRows).fill(null).map(() => Array(length).fill(null));` ("Create empty sequence data (2D array of nulls)"). Iterating a 2D array yields **row arrays**, which have no `.active` property, so `totalNotes` was always **0** — the indicator displayed "Notes: 0" no matter how many notes existed. Confirmed against `humanizeVelocity` and sibling methods in `js/Track.js` (lines ~3861, 3898, 3930) which all access the data correctly as `activeSeq.data.forEach(row => { ... row[col].active ... })`.
+
+### Feature Completed This Session:
+- **Note count indicator fix** (`js/main.js`) — replaced the flat loop with a nested loop so the count correctly iterates each row's steps:
+  - **BEFORE (buggy — always 0)**: `for (const step of activeSeq.data) { if (step && step.active) totalNotes += 1; }`
+  - **AFTER (fixed)**: `for (const row of activeSeq.data) { if (!Array.isArray(row)) continue; for (const step of row) { if (step && step.active) totalNotes += 1; } }`
+  - **Verified**: Node ESM simulation with a 4-note 2D sequence → fixed logic returns `4` (PASS); old logic returns `0`. `node --check js/main.js` passes. `curl https://snugos.github.io/snaw/js/main.js` confirms the fix is live on the deployed site.
+  - **Files modified this run**: `js/main.js` (6 insertions, 2 deletions in `updatePerformanceStats` note count block + explanatory comment); `FEATURE_STATUS.md` (this entry); `AGENTS.md` (Day 725 Run 2 entry).
+  - **Commit**: `88b4644 fix: note count indicator counts 2D sequence data correctly (v0.3.56)` — atomic bug fix. No version bump (fix to v0.3.56, matching the Day 721 precedent where the Humanize Velocity allowlist fix was committed under v0.3.50).
+
+### Files Modified This Run:
+- `js/main.js`: 2D-array iteration fix in note count block (6 insertions, 2 deletions)
+- `FEATURE_STATUS.md`: Day 725 (Run 2) session entry prepended
+- `AGENTS.md`: Day 725 (Run 2) entry prepended
+
+### Verification:
+- All 15 core modules pass `node --check` (including the fixed `js/main.js`).
+- Note count logic verified correct via simulation (4-note sequence → count 4; old logic → 0).
+- Fix is live on the deployed site (GitHub Pages serves the branch directly; no build step).
+- APP_VERSION remains 0.3.56 (bug fix, not a new feature).
+
+### Features Still in Progress:
+_None — all browser-implementable features currently implemented._
+
+### Next Features to Tackle:
+_None queued; the feature list is stable._
+
+### Action Taken:
+On entry, found a parallel run mid-flight building the v0.3.56 Notes count indicator. While scanning, the parallel run committed `cb0b48a`. This run pulled it and discovered the shipped feature was non-functional: the note count logic iterated the active sequence's 2D `data` array (rows × cols) as a flat list and checked `.active` on row arrays, so the count was always 0. Fixed with a nested loop, verified the fix via a Node simulation (4 notes → count 4), syntax-checked all 15 core modules, committed as `88b4644`, pushed to `origin/LWB-with-Bugs`, and confirmed the fix is live on the deployed site. Updated FEATURE_STATUS.md and AGENTS.md with the Day 725 (Run 2) audit + fix.
+
+---
+
 ## Session: 2026-06-19 00:30 UTC (Snaw Feature Completion Agent Run — Day 724)
 
 **Status: INCOMPLETE FEATURE FOUND + SHIPPED ✅ — Drum Kit Piece Selector panel wired + shipped (v0.3.54)**
