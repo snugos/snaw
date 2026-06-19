@@ -1,3 +1,35 @@
+## Day 725 (Run 3): Track.js In-Progress Patch Completion (2026-06-19)
+- **Run Type**: Snaw Repair & Enhancement Agent (scheduled, every 10 min)
+- **Status**: Incomplete/uncommitted `js/Track.js` patch found on entry from a previous parallel run mid-flight. The patch had been left in three broken states: a missing closing `}` on `setCrossfadeCurveType`, a `setCrossfadeDuration` stub with no body (the `duration` parameter was never applied), and a new `previewPitchFromName` method defined **outside** the `Track` class — meaning `this` would be `undefined` at call time and the method would be unreachable as a prototype method. All three issues fixed in one atomic commit; no APP_VERSION bump (bug fix, mirrors the Day 725 Run 2 precedent).
+- **Findings on entry**:
+  - `git pull origin LWB-with-Bugs` (on entry) → Already up to date at `f22cf49 docs: Day 725 Run 2 - note count indicator 2D-array bug fix (v0.3.56)`
+  - `git status` (on entry) → One modified file: `js/Track.js` (+33, -5). The local working tree held an in-progress patch that was never committed by the previous run; the same three-method block was authored on top of a class that closed early at line ~12827, leaving a stray `}` and dangling method definitions.
+  - The original Priority-1 bug from the run brief — `main.js:342 removeCustomDesktopBackground is not defined` — was already fixed in commit `6277b70` (Day 724 range) and verified live on the deployed site: the function is defined at `js/main.js:284` as a module-level hoisted `async function`, exposed on `appServices` and `window`, and `node --check js/main.js` passes.
+  - Syntax validation (`node --check`) for `js/main.js`, `js/state.js`, `js/eventHandlers.js` all pass on entry.
+  - `removeCustomDesktopBackground` is called from `js/eventHandlers.js:28` import and `js/eventHandlers.js:77` invocation, and the definition is in `js/main.js:284` — all consistent.
+- **Bug Found and Fixed This Run**: Track.js half-applied patch (v0.3.56, no version bump — bug fix)
+  - **What was broken**:
+    1. `setCrossfadeCurveType` (Track.js:12631) was missing its closing `}` (the body returned mid-statement at `crossfade.curvePoints = this.generateCrossfadeCurve(curveType);` and the method never closed). The diff-vs-committed text showed the closing `}` and the body braces that should have followed had been stripped, leaving the method as unterminated code.
+    2. `setCrossfadeDuration` (Track.js:12644, after fix) was a stub: it looked up the crossfade by id but never applied the `duration` parameter. The body ended at `const crossfade = this.clipCrossfadeEditor.crossfades.find(c => c.id === crossfadeId);` with no follow-up assignment.
+    3. `previewPitchFromName` was appended at the file level **after** the `export class Track { ... }` closing brace, so it was a free-floating function in module scope rather than a `Track.prototype` method. When called as `track.previewPitchFromName(...)`, JavaScript would treat the module-scope function as a property of the instance, but `this` inside the function body would be the instance — so the `this.type`, `this.instrument`, `this.toneSampler` lookups would still work, but the function would not be discoverable via `Track.prototype.previewPitchFromName` and would be lost on subclassing or `Object.assign(Track.prototype, …)` patterns. The intent was clearly to add it as the last method on the class.
+  - **Fix applied** (single `js/Track.js` patch, 39 insertions / 6 deletions):
+    - Re-closed `setCrossfadeCurveType` with the missing `}` pair.
+    - Implemented `setCrossfadeDuration(crossfadeId, duration)` with safe numeric coercion: `const num = Number(duration); crossfade.duration = (isFinite(num) && num > 0) ? num : this.clipCrossfadeEditor.defaultDuration;` — clamps to a positive finite number, falls back to the editor's configured `defaultDuration` (0.1s) on bad input. Mirrors the guard style of `setCrossfadeCurveType`.
+    - Moved `previewPitchFromName(pitchName, velocity = 0.8, duration = '8n')` from module scope to the last method on the `Track` class so it's a proper prototype method. Behavior unchanged: Synth / InstrumentSampler use `this.instrument.triggerAttackRelease`, Sampler uses `this.toneSampler.triggerAttackRelease(Tone.Frequency(pitchName).toNote(), …)`, DrumSampler returns `false` (pads are index-based, not pitch-based), Audio returns `false`. Catches and logs any Tone.js errors. Returns `true` only when a preview was actually triggered.
+    - Added a trailing newline to the file.
+  - **Verified**:
+    - `node --check js/Track.js` → passes
+    - `node --check js/main.js` → passes
+    - `node --check js/state.js` → passes
+    - `node --check js/eventHandlers.js` → passes
+    - Single `setCrossfadeDuration` definition (line 12644) and single `previewPitchFromName` definition (line 12841) confirmed via `grep -n`.
+    - Push to `origin/LWB-with-Bugs` succeeded; 30s wait + `curl https://snugos.github.io/snaw/js/Track.js` confirms the fix is live on the deployed site (deployed `setCrossfadeDuration` body matches the local committed version).
+- **Files modified this run**: `js/Track.js` (39 insertions, 6 deletions); `AGENTS.md` (this entry); `FEATURE_STATUS.md` (Day 725 Run 3 session entry).
+- **Commit**: `9b11b99 fix: complete setCrossfadeDuration body and move previewPitchFromName inside Track class (v0.3.56)`. No version bump (bug fix to v0.3.56, matching the Day 725 Run 2 precedent and the Day 721 Humanize Velocity allowlist fix precedent).
+- **Pre-existing bugs from the run brief**:
+  - ✅ `state.js:75` syntax error (preset objects missing closing braces) — already fixed in a prior run, `node --check js/state.js` passes.
+  - ✅ `main.js:342 removeCustomDesktopBackground is not defined` — already fixed in commit `6277b70`, function defined at `js/main.js:284`, `node --check js/main.js` passes, deployed site has the definition.
+
 ## Day 725 (Run 2): Note Count Indicator 2D-Array Bug Fix (2026-06-19)
 - **Run Type**: Snaw Feature Completion Agent (scheduled)
 - **Status**: Incomplete/broken feature found and fixed. The v0.3.56 Notes count indicator shipped non-functional — always displayed "Notes: 0". Fixed and pushed (v0.3.56, bug-fix commit).

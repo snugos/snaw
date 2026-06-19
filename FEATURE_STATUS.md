@@ -1,4 +1,63 @@
 # FEATURE_STATUS.md - SnugOS DAW
+## Session: 2026-06-19 01:05 UTC (Snaw Repair & Enhancement Agent Run — Day 725 / Run 3)
+
+**Status: INCOMPLETE PATCH COMPLETED ✅ — Track.js half-applied patch finished (v0.3.56, no version bump — bug fix)**
+
+### Automated Scan Results:
+- `git pull origin LWB-with-Bugs` (on entry) → Already up to date at `f22cf49 docs: Day 725 Run 2 - note count indicator 2D-array bug fix (v0.3.56)`
+- `git status` (on entry) → One modified file: `js/Track.js` (+33, -5). The previous parallel run had authored a patch on the `Track` class adding `setCrossfadeDuration` and `previewPitchFromName` but had never committed it; the working tree was left in three broken states: missing `}` on `setCrossfadeCurveType`, an empty `setCrossfadeDuration` body, and `previewPitchFromName` defined at module scope (after the class close) rather than as a prototype method.
+- The Priority-1 bug from the run brief — `main.js:342 removeCustomDesktopBackground is not defined` — was already fixed in a prior run (commit `6277b70` range, function defined at `js/main.js:284` as a module-level hoisted `async function`, exposed on `appServices` and `window`, called from `js/eventHandlers.js:28,77`). `node --check js/main.js` passes; deployed site has the definition.
+- The earlier `state.js:75` preset-objects-missing-closing-braces syntax error was already fixed in a prior run; `node --check js/state.js` passes.
+- Pattern sweeps (`TODO|FIXME|XXX|HACK|INCOMPLETE|STUB`) over `js/` (excluding `.backup` files) returned no active-code hits.
+- Syntax validation (`node --check`) for `js/main.js`, `js/state.js`, `js/eventHandlers.js` all passed on entry.
+- Pre-existing `const abs = Math.abs(data[i];` syntax bug in `js/Track.js` (recurring on Days 713-721) — NOT present this run (line 3446 reads `const abs = Math.abs(audioData[i]);` with the correct closing paren — clean).
+- No untracked orphan files (`git ls-files --others --exclude-standard -- 'js/*.js'` → empty).
+- `find js -name "*.js" -type f | wc -l` → 529 files (unchanged from Day 724).
+- Current `APP_VERSION`: 0.3.56 (no bump this run — bug fix to existing version, matching the Day 725 Run 2 and Day 721 precedents).
+
+### Incomplete Patch Found This Session:
+- **Track.js three-method block left half-applied** — A previous parallel run had been adding new methods to the `Track` class (`setCrossfadeDuration` and `previewPitchFromName`) plus cleaning up `setCrossfadeCurveType`, but stopped mid-edit and never committed. The working tree was left in three broken states:
+  1. `setCrossfadeCurveType` (Track.js:12631) was missing its closing `}` — the body returned mid-statement at `crossfade.curvePoints = this.generateCrossfadeCurve(curveType);` with no closing brace for the `if (crossfade)` block or the method itself. The next `setCrossfadeDuration` was being parsed as nested code inside the unclosed block.
+  2. `setCrossfadeDuration` was a stub — the body ended at `const crossfade = this.clipCrossfadeEditor.crossfades.find(c => c.id === crossfadeId);` with no follow-up assignment. Calling `track.setCrossfadeDuration(id, 2.5)` would do nothing — the duration was never persisted to the crossfade object.
+  3. `previewPitchFromName` was defined at module scope (after the `export class Track { ... }` closing brace at line ~12827, with a stray `}` at line ~12828 in between) — meaning it was a free-floating function in module scope rather than a `Track.prototype` method. The `this.type`, `this.instrument`, `this.toneSampler` lookups would have been `undefined` at runtime, causing a TypeError on any call.
+
+### Patch Completed This Session:
+- **Track.js three-method block** (`js/Track.js`) — single atomic commit that finishes the half-applied patch:
+  - **Re-closed `setCrossfadeCurveType`** by adding the missing `}` for the `if (crossfade)` block and the method. The body now correctly sets `crossfade.curveType = curveType; crossfade.curvePoints = this.generateCrossfadeCurve(curveType);` inside a guarded `if (crossfade)` block, then closes the method.
+  - **Implemented `setCrossfadeDuration(crossfadeId, duration)`** with safe numeric coercion: looks up the crossfade, then `crossfade.duration = (isFinite(num) && num > 0) ? num : this.clipCrossfadeEditor.defaultDuration;` where `num = Number(duration)`. Clamps to a positive finite number; falls back to the editor's configured `defaultDuration` (0.1s) on NaN / negative / zero / non-numeric input. Mirrors the guard style of `setCrossfadeCurveType`.
+  - **Moved `previewPitchFromName(pitchName, velocity = 0.8, duration = '8n')`** from module scope to the last method on the `Track` class so it's a proper prototype method. Behavior unchanged: Synth / InstrumentSampler use `this.instrument.triggerAttackRelease`; Sampler uses `this.toneSampler.triggerAttackRelease(Tone.Frequency(pitchName).toNote(), …)`; DrumSampler returns `false` (pads are index-based, not pitch-based); Audio returns `false`. Catches and logs any Tone.js errors via `console.warn`. Returns `true` only when a preview was actually triggered.
+  - **Added a trailing newline** to the file.
+  - **Verified**:
+    - `node --check js/Track.js` → passes
+    - `node --check js/main.js` → passes
+    - `node --check js/state.js` → passes
+    - `node --check js/eventHandlers.js` → passes
+    - `grep -n "setCrossfadeDuration\|previewPitchFromName" js/Track.js` → exactly one of each (line 12644 and line 12841 respectively)
+    - `git diff` is minimal and focused: 39 insertions, 6 deletions, all in `js/Track.js`
+    - Push to `origin/LWB-with-Bugs` succeeded (commit `9b11b99`); 30s wait + `curl https://snugos.github.io/snaw/js/Track.js` confirms the fix is live on the deployed site (deployed `setCrossfadeDuration` body at line 12644 matches the local committed version).
+
+### Files Modified This Run:
+- `js/Track.js`: Three-method block completion (39 insertions, 6 deletions)
+- `AGENTS.md`: Day 725 Run 3 entry prepended
+- `FEATURE_STATUS.md`: Day 725 Run 3 session entry (this entry)
+
+### Verification:
+- All 4 core modules pass `node --check` (`js/Track.js`, `js/main.js`, `js/state.js`, `js/eventHandlers.js`).
+- Single `setCrossfadeDuration` and single `previewPitchFromName` definition confirmed via grep.
+- Fix is live on the deployed site (GitHub Pages serves the branch directly; no build step).
+- APP_VERSION remains 0.3.56 (bug fix, not a new feature — same precedent as the Day 725 Run 2 note count fix and the Day 721 Humanize Velocity allowlist fix).
+
+### Features Still in Progress:
+_None — all browser-implementable features currently implemented._
+
+### Next Features to Tackle:
+_None queued; the feature list is stable._
+
+### Action Taken:
+On entry, found a half-applied uncommitted patch on `js/Track.js` from a previous parallel run. The patch was adding two new methods (`setCrossfadeDuration` and `previewPitchFromName`) and cleaning up `setCrossfadeCurveType`, but had been left in three broken states: a missing closing brace on `setCrossfadeCurveType`, an empty body on `setCrossfadeDuration` (duration was never applied), and `previewPitchFromName` defined outside the `Track` class (would throw at runtime due to undefined `this`). The Priority-1 bug from the run brief (`removeCustomDesktopBackground is not defined`) and the earlier `state.js:75` syntax error were both already fixed in prior runs and verified live. This run completed the half-applied patch: re-closed `setCrossfadeCurveType`, implemented `setCrossfadeDuration` with positive-numeric coercion, moved `previewPitchFromName` inside the class as a prototype method, syntax-checked all 4 core modules, committed as `9b11b99`, pushed to `origin/LWB-with-Bugs`, and confirmed the fix is live on the deployed site. Updated FEATURE_STATUS.md and AGENTS.md with the Day 725 Run 3 audit + fix.
+
+---
+
 ## Session: 2026-06-19 00:45 UTC (Snaw Feature Completion Agent Run — Day 725 / Run 2)
 
 **Status: INCOMPLETE/BROKEN FEATURE FOUND + FIXED ✅ — Note count indicator 2D-array bug fixed (v0.3.56)**
