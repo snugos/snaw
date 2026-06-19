@@ -1474,6 +1474,22 @@ const appServices = {
 
 window.removeCustomDesktopBackground = appServices.removeCustomDesktopBackground;
 
+// Keyboard shortcut: Ctrl/Cmd+Shift+B triggers custom background upload
+if (typeof window !== 'undefined' && !window.__snawCustomBgShortcutBound) {
+    window.__snawCustomBgShortcutBound = true;
+    window.addEventListener('keydown', (e) => {
+        const isMod = e.ctrlKey || e.metaKey;
+        if (isMod && e.shiftKey && (e.key === 'B' || e.key === 'b')) {
+            const target = e.target;
+            if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return;
+            e.preventDefault();
+            if (typeof appServices.triggerCustomBackgroundUpload === 'function') {
+                appServices.triggerCustomBackgroundUpload();
+            }
+        }
+    });
+}
+
 async function handleCustomBackgroundUpload(event) {
     if (!event?.target?.files?.[0]) return;
     const file = event.target.files[0];

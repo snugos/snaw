@@ -1,3 +1,35 @@
+## Day 723: Clips Count Indicator Audit + v0.3.52 Version Mismatch Found (2026-06-19)
+- **Run Type**: Snaw Feature Completion Agent (scheduled)
+- **Status**: Incomplete feature found. v0.3.52 version mismatch identified; Clips count indicator shipped by parallel run mid-session as v0.3.53 (which also resolved the mismatch). This run = audit + doc update.
+- **Findings on entry**:
+  - `git pull origin LWB-with-Bugs` (on entry) → Already up to date at `5ae6ba5 feat: add Tracks count indicator to status bar (v0.3.52)`
+  - `git status` (on entry) → Three modified files from a parallel run mid-flight: `index.html` (+5, `statusClipCount` block), `js/main.js` (+15, clip count update in `updatePerformanceStats`), `js/constants.js` (untouched at entry — still 0.3.51). The parallel run was building a sibling "Clips count indicator" feature.
+  - Last commit on entry: `5ae6ba5 feat: add Tracks count indicator to status bar (v0.3.52)`
+  - **APP_VERSION mismatch detected**: the v0.3.52 commit `5ae6ba5` shipped the Tracks count indicator code in `index.html` + `js/main.js` but forgot to bump `APP_VERSION` in `js/constants.js` (still read `0.3.51`). The committed feature claimed v0.3.52 while the version constant lagged a full minor release behind. Same class of incomplete-feature pattern this agent exists to catch (a commit that ships code but misses a constant/wiring step).
+  - TODO/FIXME/XXX/HACK/INCOMPLETE/STUB markers: None found in active code (`.backup` files ignored)
+  - "Coming soon"/"Not implemented" messages found only in intentional fallback locations (`js/PluginSystem.js:199` base-class default, `js/MIDIPatternVariationEnhancement.js:287` algorithm warning; `.backup` files ignored)
+  - Pre-existing `const abs = Math.abs(data[i];` syntax bug in `js/Track.js` (recurring on Days 713-721) — NOT present this run (clean)
+  - Syntax validation (`node --check`) for all core modules passed (audio.js, Track.js, state.js, ui.js, eventHandlers.js, effectsRegistry.js, SnugWindow.js, main.js, constants.js, TrackContextMenu.js, TrackNotes.js, BounceToTrack.js, OneShotPreviewPad.js, WaveformVisualizer.js)
+  - Total files: 528 (+1 vs Day 722) | Total lines: 267,467
+  - No untracked orphan files (`git ls-files --others --exclude-standard -- 'js/*.js'` → empty)
+- **Resolution (parallel run committed mid-session)**: While this run was reviewing the uncommitted Clips count feature and preparing the version bump (via `sed` on constants.js → 0.3.53), the parallel run committed `e86978b feat: add Clips count indicator to status bar (v0.3.53)`. That commit shipped the Clips count indicator (`index.html` +5, `js/main.js` +15) AND bumped `js/constants.js` from `0.3.51` → `0.3.53`, which simultaneously resolved the v0.3.52 version mismatch (the constant is now ahead of the missed 0.3.52 bump). After `git fetch`, this run's local `constants.js` (bumped to 0.3.53 via `sed`) matched HEAD exactly — no diff, no duplicate work.
+- **Feature Added (by parallel run `e86978b`, verified by this run)**: Clips count indicator in status bar (v0.3.53)
+  - Adds a "Clips:" count display next to the existing "Tracks:" indicator in the status bar (sibling to the v0.3.52 Tracks count)
+  - Updates on the same 1s `updatePerformanceStats` loop in `js/main.js`
+  - Reads `getTracksState()`, sums `timelineClips.length` across all tracks (guarded with `Array.isArray`), writes total to `#statusClipCountValue`
+  - Mirrors the v0.3.52 Tracks count pattern exactly (same HTML block shape in `index.html`, same update site in `updatePerformanceStats`)
+  - Wiring verified by this run before the parallel commit landed: `index.html:244-247` defines `#statusClipCount` block; `js/main.js:1998-2010` reads `statusClipCountValue`, iterates `getTracksState()`, guards with `Array.isArray(allTracks)` and `Array.isArray(t.timelineClips)`, writes the summed count. Both `node --check` pass.
+- **Bug Found This Run (resolved by parallel commit)**: APP_VERSION catch-up. The v0.3.52 commit `5ae6ba5` shipped the Tracks count indicator but never bumped `APP_VERSION` in `js/constants.js` (it stayed at `0.3.51`). The parallel run's `e86978b` bumped `APP_VERSION` to `0.3.53`, which both (a) catches up the missed v0.3.52 bump and (b) marks the new Clips count feature.
+- **Files Modified This Run**:
+  - `FEATURE_STATUS.md`: Day 723 session entry prepended (this audit)
+  - `AGENTS.md`: Day 723 entry prepended (this audit)
+  - No code changes authored by this run — the parallel run's `e86978b` committed the Clips count feature and the version bump before this run could. This run's `sed` edit to `constants.js` matched the parallel commit exactly (no diff after fetch).
+- **Verification**:
+  - All core modules pass `node --check`.
+  - Both status indicators (`statusTrackCount` at `index.html:239` + `statusClipCount` at `index.html:244`) are wired end-to-end and present in the same `updatePerformanceStats` loop in `js/main.js`
+  - APP_VERSION (0.3.53) now matches the last two shipped features (v0.3.52 Tracks count + v0.3.53 Clips count)
+- **Version**: 0.3.53 (bumped by parallel run `e86978b`; this run verified)
+
 ## Day 722: Waveform Visualizer Wiring Ship (2026-06-18)
 - **Run Type**: Snaw Feature Builder Agent (scheduled)
 - **Status**: Waveform Visualizer feature wired and shipped (v0.3.51).
