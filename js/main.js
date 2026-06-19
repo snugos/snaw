@@ -2044,8 +2044,12 @@ function updatePerformanceStats() {
                     if (!Array.isArray(t.sequences) || t.sequences.length === 0) continue;
                     const activeSeq = t.sequences.find(s => s && s.id === t.activeSequenceId) || t.sequences[0];
                     if (activeSeq && Array.isArray(activeSeq.data)) {
-                        for (const step of activeSeq.data) {
-                            if (step && step.active) totalNotes += 1;
+                        // activeSeq.data is a 2D array (rows x cols); iterate each row's steps
+                        for (const row of activeSeq.data) {
+                            if (!Array.isArray(row)) continue;
+                            for (const step of row) {
+                                if (step && step.active) totalNotes += 1;
+                            }
                         }
                     }
                 }
