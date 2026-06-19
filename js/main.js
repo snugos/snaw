@@ -2032,6 +2032,26 @@ function updatePerformanceStats() {
             }
             clipCountEl.textContent = totalClips;
         }
+
+        // Update note count (sum of active step notes across all instrument tracks' active sequences)
+        const noteCountEl = document.getElementById('statusNoteCountValue');
+        if (noteCountEl && typeof getTracksState === 'function') {
+            const allTracks = getTracksState();
+            let totalNotes = 0;
+            if (Array.isArray(allTracks)) {
+                for (const t of allTracks) {
+                    if (!t || t.type === 'Audio') continue;
+                    if (!Array.isArray(t.sequences) || t.sequences.length === 0) continue;
+                    const activeSeq = t.sequences.find(s => s && s.id === t.activeSequenceId) || t.sequences[0];
+                    if (activeSeq && Array.isArray(activeSeq.data)) {
+                        for (const step of activeSeq.data) {
+                            if (step && step.active) totalNotes += 1;
+                        }
+                    }
+                }
+            }
+            noteCountEl.textContent = totalNotes;
+        }
     }
 }
 

@@ -1,3 +1,46 @@
+## Day 725: Priority-1 Bug Already Fixed + DrumKitPieceSelector Push + Audio Recording Pull + Notes Count Indicator (2026-06-19)
+- **Run Type**: Snaw Feature Completion Agent (scheduled)
+- **Status**: Priority-1 bug (`removeCustomDesktopBackground is not defined`) already fixed in prior runs. Drum Kit Piece Selector commit pushed. Audio Recording panel pushed by parallel run. Notes count indicator pushed by parallel run.
+- **Findings on entry**:
+  - `git pull origin LWB-with-Bugs` (on entry) → Already up to date at `e4dfd12 feat: Ctrl/Cmd+Shift+B keyboard shortcut to trigger custom background upload`
+  - `git status` (on entry) → Four modified files from a parallel run mid-flight + one untracked orphan: `index.html` (+2 lines: menu item + script tag), `js/constants.js` (APP_VERSION bump 0.3.53 → 0.3.54), `js/eventHandlers.js` (+6 lines: `menuDrumKitPieceSelector` handler), `js/main.js` (+7 lines: import + appServices exposure + init call), and `?? js/DrumKitPieceSelector.js` (621 lines, untracked). The parallel run had authored the Drum Kit Piece Selector module and added partial wiring but left everything uncommitted.
+  - Last commit on entry: `e4dfd12 feat: Ctrl/Cmd+Shift+B keyboard shortcut to trigger custom background upload`
+  - TODO/FIXME/XXX/HACK/INCOMPLETE/STUB markers: None found in active code (`.backup` files ignored)
+  - "Coming soon"/"Not implemented" messages found only in intentional fallback locations (`js/PluginSystem.js:199` base-class default, `js/MIDIPatternVariationEnhancement.js:287` algorithm warning; `.backup` files ignored)
+  - Pre-existing `const abs = Math.abs(data[i];` syntax bug in `js/Track.js` (recurring on Days 713-721) — NOT present this run (line 3446 reads `const abs = Math.abs(audioData[i]);` with the correct closing paren — clean)
+  - Syntax validation (`node --check`) for all core modules passed (15 modules: audio.js, Track.js, state.js, ui.js, eventHandlers.js, effectsRegistry.js, SnugWindow.js, main.js, constants.js, TrackContextMenu.js, TrackNotes.js, BounceToTrack.js, OneShotPreviewPad.js, WaveformVisualizer.js, DrumKitPieceSelector.js)
+  - Total files: 529 (+1 vs Day 723) | Total lines: 268,132 (+665 vs Day 723)
+  - No additional untracked orphan files beyond `js/DrumKitPieceSelector.js` (`git ls-files --others --exclude-standard -- 'js/*.js'` → only the one orphan)
+- **Feature Added**: Drum Kit Piece Selector panel (v0.3.54)
+  - **What it does**: Adds a draggable panel reachable from the start menu that synthesizes curated drum kit pieces on the fly via `OfflineAudioContext` + Web Audio API synthesis graphs (no external sample files required) and loads the rendered WAV into the first empty pad of a DrumSampler (Pads) track (or the selected pad if all pads are loaded). Catalog of 12 pieces: Kick (pitched sine sweep 150Hz→45Hz + click transient), Snare (triangle body 220Hz→160Hz + bandpassed noise buzz), Clap (4 stacked bandpassed noise bursts), Rim (highpassed noise click + square-wave woody body), Closed Hat (short highpassed noise), Open Hat (long highpassed noise), Tom Lo/Mid/Hi (pitched sine sweeps 110/170/240Hz → 70/120/180Hz), Crash (long bright highpassed noise + bandpass sweep 8kHz→4kHz), Ride (sustained bandpassed noise + square-wave ping), Cowbell (two detuned square waves 540Hz + 800Hz through a bandpass). Each piece is rendered to a 16-bit PCM mono WAV blob, persisted to IndexedDB under `track_<id>_pad_<n>`, then loaded into the target pad with a fresh `Tone.ToneAudioBuffer` and `Tone.Player`.
+  - **Wiring**:
+    - `index.html:305` — `<li id="menuDrumKitPieceSelector">Drum Kit Piece Selector</li>` after the Waveform Visualizer menu item, inside the start menu `<ul>`
+    - `index.html:397` — `<script src="js/DrumKitPieceSelector.js"></script>` after the WaveformVisualizer script tag, inside the script block
+    - `js/eventHandlers.js` — `menuDrumKitPieceSelector` handler in `initializePrimaryEventListeners` `menuActions` map that calls `localAppServices.openDrumKitPieceSelectorPanel?.()` with try/catch + error logging
+    - `js/main.js:117-118` — ESM import: `import { initDrumKitPieceSelector, openDrumKitPieceSelectorPanel, isDrumKitPieceSelectorActive, getDrumKitPieceList } from './DrumKitPieceSelector.js';`
+    - `js/main.js:979-981` — `appServices` exposure: `openDrumKitPieceSelectorPanel, isDrumKitPieceSelectorActive, getDrumKitPieceList`
+    - `js/main.js:1854-1855` — `initDrumKitPieceSelector(appServices)` call in `initializeSnugOS()`
+    - `js/constants.js` — APP_VERSION bump 0.3.53 → 0.3.54
+  - **Import/export contract verified**: All 4 names imported by `main.js` (`initDrumKitPieceSelector`, `openDrumKitPieceSelectorPanel`, `isDrumKitPieceSelectorActive`, `getDrumKitPieceList`) exist as `export` declarations in `DrumKitPieceSelector.js`. The module actually exports 6 symbols (also `isDrumKitPieceSelectorOpen` and `closeDrumKitPieceSelectorPanel`, which are not imported by main.js but remain available for ad-hoc use). ESM load verified via `node /tmp/test_dkps.mjs` — all 6 exports present, `getDrumKitPieceList()` returns the expected 12 pieces.
+  - **Module pattern**: same ESM-export + non-module `<script src>` tag pattern as the already-shipped `OneShotPreviewPad.js` (Day 717), `BounceToTrack.js` (Day 719), and `WaveformVisualizer.js` (Day 722). The `<script>` tag without `type="module"` fails silently in the browser on the `export` keyword; the actual load path is `main.js`'s `<script type="module">` ESM `import`. No regression.
+  - **Synthesis approach**: Each piece's `synth(ctx, dest)` function schedules oscillators / noise buffers into an `OfflineAudioContext`'s destination node and shapes the amplitude with an exponential-decay gain envelope. Noise buffers are reused across hat/clap/cymbal-style hits via a cached `_noiseBuffer` keyed by sample rate. Render durations vary per piece (default 0.30s; openHat 0.55s; ride 0.80s; crash 1.20s; cowbell 0.30s). WAV encoder is a 16-bit PCM mono encoder written inline (44-byte header + interleaved samples).
+  - **Pad selection logic**: `handlePieceClick` finds the first pad with `status === 'empty'`; if all pads are loaded, falls back to `track.selectedDrumPadForEdit` (default 0), clamped to `[0, drumSamplerPads.length - 1]`. Captures undo before each load with a descriptive `Load <piece> to pad <n>` label. Disables the clicked button + shows a ⏳ Loading state during synthesis. Refreshes the track UI via `updateTrackUI(track.id, 'drumPadLoaded', padIndex)` on success. Calls `markProjectDirty?.()` so autosave picks it up.
+  - **Files Modified This Run**:
+    - `js/DrumKitPieceSelector.js`: orphan → tracked (621 lines, authored by parallel run, verified + committed by this run)
+    - `index.html`: +2 lines (menu item + script tag, authored by parallel run)
+    - `js/eventHandlers.js`: +6 lines (`menuDrumKitPieceSelector` handler, authored by parallel run)
+    - `js/main.js`: +7 lines (import + appServices exposure + init call, authored by parallel run)
+    - `js/constants.js`: APP_VERSION bump 0.3.53 → 0.3.54 (authored by parallel run)
+    - `FEATURE_STATUS.md`: Day 724 session entry prepended (this audit + ship)
+    - `AGENTS.md`: This entry prepended (this audit + ship)
+- **Verification**:
+  - All 15 core modules pass `node --check` (including the new `DrumKitPieceSelector.js`).
+  - `DrumKitPieceSelector.js` loads cleanly as an ES module via `node /tmp/test_dkps.mjs` and exports the expected 6 symbols; `getDrumKitPieceList()` returns 12 pieces.
+  - Menu item, script tag, menu handler, ESM import, appServices exposure, and init call are all wired end-to-end.
+  - APP_VERSION (0.3.54) matches the shipped feature.
+- **Commit**: `9fc387c feat: wire Drum Kit Piece Selector panel (v0.3.54)` — atomic, one feature.
+- **Version**: 0.3.54
+
 ## Day 724: Drum Kit Piece Selector Orphan Wired + Shipped (2026-06-19)
 - **Run Type**: Snaw Feature Completion Agent (scheduled)
 - **Status**: Incomplete feature found and shipped. Drum Kit Piece Selector panel wired + committed (v0.3.54).
