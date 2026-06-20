@@ -284,7 +284,27 @@ import {
     gatherProjectDataInternal, reconstructDAWInternal, saveProjectInternal,
     saveProjectTemplate, loadProjectTemplate, getProjectTemplateNames, getProjectTemplate, deleteProjectTemplate,
 } from './state.js';
-    
+
+// --- showSafeNotification ---
+// Module-level wrapper around the imported utilShowNotification. Many call sites
+// in this file reference the bare `showSafeNotification(...)` name (e.g. inside
+// removeCustomDesktopBackground, transport stop handlers, master-effect error
+// paths). Without this wrapper, `typeof showSafeNotification === 'function'`
+// evaluates to false everywhere, so those toasts never reach the user even
+// though appServices.showSafeNotification exists. Mirrors the appServices method
+// (line ~879) so both invocations stay consistent.
+function showSafeNotification(message, duration) {
+    try {
+        if (typeof utilShowNotification === 'function') {
+            utilShowNotification(message, duration);
+        } else {
+            console.warn('[showSafeNotification] utilShowNotification not available, logging to console:', message);
+        }
+    } catch (e) {
+        console.error('[showSafeNotification] Error showing notification:', e, 'message was:', message);
+    }
+}
+
 // --- removeCustomDesktopBackground ---
 // Properly defined at module level (hoisted) so it's accessible both as a method
 // on appServices and as window.removeCustomDesktopBackground. Uses appServices.bgDb
