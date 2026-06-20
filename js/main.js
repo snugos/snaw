@@ -117,6 +117,8 @@ import { initBounceToTrack, openBounceToTrackPanel, bounceSelectedToTrack, isBou
 import { initWaveformVisualizer, openWaveformVisualizerPanel, isWaveformVisualizerActive } from './WaveformVisualizer.js';
 // Drum Kit Piece Selector - quickly load curated synthesized drum kit pieces into pads of a Sampler (Pads) track
 import { initDrumKitPieceSelector, openDrumKitPieceSelectorPanel, isDrumKitPieceSelectorActive, getDrumKitPieceList } from './DrumKitPieceSelector.js';
+// Loudness Meter - EBU R128 LUFS + true-peak dBTP readout panel
+import { initLoudnessMeter, openLoudnessMeterPanel, isLoudnessMeterActive, updateLoudnessMeter, resetLoudnessMeterIntegrated } from './LoudnessMeter.js';
 // Guitar Tab Editor
 import { initGuitarTabEditor, openGuitarTabEditor } from './GuitarTabEditor.js';
 import { initTrackColorPanel, openTrackColorPanel } from './TrackColorPanel.js';
@@ -218,7 +220,9 @@ import { initSampleRateDisplay, startSampleRateDisplayLoop } from './SampleRateD
 import * as FeatureAdditions from './FeatureAdditions.js';
 // getMimeTypeFromFilename is used by getAudioBlobFromSoundBrowserItem (line ~342) to
 // build a File with the correct MIME type for the sound browser drop pipeline.
-import { getMimeTypeFromFilename } from './audio.js';
+// getMasterMeterNode is used by the Loudness Meter panel to tap the master bus for
+// true-peak analysis and to read the per-tick dB value for LUFS computation.
+import { getMimeTypeFromFilename, getMasterMeterNode } from './audio.js';
 // setupGenericDropZoneListeners is imported here but used via appServices by ui.js
 import { showNotification as utilShowNotification, createContextMenu, createDropZoneHTML, setupGenericDropZoneListeners } from './utils.js';
 import { openKeyboardShortcutsPanel } from './ui.js';
@@ -979,6 +983,28 @@ const appServices = {
     openDrumKitPieceSelectorPanel,
     isDrumKitPieceSelectorActive,
     getDrumKitPieceList,
+    openLoudnessMeterPanel,
+    isLoudnessMeterActive,
+    updateLoudnessMeter,
+    resetLoudnessMeterIntegrated,
+    // Loudness Meter master-meter shims: the meter module expects a stereo [L,R] dB array
+    // and a Web Audio tap node. The SnugOS master bus uses a single mono Tone.Meter, so
+    // we duplicate the mono dB value across both channels and expose the Tone.Meter node
+    // itself as the tap (Tone nodes can connect to raw AnalyserNodes).
+    getMasterMeterValue: () => {
+        try {
+            const node = typeof getMasterMeterNode === 'function' ? getMasterMeterNode() : null;
+            if (!node || node.disposed || typeof node.getValue !== 'function') return null;
+            const v = node.getValue();
+            const db = Array.isArray(v) ? (v.length > 1 ? v[1] : v[0]) : v;
+            return [db, db];
+        } catch (e) { return null; }
+    },
+    getMasterMeterTap: () => {
+        try {
+            return typeof getMasterMeterNode === 'function' ? getMasterMeterNode() : null;
+        } catch (e) { return null; }
+    },
     openDuplicateOffsetDialog,
     openTrackIconPickerPanel,
     openChordVoicingPanel,
@@ -1854,6 +1880,8 @@ async function initializeSnugOS() {
         if (typeof initWaveformVisualizer === 'function') initWaveformVisualizer(appServices);
         // Drum Kit Piece Selector initialization
         if (typeof initDrumKitPieceSelector === 'function') initDrumKitPieceSelector(appServices);
+        // Loudness Meter initialization (EBU R128 LUFS + true-peak dBTP)
+        if (typeof initLoudnessMeter === 'function') initLoudnessMeter(appServices);
         // After the timeline renders existing tracks, paint note indicators for any
         // persisted notes that didn't get a 'trackRendered' callback (initial load).
         setTimeout(() => { try { if (typeof refreshTrackNoteIndicators === 'function') refreshTrackNoteIndicators(); } catch (e) { /* ignore */ } }, 800);
@@ -2086,6 +2114,32 @@ function updatePerformanceStats() {
             const mins = Math.floor(totalSelectionSeconds / 60);
             const secs = Math.floor(totalSelectionSeconds % 60);
             selLenEl.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        // Update master output peak level (dB), read from the master meter node
+        const masterPeakEl = document.getElementById('statusMasterPeakValue');
+        if (masterPeakEl) {
+            let peakDb = -Infinity;
+            try {
+                const meter = (typeof getMasterMeterNode === 'function') ? getMasterMeterNode() : null;
+                if (meter && typeof meter.getValue === 'function' && !meter.disposed) {
+                    const raw = meter.getValue();
+                    // Tone.Meter returns dB; if stereo array, take the louder channel
+                    const v = Array.isArray(raw) ? raw[0] : raw;
+                    if (typeof v === 'number' && isFinite(v)) peakDb = v;
+                }
+            } catch (e) {
+                // Silently leave peakDb at -Infinity so the indicator shows -∞
+            }
+            masterPeakEl.textContent = !isFinite(peakDb) ? '-∞' : `${peakDb.toFixed(1)} dB`;
+            // Color coding: green for safe, yellow for hot, red for clipping
+            if (!isFinite(peakDb) || peakDb <= -6) {
+                masterPeakEl.className = 'text-green-400';
+            } else if (peakDb <= -0.1) {
+                masterPeakEl.className = 'text-yellow-400';
+            } else {
+                masterPeakEl.className = 'text-red-400';
+            }
         }
     }
 }

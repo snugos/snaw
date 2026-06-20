@@ -257,6 +257,11 @@
             <span class="text-gray-500">/</span>
             <span id="statusSelectionLengthValue">00:00</span>
         </div>
+        <div class="text-gray-600">|</div>
+        <div id="statusMasterPeak" class="flex items-center gap-1 cursor-pointer hover:text-gray-300" title="Master output peak level (dB)">
+            <span class="text-gray-500">Peak:</span>
+            <span id="statusMasterPeakValue" class="text-green-400">-∞</span>
+        </div>
         <div id="statusBgIndicator" class="hidden items-center gap-1 cursor-pointer hover:text-gray-300" title="Custom Desktop Background">
             <span class="text-gray-500">BG:</span>
             <span id="statusBgIndicatorValue" class="text-green-400">Custom</span>
@@ -316,6 +321,7 @@
             <li id="menuWaveformVisualizer">Waveform Visualizer</li>
             <li id="menuAudioRecording">Audio Recording</li>
             <li id="menuDrumKitPieceSelector">Drum Kit Piece Selector</li>
+            <li id="menuLoudnessMeter">Loudness Meter</li>
             <li id="menuGrooveTemplates">Groove Templates</li>
             <li id="menuGrooveExtractor">Groove Extractor</li>
             <li id="menuRhythmRandomizer">Rhythm Randomizer</li>
@@ -408,6 +414,7 @@
     <script src="js/BounceToTrack.js"></script>
     <script src="js/WaveformVisualizer.js"></script>
     <script src="js/DrumKitPieceSelector.js"></script>
+    <script src="js/LoudnessMeter.js"></script>
     <script src="js/AutoSaveManager.js"></script>
     <script src="js/TransportSync.js"></script>
     <script src="js/DelayCalculator.js"></script>

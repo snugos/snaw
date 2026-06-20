@@ -776,6 +776,12 @@ export function initializePrimaryEventListeners(appContext) {
                     localAppServices.openDrumKitPieceSelectorPanel?.();
                 } catch(e) { console.error('[Menu] Drum Kit Piece Selector error:', e); }
             },
+            menuLoudnessMeter: () => {
+                console.log('[Menu] Loudness Meter clicked');
+                try {
+                    localAppServices.openLoudnessMeterPanel?.();
+                } catch(e) { console.error('[Menu] Loudness Meter error:', e); }
+            },
             menuLoopRegionSnap: () => {
                 console.log('[Menu] Loop Region Snap clicked');
                 try {

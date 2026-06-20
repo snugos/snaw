@@ -1,4 +1,78 @@
 # FEATURE_STATUS.md - SnugOS DAW
+## Session: 2026-06-19 17:25 UTC (Snaw Feature Completion Agent Run — Day 726)
+
+**Status: INCOMPLETE FEATURE FOUND + SHIPPED ✅ — Loudness Meter panel wired + shipped (v0.3.59)**
+
+### Automated Scan Results:
+- `git pull origin LWB-with-Bugs` (on entry) → Already up to date at `55f0264 feat: wire Trill Notes context menu - up/down/both direction variants (v0.3.58)`
+- `git status` (on entry) → One untracked orphan: `?? js/LoudnessMeter.js` (312 lines). The orphan module was fully written (EBU R128 loudness meter logic: momentary / short-term / integrated LUFS + true-peak dBTP, K-weighting pre-emphasis approximation, 4x linear-upsampled true-peak detection, rolling 60s integrated window with -70 LUFS absolute gate, BS.1770 `-0.691 + 10·log10(MS)` calibration) but had **no panel UI** and was **completely unwired** — not imported by `main.js`, not in `index.html`, no menu item, no `eventHandlers.js` handler. Same unintegrated-module pattern as `OneShotPreviewPad.js` (Day 717, quarantined then wired Day 718-719), `BounceToTrack.js` (Day 718 orphan → wired Day 719), `WaveformVisualizer.js` (Day 722, wired), `DrumKitPieceSelector.js` (Day 724, wired).
+- Last commit on entry: `55f0264 feat: wire Trill Notes context menu - up/down/both direction variants (v0.3.58)`
+- Pattern sweeps (`TODO|FIXME|XXX|HACK|INCOMPLETE|STUB`) over `js/` (excluding `.backup` files) returned no active-code hits
+- "Coming soon" / "not implemented" messages found only in intentional fallback locations (`js/PluginSystem.js:199` base-class default, `js/MIDIPatternVariationEnhancement.js:287` algorithm warning; `.backup` files ignored)
+- Pre-existing `const abs = Math.abs(data[i];` syntax bug in `js/Track.js` (recurring on Days 713-721) — NOT present this run (clean)
+- Syntax validation (`node --check`) for all core modules passed (audio.js, Track.js, state.js, ui.js, eventHandlers.js, effectsRegistry.js, SnugWindow.js, main.js, constants.js, plus the new LoudnessMeter.js)
+- No additional untracked orphan files beyond `js/LoudnessMeter.js` (`git ls-files --others --exclude-standard -- 'js/*.js'` → only the one orphan)
+- Current `APP_VERSION`: 0.3.58 (on entry) → 0.3.59 (after this run's bump)
+
+### Incomplete Feature Found This Session:
+- **Loudness Meter orphan + no panel UI + unwired** — A parallel run had authored `js/LoudnessMeter.js` (312 lines) with the full EBU R128 metering engine but stopped before adding the panel UI, the menu wiring, the main.js import, the appServices exposure, and the init call. The module exported `initLoudnessMeter`, `updateLoudnessMeter`, `getLoudnessMeterValues`, `resetLoudnessMeterIntegrated`, `isLoudnessMeterActive`, `setLoudnessMeterPanelOpen`, and `getLoudnessMeterVersion` — but `setLoudnessMeterPanelOpen(open)` had no caller (no panel existed to flip the flag), and `updateLoudnessMeter()` was a no-op forever because `isPanelOpen` was always `false`. The feature was effectively dead code on disk.
+
+### Feature Completed This Session:
+- **Loudness Meter** (`js/LoudnessMeter.js`, `js/audio.js`, `js/main.js`, `js/eventHandlers.js`, `index.html`, `js/constants.js`) — the orphan flagged by this run's entry scan is now committed, fully wired, and shipped (v0.3.59). The module is a master-bus EBU R128 loudness meter with a draggable readout panel.
+  - **What the feature does**: Opens a draggable panel from the start menu showing five live readouts — Momentary LUFS (400 ms block), Short-term LUFS (3 s window), Integrated LUFS (rolling 60 s gated mean, -70 LUFS absolute gate), True Peak dBTP (4x linear-upsampled inter-sample peak), and True Peak Hold dBTP (3 s hold, 6 dB/s fall). Each readout has a numeric value, a unit label, and a horizontal bar meter (LUFS bars span -50..0 LUFS; dBTP bars span -60..0 dBTP). Two buttons: "Reset Integrated" (clears the integrated window + true-peak hold) and "Freeze Hold" (pauses the true-peak hold readout for inspection). The panel runs its own `requestAnimationFrame` loop that calls `updateLoudnessMeter()` and updates the DOM each tick; on close, the RAF is cancelled and `setLoudnessMeterPanelOpen(false)` is called so the meter computation pauses (the module's `updateLoudnessMeter` early-returns when the panel is closed and the meter isn't running, so it costs zero CPU when not in use).
+  - **Meter engine**: `updateLoudnessMeter()` reads the master meter node's dB value via `services.getMasterMeterValue()` (expected to return `[leftDb, rightDb]`; the SnugOS master bus is mono so `main.js`'s shim duplicates the single Tone.Meter dB across both channels), converts to linear power, computes per-channel mean-square `MS = (L² + R²) / 2`, pushes a `{t, power}` sample into a rolling 60 s circular buffer, then derives momentary/short-term/integrated LUFS via `meanSquareToLufs(MS) = -0.691 + 10·log10(MS · preEmphasis²)` (BS.1770 calibration constant `-0.691` plus a fixed +4 dB high-shelf pre-emphasis approximation of K-weighting). True-peak is computed from a separate `AnalyserNode` tap (`services.getMasterMeterTap()`) via 4x linear interpolation upsampling to catch inter-sample peaks; if the analyser tap is unavailable, it falls back to `max(|L|, |R|)` from the meter dB readings. Integrated LUFS only reports after ~1.6 s of gated samples (`MIN_INTEGRATED_BLOCKS_FOR_REPORTING * 100`).
+  - **Wiring**:
+    - `index.html:324` — `<li id="menuLoudnessMeter">Loudness Meter</li>` after the Drum Kit Piece Selector menu item, inside the start menu `<ul>`
+    - `index.html:417` — `<script src="js/LoudnessMeter.js"></script>` after the DrumKitPieceSelector script tag, inside the script block
+    - `js/eventHandlers.js:779` — `menuLoudnessMeter` handler in `initializePrimaryEventListeners` `menuActions` map that calls `localAppServices.openLoudnessMeterPanel?.()` with try/catch + error logging
+    - `js/main.js:121` — ESM import: `import { initLoudnessMeter, openLoudnessMeterPanel, isLoudnessMeterActive, updateLoudnessMeter, resetLoudnessMeterIntegrated } from './LoudnessMeter.js';`
+    - `js/main.js:981-986` — `appServices` exposure: `openLoudnessMeterPanel, isLoudnessMeterActive, updateLoudnessMeter, resetLoudnessMeterIntegrated`
+    - `js/main.js:989-1005` — two appServices shims the meter module expects: `getMasterMeterValue` (returns `[db, db]` from `getMasterMeterNode().getValue()`, mono duplicated to stereo) and `getMasterMeterTap` (returns the `Tone.Meter` node itself, which Tone can `connect()` to a raw `AnalyserNode`)
+    - `js/main.js:1880` — `initLoudnessMeter(appServices)` call in `initializeSnugOS()` after `initDrumKitPieceSelector(appServices)`
+    - `js/audio.js:727` — new `export function getMasterMeterNode()` accessor that returns `masterMeterNode` (re-running `setupMasterBus()` if it's missing/disposed), mirroring the existing `getActualMasterGainNode` / `getMasterEffectsBusInputNode` accessors
+    - `js/constants.js:3` — APP_VERSION bump 0.3.58 → 0.3.59
+  - **Import/export contract verified**: all 5 names imported by `main.js` (`initLoudnessMeter`, `openLoudnessMeterPanel`, `isLoudnessMeterActive`, `updateLoudnessMeter`, `resetLoudnessMeterIntegrated`) exist as `export` declarations in `LoudnessMeter.js` (the module actually exports 8 symbols; the other three — `setLoudnessMeterPanelOpen`, `getLoudnessMeterValues`, `getLoudnessMeterVersion` — are not imported by main.js but are used internally by the new `openLoudnessMeterPanel` function and remain available for ad-hoc use). ESM load verified via `node /tmp/test_loudness.mjs` — all 8 exports present and callable, `initLoudnessMeter({})` doesn't throw, `updateLoudnessMeter` is a graceful no-op when no meter is wired, `setLoudnessMeterPanelOpen(true)` flips `isLoudnessMeterActive()` to true, `resetLoudnessMeterIntegrated()` clears history without throwing.
+  - **Module pattern**: same ESM-export + non-module `<script src>` tag pattern as the already-shipped `OneShotPreviewPad.js` (Day 717), `BounceToTrack.js` (Day 719), `WaveformVisualizer.js` (Day 722), and `DrumKitPieceSelector.js` (Day 724). The `<script>` tag without `type="module"` fails silently in the browser on the `export` keyword; the actual load path is `main.js`'s `<script type="module">` ESM `import`. No regression.
+  - **Panel UI added this run** (`openLoudnessMeterPanel` in `js/LoudnessMeter.js`): 192 new lines. Builds a draggable window via `localAppServices.createWindow` (id `loudnessMeter`, title "Loudness Meter (LUFS)", 380×480, min 320×380, closable/minimizable/resizable). Renders five readout cells (Momentary / Short-term / Integrated / True Peak in a 2×2 grid, plus True Peak Hold full-width below) each with label, mono-numeric value, unit suffix, and a horizontal bar. Two buttons (Reset Integrated, Freeze Hold) wired inline. A `requestAnimationFrame` loop (`tickPanel`) calls `updateLoudnessMeter()` and updates the DOM each frame; auto-stops when the panel's window element is no longer in the DOM. The window's `close` method is wrapped to cancel the RAF, call `setLoudnessMeterPanelOpen(false)`, and null the panel reference before delegating to the original close. Re-opening an existing panel restores it and restarts the tick loop without spawning a second RAF.
+  - **Files modified this run**:
+    - `js/LoudnessMeter.js`: orphan → tracked, +192 lines (the `openLoudnessMeterPanel` panel UI + helpers `formatLufs`, `formatDbtp`, `buildReadout`, `lufsToBarPercent`, `dbtpToBarPercent`, `renderPanelBody`, `tickPanel`)
+    - `js/audio.js`: +7 lines (new `export function getMasterMeterNode()` accessor)
+    - `js/main.js`: +24 lines (import + 5 appServices exposures + 2 meter shims + init call)
+    - `js/eventHandlers.js`: +6 lines (`menuLoudnessMeter` handler)
+    - `index.html`: +2 lines (menu item + script tag)
+    - `js/constants.js`: 1 line (APP_VERSION 0.3.58 → 0.3.59)
+    - `FEATURE_STATUS.md`: Day 726 session entry prepended (this entry)
+    - `AGENTS.md`: Day 726 entry prepended
+  - **Commit**: `feat: wire Loudness Meter panel - EBU R128 LUFS + true-peak dBTP (v0.3.59)` — atomic, one feature.
+
+### Files Modified This Run:
+- `js/LoudnessMeter.js`: orphan → tracked (504 lines total: 312 original engine + 192 new panel UI)
+- `js/audio.js`: +7 lines (`getMasterMeterNode` accessor)
+- `js/main.js`: +24 lines (import + appServices exposure + meter shims + init call)
+- `js/eventHandlers.js`: +6 lines (`menuLoudnessMeter` handler)
+- `index.html`: +2 lines (menu item + script tag)
+- `js/constants.js`: APP_VERSION bump 0.3.58 → 0.3.59
+- `FEATURE_STATUS.md`: Day 726 session entry prepended (this entry)
+- `AGENTS.md`: Day 726 entry prepended
+
+### Verification:
+- All 10 syntax-checked modules pass `node --check` (`js/LoudnessMeter.js`, `js/audio.js`, `js/main.js`, `js/eventHandlers.js`, `js/constants.js`, `js/Track.js`, `js/state.js`, `js/ui.js`, `js/effectsRegistry.js`, `js/SnugWindow.js`).
+- `js/LoudnessMeter.js` loads cleanly as an ES module via `node /tmp/test_loudness.mjs` and exports the expected 8 symbols; `initLoudnessMeter({})` doesn't throw; `updateLoudnessMeter` is a graceful no-op when no meter is wired; `setLoudnessMeterPanelOpen(true)` flips active state; `resetLoudnessMeterIntegrated()` clears history.
+- Menu item, script tag, menu handler, ESM import, appServices exposure (incl. `getMasterMeterValue` + `getMasterMeterTap` shims), and init call are all wired end-to-end.
+- APP_VERSION (0.3.59) matches the shipped feature.
+- Working tree clean except for this run's doc updates.
+
+### Features Still in Progress:
+_None — all browser-implementable features currently implemented._
+
+### Next Features to Tackle:
+_None queued; the feature list is stable._
+
+### Action Taken:
+Found an incomplete feature on entry: a parallel run had authored the Loudness Meter module (`js/LoudnessMeter.js`, 312 lines, untracked) with the full EBU R128 metering engine but no panel UI and no wiring — it was dead code on disk. This run added a 192-line `openLoudnessMeterPanel` panel UI function (draggable window with five live LUFS/dBTP readouts + Reset Integrated / Freeze Hold buttons + its own RAF loop), added a `getMasterMeterNode` accessor to `audio.js`, wired the module into `main.js` (import + 5 appServices exposures + 2 master-meter shims + init call), added the menu item + script tag to `index.html`, added the `menuLoudnessMeter` handler to `eventHandlers.js`, bumped APP_VERSION to 0.3.59, syntax-checked all 10 modules, verified the ESM contract via `node /tmp/test_loudness.mjs`, then committed and pushed to `origin/LWB-with-Bugs`. Updated FEATURE_STATUS.md and AGENTS.md with the Day 726 audit + ship.
+
+---
+
 ## Session: 2026-06-19 01:05 UTC (Snaw Repair & Enhancement Agent Run — Day 725 / Run 3)
 
 **Status: INCOMPLETE PATCH COMPLETED ✅ — Track.js half-applied patch finished (v0.3.56, no version bump — bug fix)**

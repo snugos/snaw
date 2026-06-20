@@ -724,6 +724,13 @@ export function getActualMasterGainNode() {
     }
     return masterGainNodeActual;
 }
+export function getMasterMeterNode() {
+    if (!masterMeterNode || masterMeterNode.disposed) {
+        console.log("[Audio getMasterMeterNode] Master meter node not ready or disposed, attempting setup.");
+        setupMasterBus();
+    }
+    return masterMeterNode;
+}
 
 
 export async function initAudioContextAndMasterMeter(isUserInitiated = false) {
