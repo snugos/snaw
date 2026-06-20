@@ -38,16 +38,16 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 - **Bounce To Track** - Render a track or selected clips to a new audio track in place ✅
 - **Drum Kit Piece Selector** - Quickly swap drum kit pieces in a Sampler (Pads) track from a curated list ✅
 - **Audio Recording Panel UI** - Start menu entry + dockable panel with track selector and Start/Stop controls (v0.3.55) ✅
+- **Loudness Meter (LUFS + true-peak dBTP)** - Draggable panel with momentary/short-term/integrated LUFS, true peak, true peak hold (v0.3.59) ✅
 
 ## Current Feature Queue
 
-1. **Loudness Meter (LUFS)** - Show integrated/short-term LUFS on master with true-peak readout
-2. **Sends Overview Panel** - Visual matrix of send levels from every track to every send bus
-3. **Mark Track As Bass / Drums / Vocal** - Quick-classify tracks for smart mix presets
-4. **Export Region Selection** - Export a specific time region (between two markers) instead of the full project
-5. **Loop Until Marker** - Auto-extend loop region to next timeline marker
-6. **Project Search** - Search all track names + clip names + notes for a substring
-7. **Master Limiter Toggle** - Quick on/off for a brick-wall master limiter to catch overs
+1. **Sends Overview Panel** - Visual matrix of send levels from every track to every send bus
+2. **Mark Track As Bass / Drums / Vocal** - Quick-classify tracks for smart mix presets
+3. **Export Region Selection** - Export a specific time region (between two markers) instead of the full project
+4. **Loop Until Marker** - Auto-extend loop region to next timeline marker
+5. **Project Search** - Search all track names + clip names + notes for a substring
+6. **Master Limiter Toggle** - Quick on/off for a brick-wall master limiter to catch overs
 
 ## Workflow
 

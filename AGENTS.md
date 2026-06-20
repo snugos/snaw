@@ -1,3 +1,47 @@
+## Day 726: Loudness Meter Panel Wired + Shipped (2026-06-19)
+- **Run Type**: Snaw Feature Completion Agent (scheduled)
+- **Status**: Incomplete feature found and shipped. A parallel run had authored `js/LoudnessMeter.js` (504 lines, untracked orphan) with the full EBU R128 metering engine (momentary/short-term/integrated LUFS + true-peak dBTP, K-weighting pre-emphasis approximation, 4x linear-upsampled true-peak detection, rolling 60s integrated window with -70 LUFS absolute gate, BS.1770 `-0.691 + 10·log10(MS)` calibration) plus a 192-line `openLoudnessMeterPanel` draggable-panel UI, and had also written the full wiring in `index.html`, `js/eventHandlers.js`, `js/main.js`, `js/audio.js`, and `js/constants.js` — but had **never committed any of it**. The previous run's `FEATURE_STATUS.md` doc entry was written in the past tense as if the commit had landed, but `git log` showed HEAD still at `55f0264 feat: wire Trill Notes context menu - up/down/both direction variants (v0.3.58)` and `git status` showed all six wiring files modified + `js/LoudnessMeter.js` untracked. This run verified the wiring was sound, cleaned up one duplicate "Drum Kit Piece Selector initialization" comment in `main.js`, then committed the complete feature and pushed to `origin/LWB-with-Bugs`.
+- **Findings on entry**:
+  - `git pull origin LWB-with-Bugs` (on entry) → Already up to date at `55f0264 feat: wire Trill Notes context menu - up/down/both direction variants (v0.3.58)`
+  - `git status` (on entry) → Six modified files + one untracked orphan: `M FEATURE_STATUS.md`, `M index.html`, `M js/audio.js`, `M js/constants.js`, `M js/eventHandlers.js`, `M js/main.js`, `?? js/LoudnessMeter.js` (504 lines). The parallel run had authored the complete Loudness Meter feature (orphan module + panel UI + full wiring + version bump) but never committed it. Same unintegrated-on-disk pattern as `OneShotPreviewPad.js` (Day 717), `BounceToTrack.js` (Day 718 orphan → wired Day 719), `WaveformVisualizer.js` (Day 722), `DrumKitPieceSelector.js` (Day 724) — except this time the wiring was also written but uncommitted.
+  - Last commit on entry: `55f0264 feat: wire Trill Notes context menu - up/down/both direction variants (v0.3.58)`
+  - `js/LoudnessMeter.js` is 504 lines and exports 8 symbols: `initLoudnessMeter`, `updateLoudnessMeter`, `getLoudnessMeterValues`, `resetLoudnessMeterIntegrated`, `isLoudnessMeterActive`, `setLoudnessMeterPanelOpen`, `getLoudnessMeterVersion`, `openLoudnessMeterPanel`.
+  - Pre-existing `const abs = Math.abs(data[i];` syntax bug in `js/Track.js` (recurring on Days 713-721) — NOT present this run (clean).
+  - Syntax validation (`node --check`) for all 10 core modules passed (`js/LoudnessMeter.js`, `js/audio.js`, `js/constants.js`, `js/eventHandlers.js`, `js/main.js`, `js/Track.js`, `js/state.js`, `js/ui.js`, `js/effectsRegistry.js`, `js/SnugWindow.js`).
+  - ESM load verified via `node /tmp/test_loudness.mjs`: all 8 exports present and callable, `initLoudnessMeter({})` doesn't throw, `updateLoudnessMeter` is a graceful no-op when no meter is wired, `setLoudnessMeterPanelOpen(true)` flips `isLoudnessMeterActive()` to true, `resetLoudnessMeterIntegrated()` clears history without throwing.
+- **Feature Completed This Run**: Loudness Meter (v0.3.59) — the orphan + uncommitted wiring flagged by this run's entry scan is now committed, fully wired, and shipped. The module is a master-bus EBU R128 loudness meter with a draggable readout panel.
+  - **What the feature does**: Opens a draggable panel from the start menu showing five live readouts — Momentary LUFS (400 ms block), Short-term LUFS (3 s window), Integrated LUFS (rolling 60 s gated mean, -70 LUFS absolute gate), True Peak dBTP (4x linear-upsampled inter-sample peak), and True Peak Hold dBTP (3 s hold, 6 dB/s fall). Each readout has a numeric value, a unit label, and a horizontal bar meter. Two buttons: "Reset Integrated" and "Freeze Hold". The panel runs its own `requestAnimationFrame` loop; on close, the RAF is cancelled and `setLoudnessMeterPanelOpen(false)` is called so the meter computation pauses (zero CPU when not in use). A sibling "Peak:" indicator was also added to the status bar (color-coded green/yellow/red) reading the same `getMasterMeterNode()` accessor.
+  - **Wiring**:
+    - `index.html:324` — `<li id="menuLoudnessMeter">Loudness Meter</li>` after the Drum Kit Piece Selector menu item
+    - `index.html:417` — `<script src="js/LoudnessMeter.js"></script>` after the DrumKitPieceSelector script tag
+    - `index.html:262-266` — `#statusMasterPeak` status-bar block (Peak: readout with `#statusMasterPeakValue`)
+    - `js/eventHandlers.js:779` — `menuLoudnessMeter` handler calling `localAppServices.openLoudnessMeterPanel?.()` with try/catch + error logging
+    - `js/main.js:119-120` — ESM import: `import { initLoudnessMeter, openLoudnessMeterPanel, isLoudnessMeterActive, updateLoudnessMeter, resetLoudnessMeterIntegrated } from './LoudnessMeter.js';`
+    - `js/main.js:122` — `import { getMimeTypeFromFilename, getMasterMeterNode } from './audio.js';` (added `getMasterMeterNode`)
+    - `js/main.js:985-1006` — `appServices` exposure: `openLoudnessMeterPanel`, `isLoudnessMeterActive`, `updateLoudnessMeter`, `resetLoudnessMeterIntegrated`, plus two shims the meter module expects: `getMasterMeterValue` (returns `[db, db]` from `getMasterMeterNode().getValue()`, mono duplicated to stereo) and `getMasterMeterTap` (returns the `Tone.Meter` node itself)
+    - `js/main.js:1883` — `initLoudnessMeter(appServices)` call in `initializeSnugOS()` after `initDrumKitPieceSelector(appServices)`
+    - `js/main.js:2118-2143` — master-peak readout in `updatePerformanceStats` 1s loop, with green (≤-6 dB) / yellow (≤-0.1 dB) / red (clipping) color coding
+    - `js/audio.js:727` — new `export function getMasterMeterNode()` accessor that returns `masterMeterNode` (re-running `setupMasterBus()` if it's missing/disposed), mirroring `getActualMasterGainNode` / `getMasterEffectsBusInputNode`
+    - `js/constants.js:3` — APP_VERSION bump 0.3.58 → 0.3.59
+  - **Import/export contract verified**: all 5 names imported by `main.js` exist as `export` declarations in `LoudnessMeter.js` (the module exports 8 symbols total). ESM load verified via `node /tmp/test_loudness.mjs`.
+  - **Module pattern**: same ESM-export + non-module `<script src>` tag pattern as `OneShotPreviewPad.js` (Day 717), `BounceToTrack.js` (Day 719), `WaveformVisualizer.js` (Day 722), and `DrumKitPieceSelector.js` (Day 724). The `<script>` tag without `type="module"` fails silently in the browser on the `export` keyword; the actual load path is `main.js`'s `<script type="module">` ESM `import`. No regression.
+- **Cleanup This Run**: removed a duplicate "Drum Kit Piece Selector initialization" comment in `js/main.js` that the parallel run had accidentally introduced alongside the Loudness Meter init call.
+- **Files modified this run**:
+  - `js/LoudnessMeter.js`: orphan → tracked (504 lines: 312 engine + 192 panel UI, authored by parallel run)
+  - `js/audio.js`: +7 lines (`getMasterMeterNode` accessor, authored by parallel run)
+  - `js/main.js`: +56 lines (import + 5 appServices exposures + 2 master-meter shims + init call + status-bar peak readout), -1 line (duplicate comment cleanup this run)
+  - `js/eventHandlers.js`: +6 lines (`menuLoudnessMeter` handler, authored by parallel run)
+  - `index.html`: +11 lines (menu item + script tag + status-bar peak block, authored by parallel run)
+  - `js/constants.js`: 1 line (APP_VERSION 0.3.58 → 0.3.59, authored by parallel run)
+  - `FEATURE_STATUS.md`: Day 726 session entry (authored by parallel run, committed by this run)
+  - `AGENTS.md`: Day 726 entry prepended (this entry)
+- **Commit**: `feat: wire Loudness Meter panel - EBU R128 LUFS + true-peak dBTP (v0.3.59)` — atomic, one feature.
+- **Verification**:
+  - All 10 syntax-checked modules pass `node --check`.
+  - `js/LoudnessMeter.js` loads cleanly as an ES module and exports the expected 8 symbols; smoke tests pass (`initLoudnessMeter({})`, `updateLoudnessMeter` no-op, `setLoudnessMeterPanelOpen(true)`, `resetLoudnessMeterIntegrated()`).
+  - Menu item, script tag, menu handler, ESM import, appServices exposure (incl. `getMasterMeterValue` + `getMasterMeterTap` shims), init call, and status-bar peak readout are all wired end-to-end.
+  - APP_VERSION (0.3.59) matches the shipped feature.
+
 ## Day 725 (Run 3): Track.js In-Progress Patch Completion (2026-06-19)
 - **Run Type**: Snaw Repair & Enhancement Agent (scheduled, every 10 min)
 - **Status**: Incomplete/uncommitted `js/Track.js` patch found on entry from a previous parallel run mid-flight. The patch had been left in three broken states: a missing closing `}` on `setCrossfadeCurveType`, a `setCrossfadeDuration` stub with no body (the `duration` parameter was never applied), and a new `previewPitchFromName` method defined **outside** the `Track` class — meaning `this` would be `undefined` at call time and the method would be unreachable as a prototype method. All three issues fixed in one atomic commit; no APP_VERSION bump (bug fix, mirrors the Day 725 Run 2 precedent).
