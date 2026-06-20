@@ -314,7 +314,12 @@ function showSafeNotification(message, duration) {
 // undefined (reading 'init')" the moment the user clicks "Remove Custom Background").
 async function removeCustomDesktopBackground() {
     const hasStoredBg = localStorage.getItem('snugosDesktopBackground') || localStorage.getItem('snugosDesktopBgType');
+    const bgDbAvailable = !!(appServices && appServices.bgDb && typeof appServices.bgDb.init === 'function');
     if (!hasStoredBg) {
+        if (!bgDbAvailable) {
+            if (typeof showSafeNotification === 'function') showSafeNotification("No custom background to remove.", 2000);
+            return;
+        }
         try {
             const db = await appServices.bgDb.init();
             const stored = await new Promise((resolve) => {
@@ -335,14 +340,20 @@ async function removeCustomDesktopBackground() {
     try {
         localStorage.removeItem('snugosDesktopBackground');
         localStorage.removeItem('snugosDesktopBgType');
-        const db = await appServices.bgDb.init();
-        await new Promise((resolve, reject) => {
-            const tx = db.transaction('backgrounds', 'readwrite');
-            const store = tx.objectStore('backgrounds');
-            store.delete('desktopVideo');
-            tx.oncomplete = () => resolve();
-            tx.onerror = () => reject(tx.error);
-        });
+        if (bgDbAvailable) {
+            try {
+                const db = await appServices.bgDb.init();
+                await new Promise((resolve, reject) => {
+                    const tx = db.transaction('backgrounds', 'readwrite');
+                    const store = tx.objectStore('backgrounds');
+                    store.delete('desktopVideo');
+                    tx.oncomplete = () => resolve();
+                    tx.onerror = () => reject(tx.error);
+                });
+            } catch (idbErr) {
+                console.warn('[removeCustomDesktopBackground] IndexedDB delete failed, localStorage cleared:', idbErr);
+            }
+        }
         if (typeof applyDesktopBackground === 'function') applyDesktopBackground(null, null);
         if (typeof restoreDesktopBackground === 'function') restoreDesktopBackground();
         if (typeof updateBgStatusIndicator === 'function') updateBgStatusIndicator();
