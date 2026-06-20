@@ -1,3 +1,30 @@
+## Day 734: Sends Overview Panel (2026-06-20)
+- **Run Type**: Snaw Feature Builder Agent (scheduled)
+- **Status**: New feature authored from scratch and shipped. `js/SendsOverviewPanel.js` is a 378-line module that renders a dockable panel containing a *track × send-bus matrix*. Each row is a track (from `getTracksState()`), each column is a send bus (Reverb, Delay — from `localAppServices.getSendBusesInfo()`), and each cell shows the current send level (0..1) as a horizontal bar (color-coded slate→emerald by intensity) plus a numeric 0..100 input. Three bulk-action buttons ("Zero All", "Set All 50%", "Set All 25%") and a "Refresh" button. Clicking/dragging a bar scrubs the level; typing in the input commits it. A "return %" subhead above each column shows the bus's master return level for context. Re-renders cheaply on any change (only updates the affected cell, not the whole grid, via `updateCellVisual()`). Reads send levels via `localAppServices.getTrackSendLevel` and writes via `localAppServices.setTrackSendLevel`, so it works against the existing audio engine without coupling.
+- **Feature Details**:
+  - **Open** the panel from Start menu → "Sends Overview". The panel opens via `localAppServices.createWindow(PANEL_ID, 'Sends Overview', container, {width: 560, height: 420, …})`, mirroring the `LoudnessMeter` panel pattern. Already-open instance is detected via `localAppServices.getOpenWindows()` and restored + re-rendered.
+  - **Cells**: each `<td>` is a flex column with a 12px-tall draggable bar (full width = 100%) and a `w-12` numeric input. Cells carry `data-track-id` and `data-bus-id` so the event handlers can route the (trackId, busId, level) write.
+  - **Color ladder**: `bg-slate-700` (0%) → `bg-sky-700` (<25%) → `bg-cyan-600` (<50%) → `bg-teal-500` (<75%) → `bg-emerald-400` (75%+). Live `transition-all` makes scrubbing smooth.
+  - **Bulk actions** call `applyBulkLevel(percent, container)` which iterates all (track, bus) pairs, calls `setSendLevelSafe(...)` (a try/catch wrapper around `localAppServices.setTrackSendLevel`), then updates the visible cells without a full re-render. Shows a `localAppServices.showNotification('Sends: set N cells to X%', 1500)` toast.
+  - **Empty state**: if there are no tracks, a single row spans the table with a friendly "No tracks yet" message. If there are no buses (audio engine hasn't been initialized), the panel falls back to the hard-coded `[{id:'reverb', name:'Reverb'}, {id:'delay', name:'Delay'}]` list so the matrix is always meaningful.
+  - **Refresh** button forces a full re-render (useful after a track add/remove since the panel is opened once and doesn't auto-refresh on track changes — minimal approach).
+  - **isPanelOpen** is tracked locally and exposed via `isSendsOverviewPanelActive()`. The wrapped `win.close` flips it back to false and clears any refresh timer.
+- **Files Modified**:
+  - `js/SendsOverviewPanel.js` (new, 378 lines)
+  - `js/main.js`: +7 lines (import, appServices exposure x3, init call)
+  - `index.html`: +2 lines (menu item + script tag)
+  - `js/eventHandlers.js`: +6 lines (`menuSendsOverview` handler)
+  - `js/constants.js`: 1 line (APP_VERSION 0.3.59 → 0.3.60)
+  - `INSTRUCTION.md`: queue advanced (Sends Overview removed; remaining items renumbered 1-5)
+  - `AGENTS.md`: this entry
+- **Commit**: `bf4f54b feat: Sends Overview Panel - matrix view of track → send bus levels (v0.3.60)`. Then `bebb922 docs: advance feature queue - Sends Overview Panel shipped (v0.3.60)`.
+- **Verification**:
+  - All 4 modified files pass `node --check` (`SendsOverviewPanel.js`, `main.js`, `eventHandlers.js`, `constants.js`).
+  - ESM smoke test (`/tmp/test_sends3.mjs`) — 6/6 pass: all 4 expected exports exist, `init({})` is a no-op, `openSendsOverviewPanel` returns gracefully when `appServices.createWindow` is missing.
+  - Deployed-site verification: `curl https://snugos.github.io/snaw/js/SendsOverviewPanel.js` returns 200; `curl https://snugos.github.io/snaw/` shows the new `<li id="menuSendsOverview">` and `<script src="js/SendsOverviewPanel.js">` in the served HTML.
+  - Version: APP_VERSION bumped 0.3.59 → 0.3.60.
+- **Next**: Mark Track As Bass / Drums / Vocal (queue item 1).
+
 ## Day 726: Loudness Meter Panel Wired + Shipped (2026-06-19)
 - **Run Type**: Snaw Feature Completion Agent (scheduled)
 - **Status**: Incomplete feature found and shipped. A parallel run had authored `js/LoudnessMeter.js` (504 lines, untracked orphan) with the full EBU R128 metering engine (momentary/short-term/integrated LUFS + true-peak dBTP, K-weighting pre-emphasis approximation, 4x linear-upsampled true-peak detection, rolling 60s integrated window with -70 LUFS absolute gate, BS.1770 `-0.691 + 10·log10(MS)` calibration) plus a 192-line `openLoudnessMeterPanel` draggable-panel UI, and had also written the full wiring in `index.html`, `js/eventHandlers.js`, `js/main.js`, `js/audio.js`, and `js/constants.js` — but had **never committed any of it**. The previous run's `FEATURE_STATUS.md` doc entry was written in the past tense as if the commit had landed, but `git log` showed HEAD still at `55f0264 feat: wire Trill Notes context menu - up/down/both direction variants (v0.3.58)` and `git status` showed all six wiring files modified + `js/LoudnessMeter.js` untracked. This run verified the wiring was sound (syntax + ESM contract) and removed a duplicate "Drum Kit Piece Selector initialization" comment in `main.js`. While this run was preparing the commit, a parallel Snaw Feature Builder run committed `bd22c4c feat: Loudness Meter (LUFS + true-peak dBTP) panel (v0.3.59)` (which already had the single-comment cleanup), shipping the feature to `origin/LWB-with-Bugs`. This run's remaining work is the AGENTS.md doc entry you are reading.
