@@ -782,6 +782,12 @@ export function initializePrimaryEventListeners(appContext) {
                     localAppServices.openLoudnessMeterPanel?.();
                 } catch(e) { console.error('[Menu] Loudness Meter error:', e); }
             },
+            menuSendsOverview: () => {
+                console.log('[Menu] Sends Overview clicked');
+                try {
+                    localAppServices.openSendsOverviewPanel?.();
+                } catch(e) { console.error('[Menu] Sends Overview error:', e); }
+            },
             menuLoopRegionSnap: () => {
                 console.log('[Menu] Loop Region Snap clicked');
                 try {

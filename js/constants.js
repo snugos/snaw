@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.59"; // 2026-06-19 - Loudness Meter panel wiring (EBU R128 LUFS + true-peak dBTP) (v0.3.59)
+export const APP_VERSION = "0.3.60"; // 2026-06-19 - Loudness Meter panel wiring (EBU R128 LUFS + true-peak dBTP) (v0.3.59) - Sends Overview Panel
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks
