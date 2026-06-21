@@ -818,6 +818,12 @@ export function initializePrimaryEventListeners(appContext) {
                     localAppServices.openProjectSearchPanel?.();
                 } catch(e) { console.error('[Menu] Project Search error:', e); }
             },
+            menuMasterLimiter: () => {
+                console.log('[Menu] Master Limiter clicked');
+                try {
+                    localAppServices.openMasterLimiterPanel?.();
+                } catch(e) { console.error('[Menu] Master Limiter error:', e); }
+            },
             menuLoopRegionSnap: () => {
                 console.log('[Menu] Loop Region Snap clicked');
                 try {

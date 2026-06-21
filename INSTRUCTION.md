@@ -45,9 +45,22 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 - **Loop Until Marker** - Extend the active loop region to the next/previous timeline marker (or both adjacent markers); works against Timeline Markers, Loop Region Markers, and state.js markers with auto-merge/dedup; optional auto-mode that re-snaps the loop end when the playhead crosses it (v0.3.63) ✅
 - **Project Search** - Search all track names + clip names + notes for a substring ✅
 
+## Completed Features (recent)
+
+- **Master Limiter Toggle** - Quick on/off for a brick-wall master limiter to catch overs ✅
+
 ## Current Feature Queue
 
-1. **Master Limiter Toggle** - Quick on/off for a brick-wall master limiter to catch overs
+1. **Drum Pad Trigger Mouse-Over** - When the one-shot preview pad is open, mouse-over each pad to highlight the note name and velocity range
+2. **Mix-Bus Group Presets** - Save the entire group+send+fx+volume state of a group of tracks as a preset you can re-apply
+3. **Plugin Bypass Per-Track** - Quick "bypass" toggle for each track's effect chain to A/B dry vs wet
+4. **Tap Tempo MIDI Clock In** - Use a MIDI controller pad as the tap-tempo source instead of the keyboard `T`
+5. **Track Folder Collapse Memory** - Remember per-project which track folders are collapsed/expanded across reloads
+6. **Click Track Volume Slider** - Independent volume control for the metronome click that doesn't affect the project audio
+7. **Quick-Bounce Markers** - Mark two timeline points and one-click render just the audio between them to a new track
+8. **Drag-to-Reorder Master FX** - Drag master-bus effects in the effects rack to reorder them
+9. **Performance Mode Recall** - Save the current panel layout (open/closed/minimized state for every dockable panel) as a "Performance Mode" you can recall
+10. **Tooltips On Hover For Toolbar Buttons** - Show the keyboard shortcut and a one-line description for every toolbar button on mouseover
 
 ## Workflow
 

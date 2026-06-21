@@ -12,6 +12,10 @@ let masterGainNodeActual = null; // The actual Tone.Gain node for master volume
 let masterMeterNode = null;
 let masterAnalyserNode = null; // FFT analyser for spectrum visualization
 let activeMasterEffectNodes = new Map();
+let masterLimiterNode = null; // Master brick-wall limiter (Tone.Limiter); null until first call to getMasterLimiterNode()
+let masterLimiterEnabled = false; // True when the limiter is engaged in the master chain
+let masterLimiterThresholdDb = -0.1; // dBFS threshold (Tone.Limiter.threshold); -0.1 default
+let masterLimiterCeilingDb = -0.3; // informational display value (we don't have a separate ceiling on Tone.Limiter; it acts as a hard ceiling via its threshold)
 
 let audioContextInitialized = false;
 
@@ -732,6 +736,84 @@ export function getMasterMeterNode() {
     return masterMeterNode;
 }
 
+// ---- Master Brick-Wall Limiter ----
+// The limiter is a `Tone.Limiter` (a built-in Tone.js hard-knee brick-wall limiter)
+// that sits in the master effect chain between the user-added master effects and
+// `masterGainNodeActual` when enabled. When disabled, it is bypassed (not inserted
+// into the chain) so there is zero audio cost.
+export function getMasterLimiterNode() {
+    if (!masterLimiterNode || masterLimiterNode.disposed) {
+        if (masterLimiterNode && !masterLimiterNode.disposed) {
+            try { masterLimiterNode.dispose(); } catch(e) { console.warn('[Audio getMasterLimiterNode] Error disposing old master limiter:', e?.message); }
+        }
+        try {
+            masterLimiterNode = new Tone.Limiter(masterLimiterThresholdDb);
+            console.log('[Audio getMasterLimiterNode] Created new master limiter node at threshold', masterLimiterThresholdDb, 'dB');
+        } catch (e) {
+            console.error('[Audio getMasterLimiterNode] Failed to create Tone.Limiter:', e?.message || e);
+            masterLimiterNode = null;
+        }
+    }
+    return masterLimiterNode;
+}
+
+export function isMasterLimiterEnabled() { return !!masterLimiterEnabled; }
+
+export function setMasterLimiterEnabled(enabled) {
+    const next = !!enabled;
+    if (masterLimiterEnabled === next) return masterLimiterEnabled;
+    masterLimiterEnabled = next;
+    // Lazily create the node now so it's ready for the rebuild.
+    if (masterLimiterEnabled) {
+        try { getMasterLimiterNode(); } catch(e) { console.warn('[Audio setMasterLimiterEnabled] getMasterLimiterNode failed:', e?.message); }
+    }
+    // Always rebuild so the chain reflects the new state (with/without limiter).
+    try {
+        if (typeof rebuildMasterEffectChain === 'function') rebuildMasterEffectChain();
+    } catch (e) {
+        console.error('[Audio setMasterLimiterEnabled] rebuildMasterEffectChain failed:', e?.message || e);
+    }
+    return masterLimiterEnabled;
+}
+
+export function getMasterLimiterThresholdDb() { return masterLimiterThresholdDb; }
+export function getMasterLimiterCeilingDb() { return masterLimiterCeilingDb; }
+
+export function setMasterLimiterThresholdDb(db) {
+    const n = Number(db);
+    if (!Number.isFinite(n)) return masterLimiterThresholdDb;
+    masterLimiterThresholdDb = Math.max(-24, Math.min(0, n));
+    if (masterLimiterNode && !masterLimiterNode.disposed) {
+        try { masterLimiterNode.threshold.value = masterLimiterThresholdDb; } catch(e) { console.warn('[Audio setMasterLimiterThresholdDb] Error:', e?.message); }
+    }
+    return masterLimiterThresholdDb;
+}
+
+export function setMasterLimiterCeilingDb(db) {
+    // Informational only — Tone.Limiter has no separate ceiling (the threshold IS the ceiling).
+    const n = Number(db);
+    if (!Number.isFinite(n)) return masterLimiterCeilingDb;
+    masterLimiterCeilingDb = Math.max(-6, Math.min(0, n));
+    return masterLimiterCeilingDb;
+}
+
+// Returns the limiter's current gain reduction in dB (negative or zero).
+// Reads the embedded compressor's reduction value via the limit's internal node.
+export function getMasterLimiterReductionDb() {
+    try {
+        if (!masterLimiterEnabled) return 0;
+        const node = getMasterLimiterNode();
+        if (!node || node.disposed) return 0;
+        // Tone.Limiter wraps a compressor; `reduction` is the gain reduction signal in dB.
+        const r = (node._compressor && typeof node._compressor.reduction !== 'undefined')
+            ? node._compressor.reduction
+            : (typeof node.reduction === 'number' ? node.reduction : 0);
+        return Number.isFinite(r) ? r : 0;
+    } catch (e) {
+        return 0;
+    }
+}
+
 
 export async function initAudioContextAndMasterMeter(isUserInitiated = false) {
     if (audioContextInitialized && Tone.context && Tone.context.state === 'running') {
@@ -897,8 +979,47 @@ export function rebuildMasterEffectChain() {
         }
     });
 
+    // Insert the Master Brick-Wall Limiter as the final stage before masterGainNodeActual
+    // when the user has enabled it from the Start menu (v0.3.65 — Master Limiter feature).
+    // When enabled we take full ownership of the final wire so the downstream
+    // `currentAudioPathEnd.connect(masterGainNodeActual)` below is skipped.
+    let _masterLimiterWired = false;
+    if (masterLimiterEnabled && masterGainNodeActual && !masterGainNodeActual.disposed) {
+        try {
+            const limiterNode = getMasterLimiterNode();
+            if (limiterNode && !limiterNode.disposed) {
+                // Sync threshold in case it was changed while disabled
+                try { limiterNode.threshold.value = masterLimiterThresholdDb; } catch(_e) { /* ignore */ }
+                // Disconnect any prior wire into masterGainNodeActual from currentAudioPathEnd
+                // (or from bus input if there were no effects).
+                const wireSource = (currentAudioPathEnd && !currentAudioPathEnd.disposed)
+                    ? currentAudioPathEnd
+                    : (masterEffectsBusInputNode && !masterEffectsBusInputNode.disposed ? masterEffectsBusInputNode : null);
+                if (wireSource) {
+                    try { wireSource.disconnect(masterGainNodeActual); } catch(_e) { /* nothing was connected — ignore */ }
+                }
+                // Wire wireSource → limiter → masterGainNodeActual
+                if (wireSource) {
+                    try {
+                        wireSource.connect(limiterNode);
+                        limiterNode.connect(masterGainNodeActual);
+                        _masterLimiterWired = true;
+                        console.log('[Audio rebuildMasterEffectChain] Master limiter inserted into chain (threshold', masterLimiterThresholdDb, 'dB)');
+                    } catch (e) {
+                        console.error('[Audio rebuildMasterEffectChain] Error wiring limiter into chain:', e?.message || e);
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('[Audio rebuildMasterEffectChain] Error inserting master limiter:', e?.message || e);
+        }
+    }
+
     // Connect the end of the effect chain to masterGainNodeActual
-    if (currentAudioPathEnd && !currentAudioPathEnd.disposed && masterGainNodeActual && !masterGainNodeActual.disposed) {
+    // (Skip when the master limiter is enabled — the limiter block above already wired this.)
+    if (_masterLimiterWired) {
+        // Already wired via limiter; nothing more to do.
+    } else if (currentAudioPathEnd && !currentAudioPathEnd.disposed && masterGainNodeActual && !masterGainNodeActual.disposed) {
         try {
             console.log(`[Audio rebuildMasterEffectChain] Connecting end of master effect chain (${currentAudioPathEnd.toString()}) to masterGainNodeActual.`);
             currentAudioPathEnd.connect(masterGainNodeActual);

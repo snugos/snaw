@@ -123,6 +123,8 @@ import { initLoudnessMeter, openLoudnessMeterPanel, isLoudnessMeterActive, updat
 import { initSendsOverviewPanel, openSendsOverviewPanel, isSendsOverviewPanelActive, getSendsOverviewVersion } from './SendsOverviewPanel.js';
 // Project Search - global substring search across track names, clip names, and track notes
 import { initProjectSearch, openProjectSearchPanel, isProjectSearchPanelOpen, searchProject } from './ProjectSearch.js';
+// Master Limiter - brick-wall master limiter toggle (Tone.Limiter at the end of the master chain)
+import { initMasterLimiter, openMasterLimiterPanel, isMasterLimiterEnabled } from './MasterLimiter.js';
 // Guitar Tab Editor
 import { initGuitarTabEditor, openGuitarTabEditor } from './GuitarTabEditor.js';
 import { initTrackColorPanel, openTrackColorPanel } from './TrackColorPanel.js';
@@ -227,7 +229,7 @@ import * as FeatureAdditions from './FeatureAdditions.js';
 // build a File with the correct MIME type for the sound browser drop pipeline.
 // getMasterMeterNode is used by the Loudness Meter panel to tap the master bus for
 // true-peak analysis and to read the per-tick dB value for LUFS computation.
-import { getMimeTypeFromFilename, getMasterMeterNode } from './audio.js';
+import { getMimeTypeFromFilename, getMasterMeterNode, getMasterLimiterNode, setMasterLimiterEnabled, setMasterLimiterThresholdDb, setMasterLimiterCeilingDb, getMasterLimiterReductionDb, getMasterLimiterThresholdDb, getMasterLimiterCeilingDb, isMasterLimiterEnabled as audioIsMasterLimiterEnabledImpl } from './audio.js';
 // setupGenericDropZoneListeners is imported here but used via appServices by ui.js
 import { showNotification as utilShowNotification, createContextMenu, createDropZoneHTML, setupGenericDropZoneListeners } from './utils.js';
 import { openKeyboardShortcutsPanel } from './ui.js';
@@ -1018,6 +1020,19 @@ const appServices = {
     openProjectSearchPanel,
     isProjectSearchPanelOpen,
     searchProject,
+    // Master Limiter - brick-wall limiter toggle panel
+    openMasterLimiterPanel,
+    isMasterLimiterEnabled,
+    // Master Limiter audio.js accessors — the MasterLimiter.js module calls these
+    // to wire/unwire the limiter into the master effect chain (v0.3.65 — Master Limiter feature).
+    getMasterLimiterNode,
+    setMasterLimiterEnabled,
+    setMasterLimiterThresholdDb,
+    setMasterLimiterCeilingDb,
+    getMasterLimiterReductionDb,
+    getMasterLimiterThresholdDb,
+    getMasterLimiterCeilingDb,
+    audioIsMasterLimiterEnabled: audioIsMasterLimiterEnabledImpl,
     // Loudness Meter master-meter shims: the meter module expects a stereo [L,R] dB array
     // and a Web Audio tap node. The SnugOS master bus uses a single mono Tone.Meter, so
     // we duplicate the mono dB value across both channels and expose the Tone.Meter node
@@ -1925,6 +1940,8 @@ async function initializeSnugOS() {
         if (typeof initSendsOverviewPanel === 'function') initSendsOverviewPanel(appServices);
         // Project Search initialization (substring search across tracks/clips/notes)
         if (typeof initProjectSearch === 'function') initProjectSearch(appServices);
+        // Master Limiter initialization (brick-wall limiter toggle)
+        if (typeof initMasterLimiter === 'function') initMasterLimiter(appServices);
         // After the timeline renders existing tracks, paint note indicators for any
         // persisted notes that didn't get a 'trackRendered' callback (initial load).
         setTimeout(() => { try { if (typeof refreshTrackNoteIndicators === 'function') refreshTrackNoteIndicators(); } catch (e) { /* ignore */ } }, 800);

@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.64"; // 2026-06-21 - Project Search (v0.3.64)
+export const APP_VERSION = "0.3.65"; // 2026-06-21 - Master Limiter toggle panel (v0.3.65)
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks
