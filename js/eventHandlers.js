@@ -812,6 +812,12 @@ export function initializePrimaryEventListeners(appContext) {
                     localAppServices.openSendsOverviewPanel?.();
                 } catch(e) { console.error('[Menu] Sends Overview error:', e); }
             },
+            menuProjectSearch: () => {
+                console.log('[Menu] Project Search clicked');
+                try {
+                    localAppServices.openProjectSearchPanel?.();
+                } catch(e) { console.error('[Menu] Project Search error:', e); }
+            },
             menuLoopRegionSnap: () => {
                 console.log('[Menu] Loop Region Snap clicked');
                 try {

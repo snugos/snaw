@@ -121,6 +121,8 @@ import { initDrumKitPieceSelector, openDrumKitPieceSelectorPanel, isDrumKitPiece
 // Loudness Meter - EBU R128 LUFS + true-peak dBTP readout panel
 import { initLoudnessMeter, openLoudnessMeterPanel, isLoudnessMeterActive, updateLoudnessMeter, resetLoudnessMeterIntegrated } from './LoudnessMeter.js';
 import { initSendsOverviewPanel, openSendsOverviewPanel, isSendsOverviewPanelActive, getSendsOverviewVersion } from './SendsOverviewPanel.js';
+// Project Search - global substring search across track names, clip names, and track notes
+import { initProjectSearch, openProjectSearchPanel, isProjectSearchPanelOpen, searchProject } from './ProjectSearch.js';
 // Guitar Tab Editor
 import { initGuitarTabEditor, openGuitarTabEditor } from './GuitarTabEditor.js';
 import { initTrackColorPanel, openTrackColorPanel } from './TrackColorPanel.js';
@@ -1012,6 +1014,10 @@ const appServices = {
     openSendsOverviewPanel,
     isSendsOverviewPanelActive,
     getSendsOverviewVersion,
+    // Project Search - substring search across track names, clip names, and track notes
+    openProjectSearchPanel,
+    isProjectSearchPanelOpen,
+    searchProject,
     // Loudness Meter master-meter shims: the meter module expects a stereo [L,R] dB array
     // and a Web Audio tap node. The SnugOS master bus uses a single mono Tone.Meter, so
     // we duplicate the mono dB value across both channels and expose the Tone.Meter node
@@ -1917,6 +1923,8 @@ async function initializeSnugOS() {
         if (typeof initLoudnessMeter === 'function') initLoudnessMeter(appServices);
         // Sends Overview Panel initialization (track → send bus matrix)
         if (typeof initSendsOverviewPanel === 'function') initSendsOverviewPanel(appServices);
+        // Project Search initialization (substring search across tracks/clips/notes)
+        if (typeof initProjectSearch === 'function') initProjectSearch(appServices);
         // After the timeline renders existing tracks, paint note indicators for any
         // persisted notes that didn't get a 'trackRendered' callback (initial load).
         setTimeout(() => { try { if (typeof refreshTrackNoteIndicators === 'function') refreshTrackNoteIndicators(); } catch (e) { /* ignore */ } }, 800);

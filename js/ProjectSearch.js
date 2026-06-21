@@ -90,10 +90,15 @@ function buildResults(query) {
         if (!entry) return;
         const text = entry.text || '';
         if (!q || matches(text, q)) {
+            let resolvedName = entry.trackName || null;
+            if (!resolvedName && entry.trackId != null) {
+                const t = tracks.find(tr => String(tr.id) === String(entry.trackId));
+                if (t) resolvedName = t.name;
+            }
             noteResults.push({
                 kind: 'note',
                 trackId: entry.trackId != null ? String(entry.trackId) : null,
-                trackName: entry.trackName || entry.trackId,
+                trackName: resolvedName || entry.trackId,
                 snippet: text,
                 color: entry.color || '#3b82f6',
                 timestamp: entry.timestamp || null
@@ -101,16 +106,18 @@ function buildResults(query) {
         }
     });
 
+    const truncated =
+        (trackResults.length > MAX_RESULTS_PER_KIND) ||
+        (clipResults.length > MAX_RESULTS_PER_KIND) ||
+        (noteResults.length > MAX_RESULTS_PER_KIND);
+
     return {
         query: q,
         tracks: trackResults.slice(0, MAX_RESULTS_PER_KIND),
         clips: clipResults.slice(0, MAX_RESULTS_PER_KIND),
         notes: noteResults.slice(0, MAX_RESULTS_PER_KIND),
         totalCount: trackResults.length + clipResults.length + noteResults.length,
-        truncated: (trackResults.length + clipResults.length + noteResults.length) >
-                   (Math.min(trackResults.length, MAX_RESULTS_PER_KIND) +
-                    Math.min(clipResults.length, MAX_RESULTS_PER_KIND) +
-                    Math.min(noteResults.length, MAX_RESULTS_PER_KIND))
+        truncated
     };
 }
 
@@ -125,8 +132,8 @@ function highlightTrack(trackId) {
             const tracks = safeTracks();
             const t = tracks.find(tr => String(tr.id) === String(trackId));
             if (t && t.name) {
-                const all = document.querySelectorAll('[data-track-id]');
-                all.forEach((node) => {
+                const candidates = document.querySelectorAll('[data-track-id]');
+                candidates.forEach((node) => {
                     const header = node.querySelector('.track-header, .track-name, .track-info');
                     if (header && header.textContent && header.textContent.indexOf(t.name) !== -1) {
                         el = node;
@@ -143,7 +150,6 @@ function highlightTrack(trackId) {
     setTimeout(() => {
         try {
             el.style.boxShadow = original || '';
-            setTimeout(() => { el.style.boxShadow = original || ''; }, 250);
         } catch (e) { /* ignore */ }
     }, HIGHLIGHT_DURATION_MS);
 }
@@ -158,24 +164,21 @@ function jumpToResult(result) {
     highlightTrack(result.trackId);
     if (localAppServices && typeof localAppServices.showNotification === 'function') {
         const label = result.kind === 'clip'
-            ? `Clip: ${result.clipName || result.clipType}`
+            ? `Clip: ${result.clipName || result.clipType || 'clip'}`
             : result.kind === 'note'
                 ? 'Track note'
                 : 'Track';
-        localAppServices.showNotification(`Jumped to: ${result.trackName} · ${label}`, 1500);
+        localAppServices.showNotification(`Jumped to: ${result.trackName || result.trackId} · ${label}`, 1500);
     }
 }
 
-function escapeHtml(s) {
-    return String(s == null ? '' : s)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+function truncateSnippet(text, maxLen) {
+    const s = String(text == null ? '' : text);
+    if (s.length <= maxLen) return s;
+    return s.slice(0, maxLen - 1) + '…';
 }
 
-function renderResultItem(result) {
+function makeResultCard(result, query) {
     const wrap = document.createElement('div');
     wrap.className = 'ps-result';
     wrap.style.cssText = [
@@ -194,8 +197,9 @@ function renderResultItem(result) {
 
     const top = document.createElement('div');
     top.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:8px;';
+
     const label = document.createElement('span');
-    label.style.cssText = 'color:#fff;font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
+    label.style.cssText = 'color:#fff;font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;';
     if (result.kind === 'clip') {
         label.textContent = `${result.trackName || 'Track'} → ${result.clipName || '(unnamed clip)'}`;
     } else if (result.kind === 'note') {
@@ -230,30 +234,53 @@ function renderResultItem(result) {
     top.appendChild(badge);
     wrap.appendChild(top);
 
-    if (result.kind === 'note' && result.snippet) {
-        const snip = document.createElement('div');
-        snip.textContent = result.snippet.length > 160
-            ? result.snippet.slice(0, 160) + '…'
-            : result.snippet;
-        snip.style.cssText = 'color:#bbb;font-size:11px;line-height:1.4;white-space:pre-wrap;word-wrap:break-word;';
-        wrap.appendChild(snip);
-    } else if (result.matchField) {
+    if (result.matchField) {
         const meta = document.createElement('div');
         meta.textContent = result.matchField;
-        meta.style.cssText = 'color:#666;font-size:10px;font-style:italic;';
+        meta.style.cssText = 'color:#888;font-size:10px;';
         wrap.appendChild(meta);
+    } else if (result.kind === 'note' && result.snippet) {
+        const snippet = document.createElement('div');
+        snippet.textContent = truncateSnippet(result.snippet, 140);
+        snippet.style.cssText = 'color:#bbb;font-size:11px;line-height:1.4;white-space:pre-wrap;word-wrap:break-word;';
+        wrap.appendChild(snippet);
     }
 
     return wrap;
 }
 
+function renderSection(container, title, items, kind, query) {
+    const section = document.createElement('div');
+    section.style.cssText = 'display:flex;flex-direction:column;gap:6px;';
+    const header = document.createElement('div');
+    header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;color:#888;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid #222;padding-bottom:4px;';
+    const titleEl = document.createElement('span');
+    titleEl.textContent = title;
+    header.appendChild(titleEl);
+    const countEl = document.createElement('span');
+    countEl.textContent = `${items.length} match${items.length === 1 ? '' : 'es'}`;
+    countEl.style.cssText = 'color:#666;font-size:10px;text-transform:none;letter-spacing:0;';
+    header.appendChild(countEl);
+    section.appendChild(header);
+
+    if (items.length === 0) {
+        const empty = document.createElement('div');
+        empty.textContent = `No ${kind} matches`;
+        empty.style.cssText = 'color:#555;font-size:11px;font-style:italic;padding:4px 0 8px;';
+        section.appendChild(empty);
+    } else {
+        items.forEach((item) => section.appendChild(makeResultCard(item, query)));
+    }
+    container.appendChild(section);
+}
+
 function renderResults(container, results) {
     container.innerHTML = '';
     if (!results.query) {
-        const empty = document.createElement('div');
-        empty.textContent = 'Type to search across all tracks, clips, and notes.';
-        empty.style.cssText = 'color:#666;text-align:center;padding:24px 12px;font-size:12px;';
-        container.appendChild(empty);
+        const hint = document.createElement('div');
+        hint.textContent = 'Type to search track names, clip names, and track notes.';
+        hint.style.cssText = 'color:#666;text-align:center;padding:24px 12px;font-size:12px;line-height:1.5;';
+        container.appendChild(hint);
         return;
     }
     if (results.totalCount === 0) {
@@ -263,60 +290,58 @@ function renderResults(container, results) {
         container.appendChild(empty);
         return;
     }
-
-    const sections = [
-        { key: 'tracks', title: 'Tracks', results: results.tracks, color: '#a78bfa' },
-        { key: 'clips', title: 'Clips', results: results.clips, color: '#60a5fa' },
-        { key: 'notes', title: 'Notes', results: results.notes, color: '#fbbf24' }
-    ];
-    sections.forEach((section) => {
-        if (!section.results.length) return;
-        const heading = document.createElement('div');
-        heading.textContent = `${section.title} (${section.results.length})`;
-        heading.style.cssText = `color:${section.color};font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin:6px 0 4px 2px;`;
-        container.appendChild(heading);
-        section.results.forEach((r) => {
-            container.appendChild(renderResultItem(r));
-        });
-    });
-
+    renderSection(container, 'Tracks', results.tracks, 'track', results.query);
+    renderSection(container, 'Clips', results.clips, 'clip', results.query);
+    renderSection(container, 'Notes', results.notes, 'note', results.query);
     if (results.truncated) {
-        const more = document.createElement('div');
-        more.textContent = '…results truncated. Refine your search to see more.';
-        more.style.cssText = 'color:#888;text-align:center;font-size:11px;font-style:italic;margin-top:8px;';
-        container.appendChild(more);
+        const note = document.createElement('div');
+        note.textContent = `Showing first ${MAX_RESULTS_PER_KIND} of each kind.`;
+        note.style.cssText = 'color:#666;font-size:10px;text-align:center;padding:6px;font-style:italic;';
+        container.appendChild(note);
     }
 }
 
-function renderPanelContent() {
+function refreshResults() {
     if (!panel) return;
+    lastResults = buildResults(searchQuery);
     const list = panel.querySelector('.ps-list');
-    if (!list) return;
-    const results = buildResults(searchQuery);
-    lastResults = results;
-    renderResults(list, results);
-
     const counter = panel.querySelector('.ps-counter');
+    if (list) renderResults(list, lastResults);
     if (counter) {
-        const tracks = safeTracks().length;
-        const noteCount = safeNotes().length;
-        if (!searchQuery) {
-            counter.textContent = `${tracks} track(s), ${noteCount} note(s)`;
-        } else {
-            counter.textContent = `${results.totalCount} match${results.totalCount === 1 ? '' : 'es'}`;
-        }
+        counter.textContent = searchQuery
+            ? `${lastResults.totalCount} result${lastResults.totalCount === 1 ? '' : 's'}`
+            : `${safeTracks().length} tracks · ${safeTracks().reduce((n, t) => n + (Array.isArray(t && t.timelineClips) ? t.timelineClips.length : 0), 0)} clips`;
     }
+}
+
+export function initProjectSearch(services) {
+    localAppServices = services || {};
+    console.log('[ProjectSearch] Initialized');
+}
+
+export function searchProject(query) {
+    return buildResults(query);
+}
+
+export function isProjectSearchPanelOpen() {
+    return !!panel;
+}
+
+export function setProjectSearchPanelOpen(open) {
+    if (open) openProjectSearchPanel();
+    else closeProjectSearchPanel();
 }
 
 export function openProjectSearchPanel() {
     if (panel) {
-        closeProjectSearchPanel();
+        panel.remove();
+        panel = null;
         return;
     }
 
-    const container = document.createElement('div');
-    container.id = PANEL_ID;
-    container.style.cssText = [
+    const wrap = document.createElement('div');
+    wrap.id = PANEL_ID;
+    wrap.style.cssText = [
         'position:fixed',
         'right:20px',
         'top:80px',
@@ -326,7 +351,7 @@ export function openProjectSearchPanel() {
         'border:1px solid #333',
         'border-radius:8px',
         'padding:14px',
-        'z-index:9050',
+        'z-index:9000',
         'box-shadow:0 6px 24px rgba(0,0,0,0.55)',
         'display:flex',
         'flex-direction:column',
@@ -344,16 +369,18 @@ export function openProjectSearchPanel() {
     const closeBtn = document.createElement('button');
     closeBtn.innerHTML = '&times;';
     closeBtn.style.cssText = 'background:none;border:none;color:#888;font-size:20px;cursor:pointer;line-height:1;padding:0 4px;';
-    closeBtn.addEventListener('click', () => closeProjectSearchPanel());
+    closeBtn.title = 'Close';
+    closeBtn.addEventListener('click', () => {
+        wrap.remove();
+        panel = null;
+    });
     header.appendChild(closeBtn);
-    container.appendChild(header);
+    wrap.appendChild(header);
 
     const search = document.createElement('input');
     search.type = 'text';
     search.placeholder = 'Search tracks, clips, notes…';
     search.value = searchQuery || '';
-    search.autocomplete = 'off';
-    search.spellcheck = false;
     search.style.cssText = [
         'width:100%',
         'padding:9px 10px',
@@ -363,68 +390,59 @@ export function openProjectSearchPanel() {
         'color:#fff',
         'font-size:13px',
         'box-sizing:border-box',
-        'font-family:inherit'
+        'font-family:inherit',
+        'outline:none'
     ].join(';');
-    let searchTimer = null;
+    search.addEventListener('focus', () => { search.style.borderColor = '#3b82f6'; });
+    search.addEventListener('blur', () => { search.style.borderColor = '#333'; });
     search.addEventListener('input', (e) => {
-        const value = e.target.value;
-        clearTimeout(searchTimer);
-        searchTimer = setTimeout(() => {
-            searchQuery = value;
-            renderPanelContent();
-        }, 80);
+        searchQuery = e.target.value;
+        refreshResults();
     });
     search.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            clearTimeout(searchTimer);
-            searchQuery = search.value;
-            renderPanelContent();
-        } else if (e.key === 'Escape') {
-            e.preventDefault();
-            closeProjectSearchPanel();
+        if (e.key === 'Escape') {
+            if (searchQuery) {
+                searchQuery = '';
+                search.value = '';
+                refreshResults();
+            } else {
+                wrap.remove();
+                panel = null;
+            }
+            e.stopPropagation();
+        } else if (e.key === 'Enter') {
+            const first = wrap.querySelector('.ps-result');
+            if (first) first.click();
         }
     });
-    container.appendChild(search);
+    wrap.appendChild(search);
+
+    const counter = document.createElement('div');
+    counter.className = 'ps-counter';
+    counter.style.cssText = 'color:#666;font-size:11px;';
+    wrap.appendChild(counter);
 
     const list = document.createElement('div');
     list.className = 'ps-list';
-    list.style.cssText = 'display:flex;flex-direction:column;gap:6px;overflow-y:auto;flex:1;min-height:160px;padding-right:2px;';
-    container.appendChild(list);
+    list.style.cssText = 'display:flex;flex-direction:column;gap:14px;overflow-y:auto;flex:1;min-height:140px;padding-right:2px;';
+    wrap.appendChild(list);
 
     const footer = document.createElement('div');
-    footer.style.cssText = 'display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#666;border-top:1px solid #222;padding-top:8px;';
-    const counter = document.createElement('span');
-    counter.className = 'ps-counter';
-    counter.textContent = '';
-    footer.appendChild(counter);
-
-    const buttons = document.createElement('div');
-    buttons.style.cssText = 'display:flex;gap:6px;';
-
+    footer.style.cssText = 'display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#555;border-top:1px solid #222;padding-top:8px;';
+    const hint = document.createElement('span');
+    hint.textContent = 'Enter jumps to first · Esc clears/closes';
+    footer.appendChild(hint);
     const refreshBtn = document.createElement('button');
     refreshBtn.textContent = 'Refresh';
-    refreshBtn.style.cssText = 'background:#222;border:1px solid #333;color:#ccc;padding:4px 10px;border-radius:3px;cursor:pointer;font-size:11px;';
-    refreshBtn.addEventListener('click', () => renderPanelContent());
-    buttons.appendChild(refreshBtn);
+    refreshBtn.style.cssText = 'background:#222;border:1px solid #333;color:#ccc;padding:3px 8px;border-radius:3px;cursor:pointer;font-size:11px;';
+    refreshBtn.addEventListener('click', () => refreshResults());
+    footer.appendChild(refreshBtn);
+    wrap.appendChild(footer);
 
-    const clearBtn = document.createElement('button');
-    clearBtn.textContent = 'Clear';
-    clearBtn.style.cssText = 'background:#222;border:1px solid #333;color:#ccc;padding:4px 10px;border-radius:3px;cursor:pointer;font-size:11px;';
-    clearBtn.addEventListener('click', () => {
-        searchQuery = '';
-        search.value = '';
-        renderPanelContent();
-        search.focus();
-    });
-    buttons.appendChild(clearBtn);
-
-    footer.appendChild(buttons);
-    container.appendChild(footer);
-
-    document.body.appendChild(container);
-    panel = container;
-    renderPanelContent();
-    setTimeout(() => search.focus(), 30);
+    document.body.appendChild(wrap);
+    panel = wrap;
+    refreshResults();
+    setTimeout(() => { try { search.focus(); search.select(); } catch (e) { /* ignore */ } }, 30);
 }
 
 export function closeProjectSearchPanel() {
@@ -434,30 +452,20 @@ export function closeProjectSearchPanel() {
     }
 }
 
-export function isProjectSearchPanelActive() {
-    return panel !== null;
-}
-
-export function initProjectSearch(services) {
-    localAppServices = services || {};
-}
-
-export function searchProject(query) {
-    return buildResults(query);
-}
-
 if (typeof window !== 'undefined') {
     window.initProjectSearch = initProjectSearch;
+    window.searchProject = searchProject;
     window.openProjectSearchPanel = openProjectSearchPanel;
     window.closeProjectSearchPanel = closeProjectSearchPanel;
-    window.isProjectSearchPanelActive = isProjectSearchPanelActive;
-    window.searchProject = searchProject;
+    window.isProjectSearchPanelOpen = isProjectSearchPanelOpen;
+    window.setProjectSearchPanelOpen = setProjectSearchPanelOpen;
     window.projectSearch = {
         init: initProjectSearch,
-        open: openProjectSearchPanel,
-        close: closeProjectSearchPanel,
-        isActive: isProjectSearchPanelActive,
-        search: searchProject
+        search: searchProject,
+        openPanel: openProjectSearchPanel,
+        closePanel: closeProjectSearchPanel,
+        isOpen: isProjectSearchPanelOpen,
+        setOpen: setProjectSearchPanelOpen
     };
 }
 
