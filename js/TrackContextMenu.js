@@ -169,6 +169,55 @@ function showTrackContextMenu(x, y, trackId) {
                 <button class="w-full text-left px-6 py-1.5 text-sm text-white hover:bg-gray-700" data-action="trillNotes" data-direction="both" data-taps="8" data-interval="2" data-track-id="${trackId}">Trill Both (±2 st, 8 taps)</button>
             </div>
             ` : ''}
+            <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="markRoleMenu" data-track-id="${trackId}">
+                <span class="w-4">🏷️</span>
+                <span>Mark as Role...</span>
+                <span class="ml-auto text-xs text-gray-500">▶</span>
+            </button>
+            <div id="markRoleSubmenu-${trackId}" class="hidden pl-6 bg-gray-800">
+                <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="setRole" data-role="none" data-track-id="${trackId}">
+                    <span class="w-4">⚪</span>
+                    <span>Unclassified</span>
+                </button>
+                <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="setRole" data-role="bass" data-track-id="${trackId}">
+                    <span class="w-4">🔊</span>
+                    <span>Bass</span>
+                </button>
+                <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="setRole" data-role="drums" data-track-id="${trackId}">
+                    <span class="w-4">🥁</span>
+                    <span>Drums</span>
+                </button>
+                <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="setRole" data-role="vocal" data-track-id="${trackId}">
+                    <span class="w-4">🎤</span>
+                    <span>Vocal</span>
+                </button>
+                <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="setRole" data-role="guitar" data-track-id="${trackId}">
+                    <span class="w-4">🎸</span>
+                    <span>Guitar</span>
+                </button>
+                <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="setRole" data-role="keys" data-track-id="${trackId}">
+                    <span class="w-4">🎹</span>
+                    <span>Keys</span>
+                </button>
+                <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="setRole" data-role="synth" data-track-id="${trackId}">
+                    <span class="w-4">🎛️</span>
+                    <span>Synth</span>
+                </button>
+                <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="setRole" data-role="fx" data-track-id="${trackId}">
+                    <span class="w-4">✨</span>
+                    <span>FX</span>
+                </button>
+                <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="setRole" data-role="other" data-track-id="${trackId}">
+                    <span class="w-4">🎵</span>
+                    <span>Other</span>
+                </button>
+                <div class="border-t border-gray-700 mt-1 pt-1">
+                    <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="openRolePanel" data-track-id="${trackId}">
+                        <span class="w-4">📋</span>
+                        <span>Open Role Panel...</span>
+                    </button>
+                </div>
+            </div>
             <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="trackNote" data-track-id="${trackId}">
                 <span class="w-4">📝</span>
                 <span>Add/Edit Track Note</span>
@@ -220,6 +269,12 @@ function showTrackContextMenu(x, y, trackId) {
             if (action === 'trillNotesMenu') {
                 e.stopPropagation();
                 const sub = menu.querySelector(`#trillNotesSubmenu-${tId}`);
+                if (sub) sub.classList.toggle('hidden');
+                return;
+            }
+            if (action === 'markRoleMenu') {
+                e.stopPropagation();
+                const sub = menu.querySelector(`#markRoleSubmenu-${tId}`);
                 if (sub) sub.classList.toggle('hidden');
                 return;
             }
@@ -515,7 +570,32 @@ function handleTrackAction(action, trackId, btn) {
         case 'exportTrack':
             exportTrackToFile(trackId);
             break;
-            
+
+        case 'setRole':
+            if (typeof btn?.dataset?.role === 'string' && track) {
+                const newRole = btn.dataset.role;
+                if (typeof track.setRole === 'function') {
+                    track.setRole(newRole, true);
+                } else {
+                    track.role = newRole;
+                    if (localAppServices.captureStateForUndo) {
+                        localAppServices.captureStateForUndo(`Set role on ${track.name}`);
+                    }
+                }
+                const label = (window.TRACK_ROLE_LABELS && window.TRACK_ROLE_LABELS[newRole]) || newRole;
+                localAppServices.showNotification?.(`Role set to ${label}`, 1500);
+                if (localAppServices.renderTracks) localAppServices.renderTracks();
+            }
+            break;
+
+        case 'openRolePanel':
+            if (localAppServices.openTrackRolePanel) {
+                localAppServices.openTrackRolePanel(trackId);
+            } else {
+                localAppServices.showNotification?.('Track Role Panel not available', 2000);
+            }
+            break;
+
         case 'delete':
             if (confirm(`Delete track "${track.name || 'Unnamed Track'}"?`)) {
                 if (localAppServices.captureStateForUndo) {

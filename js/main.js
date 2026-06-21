@@ -123,6 +123,7 @@ import { initSendsOverviewPanel, openSendsOverviewPanel, isSendsOverviewPanelAct
 // Guitar Tab Editor
 import { initGuitarTabEditor, openGuitarTabEditor } from './GuitarTabEditor.js';
 import { initTrackColorPanel, openTrackColorPanel } from './TrackColorPanel.js';
+import { initTrackRolePanel, openTrackRolePanel, getTracksByRole, getRoleSummary } from './TrackRolePanel.js';
 import { initTrackSnapResolutionPanel, openTrackSnapResolutionPanel } from './TrackSnapResolutionPanel.js';
 import { initTrackIconPicker, openTrackIconPickerPanel } from './TrackIconPicker.js';
 import { initChordVoicingModes, openChordVoicingPanel } from './ChordVoicingModes.js';
@@ -313,53 +314,37 @@ function showSafeNotification(message, duration) {
 // `this` is undefined, so `this.init()` would throw "Cannot read properties of
 // undefined (reading 'init')" the moment the user clicks "Remove Custom Background").
 async function removeCustomDesktopBackground() {
-    const hasStoredBg = localStorage.getItem('snugosDesktopBackground') || localStorage.getItem('snugosDesktopBgType');
-    const bgDbAvailable = !!(appServices && appServices.bgDb && typeof appServices.bgDb.init === 'function');
-    if (!hasStoredBg) {
-        if (!bgDbAvailable) {
-            if (typeof showSafeNotification === 'function') showSafeNotification("No custom background to remove.", 2000);
-            return;
-        }
-        try {
-            const db = await appServices.bgDb.init();
-            const stored = await new Promise((resolve) => {
-                const tx = db.transaction('backgrounds', 'readonly');
-                const store = tx.objectStore('backgrounds');
-                const req = store.get('desktopVideo');
-                req.onsuccess = () => resolve(req.result);
-                req.onerror = () => resolve(null);
-            });
-            if (!stored) {
-                if (typeof showSafeNotification === 'function') showSafeNotification("No custom background to remove.", 2000);
-                return;
-            }
-        } catch (e) {
-            console.warn('[removeCustomDesktopBackground] IndexedDB check failed, continuing anyway:', e);
-        }
-    }
+    const desktop = uiElementsCache?.desktop;
+    const videoBg = document.getElementById('desktopVideoBg');
+
     try {
-        localStorage.removeItem('snugosDesktopBackground');
-        localStorage.removeItem('snugosDesktopBgType');
-        if (bgDbAvailable) {
-            try {
-                const db = await appServices.bgDb.init();
-                await new Promise((resolve, reject) => {
-                    const tx = db.transaction('backgrounds', 'readwrite');
-                    const store = tx.objectStore('backgrounds');
-                    store.delete('desktopVideo');
-                    tx.oncomplete = () => resolve();
-                    tx.onerror = () => reject(tx.error);
-                });
-            } catch (idbErr) {
-                console.warn('[removeCustomDesktopBackground] IndexedDB delete failed, localStorage cleared:', idbErr);
-            }
+        // Clear localStorage
+        localStorage.removeItem(DESKTOP_BACKGROUND_KEY);
+        localStorage.removeItem(DESKTOP_BG_TYPE_KEY);
+
+        // Clear desktop background styles
+        if (desktop) {
+            desktop.style.backgroundImage = '';
+            desktop.style.backgroundColor = Constants.defaultDesktopBg || '#101010';
         }
-        if (typeof applyDesktopBackground === 'function') applyDesktopBackground(null, null);
-        if (typeof restoreDesktopBackground === 'function') restoreDesktopBackground();
-        if (typeof updateBgStatusIndicator === 'function') updateBgStatusIndicator();
+
+        // Stop and clear video
+        if (videoBg) {
+            videoBg.pause();
+            videoBg.src = '';
+            videoBg.style.display = 'none';
+        }
+
+        // Remove from db if exists (capture so we can surface a warning if it fails)
+        bgDbDeleteAudio('desktopVideo').catch((dbErr) => {
+            console.warn("[removeCustomDesktopBackground] IndexedDB delete failed (localStorage still cleared):", dbErr);
+            if (typeof showSafeNotification === 'function') showSafeNotification("Local DB cleanup failed — background cleared anyway.", 2500);
+        });
+
+        console.log("[removeCustomDesktopBackground] Custom background removed.");
         if (typeof showSafeNotification === 'function') showSafeNotification("Custom background removed.", 2000);
     } catch (e) {
-        console.error('[removeCustomDesktopBackground] Error:', e);
+        console.error("Error removing custom desktop background:", e);
         if (typeof showSafeNotification === 'function') showSafeNotification("Failed to remove background.", 2000);
     }
 }
@@ -989,6 +974,9 @@ const appServices = {
     openPhaseCorrelationMeterPanel,
     openTrackColorPalettePanel,
     openTrackColorPanel,
+    openTrackRolePanel,
+    getTracksByRole,
+    getRoleSummary,
     openCountInSettingsPanel,
     openTrackSnapResolutionPanel,
     openTempoSyncLFOPanel,
@@ -1846,6 +1834,7 @@ async function initializeSnugOS() {
         if (typeof initTimelineClipOperations === 'function') initTimelineClipOperations(appServices); // Timeline Clip Operations (multi-select)
         if (typeof initTrackDuplicateOffset === 'function') initTrackDuplicateOffset(appServices); // Track Duplicate with Offset
         if (typeof initTrackColorPanel === 'function') initTrackColorPanel(appServices); // Track Color Panel initialization
+        if (typeof initTrackRolePanel === 'function') initTrackRolePanel(appServices); // Track Role Panel initialization
         if (typeof initTrackSnapResolutionPanel === 'function') initTrackSnapResolutionPanel(appServices); // Track Snap Resolution Panel initialization
         if (typeof initTrackScrollToCenter === 'function') initTrackScrollToCenter(appServices); // Track Scroll To Center initialization
         if (typeof initSamplerLoopTrim === 'function') initSamplerLoopTrim(appServices); // Sampler Loop Trim initialization
@@ -2089,7 +2078,7 @@ function updatePerformanceStats() {
         if (clipCountEl && typeof getTracksState === 'function') {
             const allTracks = getTracksState();
             let totalClips = 0;
-            if (Array.isArray(allTracks)) {
+            if (Array.isArray(allTracks) {
                 for (const t of allTracks) {
                     if (t && Array.isArray(t.timelineClips)) {
                         totalClips += t.timelineClips.length;
@@ -2104,7 +2093,7 @@ function updatePerformanceStats() {
         if (noteCountEl && typeof getTracksState === 'function') {
             const allTracks = getTracksState();
             let totalNotes = 0;
-            if (Array.isArray(allTracks)) {
+            if (Array.isArray(allTracks) {
                 for (const t of allTracks) {
                     if (!t || t.type === 'Audio') continue;
                     if (!Array.isArray(t.sequences) || t.sequences.length === 0) continue;
@@ -2292,7 +2281,7 @@ function applyDesktopBackground(sourceUrl, bgType = 'image') {
 
 // Restore background on load
 async function restoreDesktopBackground() {
-    const bgType = localStorage.getItem('snugosDesktopBgType');
+    const bgType = localStorage.getItem(DESKTOP_BG_TYPE_KEY);
 
     if (bgType === 'video') {
         let restored = false;
@@ -2301,22 +2290,25 @@ async function restoreDesktopBackground() {
             if (videoBlob) {
                 const objectUrl = URL.createObjectURL(videoBlob);
                 applyDesktopBackground(objectUrl, 'video');
-                console.log("[Main] Restored video background from IndexedDB");
-                restored = true;
+                return;
+            }
+            // Blob missing — clear stale video marker, fall through to image fallback
+            console.warn('[restoreDesktopBackground] Stored video bg marker set but IDB blob is missing. Clearing marker.');
+            localStorage.removeItem(DESKTOP_BG_TYPE_KEY);
+            if (typeof showSafeNotification === 'function') {
+                showSafeNotification("Stored video background could not be restored (missing data). Falling back to default.", 3500);
             }
         } catch (e) {
             console.warn("Could not restore video background:", e);
+            localStorage.removeItem(DESKTOP_BG_TYPE_KEY);
+            if (typeof showSafeNotification === 'function') {
+                showSafeNotification("Video background restore failed. Falling back to default.", 3500);
+            }
         }
-        if (!restored) {
-            // IDB read failed or blob is missing (partial clear, browser storage eviction,
-            // schema migration). Clear the stale 'video' marker so subsequent loads don't
-            // keep re-triggering the broken path, and tell the user what happened.
-            console.warn("[restoreDesktopBackground] bgType='video' but no video blob available; clearing stale marker.");
-            localStorage.removeItem('snugosDesktopBgType');
-            if (typeof showSafeNotification === 'function') showSafeNotification("Stored video background could not be restored. Falling back to default.", 3000);
-        }
-    } else if (bgType === 'image' || !bgType) {
-        const imageUrl = localStorage.getItem('snugosDesktopBackground');
+    }
+
+    if (bgType === 'image' || !bgType) {
+        const imageUrl = localStorage.getItem(DESKTOP_BACKGROUND_KEY);
         if (imageUrl) {
             applyDesktopBackground(imageUrl, 'image');
         }

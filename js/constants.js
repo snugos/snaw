@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.60"; // 2026-06-19 - Loudness Meter panel wiring (EBU R128 LUFS + true-peak dBTP) (v0.3.59) - Sends Overview Panel
+export const APP_VERSION = "0.3.61"; // 2026-06-20 - Mark Track As Bass/Drums/Vocal role tags for smart mix presets (v0.3.61)
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks
@@ -223,3 +223,49 @@ export const HUMANIZE_VELOCITY_PRESET_SUBTLE = 0.05;    // Subtle preset (±5%)
 export const HUMANIZE_VELOCITY_PRESET_MEDIUM = 0.15;    // Medium preset (±15%)
 export const HUMANIZE_VELOCITY_PRESET_HEAVY = 0.30;     // Heavy preset (±30%)
 export const HUMANIZE_VELOCITY_PRESET_WILD = 0.50;      // Wild preset (±50%)
+
+// --- Track Role Constants ---
+// Roles mark tracks for smart mix presets (e.g. auto-EQ ranges, send levels, pan defaults).
+// Stored on Track.role and persisted in project state. Roles are user-assigned metadata.
+export const TRACK_ROLE_NONE = 'none';              // Unclassified (default — no role)
+export const TRACK_ROLE_BASS = 'bass';              // Bass / sub frequencies
+export const TRACK_ROLE_DRUMS = 'drums';            // Drums / percussion
+export const TRACK_ROLE_VOCAL = 'vocal';            // Lead / backing vocal
+export const TRACK_ROLE_GUITAR = 'guitar';          // Acoustic or electric guitar
+export const TRACK_ROLE_KEYS = 'keys';              // Keys / piano / organ
+export const TRACK_ROLE_SYNTH = 'synth';            // Synth lead / pad
+export const TRACK_ROLE_FX = 'fx';                  // Sound effects / risers / impacts
+export const TRACK_ROLE_OTHER = 'other';            // Anything else
+export const TRACK_ROLES = [
+    TRACK_ROLE_NONE,
+    TRACK_ROLE_BASS,
+    TRACK_ROLE_DRUMS,
+    TRACK_ROLE_VOCAL,
+    TRACK_ROLE_GUITAR,
+    TRACK_ROLE_KEYS,
+    TRACK_ROLE_SYNTH,
+    TRACK_ROLE_FX,
+    TRACK_ROLE_OTHER
+];
+export const TRACK_ROLE_LABELS = {
+    [TRACK_ROLE_NONE]: 'Unclassified',
+    [TRACK_ROLE_BASS]: 'Bass',
+    [TRACK_ROLE_DRUMS]: 'Drums',
+    [TRACK_ROLE_VOCAL]: 'Vocal',
+    [TRACK_ROLE_GUITAR]: 'Guitar',
+    [TRACK_ROLE_KEYS]: 'Keys',
+    [TRACK_ROLE_SYNTH]: 'Synth',
+    [TRACK_ROLE_FX]: 'FX',
+    [TRACK_ROLE_OTHER]: 'Other'
+};
+export const TRACK_ROLE_ICONS = {
+    [TRACK_ROLE_NONE]: '⚪',
+    [TRACK_ROLE_BASS]: '🔊',
+    [TRACK_ROLE_DRUMS]: '🥁',
+    [TRACK_ROLE_VOCAL]: '🎤',
+    [TRACK_ROLE_GUITAR]: '🎸',
+    [TRACK_ROLE_KEYS]: '🎹',
+    [TRACK_ROLE_SYNTH]: '🎛️',
+    [TRACK_ROLE_FX]: '✨',
+    [TRACK_ROLE_OTHER]: '🎵'
+};

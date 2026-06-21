@@ -432,6 +432,17 @@ export function initializePrimaryEventListeners(appContext) {
                     }
                 } catch(e) { console.error("[Menu] Track Color Panel error:", e); }
             },
+            menuTrackRolePanel: () => {
+                console.log("[Menu] Track Role Panel clicked");
+                try {
+                    const tracks = localAppServices.getTracksState?.() || [];
+                    if (tracks.length > 0) {
+                        localAppServices.openTrackRolePanel?.(tracks[0].id);
+                    } else {
+                        localAppServices.showNotification?.('No tracks available', 2000);
+                    }
+                } catch(e) { console.error("[Menu] Track Role Panel error:", e); }
+            },
             menuTrackNoiseGate: () => {
                 console.log("[Menu] Track Noise Gate clicked");
                 try {

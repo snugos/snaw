@@ -81,6 +81,9 @@ export class Track {
         // Track color for visual grouping
         this.color = initialData?.color || getRandomTrackColor();
 
+        // Track role for smart mix presets (bass/drums/vocal/etc.)
+        this.role = initialData?.role || 'none';
+
         // Track snap resolution - per-track grid snap sensitivity
         // null means inherit from global snap resolution
         this.snapResolution = initialData?.snapResolution ?? null;
@@ -2235,6 +2238,44 @@ export class Track {
         if (this.appServices.updateTrackUI) {
             this.appServices.updateTrackUI(this.id, 'colorChanged');
         }
+    }
+
+    /**
+     * Set the track role for smart mix presets (bass/drums/vocal/etc.).
+     * Roles are user-assigned metadata used by AI assistants, smart mix presets,
+     * export templates, and color-coding helpers to know what kind of audio a track carries.
+     * @param {string} role - One of the TRACK_ROLE_* values (defaults to 'none' for unknown)
+     * @param {boolean} fromInteraction - Whether this is from a user interaction
+     */
+    setRole(role, fromInteraction = false) {
+        if (!fromInteraction) this._captureUndoState?.(`Set role on ${this.name}`);
+        const validRoles = ['none', 'bass', 'drums', 'vocal', 'guitar', 'keys', 'synth', 'fx', 'other'];
+        const normalized = validRoles.includes(role) ? role : 'none';
+        const oldRole = this.role || 'none';
+        this.role = normalized;
+        console.log(`[Track ${this.id}] Set role from "${oldRole}" to "${normalized}"`);
+        if (fromInteraction && this.appServices.captureStateForUndo) {
+            this.appServices.captureStateForUndo(`Set ${this.name} role to ${normalized}`);
+        }
+        if (this.appServices.updateTrackUI) {
+            this.appServices.updateTrackUI(this.id, 'roleChanged');
+        }
+    }
+
+    /**
+     * Get the track role (defaults to 'none' if not set).
+     * @returns {string} The current track role
+     */
+    getRole() {
+        return this.role || 'none';
+    }
+
+    /**
+     * Clear the track role (reset to 'none'). Convenience for menu items and the panel.
+     * @param {boolean} fromInteraction - Whether this is from a user interaction
+     */
+    clearRole(fromInteraction = false) {
+        this.setRole('none', fromInteraction);
     }
 
     /**
