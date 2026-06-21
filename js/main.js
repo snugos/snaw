@@ -2293,17 +2293,27 @@ function applyDesktopBackground(sourceUrl, bgType = 'image') {
 // Restore background on load
 async function restoreDesktopBackground() {
     const bgType = localStorage.getItem('snugosDesktopBgType');
-    
+
     if (bgType === 'video') {
+        let restored = false;
         try {
             const videoBlob = await bgDb.get('desktopVideo');
             if (videoBlob) {
                 const objectUrl = URL.createObjectURL(videoBlob);
                 applyDesktopBackground(objectUrl, 'video');
                 console.log("[Main] Restored video background from IndexedDB");
+                restored = true;
             }
         } catch (e) {
             console.warn("Could not restore video background:", e);
+        }
+        if (!restored) {
+            // IDB read failed or blob is missing (partial clear, browser storage eviction,
+            // schema migration). Clear the stale 'video' marker so subsequent loads don't
+            // keep re-triggering the broken path, and tell the user what happened.
+            console.warn("[restoreDesktopBackground] bgType='video' but no video blob available; clearing stale marker.");
+            localStorage.removeItem('snugosDesktopBgType');
+            if (typeof showSafeNotification === 'function') showSafeNotification("Stored video background could not be restored. Falling back to default.", 3000);
         }
     } else if (bgType === 'image' || !bgType) {
         const imageUrl = localStorage.getItem('snugosDesktopBackground');

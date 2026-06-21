@@ -1,3 +1,12 @@
+#### Day 738: restoreDesktopBackground Stale-Marker Recovery (2026-06-20)
+- **Run Type**: Snaw Repair & Enhancement Agent (scheduled)
+- **Bug Check**: The task described `main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground is not defined`, but the function is defined and exported (line 315 in current file, exported on `appServices` at line 910 with `window.removeCustomDesktopBackground` mirror at line 1532). All call sites in `eventHandlers.js` guard for existence. No `ReferenceError` can be thrown. Bug already resolved.
+- **Latent Bug Fixed in `restoreDesktopBackground`**: When `localStorage['snugosDesktopBgType'] === 'video'` but the IDB blob was missing (partial clear, browser storage eviction, schema migration) or the read threw, the function returned silently — the user was left with a black desktop and a stale `'video'` marker that would keep re-triggering the broken code path on every reload.
+- **Enhancement**: On video-bg IDB miss/failure, (1) surface a `showSafeNotification` warning ("Stored video background could not be restored. Falling back to default."), (2) clear the stale `snugosDesktopBgType` so subsequent loads don't re-trigger the broken path, and (3) fall through to the existing image-from-localStorage path if one exists. Net: the desktop is never silently black; the user is told what happened and the stale marker self-heals.
+- **Files Modified**: `js/main.js` (+14/-3 lines), `AGENTS.md` (this entry)
+- **Verification**: `node --check js/main.js` passes. All 5 key files (main, state, audio, ui, eventHandlers) syntax-check clean. Deployed `https://raw.githubusercontent.com/snugos/snaw/LWB-with-Bugs/js/main.js` confirmed via curl.
+- **Note**: The `removeCustomDesktopBackground` enhancement (the `bgDbAvailable` guard for missing `appServices.bgDb`) was already shipped on `origin/LWB-with-Bugs` as commit `f921f683` (the Snaw Feature Agent's run). My initial commit for that enhancement was silently dropped during the rebase onto the updated remote because it became a no-op duplicate. Only the still-unfixed `restoreDesktopBackground` bug was novel and worth shipping this run.
+
 ## Day 736: state.js Working-Tree Corruption Recovery + Clean Audit (2026-06-21)
 - **Run Type**: Snaw Feature Completion Agent (scheduled)
 - **Status**: No incomplete features found in active code. Recovered a destructive working-tree corruption of `js/state.js` left by a parallel run mid-flight.
