@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.65"; // 2026-06-21 - Master Limiter toggle panel (v0.3.65)
+export const APP_VERSION = "0.3.66"; // 2026-06-21 - Daily merge: humanizeVelocity undo capture + Track/eventHandlers/ui bugfixes (v0.3.66)
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks

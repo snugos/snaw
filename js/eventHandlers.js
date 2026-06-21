@@ -496,7 +496,7 @@ export function initializePrimaryEventListeners(appContext) {
             },
             menuMuteGroups: () => {
                 console.log("[Menu] Mute Groups clicked");
-                try { localAppServices.openMuteGroupsPanel?(); } catch(e) { console.error("[Menu] Mute Groups error:", e); }
+                try { localAppServices.openMuteGroupsPanel?.(); } catch(e) { console.error("[Menu] Mute Groups error:", e); }
             },
             menuTrackMuteAutomation: () => {
                 console.log('[Menu] Track Mute Automation clicked');
@@ -1043,7 +1043,7 @@ export function attachGlobalControlEvents(elements) {
             loopToggleBtnGlobal.classList.toggle('playing', loopEnabled);
         };
         updateLoopButtonState();
-        loopToggleBtnGlobal.addEventListener('click', () => {
+        loopToggleBtnGlobal.addEventListener('click', async () => {
             const currentEnabled = typeof getLoopRegionEnabled === 'function' ? getLoopRegionEnabled() : false;
             if (typeof setLoopRegionEnabled === 'function') {
                 setLoopRegionEnabled(!currentEnabled);
@@ -1915,7 +1915,7 @@ export function selectMIDIInput(deviceId, silent = false) {
     }
 }
 
-function handleMIDIMessage(message) {
+async function handleMIDIMessage(message) {
     try {
         const [status, data1, data2] = message.data;
         const command = status & 0xF0; // Extract command (upper 4 bits)

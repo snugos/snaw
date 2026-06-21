@@ -3862,6 +3862,10 @@ async function handleAudioExport() {
                             const audioCtx = new AudioContext();
                             const decodedBuffer = await audioCtx.decodeAudioData(audioBuffer);
                             exportBlob = await localAppServices.encodeOggFromAudioBuffer(decodedBuffer, decodedBuffer.sampleRate);
+                        } catch (e) {
+                            console.warn('OGG encoding failed, using WAV:', e);
+                            exportBlob = wavBlob;
+                        }
                     } else if (format === 'flac' && localAppServices.encodeFlacFromAudioBuffer) {
                         try {
                             const audioBuffer = await wavBlob.arrayBuffer();
@@ -3870,10 +3874,6 @@ async function handleAudioExport() {
                             exportBlob = await localAppServices.encodeFlacFromAudioBuffer(decodedBuffer, decodedBuffer.sampleRate);
                         } catch (e) {
                             console.warn('FLAC encoding failed, using WAV:', e);
-                            exportBlob = wavBlob;
-                        }
-                        } catch (e) {
-                            console.warn('OGG encoding failed, using WAV:', e);
                             exportBlob = wavBlob;
                         }
                     }
@@ -3897,6 +3897,7 @@ async function handleAudioExport() {
                 localAppServices.showNotification(`Exported ${selectedTracks.length} stems successfully!`, 3000);
             }
             
+        } else {
             statusText.textContent = 'Preparing master mix export...';
             progressBar.style.width = '20%';
             
@@ -3949,6 +3950,10 @@ async function handleAudioExport() {
                             const audioCtx = new AudioContext();
                             const decodedBuffer = await audioCtx.decodeAudioData(audioBuffer);
                             exportBlob = await localAppServices.encodeOggFromAudioBuffer(decodedBuffer, decodedBuffer.sampleRate);
+                        } catch (e) {
+                            console.warn('OGG encoding failed, using WAV:', e);
+                            exportBlob = wavBlob;
+                        }
                     } else if (format === 'flac' && localAppServices.encodeFlacFromAudioBuffer) {
                         try {
                             statusText.textContent = 'Encoding to FLAC...';
@@ -3958,10 +3963,6 @@ async function handleAudioExport() {
                             exportBlob = await localAppServices.encodeFlacFromAudioBuffer(decodedBuffer, decodedBuffer.sampleRate);
                         } catch (e) {
                             console.warn('FLAC encoding failed, using WAV:', e);
-                            exportBlob = wavBlob;
-                        }
-                        } catch (e) {
-                            console.warn('OGG encoding failed, using WAV:', e);
                             exportBlob = wavBlob;
                         }
                     }
@@ -3993,6 +3994,7 @@ async function handleAudioExport() {
                 }
             }
         
+        }
         progressContainer?.classList.add('hidden');
         
     } catch (error) {
