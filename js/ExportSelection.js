@@ -1,8 +1,9 @@
 /**
  * ExportSelection - Export selected tracks or loop region to audio file
  * Feature #10: Export Selection
+ * Feature: Export Region Selection - export a specific time region (between two markers, custom range, or loop region) instead of the full project
  */
-import { getTracksState, getTrackByIdState, getLoopRegion } from './state.js';
+import { getTracksState, getTrackByIdState, getLoopRegion, getTimelineMarkers } from './state.js';
 
 let panelInstance = null;
 let localAppServices = {};
@@ -27,9 +28,9 @@ export function openExportSelectionPanel() {
     }
 
     const tracks = getTracksState() || [];
-    const audioTracks = tracks.filter(t => 
-        t.type === 'Synth' || t.type === 'Sampler' || 
-        t.type === 'DrumSampler' || t.type === 'Audio' || 
+    const audioTracks = tracks.filter(t =>
+        t.type === 'Synth' || t.type === 'Sampler' ||
+        t.type === 'DrumSampler' || t.type === 'Audio' ||
         t.type === 'InstrumentSampler'
     );
 
@@ -43,6 +44,12 @@ export function openExportSelectionPanel() {
     const loopStart = loopRegion?.start || 0;
     const loopEnd = loopRegion?.end || 16;
 
+    const timelineMarkers = getTimelineMarkers() || [];
+    const markersEnabled = timelineMarkers.length >= 2;
+    const markerOptions = timelineMarkers.map(m =>
+        `<option value="${escapeHtml(m.id)}">${escapeHtml(m.name)} @ ${formatTime(m.position)}</option>`
+    ).join('');
+
     const panel = document.createElement('div');
     panel.id = 'exportSelectionPanel';
     panel.style.cssText = `
@@ -55,8 +62,8 @@ export function openExportSelectionPanel() {
         border-radius: 8px;
         padding: 24px;
         z-index: 10000;
-        min-width: 420px;
-        max-width: 500px;
+        min-width: 460px;
+        max-width: 540px;
         max-height: 80vh;
         overflow-y: auto;
         box-shadow: 0 8px 32px rgba(0,0,0,0.6);
@@ -66,7 +73,7 @@ export function openExportSelectionPanel() {
     const tracksCheckboxes = audioTracks.map((track, idx) => `
         <label class="flex items-center gap-2 p-2 hover:bg-gray-700 rounded cursor-pointer">
             <input type="checkbox" class="export-track-check w-4 h-4" data-track-id="${track.id}" ${idx === 0 ? 'checked' : ''}>
-            <span class="text-sm text-gray-200">${track.name || `Track ${track.id}`}</span>
+            <span class="text-sm text-gray-200">${escapeHtml(track.name || `Track ${track.id}`)}</span>
             <span class="text-xs text-gray-500 ml-auto">${track.type}</span>
         </label>
     `).join('');
@@ -75,7 +82,7 @@ export function openExportSelectionPanel() {
         <div style="color: #e0e0e0; font-size: 18px; font-weight: 600; margin-bottom: 20px;">
             Export Selection
         </div>
-        
+
         <!-- Track Selection -->
         <div style="margin-bottom: 16px;">
             <div style="color: #888; font-size: 12px; margin-bottom: 8px;">
@@ -92,13 +99,61 @@ export function openExportSelectionPanel() {
             </button>
         </div>
 
-        <!-- Loop Region Option -->
-        <div style="margin-bottom: 16px;">
-            <label class="flex items-center gap-2 p-2 bg-gray-800 rounded border border-gray-700 cursor-pointer">
-                <input type="checkbox" id="exportLoopRegion" class="w-4 h-4" ${loopEnabled ? 'checked' : ''} ${!loopEnabled ? 'disabled' : ''}>
-                <span class="text-sm text-gray-200">Export loop region only</span>
-                <span id="exportLoopRegionHint" class="text-xs text-gray-500 ml-auto">${loopEnabled ? `${loopStart.toFixed(1)}s - ${loopEnd.toFixed(1)}s` : '(no loop set)'}</span>
-            </label>
+        <!-- Region Selection (Feature: Export Region Selection) -->
+        <div style="margin-bottom: 16px; background: #252525; border-radius: 4px; padding: 12px;">
+            <div style="color: #aaa; font-size: 12px; margin-bottom: 8px; font-weight: 600;">
+                Time Region
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="exportRegionMode" value="full" class="export-region-radio" checked>
+                    <span class="text-sm text-gray-200">Full project</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="exportRegionMode" value="loop" class="export-region-radio" ${!loopEnabled ? 'disabled' : ''}>
+                    <span class="text-sm text-gray-200" style="${!loopEnabled ? 'opacity: 0.5;' : ''}">Loop region</span>
+                    <span class="text-xs text-gray-500 ml-auto">${loopEnabled ? `${formatTime(loopStart)} - ${formatTime(loopEnd)}` : '(no loop set)'}</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="exportRegionMode" value="markers" class="export-region-radio" ${!markersEnabled ? 'disabled' : ''}>
+                    <span class="text-sm text-gray-200" style="${!markersEnabled ? 'opacity: 0.5;' : ''}">Between two markers</span>
+                    <span class="text-xs text-gray-500 ml-auto">${markersEnabled ? `(${timelineMarkers.length} markers)` : '(need 2+ markers)'}</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="exportRegionMode" value="custom" class="export-region-radio">
+                    <span class="text-sm text-gray-200">Custom time range</span>
+                </label>
+            </div>
+
+            <!-- Marker pickers (hidden unless "Between two markers" is chosen) -->
+            <div id="exportMarkerRegion" style="display: none; margin-top: 10px; padding: 8px; background: #1e1e1e; border-radius: 4px;">
+                <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 6px;">
+                    <span class="text-xs text-gray-400" style="min-width: 50px;">Start:</span>
+                    <select id="exportStartMarker" style="flex: 1; padding: 4px 6px; background: #2a2a2a; border: 1px solid #444; border-radius: 3px; color: #e0e0e0; font-size: 12px;">
+                        ${markerOptions}
+                    </select>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <span class="text-xs text-gray-400" style="min-width: 50px;">End:</span>
+                    <select id="exportEndMarker" style="flex: 1; padding: 4px 6px; background: #2a2a2a; border: 1px solid #444; border-radius: 3px; color: #e0e0e0; font-size: 12px;">
+                        ${markerOptions}
+                    </select>
+                </div>
+            </div>
+
+            <!-- Custom range inputs (hidden unless "Custom time range" is chosen) -->
+            <div id="exportCustomRegion" style="display: none; margin-top: 10px; padding: 8px; background: #1e1e1e; border-radius: 4px;">
+                <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 6px;">
+                    <span class="text-xs text-gray-400" style="min-width: 50px;">Start:</span>
+                    <input id="exportCustomStart" type="number" step="0.1" min="0" value="0" style="flex: 1; padding: 4px 6px; background: #2a2a2a; border: 1px solid #444; border-radius: 3px; color: #e0e0e0; font-size: 12px;">
+                    <span class="text-xs text-gray-500">sec</span>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <span class="text-xs text-gray-400" style="min-width: 50px;">End:</span>
+                    <input id="exportCustomEnd" type="number" step="0.1" min="0" value="16" style="flex: 1; padding: 4px 6px; background: #2a2a2a; border: 1px solid #444; border-radius: 3px; color: #e0e0e0; font-size: 12px;">
+                    <span class="text-xs text-gray-500">sec</span>
+                </div>
+            </div>
         </div>
 
         <!-- Format Selection -->
@@ -200,6 +255,12 @@ export function openExportSelectionPanel() {
     document.body.appendChild(panel);
     panelInstance = panel;
 
+    // Default the marker end-select to the 2nd marker if we have at least 2
+    if (timelineMarkers.length >= 2) {
+        const endSel = panel.querySelector('#exportEndMarker');
+        if (endSel) endSel.value = timelineMarkers[1].id;
+    }
+
     // Event handlers
     panel.querySelector('#selectAllExport')?.addEventListener('click', () => {
         panel.querySelectorAll('.export-track-check').forEach(cb => cb.checked = true);
@@ -215,6 +276,19 @@ export function openExportSelectionPanel() {
             mp3Options.style.display = e.target.value === 'mp3' ? 'block' : 'none';
         }
     });
+
+    // Region-mode radio change handler: show the appropriate sub-panel
+    const updateRegionPanels = () => {
+        const mode = panel.querySelector('.export-region-radio:checked')?.value || 'full';
+        const markerPanel = panel.querySelector('#exportMarkerRegion');
+        const customPanel = panel.querySelector('#exportCustomRegion');
+        if (markerPanel) markerPanel.style.display = mode === 'markers' ? 'block' : 'none';
+        if (customPanel) customPanel.style.display = mode === 'custom' ? 'block' : 'none';
+    };
+    panel.querySelectorAll('.export-region-radio').forEach(r => {
+        r.addEventListener('change', updateRegionPanels);
+    });
+    updateRegionPanels();
 
     panel.querySelector('#exportSelectionBtn')?.addEventListener('click', () => {
         performExport();
@@ -233,6 +307,45 @@ function closePanel() {
 }
 
 /**
+ * Resolve the region to (start, end) seconds based on the panel's selected mode.
+ * Returns null if the chosen mode is unavailable (e.g. no markers / no loop).
+ */
+function resolveRegionFromPanel() {
+    const mode = document.querySelector('.export-region-radio:checked')?.value || 'full';
+
+    if (mode === 'full') {
+        return null; // null means "full project" (caller falls back to clip-driven max)
+    }
+
+    if (mode === 'loop') {
+        const loop = getLoopRegion();
+        if (!loop?.enabled) return null;
+        return { start: Math.max(0, parseFloat(loop.start) || 0), end: Math.max(parseFloat(loop.end) || 0, parseFloat(loop.start) || 0) };
+    }
+
+    if (mode === 'markers') {
+        const startId = document.querySelector('#exportStartMarker')?.value;
+        const endId = document.querySelector('#exportEndMarker')?.value;
+        const all = getTimelineMarkers() || [];
+        const startM = all.find(m => m.id === startId);
+        const endM = all.find(m => m.id === endId);
+        if (!startM || !endM) return null;
+        const start = Math.min(startM.position, endM.position);
+        const end = Math.max(startM.position, endM.position);
+        return { start, end, startName: startM.name, endName: endM.name };
+    }
+
+    if (mode === 'custom') {
+        const s = Math.max(0, parseFloat(document.querySelector('#exportCustomStart')?.value) || 0);
+        let e = parseFloat(document.querySelector('#exportCustomEnd')?.value) || 0;
+        if (e <= s) e = s + 0.1;
+        return { start: s, end: e };
+    }
+
+    return null;
+}
+
+/**
  * Perform the export based on selections
  */
 async function performExport() {
@@ -246,20 +359,24 @@ async function performExport() {
         return;
     }
 
-    const useLoopRegion = document.querySelector('#exportLoopRegion')?.checked || false;
+    const region = resolveRegionFromPanel();
     const format = document.querySelector('#exportFormatSelect')?.value || 'wav';
     const sampleRate = parseInt(document.querySelector('#exportSampleRateSelect')?.value || '48000', 10);
     const bitrate = parseInt(document.querySelector('#exportMp3Bitrate')?.value || '256', 10);
 
     closePanel();
 
-    localAppServices.showNotification?.(`Exporting ${selectedTrackIds.length} track(s)...`, 2000);
+    let regionLabel = '';
+    if (region) {
+        regionLabel = ` (${formatTime(region.start)} - ${formatTime(region.end)})`;
+    }
+    localAppServices.showNotification?.(`Exporting ${selectedTrackIds.length} track(s)${regionLabel}...`, 2000);
 
     try {
         // Build options
         const options = {
             trackIds: selectedTrackIds,
-            useLoopRegion,
+            region, // null = full project; {start, end} = custom region
             format,
             sampleRate,
             bitrate
@@ -288,8 +405,8 @@ async function performExport() {
  * @param {object} options - Export options
  */
 async function exportSelectedTracks(options) {
-    const { trackIds, useLoopRegion, format, sampleRate } = options;
-    
+    const { trackIds, region, format, sampleRate } = options;
+
     if (typeof Tone === 'undefined') {
         throw new Error('Audio engine not available');
     }
@@ -300,10 +417,15 @@ async function exportSelectedTracks(options) {
     }
 
     // Get duration
+    const start = 0;
+    let renderStart = 0;
     let duration = 60; // Default
-    if (useLoopRegion) {
-        const loopRegion = getLoopRegion();
-        duration = loopRegion.end - loopRegion.start;
+    if (region) {
+        renderStart = Math.max(0, parseFloat(region.start) || 0);
+        const end = Math.max(renderStart + 0.1, parseFloat(region.end) || renderStart + 0.1);
+        // Render the full window [0, end] and slice to [start, end] after render
+        // so the exported audio actually contains the requested time region.
+        duration = end;
     } else {
         // Calculate max duration from clips
         tracks.forEach(track => {
@@ -317,10 +439,10 @@ async function exportSelectedTracks(options) {
     }
 
     const offlineCtx = new Tone.OfflineContext(1, duration, sampleRate);
-    
+
     // Create offline audio rendering
     const masterGain = new Tone.Gain(1).toDestination();
-    
+
     // Mix selected tracks into offline context
     for (const track of tracks) {
         if (!track.outputNode) continue;
@@ -330,26 +452,90 @@ async function exportSelectedTracks(options) {
     // Render
     const buffer = await offlineCtx.render();
     const audioBuffer = buffer.get()?.get()?.get ? buffer.get().get().get() : buffer;
-    
+
     if (!audioBuffer || !audioBuffer.numberOfChannels) {
         throw new Error('Failed to render audio buffer');
+    }
+
+    // Trim the rendered buffer to the requested region window.
+    // The OfflineContext always renders from t=0, so if a region is selected
+    // we slice out the [renderStart, renderStart + (region.end - region.start)]
+    // window so the exported file actually contains that time range.
+    let exportBuffer = audioBuffer;
+    if (region) {
+        const startSample = Math.min(audioBuffer.length, Math.max(0, Math.floor(renderStart * sampleRate)));
+        const regionDuration = Math.max(0, (parseFloat(region.end) || 0) - (parseFloat(region.start) || 0));
+        const regionLengthSamples = Math.max(1, Math.floor(regionDuration * sampleRate));
+        const endSample = Math.min(audioBuffer.length, startSample + regionLengthSamples);
+        if (startSample > 0 || endSample < audioBuffer.length) {
+            try {
+                const ctx = new OfflineAudioContext(
+                    audioBuffer.numberOfChannels,
+                    Math.max(1, endSample - startSample),
+                    sampleRate
+                );
+                const src = ctx.createBufferSource();
+                // Re-create a sliced copy of the original buffer for the source
+                const sliced = ctx.createBuffer(
+                    audioBuffer.numberOfChannels,
+                    Math.max(1, endSample - startSample),
+                    sampleRate
+                );
+                for (let ch = 0; ch < audioBuffer.numberOfChannels; ch++) {
+                    const srcData = audioBuffer.getChannelData(ch);
+                    const dstData = sliced.getChannelData(ch);
+                    for (let i = 0; i < dstData.length; i++) {
+                        dstData[i] = srcData[startSample + i] || 0;
+                    }
+                }
+                src.buffer = sliced;
+                src.connect(ctx.destination);
+                src.start(0);
+                const trimmed = await ctx.startRendering();
+                exportBuffer = trimmed;
+            } catch (sliceErr) {
+                console.warn('[ExportSelection] Region trim failed, exporting full render:', sliceErr);
+                exportBuffer = audioBuffer;
+            }
+        }
     }
 
     // Convert to desired format
     let blob;
     if (format === 'wav') {
-        blob = encodeWav(audioBuffer, sampleRate);
+        blob = encodeWav(exportBuffer, sampleRate);
     } else if (format === 'mp3') {
-        blob = encodeMp3(audioBuffer, options.bitrate || 256);
+        blob = encodeMp3(exportBuffer, options.bitrate || 256);
     } else if (format === 'flac') {
-        blob = encodeFlac(audioBuffer);
+        blob = encodeFlac(exportBuffer);
     } else {
-        blob = encodeWav(audioBuffer, sampleRate);
+        blob = encodeWav(exportBuffer, sampleRate);
     }
 
-    // Download
-    const filename = `snugos-export-${Date.now()}.${format}`;
+    // Build a descriptive filename (include start time when a region is selected)
+    const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    const regionSuffix = region ? `-${start.toFixed(1)}s` : '';
+    const filename = `snugos-export${regionSuffix}-${ts}.${format}`;
     downloadBlob(blob, filename);
+}
+
+/**
+ * Format seconds as a human-readable m:ss.x label
+ */
+function formatTime(seconds) {
+    const s = Math.max(0, Number(seconds) || 0);
+    const mins = Math.floor(s / 60);
+    const secs = s - mins * 60;
+    return `${mins}:${secs.toFixed(1).padStart(4, '0')}`;
+}
+
+/**
+ * Minimal HTML-escape for user-controlled strings (track names, marker names)
+ */
+function escapeHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+    ));
 }
 
 /**

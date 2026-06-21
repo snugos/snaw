@@ -40,14 +40,14 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 - **Audio Recording Panel UI** - Start menu entry + dockable panel with track selector and Start/Stop controls (v0.3.55) ✅
 - **Loudness Meter (LUFS + true-peak dBTP)** - Draggable panel with momentary/short-term/integrated LUFS, true peak, true peak hold (v0.3.59) ✅
 - **Sends Overview Panel** - Visual matrix of send levels from every track to every send bus (v0.3.60) ✅
+- **Mark Track As Bass / Drums / Vocal** - Quick-classify tracks for smart mix presets ✅
+- **Export Region Selection** - Export a specific time region (full project / loop region / between two markers / custom time range) (v0.3.62) ✅
 
 ## Current Feature Queue
 
-1. **Mark Track As Bass / Drums / Vocal** - Quick-classify tracks for smart mix presets
-2. **Export Region Selection** - Export a specific time region (between two markers) instead of the full project
-3. **Loop Until Marker** - Auto-extend loop region to next timeline marker
-4. **Project Search** - Search all track names + clip names + notes for a substring
-5. **Master Limiter Toggle** - Quick on/off for a brick-wall master limiter to catch overs
+1. **Loop Until Marker** - Auto-extend loop region to next timeline marker
+2. **Project Search** - Search all track names + clip names + notes for a substring
+3. **Master Limiter Toggle** - Quick on/off for a brick-wall master limiter to catch overs
 
 ## Workflow
 

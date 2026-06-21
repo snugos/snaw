@@ -585,6 +585,7 @@ export function initializePrimaryEventListeners(appContext) {
             menuSaveProject: () => { console.log('[Menu] Save clicked'); localAppServices.saveProject?.(); },
             menuLoadProject: () => { console.log('[Menu] Load clicked'); localAppServices.loadProject?.(); },
             menuExportWav: () => { console.log('[Menu] Export clicked'); localAppServices.exportToWav?.(); },
+            menuExportRegion: () => { console.log('[Menu] Export Region clicked'); try { localAppServices.openExportSelectionPanel?.(); } catch(e) { console.error('[Menu] Export Region error:', e); } },
             menuExportMidi: () => { console.log('[Menu] Export MIDI clicked'); localAppServices.exportToMidi?.(); },
             menuExportStems: () => { console.log('[Menu] Export Stems clicked'); localAppServices.showStemExportDialog?.(); },
             menuVideoExport: () => { console.log('[Menu] Video Export clicked'); localAppServices.openVideoExportPanel?.(); },
