@@ -86,6 +86,7 @@ import { initLoopRegionQuickSet, openLoopRegionQuickSetSettings } from './LoopRe
 import { initLoopRegionMarkers, openLoopRegionMarkersPanel, addLoopRegionMarker } from './LoopRegionMarkers.js';
 import { initLoopRegionSnap, openLoopSnapPanel, isLoopSnapEnabled, toggleLoopSnap, getSnapConfig } from './LoopRegionSnap.js';
 import { initLoopRegionPresets, openLoopRegionPresetsPanel } from './LoopRegionPresets.js';
+import { initLoopUntilMarker, openLoopUntilMarkerPanel, extendLoopToNextMarker, extendLoopToPreviousMarker, extendLoopToBothMarkers, setLoopUntilMarkerAutoEnabled, isLoopUntilMarkerAutoEnabled } from './LoopUntilMarker.js';
 import { initAutoSaveIndicator, showSaveStatus, getSaveStatus } from './AutoSaveIndicator.js';
 import { initExportSelection, openExportSelectionPanel } from './ExportSelection.js';
 import { initLyricsTrack, openLyricsTrackPanel, getLyrics, addLyric, importLyricsText, setLyricsTrackEnabled, getCurrentLyric } from './LyricsTrack.js';
@@ -1048,6 +1049,12 @@ const appServices = {
     openLoopRegionMarkersPanel,
     openLoopRegionPresetsPanel,
     openLoopSnapPanel,
+    openLoopUntilMarkerPanel,
+    extendLoopToNextMarker,
+    extendLoopToPreviousMarker,
+    extendLoopToBothMarkers,
+    setLoopUntilMarkerAutoEnabled,
+    isLoopUntilMarkerAutoEnabled,
     openGrooveExtractorPanel,
     openSmartFXChainPanel,
     openTrackDelayCompensationPanel,
@@ -1796,6 +1803,7 @@ async function initializeSnugOS() {
         if (typeof initLoopRegionMarkers === 'function') initLoopRegionMarkers(appServices); // Loop Region Markers initialization
         if (typeof initLoopRegionSnap === 'function') initLoopRegionSnap(appServices); // Loop Region Snap initialization
         if (typeof initLoopRegionPresets === 'function') initLoopRegionPresets(appServices); // Loop Region Presets initialization
+        if (typeof initLoopUntilMarker === 'function') initLoopUntilMarker(appServices); // Loop Until Marker initialization
         if (typeof initAutoSaveIndicator === 'function') initAutoSaveIndicator(appServices); // Auto-save Indicator initialization
         if (typeof initLyricsTrack === 'function') initLyricsTrack(appServices); // Lyrics Track initialization
         if (typeof initLyricsDisplay === 'function') initLyricsDisplay(appServices); // Lyrics Display Karaoke Mode

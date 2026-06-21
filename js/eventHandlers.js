@@ -746,6 +746,18 @@ export function initializePrimaryEventListeners(appContext) {
                     localAppServices.openLoopRegionQuickSetSettings?.();
                 } catch(e) { console.error('[Menu] Loop Region Quick Set error:', e); }
             },
+            menuLoopUntilMarker: () => {
+                console.log('[Menu] Loop Until Marker clicked');
+                try {
+                    if (typeof localAppServices.openLoopUntilMarkerPanel === 'function') {
+                        localAppServices.openLoopUntilMarkerPanel();
+                    } else {
+                        import('./LoopUntilMarker.js').then(m => {
+                            if (m.openLoopUntilMarkerPanel) m.openLoopUntilMarkerPanel();
+                        }).catch(e => console.error('[Menu] Loop Until Marker dynamic import error:', e));
+                    }
+                } catch(e) { console.error('[Menu] Loop Until Marker error:', e); }
+            },
             menuLoopPracticeTrainer: () => {
                 console.log('[Menu] Loop Practice Trainer clicked');
                 try {

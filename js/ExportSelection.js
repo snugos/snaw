@@ -417,7 +417,6 @@ async function exportSelectedTracks(options) {
     }
 
     // Get duration
-    const start = 0;
     let renderStart = 0;
     let duration = 60; // Default
     if (region) {
@@ -514,7 +513,7 @@ async function exportSelectedTracks(options) {
 
     // Build a descriptive filename (include start time when a region is selected)
     const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-    const regionSuffix = region ? `-${start.toFixed(1)}s` : '';
+    const regionSuffix = region ? `-${renderStart.toFixed(1)}s` : '';
     const filename = `snugos-export${regionSuffix}-${ts}.${format}`;
     downloadBlob(blob, filename);
 }
