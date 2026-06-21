@@ -43,11 +43,11 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 - **Mark Track As Bass / Drums / Vocal** - Quick-classify tracks for smart mix presets ✅
 - **Export Region Selection** - Export a specific time region (full project / loop region / between two markers / custom time range) (v0.3.62) ✅
 - **Loop Until Marker** - Extend the active loop region to the next/previous timeline marker (or both adjacent markers); works against Timeline Markers, Loop Region Markers, and state.js markers with auto-merge/dedup; optional auto-mode that re-snaps the loop end when the playhead crosses it (v0.3.63) ✅
+- **Project Search** - Search all track names + clip names + notes for a substring ✅
 
 ## Current Feature Queue
 
-1. **Project Search** - Search all track names + clip names + notes for a substring
-2. **Master Limiter Toggle** - Quick on/off for a brick-wall master limiter to catch overs
+1. **Master Limiter Toggle** - Quick on/off for a brick-wall master limiter to catch overs
 
 ## Workflow
 
