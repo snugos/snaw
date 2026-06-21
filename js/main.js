@@ -2328,10 +2328,23 @@ async function restoreDesktopBackground() {
 // Shows time position tooltip when clicking on the timeline ruler
 function showPlayheadTooltip(clientX, clientY) {
     const tooltip = document.getElementById('playheadTooltip') || createPlayheadTooltip();
-    const time = getCurrentTimelinePosition?.() || 0;
+    // Defensive: if timeline position accessor is unavailable or returns NaN,
+    // fall back to 0 so the tooltip still renders (instead of going stale/blank).
+    let time = 0;
+    try {
+        if (typeof getCurrentTimelinePosition === 'function') {
+            const t = getCurrentTimelinePosition();
+            if (typeof t === 'number' && isFinite(t) && t >= 0) time = t;
+        }
+    } catch (_) { /* swallow — tooltip still shows 0:00:000 */ }
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
-    const ms = Math.floor((time % 1) * 1000);
+    // Clamp ms to 0-999 to defend against floating-point drift (e.g. 59.9999s
+    // showing as "0:59:999" instead of "1:00:000"). The integer floor + clamp
+    // guarantees a stable, parseable MM:SS:mmm display.
+    let ms = Math.floor((time % 1) * 1000);
+    if (!isFinite(ms) || ms < 0) ms = 0;
+    if (ms > 999) ms = 999;
     tooltip.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}:${ms.toString().padStart(3, '0')}`;
     tooltip.style.left = (clientX + 10) + 'px';
     tooltip.style.top = (clientY + 10) + 'px';
