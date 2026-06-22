@@ -259,6 +259,108 @@ function previewAudioTrackOneShot(track) {
 }
 
 /**
+ * Build a compact, human-readable summary of a track's pad/sequence content.
+ * Used by the hover-tooltip + inline hint on each row.
+ *
+ * For DrumSampler tracks: lists which pads are populated and what MIDI note each pad maps to.
+ * For Synth / InstrumentSampler tracks: lists the pitch names used (deduped, up to 6 names).
+ * For Audio tracks: returns null (audio clips have no note names).
+ *
+ * @returns {{noteNames: string, velocityRange: string, triggerCount: number, inlineHint: string, tooltipText: string}|null}
+ */
+function buildPadSummary(track, sequence) {
+    try {
+        if (!track || !sequence || !Array.isArray(sequence.data) || sequence.data.length === 0) {
+            return null;
+        }
+        const rowCount = sequence.data.length;
+        const isDrum = track.type === 'DrumSampler';
+
+        let triggerCount = 0;
+        let minVel = Infinity;
+        let maxVel = -Infinity;
+        const usedRows = new Set();
+
+        for (let row = 0; row < rowCount; row++) {
+            const rowData = sequence.data[row];
+            if (!Array.isArray(rowData)) continue;
+            for (let col = 0; col < rowData.length; col++) {
+                const cell = rowData[col];
+                if (!cell) continue;
+                triggerCount++;
+                usedRows.add(row);
+                const v = typeof cell.velocity === 'number' ? cell.velocity : 0.8;
+                if (v < minVel) minVel = v;
+                if (v > maxVel) maxVel = v;
+            }
+        }
+
+        if (triggerCount === 0) {
+            return {
+                noteNames: '(no triggers)',
+                velocityRange: '—',
+                triggerCount: 0,
+                inlineHint: 'no active triggers',
+                tooltipText: `${track && track.name ? track.name : 'Track'} · no active triggers`
+            };
+        }
+
+        const velocityRange = (minVel === maxVel)
+            ? `vel ${minVel.toFixed(2)}`
+            : `vel ${minVel.toFixed(2)}–${maxVel.toFixed(2)}`;
+
+        let noteNames;
+        if (isDrum) {
+            const samplerMIDINoteStart = (typeof Constants !== 'undefined' && Constants.samplerMIDINoteStart)
+                ? Constants.samplerMIDINoteStart
+                : 36;
+            const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+            const midiToName = (midi) => {
+                const pc = ((midi % 12) + 12) % 12;
+                const octave = Math.floor(midi / 12) - 1;
+                return `${NOTE_NAMES[pc]}${octave}`;
+            };
+            const sortedRows = Array.from(usedRows).sort((a, b) => a - b);
+            const labelFor = (row) => {
+                const pad = track.drumSamplerPads && track.drumSamplerPads[row];
+                const name = pad?.originalFileName ? pad.originalFileName.replace(/\.[^.]+$/, '') : `Pad ${row}`;
+                const midi = samplerMIDINoteStart + row;
+                const note = midiToName(midi);
+                return `${name} (${note})`;
+            };
+            const all = sortedRows.map(labelFor);
+            noteNames = all.length <= 4
+                ? all.join(', ')
+                : `${all.slice(0, 3).join(', ')} +${all.length - 3} more`;
+        } else {
+            const synthPitches = (typeof Constants !== 'undefined' && Constants.synthPitches)
+                ? Constants.synthPitches
+                : null;
+            const usedPitchNames = Array.from(usedRows).map(row => {
+                if (synthPitches && synthPitches[row]) return synthPitches[row];
+                return Tone.Frequency(row * 50 + 220, "hz").toNote();
+            }).sort();
+            noteNames = usedPitchNames.length <= 6
+                ? usedPitchNames.join(', ')
+                : `${usedPitchNames.slice(0, 5).join(', ')} +${usedPitchNames.length - 5} more`;
+        }
+
+        // Build compact inline hint (single line) and full tooltip text.
+        const inlineHint = `${noteNames} · ${velocityRange} · ${triggerCount} hit${triggerCount === 1 ? '' : 's'}`;
+        const tooltipText = [
+            `Notes: ${noteNames}`,
+            `Velocity: ${velocityRange}`,
+            `Triggers: ${triggerCount}`
+        ].join('\n');
+
+        return { noteNames, velocityRange, triggerCount, inlineHint, tooltipText };
+    } catch (e) {
+        console.warn('[OneShotPreviewPad] buildPadSummary failed:', e);
+        return null;
+    }
+}
+
+/**
  * Stop a single track's preview (kills scheduled timers; Tone.js triggers fire-once).
  */
 export function stopTrackOneShotPreview(trackId) {
@@ -300,16 +402,21 @@ function getPreviewableTracks() {
             return seq && Array.isArray(seq.data) && seq.data.length > 0;
         }
         return false;
-    }).map(t => ({
-        id: t.id,
-        name: t.name || `Track ${t.id}`,
-        type: t.type,
-        isMuted: !!t.isMuted,
-        isSoloedAway: soloedId != null && soloedId !== t.id,
-        isPreviewing: activePreviewHandles.has(t.id),
-        sequenceName: (typeof t.getActiveSequence === 'function' && t.getActiveSequence())?.name || null,
-        sequenceLength: (typeof t.getActiveSequence === 'function' && t.getActiveSequence())?.length || 0
-    }));
+    }).map(t => {
+        const seq = (typeof t.getActiveSequence === 'function') ? t.getActiveSequence() : null;
+        const summary = (t.type !== 'Audio') ? buildPadSummary(t, seq) : null;
+        return {
+            id: t.id,
+            name: t.name || `Track ${t.id}`,
+            type: t.type,
+            isMuted: !!t.isMuted,
+            isSoloedAway: soloedId != null && soloedId !== t.id,
+            isPreviewing: activePreviewHandles.has(t.id),
+            sequenceName: seq?.name || null,
+            sequenceLength: seq?.length || 0,
+            padSummary: summary
+        };
+    });
 }
 
 function renderPanelContent() {
@@ -393,15 +500,38 @@ function renderTrackRow(t) {
         ? `<span class="text-[10px] text-gray-400 ml-2">${escapeHtml(t.sequenceName)} · ${t.sequenceLength} steps</span>`
         : '';
 
+    // Pad / note hover info — shows note names + velocity range on hover via
+    // the native `title` tooltip AND as a compact inline subtitle.
+    const summary = t.padSummary;
+    const tooltipText = summary
+        ? summary.tooltipText
+        : (t.type === 'Audio'
+            ? `Audio track · ${(t.sequenceLength || 0)} clip(s)`
+            : 'No active triggers');
+    const inlineHint = summary && summary.inlineHint
+        ? `<div class="text-[10px] text-gray-500 mt-0.5 truncate" title="${escapeHtml(tooltipText)}">${escapeHtml(summary.inlineHint)}</div>`
+        : '';
+
+    const rowClasses = t.isPreviewing
+        ? 'flex items-center gap-2 p-2 bg-gray-800 rounded border border-green-600'
+        : 'flex items-center gap-2 p-2 bg-gray-800 rounded border border-gray-700';
+
+    const inner = `
+        <div class="flex-1 min-w-0">
+            <div class="text-sm font-medium text-white truncate">
+                ${escapeHtml(t.name)} ${typeBadge} ${mutedHint}
+            </div>
+            <div class="flex items-center gap-2 flex-wrap">
+                ${seqInfo}
+            </div>
+            ${inlineHint}
+        </div>
+    `;
+
     if (t.isPreviewing) {
         return `
-            <div class="flex items-center gap-2 p-2 bg-gray-800 rounded border border-green-600">
-                <div class="flex-1 min-w-0">
-                    <div class="text-sm font-medium text-white truncate">
-                        ${escapeHtml(t.name)} ${typeBadge} ${mutedHint}
-                    </div>
-                    ${seqInfo}
-                </div>
+            <div class="${rowClasses}" title="${escapeHtml(tooltipText)}">
+                ${inner}
                 <button class="ospp-stop-btn px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-500" data-track-id="${t.id}">
                     ⏹ Stop
                 </button>
@@ -410,13 +540,8 @@ function renderTrackRow(t) {
     }
 
     return `
-        <div class="flex items-center gap-2 p-2 bg-gray-800 rounded border border-gray-700">
-            <div class="flex-1 min-w-0">
-                <div class="text-sm font-medium text-white truncate">
-                    ${escapeHtml(t.name)} ${typeBadge} ${mutedHint}
-                </div>
-                ${seqInfo}
-            </div>
+        <div class="${rowClasses}" title="${escapeHtml(tooltipText)}">
+            ${inner}
             <button class="ospp-preview-btn px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-500" data-track-id="${t.id}">
                 ▶ Preview
             </button>

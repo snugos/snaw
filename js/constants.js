@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.66"; // 2026-06-21 - Daily merge: humanizeVelocity undo capture + Track/eventHandlers/ui bugfixes (v0.3.66)
+export const APP_VERSION = "0.3.67"; // 2026-06-21 - OneShotPreviewPad: hover-tooltip pad summary (note names, velocity range, trigger count) (v0.3.67)
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks
