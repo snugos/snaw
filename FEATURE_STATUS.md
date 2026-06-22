@@ -42,6 +42,13 @@ The Day 741 run shipped WebAudio Plugin Host (v0.3.68) and committed the paralle
 ### Files Modified This Run:
 - None (no code changes). `FEATURE_STATUS.md` (this entry). `AGENTS.md` (Day 742 entry). No JS or HTML files touched.
 
+### Parallel-Builder Coordination (mid-session, after this run's commit `7bb71ae`):
+After this run's doc commit (`7bb71ae`) landed, a parallel Snaw Repair/Codebase agent went live mid-session and authored an uncommitted `M js/main.js` (+35/-4) memory-leak fix in the working tree:
+- Introduces a module-level `currentDesktopVideoObjectUrl` tracker (near `removeCustomDesktopBackground`) and revokes the previously-issued object URL at three sites — `removeCustomDesktopBackground`, `handleCustomBackgroundUpload` (revoke-before-create), and `restoreDesktopBackground` (revoke-before-create) — so repeated video-bg uploads no longer leak one Blob per upload for the page lifetime.
+- Adds belt-and-suspenders `&& typeof allTracks.forEach === 'function'` guards to the two `updatePerformanceStats()` `if (Array.isArray(allTracks))` sites that the Day 741 run fixed (technically redundant since `Array.isArray` implies `.forEach`, but harmless).
+- `node --check js/main.js` passes on the working-tree version. The change is real, well-commented, syntactically valid, and the parallel builder's own work — NOT this completion agent's.
+- To avoid disrupting the live builder, this run committed ONLY `FEATURE_STATUS.md` + `AGENTS.md` (commit `7bb71ae`) — no JS or HTML files touched. The builder's `js/main.js` modification was left exactly as the builder left it (unstaged) for the builder to finish and commit. This is the same coordination pattern as Days 739 and 740.
+
 ### Features Still in Progress:
 _None — all browser-implementable features currently implemented._ (The parallel "Snaw Feature Builder Agent" workflow's INSTRUCTION.md queue has been empty since v0.3.68 shipped on Day 741; no new candidate features are queued.)
 
