@@ -824,6 +824,12 @@ export function initializePrimaryEventListeners(appContext) {
                     localAppServices.openMasterLimiterPanel?.();
                 } catch(e) { console.error('[Menu] Master Limiter error:', e); }
             },
+            menuWebAudioPluginHost: () => {
+                console.log('[Menu] WebAudio Plugin Host clicked');
+                try {
+                    localAppServices.openWebAudioPluginHostPanel?.();
+                } catch(e) { console.error('[Menu] WebAudio Plugin Host error:', e); }
+            },
             menuLoopRegionSnap: () => {
                 console.log('[Menu] Loop Region Snap clicked');
                 try {

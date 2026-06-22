@@ -199,6 +199,8 @@ import { initWaveformVisualization, updateWaveformDisplay, renderTrackWaveforms 
 // Clip Reverse - Reverse audio clips with one click
 import { initClipReverse, openClipReversePanel, reverseAudioClip, reverseMIDISequence, isClipReversed, isSequenceReversed } from './ClipReverse.js';
 import { initQuickVolumeRamp, openQuickVolumeRampPanel, toggleQuickVolumeRampPanel } from './QuickVolumeRamp.js';
+// WebAudio Plugin Host - Load AudioWorklet processors into track effect chains (VST-style plugins)
+import { initWebAudioPluginHost, openWebAudioPluginHostPanel, loadWorkletPlugin, removeWorkletPlugin, bypassWorkletPlugin, setWorkletParam, getLoadedWorkletPlugins, isWorkletPluginLoaded } from './WebAudioPluginHost.js';
 // Sidechain Volume Envelope - Draw ducking curves on clips for sidechain effects
 import { initSidechainVolumeEnvelope, openSidechainVolumeEnvelopePanel, getSidechainEnvelope } from './SidechainVolumeEnvelope.js';
 // Sidechain Visualizer - Visual indicator for sidechain routing and ducking status
@@ -1033,6 +1035,15 @@ const appServices = {
     getMasterLimiterThresholdDb,
     getMasterLimiterCeilingDb,
     audioIsMasterLimiterEnabled: audioIsMasterLimiterEnabledImpl,
+    // WebAudio Plugin Host - load AudioWorklet processors (VST-style plugins) by URL
+    openWebAudioPluginHostPanel,
+    initWebAudioPluginHost,
+    loadWorkletPlugin,
+    removeWorkletPlugin,
+    bypassWorkletPlugin,
+    setWorkletParam,
+    getLoadedWorkletPlugins,
+    isWorkletPluginLoaded,
     // Loudness Meter master-meter shims: the meter module expects a stereo [L,R] dB array
     // and a Web Audio tap node. The SnugOS master bus uses a single mono Tone.Meter, so
     // we duplicate the mono dB value across both channels and expose the Tone.Meter node
@@ -1942,6 +1953,8 @@ async function initializeSnugOS() {
         if (typeof initProjectSearch === 'function') initProjectSearch(appServices);
         // Master Limiter initialization (brick-wall limiter toggle)
         if (typeof initMasterLimiter === 'function') initMasterLimiter(appServices);
+        // WebAudio Plugin Host initialization (load AudioWorklet processors into track chains)
+        if (typeof initWebAudioPluginHost === 'function') initWebAudioPluginHost(appServices);
         // After the timeline renders existing tracks, paint note indicators for any
         // persisted notes that didn't get a 'trackRendered' callback (initial load).
         setTimeout(() => { try { if (typeof refreshTrackNoteIndicators === 'function') refreshTrackNoteIndicators(); } catch (e) { /* ignore */ } }, 800);
