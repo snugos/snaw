@@ -361,6 +361,73 @@ function buildPadSummary(track, sequence) {
 }
 
 /**
+ * Per-pad breakdown for the pad grid (hover tooltips + click-to-preview).
+ * Each entry describes one row in the sequence: its note name, MIDI note,
+ * trigger count, and velocity range (for that row).
+ *
+ * @returns {Array<{row:number,label:string,noteName:string,midiNote:number|null,triggered:boolean,triggerCount:number,velocityRange:string,padName:string}>}
+ */
+function buildPadGridData(track, sequence) {
+    try {
+        if (!track || !sequence || !Array.isArray(sequence.data) || sequence.data.length === 0) return [];
+        const rowCount = sequence.data.length;
+        const isDrum = track.type === 'DrumSampler';
+        const synthPitches = (typeof Constants !== 'undefined' && Constants.synthPitches) ? Constants.synthPitches : null;
+        const samplerMIDINoteStart = (typeof Constants !== 'undefined' && Constants.samplerMIDINoteStart) ? Constants.samplerMIDINoteStart : 36;
+        const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        const midiToName = (midi) => {
+            const pc = ((midi % 12) + 12) % 12;
+            const octave = Math.floor(midi / 12) - 1;
+            return `${NOTE_NAMES[pc]}${octave}`;
+        };
+
+        const out = [];
+        for (let row = 0; row < rowCount; row++) {
+            const rowData = sequence.data[row];
+            if (!Array.isArray(rowData)) continue;
+            let triggerCount = 0;
+            let minVel = Infinity;
+            let maxVel = -Infinity;
+            for (let col = 0; col < rowData.length; col++) {
+                const cell = rowData[col];
+                if (!cell) continue;
+                triggerCount++;
+                const v = typeof cell.velocity === 'number' ? cell.velocity : 0.8;
+                if (v < minVel) minVel = v;
+                if (v > maxVel) maxVel = v;
+            }
+            const triggered = triggerCount > 0;
+            const velocityRange = triggered
+                ? (minVel === maxVel ? `vel ${minVel.toFixed(2)}` : `vel ${minVel.toFixed(2)}–${maxVel.toFixed(2)}`)
+                : '—';
+
+            let label;
+            let noteName;
+            let midiNote = null;
+            let padName = '';
+            if (isDrum) {
+                const pad = track.drumSamplerPads && track.drumSamplerPads[row];
+                padName = pad?.originalFileName ? pad.originalFileName.replace(/\.[^.]+$/, '') : `Pad ${row + 1}`;
+                midiNote = samplerMIDINoteStart + row;
+                noteName = midiToName(midiNote);
+                label = padName;
+            } else {
+                noteName = (synthPitches && synthPitches[row]) ? synthPitches[row] : midiToName(60 + row);
+                midiNote = null;
+                label = noteName;
+                padName = '';
+            }
+
+            out.push({ row, label, noteName, midiNote, triggered, triggerCount, velocityRange, padName });
+        }
+        return out;
+    } catch (e) {
+        console.warn('[OneShotPreviewPad] buildPadGridData failed:', e);
+        return [];
+    }
+}
+
+/**
  * Stop a single track's preview (kills scheduled timers; Tone.js triggers fire-once).
  */
 export function stopTrackOneShotPreview(trackId) {
@@ -405,6 +472,7 @@ function getPreviewableTracks() {
     }).map(t => {
         const seq = (typeof t.getActiveSequence === 'function') ? t.getActiveSequence() : null;
         const summary = (t.type !== 'Audio') ? buildPadSummary(t, seq) : null;
+        const padGridData = (t.type !== 'Audio') ? buildPadGridData(t, seq) : [];
         return {
             id: t.id,
             name: t.name || `Track ${t.id}`,
@@ -414,7 +482,8 @@ function getPreviewableTracks() {
             isPreviewing: activePreviewHandles.has(t.id),
             sequenceName: seq?.name || null,
             sequenceLength: seq?.length || 0,
-            padSummary: summary
+            padSummary: summary,
+            padGridData: padGridData
         };
     });
 }
@@ -482,6 +551,68 @@ function renderPanelContent() {
             localAppServices.showNotification('All previews stopped', 1200);
         }
     });
+
+    // Per-pad hover highlight + click-to-preview-pad. Delegated from container.
+    attachPadHoverAndClickHandlers(container);
+}
+
+/**
+ * Attach delegated listeners for the per-pad grid:
+ *  - mouseenter on a pad -> add 'ospp-pad-hover' class (highlight) + show tooltip
+ *  - mouseleave on a pad -> remove highlight + hide tooltip
+ *  - click on a pad      -> trigger single-pad one-shot preview
+ *
+ * Single floating tooltip element is reused across pads.
+ */
+function attachPadHoverAndClickHandlers(container) {
+    if (!container) return;
+    const pads = container.querySelectorAll('.ospp-pad[data-pad-info]');
+    if (pads.length === 0) return;
+
+    let tooltipEl = container.querySelector('#osppPadTooltip');
+    if (!tooltipEl) {
+        tooltipEl = document.createElement('div');
+        tooltipEl.id = 'osppPadTooltip';
+        tooltipEl.className = 'hidden absolute z-50 pointer-events-none px-2 py-1 text-[10px] text-white bg-gray-950 border border-blue-500 rounded shadow-lg whitespace-nowrap';
+        container.style.position = container.style.position || 'relative';
+        container.appendChild(tooltipEl);
+    }
+    const showTooltip = (pad) => {
+        const info = pad.getAttribute('data-pad-info') || '';
+        if (!info) return;
+        tooltipEl.textContent = info;
+        tooltipEl.classList.remove('hidden');
+        // Position above the pad within the container
+        const containerRect = container.getBoundingClientRect();
+        const padRect = pad.getBoundingClientRect();
+        const top = (padRect.top - containerRect.top) - tooltipEl.offsetHeight - 6;
+        const left = (padRect.left - containerRect.left) + (padRect.width / 2) - (tooltipEl.offsetWidth / 2);
+        tooltipEl.style.top = `${Math.max(0, top)}px`;
+        tooltipEl.style.left = `${Math.max(0, left)}px`;
+    };
+    const hideTooltip = () => {
+        tooltipEl.classList.add('hidden');
+    };
+
+    pads.forEach(pad => {
+        pad.addEventListener('mouseenter', () => {
+            pad.classList.add('ospp-pad-hover');
+            showTooltip(pad);
+        });
+        pad.addEventListener('mouseleave', () => {
+            pad.classList.remove('ospp-pad-hover');
+            hideTooltip();
+        });
+        pad.addEventListener('click', (e) => {
+            // Don't double-fire if the pad was already triggered by the preview/stop buttons
+            e.stopPropagation();
+            const trackId = pad.getAttribute('data-track-id');
+            const rowStr = pad.getAttribute('data-pad-row');
+            const row = rowStr != null ? parseInt(rowStr, 10) : NaN;
+            if (!trackId || isNaN(row)) return;
+            previewSinglePad(trackId, row);
+        });
+    });
 }
 
 function renderTrackRow(t) {
@@ -513,39 +644,122 @@ function renderTrackRow(t) {
         : '';
 
     const rowClasses = t.isPreviewing
-        ? 'flex items-center gap-2 p-2 bg-gray-800 rounded border border-green-600'
-        : 'flex items-center gap-2 p-2 bg-gray-800 rounded border border-gray-700';
+        ? 'flex flex-col gap-2 p-2 bg-gray-800 rounded border border-green-600'
+        : 'flex flex-col gap-2 p-2 bg-gray-800 rounded border border-gray-700';
 
-    const inner = `
-        <div class="flex-1 min-w-0">
-            <div class="text-sm font-medium text-white truncate">
-                ${escapeHtml(t.name)} ${typeBadge} ${mutedHint}
+    // Header row (title + preview/stop button)
+    const headerRow = `
+        <div class="flex items-center gap-2">
+            <div class="flex-1 min-w-0">
+                <div class="text-sm font-medium text-white truncate">
+                    ${escapeHtml(t.name)} ${typeBadge} ${mutedHint}
+                </div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    ${seqInfo}
+                </div>
+                ${inlineHint}
             </div>
-            <div class="flex items-center gap-2 flex-wrap">
-                ${seqInfo}
-            </div>
-            ${inlineHint}
+            ${t.isPreviewing
+                ? `<button class="ospp-stop-btn flex-shrink-0 px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-500" data-track-id="${t.id}">⏹ Stop</button>`
+                : `<button class="ospp-preview-btn flex-shrink-0 px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-500" data-track-id="${t.id}">▶ Preview</button>`
+            }
         </div>
     `;
 
-    if (t.isPreviewing) {
-        return `
-            <div class="${rowClasses}" title="${escapeHtml(tooltipText)}">
-                ${inner}
-                <button class="ospp-stop-btn px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-500" data-track-id="${t.id}">
-                    ⏹ Stop
-                </button>
-            </div>
-        `;
-    }
+    // Pad grid (individual pads with hover info + click-to-preview-pad).
+    // For DrumSampler: all 8 pads in a 2x4 grid. For Synth/Sampler: only used rows.
+    // Pads carry data-pad-row so we can single-pad preview on click and highlight on hover.
+    const padGridHtml = renderPadGrid(t);
 
     return `
-        <div class="${rowClasses}" title="${escapeHtml(tooltipText)}">
-            ${inner}
-            <button class="ospp-preview-btn px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-500" data-track-id="${t.id}">
-                ▶ Preview
-            </button>
+        <div class="${rowClasses}" title="${escapeHtml(tooltipText)}" data-track-row-id="${t.id}">
+            ${headerRow}
+            ${padGridHtml}
         </div>
+    `;
+}
+
+/**
+ * Render the per-pad grid for a track row. Each pad has data attributes for
+ * the per-pad tooltip (note name + velocity range) and click-to-preview-pad.
+ * The grid is hidden entirely for Audio tracks (no note model).
+ */
+function renderPadGrid(t) {
+    if (t.type === 'Audio') return '';
+    const pads = t.padGridData || [];
+    if (pads.length === 0) return '';
+    const isDrum = t.type === 'DrumSampler';
+
+    // For drum pads, always show all 8 pads (pads without triggers are dimmed).
+    // For synth/sampler tracks, only show rows that have triggers OR the first 8
+    // rows so the grid stays compact.
+    let displayPads;
+    if (isDrum) {
+        // Fill up to 8 pads; missing rows render as empty/untriggered slots.
+        const byRow = new Map(pads.map(p => [p.row, p]));
+        displayPads = [];
+        for (let r = 0; r < 8; r++) {
+            if (byRow.has(r)) displayPads.push(byRow.get(r));
+            else displayPads.push({
+                row: r,
+                label: `Pad ${r + 1}`,
+                noteName: '—',
+                midiNote: null,
+                triggered: false,
+                triggerCount: 0,
+                velocityRange: '—',
+                padName: ''
+            });
+        }
+    } else {
+        const triggeredPads = pads.filter(p => p.triggered);
+        displayPads = triggeredPads.length > 0
+            ? triggeredPads.slice(0, 12)
+            : pads.slice(0, 8);
+    }
+
+    const padsHtml = displayPads.map(p => {
+        const triggeredClass = p.triggered
+            ? (isDrum ? 'bg-orange-600 border-orange-400 text-white' : 'bg-purple-600 border-purple-400 text-white')
+            : 'bg-gray-900 border-gray-700 text-gray-500';
+        const intensityOpacity = p.triggered
+            ? Math.max(0.45, Math.min(1, p.triggerCount / 4))
+            : 0.55;
+        const tooltipInfo = JSON.stringify({
+            row: p.row,
+            noteName: p.noteName,
+            midiNote: p.midiNote,
+            padName: p.padName,
+            triggered: p.triggered,
+            triggerCount: p.triggerCount,
+            velocityRange: p.velocityRange
+        });
+        const nativeTitle = p.triggered
+            ? `${p.label} · ${p.noteName}${p.midiNote != null ? ` (MIDI ${p.midiNote})` : ''} · ${p.velocityRange} · ${p.triggerCount} hit${p.triggerCount === 1 ? '' : 's'}`
+            : `${p.label}${p.noteName && p.noteName !== '—' ? ` · ${p.noteName}` : ''} · no triggers`;
+        return `
+            <div class="ospp-pad ${triggeredClass} border rounded px-1.5 py-1 text-center cursor-pointer hover:ring-2 hover:ring-yellow-300 transition-all flex-shrink-0"
+                 data-pad-row="${p.row}"
+                 data-track-id="${t.id}"
+                 data-pad-info='${escapeHtml(tooltipInfo)}'
+                 title="${escapeHtml(nativeTitle)}"
+                 style="opacity:${intensityOpacity}">
+                <div class="text-[10px] leading-tight truncate">${escapeHtml(p.label)}</div>
+                <div class="text-[9px] leading-tight text-gray-200 truncate">${escapeHtml(p.noteName)}</div>
+            </div>
+        `;
+    }).join('');
+
+    const gridLayout = isDrum
+        ? 'grid grid-cols-4 gap-1.5'
+        : 'flex flex-wrap gap-1.5';
+
+    return `
+        <div class="ospp-pad-grid ${gridLayout}" data-track-id="${t.id}" data-pad-grid="1">
+            ${padsHtml}
+        </div>
+        <div class="ospp-pad-tooltip hidden absolute z-50 bg-black border border-yellow-500 text-yellow-100 text-[10px] rounded px-2 py-1 pointer-events-none whitespace-pre-line shadow-lg"
+             data-pad-tooltip></div>
     `;
 }
 
