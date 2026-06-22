@@ -321,6 +321,11 @@ function showSafeNotification(message, duration) {
 // lifetime of the tab (URL.createObjectURL pins the Blob until revoked or the
 // document is unloaded).
 let currentDesktopVideoObjectUrl = null;
+// --- currentDesktopImageObjectUrl tracker ---
+// Same hygiene for the IDB-fallback image path: when a large image is too big for
+// localStorage, we route it through bgDb and issue a blob: URL for the runtime
+// <img>. Track it so removeCustomDesktopBackground + a video switch can revoke it.
+let currentDesktopImageObjectUrl = null;
 
 // --- removeCustomDesktopBackground ---
 // Properly defined at module level (hoisted) so it's accessible both as a method
@@ -357,11 +362,20 @@ async function removeCustomDesktopBackground() {
             try { URL.revokeObjectURL(currentDesktopVideoObjectUrl); } catch (_) {}
             currentDesktopVideoObjectUrl = null;
         }
+        // Same hygiene for the large-image IDB-fallback path: revoke the blob:
+        // URL we issued and clear the IDB row.
+        if (currentDesktopImageObjectUrl) {
+            try { URL.revokeObjectURL(currentDesktopImageObjectUrl); } catch (_) {}
+            currentDesktopImageObjectUrl = null;
+        }
 
         // Remove from db if exists (capture so we can surface a warning if it fails)
         bgDbDeleteAudio('desktopVideo').catch((dbErr) => {
             console.warn("[removeCustomDesktopBackground] IndexedDB delete failed (localStorage still cleared):", dbErr);
             if (typeof showSafeNotification === 'function') showSafeNotification("Local DB cleanup failed — background cleared anyway.", 2500);
+        });
+        bgDbDeleteAudio('desktopImage').catch((dbErr) => {
+            console.warn("[removeCustomDesktopBackground] IndexedDB delete of image failed (localStorage still cleared):", dbErr);
         });
 
         console.log("[removeCustomDesktopBackground] Custom background removed.");
@@ -1624,10 +1638,56 @@ async function handleCustomBackgroundUpload(event) {
             const reader = new FileReader();
             reader.onload = async (e) => {
                 const dataURL = e.target.result;
-                localStorage.setItem('snugosDesktopBackground', dataURL);
-                localStorage.setItem('snugosDesktopBgType', 'image');
+                // Try localStorage first (legacy / small images). If the encoded data:
+                // URL is too big for the origin's localStorage quota, fall back to IDB
+                // via bgDb (same path the video branch uses). This makes large wallpapers
+                // (~4K JPG/PNG) work without a confusing "Could not save background" error.
+                const probeKey = '__snugosDesktopBgProbe__';
+                let usedFallback = false;
+                try {
+                    localStorage.setItem(probeKey, dataURL);
+                    localStorage.removeItem(probeKey);
+                    localStorage.setItem('snugosDesktopBackground', dataURL);
+                    localStorage.setItem('snugosDesktopBgType', 'image');
+                    // Defensive: revoke any prior image object URL (data: URLs aren't
+                    // revokable but blob: ones are — matches the video path's hygiene).
+                    if (currentDesktopImageObjectUrl) {
+                        try { URL.revokeObjectURL(currentDesktopImageObjectUrl); } catch (_) {}
+                        currentDesktopImageObjectUrl = null;
+                    }
+                } catch (quotaErr) {
+                    // QuotaExceededError (or any other localStorage failure): fall through
+                    // to IDB. We still keep a tiny marker in localStorage so legacy code
+                    // can tell there *was* an image bg; the actual bytes live in bgDb.
+                    usedFallback = true;
+                    try {
+                        if (currentDesktopImageObjectUrl) {
+                            try { URL.revokeObjectURL(currentDesktopImageObjectUrl); } catch (_) {}
+                            currentDesktopImageObjectUrl = null;
+                        }
+                        await bgDb.save('desktopImage', file);
+                        const objectUrl = URL.createObjectURL(file);
+                        currentDesktopImageObjectUrl = objectUrl;
+                        localStorage.setItem('snugosDesktopBgType', 'image');
+                        localStorage.setItem('snugosDesktopBackground', objectUrl);
+                        await applyDesktopBackground(objectUrl, 'image');
+                        if (typeof showSafeNotification === 'function') {
+                            showSafeNotification("Image background applied (IDB fallback).", 2000);
+                        }
+                        if (typeof updateBgStatusIndicator === 'function') updateBgStatusIndicator();
+                        return;
+                    } catch (idbErr) {
+                        console.error("[bg upload] IDB fallback for image also failed:", idbErr);
+                        if (typeof showSafeNotification === 'function') {
+                            showSafeNotification("Could not save image background: " + idbErr.message, 4000);
+                        }
+                        return;
+                    }
+                }
                 await applyDesktopBackground(dataURL, 'image');
-                if (typeof showSafeNotification === 'function') showSafeNotification("Image background applied.", 2000);
+                if (typeof showSafeNotification === 'function' && !usedFallback) {
+                    showSafeNotification("Image background applied.", 2000);
+                }
                 if (typeof updateBgStatusIndicator === 'function') updateBgStatusIndicator();
             };
             reader.readAsDataURL(file);
@@ -2148,7 +2208,7 @@ function updatePerformanceStats() {
         if (clipCountEl && typeof getTracksState === 'function') {
             const allTracks = getTracksState();
             let totalClips = 0;
-            if (Array.isArray(allTracks)) {
+            if (Array.isArray(allTracks) {
                 for (const t of allTracks) {
                     if (t && Array.isArray(t.timelineClips)) {
                         totalClips += t.timelineClips.length;
@@ -2163,7 +2223,7 @@ function updatePerformanceStats() {
         if (noteCountEl && typeof getTracksState === 'function') {
             const allTracks = getTracksState();
             let totalNotes = 0;
-            if (Array.isArray(allTracks)) {
+            if (Array.isArray(allTracks) {
                 for (const t of allTracks) {
                     if (!t || t.type === 'Audio') continue;
                     if (!Array.isArray(t.sequences) || t.sequences.length === 0) continue;
@@ -2381,6 +2441,28 @@ async function restoreDesktopBackground() {
             if (typeof showSafeNotification === 'function') {
                 showSafeNotification("Video background restore failed. Falling back to default.", 3500);
             }
+        }
+    }
+
+    // Image-IDB fallback: if the image was stored via the upload-time quota fallback
+    // path (large images saved as Blobs in bgDb under 'desktopImage'), the localStorage
+    // entry may be a blob: URL that no longer resolves (e.g. tab reload before the
+    // user re-applies). Try bgDb first; only fall through to the legacy data:/localStorage
+    // path if that fails. Mirrors the video-IDB restore branch above.
+    if (bgType === 'image') {
+        try {
+            const imageBlob = await bgDb.get('desktopImage');
+            if (imageBlob) {
+                const objectUrl = URL.createObjectURL(imageBlob);
+                if (currentDesktopImageObjectUrl) {
+                    try { URL.revokeObjectURL(currentDesktopImageObjectUrl); } catch (_) {}
+                }
+                currentDesktopImageObjectUrl = objectUrl;
+                applyDesktopBackground(objectUrl, 'image');
+                return;
+            }
+        } catch (e) {
+            console.warn("[restoreDesktopBackground] Image-IDB restore failed, falling back to localStorage:", e);
         }
     }
 

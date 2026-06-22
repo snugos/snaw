@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.68"; // 2026-06-22 - WebAudio Plugin Host: load AudioWorklet processors by URL into track effect chains (v0.3.68)
+export const APP_VERSION = "0.3.69"; // 2026-06-22 - Image-background IDB fallback: route large image uploads through bgDb when localStorage quota is exceeded (v0.3.69)
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks
