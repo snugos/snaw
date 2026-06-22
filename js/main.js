@@ -2343,7 +2343,27 @@ async function restoreDesktopBackground() {
     if (bgType === 'image' || !bgType) {
         const imageUrl = localStorage.getItem(DESKTOP_BACKGROUND_KEY);
         if (imageUrl) {
-            applyDesktopBackground(imageUrl, 'image');
+            // Defensive: a stale or corrupt imageUrl (revoked blob URL, empty string,
+            // an unsupported scheme like javascript:, or a value that fails to parse)
+            // would otherwise silently leave the desktop with a broken background.
+            // Mirror the Day 738 video fallback: clear the stale markers and notify.
+            const trimmed = String(imageUrl).trim();
+            const looksSafe =
+                trimmed.length > 0 &&
+                (trimmed.startsWith('data:') ||
+                 trimmed.startsWith('blob:') ||
+                 trimmed.startsWith('http://') ||
+                 trimmed.startsWith('https://'));
+            if (looksSafe) {
+                applyDesktopBackground(trimmed, 'image');
+            } else {
+                console.warn('[restoreDesktopBackground] Stored image bg URL is invalid or uses an unsupported scheme. Clearing marker.');
+                localStorage.removeItem(DESKTOP_BACKGROUND_KEY);
+                if (!bgType) localStorage.removeItem(DESKTOP_BG_TYPE_KEY);
+                if (typeof showSafeNotification === 'function') {
+                    showSafeNotification("Stored image background could not be restored (invalid data). Falling back to default.", 3500);
+                }
+            }
         }
     }
 }
