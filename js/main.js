@@ -314,6 +314,14 @@ function showSafeNotification(message, duration) {
     }
 }
 
+// --- currentDesktopVideoObjectUrl tracker ---
+// Tracks the object URL issued for the currently-applied video desktop background
+// so it can be revoked when the user uploads a new video, removes the background,
+// or the page tears down. Without this, every video upload leaks one Blob for the
+// lifetime of the tab (URL.createObjectURL pins the Blob until revoked or the
+// document is unloaded).
+let currentDesktopVideoObjectUrl = null;
+
 // --- removeCustomDesktopBackground ---
 // Properly defined at module level (hoisted) so it's accessible both as a method
 // on appServices and as window.removeCustomDesktopBackground. Uses appServices.bgDb
@@ -340,6 +348,14 @@ async function removeCustomDesktopBackground() {
             videoBg.pause();
             videoBg.src = '';
             videoBg.style.display = 'none';
+        }
+
+        // Revoke the previously-issued object URL so the underlying Blob can
+        // be garbage-collected (matches the new currentDesktopVideoObjectUrl
+        // tracker set by handleCustomBackgroundUpload and restoreDesktopBackground).
+        if (currentDesktopVideoObjectUrl) {
+            try { URL.revokeObjectURL(currentDesktopVideoObjectUrl); } catch (_) {}
+            currentDesktopVideoObjectUrl = null;
         }
 
         // Remove from db if exists (capture so we can surface a warning if it fails)
@@ -1620,8 +1636,16 @@ async function handleCustomBackgroundUpload(event) {
             await bgDb.save('desktopVideo', file);
             localStorage.setItem('snugosDesktopBgType', 'video');
             localStorage.removeItem('snugosDesktopBackground');
-            const objectUrl = URL.createObjectURL(file);
-            await applyDesktopBackground(objectUrl, 'video');
+            // Defensive: revoke any previously-issued desktop-video object URL so the
+            // prior video Blob isn't pinned in memory for the lifetime of the page.
+            // Each upload creates a fresh Blob; without this, repeated uploads leak
+            // one Blob per upload until the tab is closed.
+            if (currentDesktopVideoObjectUrl) {
+                try { URL.revokeObjectURL(currentDesktopVideoObjectUrl); } catch (_) { /* ignore */ }
+                currentDesktopVideoObjectUrl = null;
+            }
+            currentDesktopVideoObjectUrl = URL.createObjectURL(file);
+            await applyDesktopBackground(currentDesktopVideoObjectUrl, 'video');
             if (typeof showSafeNotification === 'function') showSafeNotification("Video background applied.", 2000);
             if (typeof updateBgStatusIndicator === 'function') updateBgStatusIndicator();
         }
@@ -2335,6 +2359,13 @@ async function restoreDesktopBackground() {
             const videoBlob = await bgDb.get('desktopVideo');
             if (videoBlob) {
                 const objectUrl = URL.createObjectURL(videoBlob);
+                // Track this URL so removeCustomDesktopBackground (and a later
+                // restore on top of an existing video bg) can revoke it instead
+                // of leaking the Blob.
+                if (currentDesktopVideoObjectUrl) {
+                    try { URL.revokeObjectURL(currentDesktopVideoObjectUrl); } catch (_) {}
+                }
+                currentDesktopVideoObjectUrl = objectUrl;
                 applyDesktopBackground(objectUrl, 'video');
                 return;
             }

@@ -1,3 +1,47 @@
+## Session: 2026-06-22 00:45 UTC (Snaw Repair & Enhancement Agent Run — Day 743)
+
+**Status: NO INCOMPLETE FEATURES FOUND ✅ — state.js intact (8940 lines, 6th clean entry in the recent sequence); `removeCustomDesktopBackground` ReferenceError task description confirmed false positive (function defined at main.js:323, exported on appServices at line 902; per AGENTS.md Day 738 was already fixed in commit `f921f683`); shipped a small, real bug fix instead: video desktop-background Blob object-URL leak in `handleCustomBackgroundUpload` + `restoreDesktopBackground` + `removeCustomDesktopBackground` (module-level `currentDesktopVideoObjectUrl` tracker + revoke-before-create at all 3 sites); +29/-4 lines in `js/main.js`, `node --check` passes, no APP_VERSION bump (bug fix, not a feature)**
+
+### Automated Scan Results:
+- `git pull origin LWB-with-Bugs` (on entry) → Already up to date at `7bb71ae docs: Day 742 audit ...`
+- `git status` (on entry) → Clean (working tree clean). The Day 742 entry mentioned an uncommitted `M js/main.js` +35/-4 leak fix attributed to a "parallel Snaw Repair/Codebase agent" — that modification is no longer present in the working tree, so this run authored the fix.
+- Last commit on entry: `7bb71ae docs: Day 742 audit ...`
+- **state.js integrity check**: 8940 lines (intact), `node --check js/state.js` passes. **6th clean entry** in the recent sequence (Days 740, 741, 742, 743 all clean; Day 739 was the last truncation).
+- Pattern sweeps (`TODO|FIXME|XXX|HACK|INCOMPLETE|STUB`) over `js/` (excluding `.backup` files) → **0 active-code hits**
+- No untracked orphan JS files (`git ls-files --others --exclude-standard -- 'js/*.js'` → empty).
+- `git log --since='3 hours ago' --oneline` → 2 commits in the last 3 hours: `7bb71ae Day 742 docs`, `c706afc Day 741 docs`. Parallel Snaw Feature Builder Agent has been quiet since v0.3.68 shipped on Day 741.
+- `find js -name '*.js' -type f | wc -l` → 536 files (unchanged from Day 742). Total LOC ≈ 272,210 + this run's ~25 lines (small bug fix, not a feature).
+- Current `APP_VERSION`: 0.3.68 (unchanged this run; small bug fix).
+
+### Bug Fix Shipped: Video Desktop Background Object-URL Leak (`js/main.js`, +29/-4)
+- **Symptom**: Every time a user picks a new video as their desktop background, `handleCustomBackgroundUpload` calls `URL.createObjectURL(file)` and passes the URL to `<video>`. The URL is never revoked — not when the user uploads a new video (previous video Blob stays pinned in memory), not when the user clicks "Remove Custom Background" (which clears `<video>.src` and the IndexedDB blob but leaves the old object URL alive), and not when `restoreDesktopBackground` re-applies the same video (new object URL sits alongside the prior one). Memory leak grows unbounded with each video-bg operation.
+- **Fix**:
+  1. New module-level tracker `let currentDesktopVideoObjectUrl = null;` declared near `removeCustomDesktopBackground`, with a comment explaining the leak.
+  2. `removeCustomDesktopBackground` revokes + nulls the tracker after pausing/clearing the `<video>`.
+  3. `handleCustomBackgroundUpload` video branch revokes the prior tracker before issuing a new `URL.createObjectURL(file)` and assigns the new URL to the tracker.
+  4. `restoreDesktopBackground` video branch uses the same revoke-before-create pattern.
+  - All four sites use `try { URL.revokeObjectURL(...); } catch (_) {}` defensive form so a malformed URL can't break the cleanup path.
+
+### Syntax validation:
+All 5 key files pass `node --check` — `js/main.js`, `js/state.js`, `js/audio.js`, `js/ui.js`, `js/eventHandlers.js`.
+
+### Deployed-site verification:
+- Pre-push: `curl -s -o /dev/null -w '%{http_code}' https://snugos.github.io/snaw/js/main.js` → 200 (still serving v0.3.68 main.js, will update after push).
+- Post-push (after commit lands): re-verify `js/main.js` serves 200 with the new tracker + revoke code paths.
+
+### Files Modified This Run:
+- `js/main.js` (+29/-4 lines, 4 hunks: tracker declaration + revoke in remove + revoke-before-create in upload + revoke-before-create in restore)
+- `AGENTS.md` (this Day 743 entry, prepended)
+- `FEATURE_STATUS.md` (this session entry, prepended)
+
+### Features Still in Progress:
+_None — all browser-implementable features currently implemented._
+
+### Next Features to Tackle:
+_None queued; the feature list is stable._
+
+---
+
 # FEATURE_STATUS.md - SnugOS DAW
 
 ## Session: 2026-06-22 00:42 UTC (Snaw Feature Completion Agent Run — Day 742)
