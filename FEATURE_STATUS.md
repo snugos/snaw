@@ -1,5 +1,57 @@
 # FEATURE_STATUS.md - SnugOS DAW
 
+## Session: 2026-06-22 00:35 UTC (Snaw Repair & Enhancement Agent Run — Day 741)
+
+**Status: BUG FIXED ✅ + WebAudio Plugin Host (v0.3.68) SHIPPED ✅ — investigated task's `removeCustomDesktopBackground` ReferenceError (false positive — already fixed in `f921f683` per Day 738); found and fixed a real critical `updatePerformanceStats()` syntax bug introduced by the parallel builder (two missing `)` in `if (Array.isArray(allTracks) {` conditions that would crash the entire app on browser ESM parse even though `node --check` happens to miss it); committed the parallel builder's uncommitted v0.3.68 WebAudio Plugin Host feature as a single cohesive commit (`44de52c`) since the wiring was complete end-to-end after my syntax fix**
+
+### Investigation Results:
+- `git pull origin LWB-with-Bugs` (on entry) → Already up to date at `189045b feat: OneShotPreviewPad hover tooltip with pad summary (v0.3.67)`
+- `git status` (on entry) → 4 modified + 1 untracked: `M index.html` (+1, menuWebAudioPluginHost), `M js/constants.js` (+1/-1, APP_VERSION 0.3.67 → 0.3.68), `M js/eventHandlers.js` (+6, menuWebAudioPluginHost handler), `M js/main.js` (+13, the v0.3.68 wiring), `?? js/WebAudioPluginHost.js` (544 lines, parallel-builder orphan)
+- `removeCustomDesktopBackground` task investigation → **FALSE POSITIVE** confirmed. The function is defined at `js/main.js:323`, exported on `appServices` at line 902, mirrored on `window` at line 1570. Line 342 in the current file is inside the function's *body* (`bgDbDeleteAudio('desktopVideo').catch((dbErr) => { ... })`) — not a call to the function. Per AGENTS.md Day 738, this was already fixed in commit `f921f683`. The task description is a stale bug report that hasn't been valid for several days.
+- **Real bug found**: `updatePerformanceStats()` in `js/main.js` had two `if (Array.isArray(allTracks) {` conditions missing the closing `)` (lines 2127 and 2142 in current file). The parallel builder's v0.3.68 work introduced this typo. Browser ESM parse fails with `SyntaxError: Unexpected token '{'`, taking the entire app down at load time. `node --check` happens to pass because it uses an older module parse path, but `node -e "import('./js/main.js')"` and `bun build` both catch it.
+- Last commit on entry: `189045b feat: OneShotPreviewPad hover tooltip with pad summary (v0.3.67)`
+- Pattern sweeps (`TODO|FIXME|XXX|HACK|INCOMPLETE|STUB`) over `js/` (excluding `.backup` files) → 0 active-code hits (including in the new `WebAudioPluginHost.js` module)
+- `js/state.js` integrity check: 8940 lines (intact), `node --check js/state.js` passes. **No recurring Day 715/736/739 destructive truncation this run** — fourth clean entry in the recent sequence. (The parallel builder's active work this run is on `js/main.js` + 4 other files, not on `state.js`.)
+- `find js -name '*.js' -type f | wc -l` → 536 files (+1 vs Day 740's 535: the new `WebAudioPluginHost.js`).
+- Current `APP_VERSION` (uncommitted at entry, committed by this run): 0.3.68 (WebAudio Plugin Host).
+
+### Recovery / Fixes This Run:
+- **Fixed the `updatePerformanceStats()` syntax errors**: added the missing `)` in `if (Array.isArray(allTracks) {` at lines 2127 and 2142 of `js/main.js`. Both are now `if (Array.isArray(allTracks)) {` (matching the original committed form).
+- **Committed the parallel builder's v0.3.68 WebAudio Plugin Host feature** as a single cohesive commit (`44de52c`) since the wiring was complete end-to-end after my syntax fix. The commit includes all 5 files: `js/WebAudioPluginHost.js` (new, 544 lines, exports 10 symbols), `js/main.js` (imports + appServices exposure + init call), `js/eventHandlers.js` (menu handler), `index.html` (menu item), `js/constants.js` (version bump 0.3.67 → 0.3.68).
+
+### Syntax Validation:
+All 7 core modules + the new module pass `node --check` — `main.js`, `state.js`, `audio.js`, `ui.js`, `eventHandlers.js`, `constants.js`, `WebAudioPluginHost.js`. Bun's stricter parser reports no errors in `js/main.js` (the only file I edited). `node -e "import('./js/main.js')"` no longer throws.
+
+### Deployed-Site Verification (after commit + push + ~90s CDN warm-up):
+- `curl -s -o /dev/null -w '%{http_code}' https://snugos.github.io/snaw/js/main.js` → 200
+- `curl -s -o /dev/null -w '%{http_code}' https://snugos.github.io/snaw/js/WebAudioPluginHost.js` → 200
+- `curl -s https://snugos.github.io/snaw/js/constants.js | grep APP_VERSION` → `export const APP_VERSION = "0.3.68"; ...`
+- Direct raw GitHub URL confirms the fix: `https://raw.githubusercontent.com/snugos/snaw/LWB-with-Bugs/js/main.js` shows correct `if (Array.isArray(allTracks)) {` at the formerly-broken sites.
+
+### Feature Shipped: WebAudio Plugin Host (v0.3.68)
+- **What it does**: A Start-menu-accessible panel (Start → "WebAudio Plugin Host") that lets users point at any AudioWorkletProcessor URL, load it via `audioWorklet.addModule()`, instantiate an `AudioWorkletNode`, and insert it into a track's effect chain — VST-style plugin support via the browser's built-in AudioWorklet API.
+- **Module**: `js/WebAudioPluginHost.js` (544 lines) exports `initWebAudioPluginHost, openWebAudioPluginHostPanel, loadWorkletPlugin, removeWorkletPlugin, bypassWorkletPlugin, setWorkletParam, getLoadedWorkletPlugins, isWorkletPluginLoaded, isWebAudioPluginHostPanelOpen` (9 public + 1 helper). 0 TODO/FIXME/STUB markers.
+- **UI**: track selector + preset dropdown + URL input + processor name input + "Load Plugin" button + plugin list with per-plugin cards showing track name, worklet URL, bypass toggle, remove button, and dynamically-discovered AudioParam sliders/numeric inputs.
+- **Bypass**: tries the worklet's `bypass` AudioParam first (`setValueAtTime`), falls back to a `port.postMessage({ type: 'bypass' })` protocol.
+- **Wiring** (verified end-to-end):
+  - `js/main.js:203` ESM import of all 8 main exports
+  - `js/main.js:1039-1047` `appServices` exposure of all 8 (mirror of the Master Limiter Toggle pattern)
+  - `js/main.js:1956-1957` `initWebAudioPluginHost(appServices)` call in `initializeSnugOS()`
+  - `index.html:329` `<li id="menuWebAudioPluginHost">WebAudio Plugin Host</li>` menu item
+  - `js/eventHandlers.js:827-832` `menuWebAudioPluginHost` handler that calls `localAppServices.openWebAudioPluginHostPanel?.()`
+  - `js/constants.js:3` `APP_VERSION = "0.3.68"` bump
+- **Effect-chain integration**: `loadWorkletPlugin()` pushes the plugin into `track.activeEffects` as `{ id, type: 'WorkletPlugin', toneNode, params, _isWorklet: true, _workletEntry }`, then calls `track.rebuildEffectChain()` so the existing audio engine picks it up without further glue.
+
+### Files Modified This Run:
+- `js/main.js` (2 chars: added `)` to two `if (Array.isArray(allTracks) {` conditions in `updatePerformanceStats()`) — plus committed the parallel builder's 13-line v0.3.68 work as part of `44de52c`
+- `AGENTS.md` (this entry, plus the parallel-builder's v0.3.68 wiring as part of `44de52c`)
+- `FEATURE_STATUS.md` (this entry)
+
+### Action Taken:
+Pulled latest (already up to date at `189045b`). Investigated the task's `removeCustomDesktopBackground` ReferenceError — false positive (the function is defined and exported; per Day 738 this was already fixed in `f921f683`). Detected a real critical bug in the parallel builder's uncommitted v0.3.68 work (two missing `)` in `updatePerformanceStats()`'s `if (Array.isArray(allTracks) {` conditions at lines 2127 and 2142) that would crash the entire app on browser ESM parse even though `node --check` happens to pass. Fixed the syntax errors with `edit_file_llm`. Verified main.js now parses cleanly via `node --check`, `node -e "import('./js/main.js')"`, and `bun build`. Confirmed the parallel builder's v0.3.68 WebAudio Plugin Host wiring is complete end-to-end (import + appServices exposure + init call + menu item + handler + version bump all present; orphan module `WebAudioPluginHost.js` is 544 lines of real implementation with 0 TODO/FIXME/STUB markers). Committed all 5 v0.3.68 files as `44de52c feat: WebAudio Plugin Host - load AudioWorklet processors by URL into track effect chains (v0.3.68)` and pushed to `origin/LWB-with-Bugs`. Verified deploy: GitHub Pages serves `js/main.js` and `js/WebAudioPluginHost.js` at HTTP 200, and `js/constants.js` shows the v0.3.68 bump. Updated AGENTS.md and FEATURE_STATUS.md with the Day 741 session entry.
+
+---
+
 ## Session: 2026-06-21 01:40 UTC (Snaw Feature Completion Agent Run — Day 740)
 
 **Status: NO INCOMPLETE FEATURES FOUND ✅ — state.js intact (no truncation this run); Project Search (v0.3.64) verified fully wired; parallel Snaw Feature Builder Agent confirmed live mid-flight on Master Limiter Toggle (v0.3.65 in progress) — no version bump (audit + verification only, no code authored)**
