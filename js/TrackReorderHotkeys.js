@@ -1,18 +1,40 @@
 // js/TrackReorderHotkeys.js - Reorder Selected Track via Alt+ArrowUp / Alt+ArrowDown
 // Move the active track one slot up or down in the track list. Undo-aware
-// (delegates to state.js captureStateForUndo / reorderTrackInState which
-// already push an undo snapshot).
+// (delegates to state.js reorderTrackInState which already pushes an undo
+// snapshot via captureStateForUndoInternal — do NOT capture again here, or
+// every Alt+Arrow press produces two undo entries and the user must press
+// Ctrl+Z twice to undo a single move).
+//
+// Toast feedback uses localAppServices.showSafeNotification (the actual
+// method on appServices); a few older code paths in this file referenced
+// showNotification which is undefined on appServices, so all three toasts
+// were silent no-ops.
 
 import {
     getActiveSequencerTrackIdState,
     setActiveSequencerTrackIdState,
     getTracksState,
     reorderTrackInState,
-    captureStateForUndoInternal,
 } from './state.js';
 
 let localAppServices = {};
 let isInitialized = false;
+
+/**
+ * Surface a short toast to the user, matching the other Snaw features.
+ * Prefers appServices.showSafeNotification (the canonical name on
+ * appServices) and falls back to showNotification if a future caller
+ * wires that name instead.
+ */
+function notify(message, duration) {
+    if (!message) return;
+    const svc = localAppServices;
+    if (svc && typeof svc.showSafeNotification === 'function') {
+        svc.showSafeNotification(message, duration);
+    } else if (svc && typeof svc.showNotification === 'function') {
+        svc.showNotification(message, duration);
+    }
+}
 
 /**
  * Initialize the Track Reorder Hotkeys feature
@@ -56,9 +78,7 @@ export function moveActiveTrackBy(delta) {
     const activeId = typeof getActiveSequencerTrackIdState === 'function'
         ? getActiveSequencerTrackIdState() : null;
     if (activeId == null) {
-        if (localAppServices.showNotification) {
-            localAppServices.showNotification('Select a track first (click track header)', 1500);
-        }
+        notify('Select a track first (click track header)', 1500);
         return false;
     }
 
@@ -70,19 +90,17 @@ export function moveActiveTrackBy(delta) {
 
     const newIndex = oldIndex + delta;
     if (newIndex < 0 || newIndex >= tracks.length) {
-        if (localAppServices.showNotification) {
-            const at = delta < 0 ? 'top' : 'bottom';
-            localAppServices.showNotification(`Track already at ${at}`, 1200);
-        }
+        const at = delta < 0 ? 'top' : 'bottom';
+        notify(`Track already at ${at}`, 1200);
         return false;
     }
 
     const movedTrack = tracks[oldIndex];
     const movedName = movedTrack && movedTrack.name ? movedTrack.name : 'track';
 
-    if (typeof captureStateForUndoInternal === 'function') {
-        captureStateForUndoInternal(`Reorder track "${movedName}"`);
-    }
+    // reorderTrackInState pushes an undo snapshot via captureStateForUndoInternal;
+    // do not call it again here or the user will need two Ctrl+Z presses to undo
+    // a single Alt+Arrow move.
     if (typeof reorderTrackInState === 'function') {
         reorderTrackInState(activeId, newIndex);
     }
@@ -92,10 +110,8 @@ export function moveActiveTrackBy(delta) {
         setActiveSequencerTrackIdState(activeId);
     }
 
-    if (localAppServices.showNotification) {
-        const dir = delta < 0 ? 'up' : 'down';
-        localAppServices.showNotification(`Moved "${movedName}" ${dir}`, 1200);
-    }
+    const dir = delta < 0 ? 'up' : 'down';
+    notify(`Moved "${movedName}" ${dir}`, 1200);
     if (localAppServices.renderTimeline) localAppServices.renderTimeline();
     if (localAppServices.updateMixerWindow) localAppServices.updateMixerWindow();
 
