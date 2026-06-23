@@ -48,6 +48,7 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 ## Completed Features (recent)
 
 - **Master Limiter Toggle** - Quick on/off for a brick-wall master limiter to catch overs ✅
+- **Track Reorder Hotkeys** - Alt+ArrowUp / Alt+ArrowDown to move the active track one slot up/down in the track list (v0.3.70) ✅
 
 ## Current Feature Queue
 
