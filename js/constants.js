@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.70"; // 2026-06-22 - Track Reorder Hotkeys: Alt+ArrowUp/Down moves the active track one slot in the track list (v0.3.70)
+export const APP_VERSION = "0.3.71"; // 2026-06-23 - Drum Pad Trigger Mouse-Over: pad mouseover highlights + tooltips (note name, MIDI, velocity range) + click-to-preview-single-pad in the One-Shot Preview Pad panel (v0.3.71)
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks
