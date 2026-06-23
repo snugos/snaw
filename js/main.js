@@ -61,6 +61,7 @@ import { initTrackHeadphoneMix, openTrackHeadphoneMixPanel } from './TrackHeadph
 import { initTrackSendRouting, openTrackSendRoutingPanel } from './TrackSendRouting.js';
 import { initTrackMuteAutomation, openTrackMuteAutomationPanel } from './TrackMuteAutomation.js';
 import { openTrackDelayCompensationPanel, openLatencyCompensationPanel } from './TrackDelayCompensation.js';
+import { initTrackReorderHotkeys, moveActiveTrackBy, isTrackReorderHotkeysInitialized } from './TrackReorderHotkeys.js'; // Track Reorder Hotkeys - Alt+ArrowUp/Down to move active track (v0.3.70)
 import { openGrooveExtractorPanel } from './GrooveExtractor.js';
 import { openStepSequencerView } from './StepSequencerView.js';
 import { openPianoRollEditor, initPianoRollEditor } from './PianoRollEditor.js';
@@ -2045,6 +2046,7 @@ async function initializeSnugOS() {
         if (typeof initAutoScrollSync === 'function') initAutoScrollSync(); // Auto-Scroll Sync initialization
         if (typeof initTrackLaneReorder === 'function') initTrackLaneReorder(appServices); // Track Lane Reorder initialization
         if (typeof enableTrackLaneReorder === 'function') enableTrackLaneReorder(); // Enable track lane drag-and-drop
+        if (typeof initTrackReorderHotkeys === 'function') initTrackReorderHotkeys(appServices); // Track Reorder Hotkeys - Alt+ArrowUp/Down to move active track (v0.3.70)
         if (typeof initChordProgressionAssistant === 'function') initChordProgressionAssistant(appServices); // Chord Progression Assistant initialization
         if (typeof initLoopbackAudioRouting === 'function') initLoopbackAudioRouting(appServices); // Loopback Audio Routing initialization
         if (typeof initTempoSyncHelper === 'function') initTempoSyncHelper(appServices); // Tempo Sync Helper initialization

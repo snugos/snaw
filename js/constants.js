@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.69"; // 2026-06-22 - Image-background IDB fallback: route large image uploads through bgDb when localStorage quota is exceeded (v0.3.69)
+export const APP_VERSION = "0.3.70"; // 2026-06-22 - Track Reorder Hotkeys: Alt+ArrowUp/Down moves the active track one slot in the track list (v0.3.70)
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks
