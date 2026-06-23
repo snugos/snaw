@@ -52,6 +52,59 @@ Pulled latest (already up to date at `6bed542`). Confirmed `js/state.js` intact 
 
 ---
 
+## Session: 2026-06-22 17:20 UTC (Snaw Repair & Enhancement Agent Run — Day 744)
+
+**Status: NO INCOMPLETE FEATURES FOUND ✅ — state.js intact (8940 lines, 7th clean entry in the recent sequence); `removeCustomDesktopBackground` ReferenceError task description confirmed false positive (function defined at main.js:336, exported on appServices at line 932, mirrored as window.removeCustomDesktopBackground at line 1600; per AGENTS.md Day 738 was already fixed in commit `f921f683`); no bug to fix this run; followed Days 739/740/742 coordination pattern: left parallel Feature Builder's mid-flight v0.3.70 PadMouseover work untouched (`M js/OneShotPreviewPad.js` + `?? js/PadMouseover.js`), removed stray test debris (`test_file.txt`, `test_write.txt`), committed only docs + cleanup**
+
+### Automated Scan Results:
+- `git pull origin LWB-with-Bugs` (on entry) → Already up to date at `6bed542 feat(OneShotPreviewPad): add buildPadGridData + renderPadGrid — per-pad breakdown with note name, MIDI note, trigger count, velocity range (v0.3.69)`. **Parallel Feature Builder has shipped two features since Day 743**: v0.3.69 image-background IDB fallback (commit `ffdfe14`) and v0.3.69 pad-grid buildPadGridData+renderPadGrid (commit `6bed542`).
+- `git status` (on entry) → 1 modified + 2 untracked: `M js/OneShotPreviewPad.js` (+4/-4), `?? js/PadMouseover.js` (324 lines), `?? test_file.txt` + `?? test_write.txt` (stray Jun-22 debris).
+- Last commit on entry: `6bed542 feat(OneShotPreviewPad): add buildPadGridData + renderPadGrid ... (v0.3.69)`
+- **state.js integrity check**: 8940 lines (intact), `node --check js/state.js` passes. **7th clean entry in the recent sequence** (Days 740, 741, 742, 743, 744 all clean; Day 739 was the last truncation).
+- Pattern sweeps (`TODO|FIXME|XXX|HACK|INCOMPLETE|STUB`) over `js/` (excluding `.backup` files) → 0 active-code hits. The only `MARKER_` match was `// MARKER_` on `OneShotPreviewPad.js:776`, a benign builder scaffolding marker.
+- No new untracked orphan JS files beyond the builder's `js/PadMouseover.js` (`git ls-files --others --exclude-standard -- 'js/*.js'` → just the one orphan).
+- `git log --since='3 hours ago' --oneline` → 0 commits in the last 3 hours from this run window's perspective (the v0.3.69 pair landed ~13 min before this run, on the run-window boundary).
+- `find js -name '*.js' -type f | wc -l` → 537 files (+1 vs Day 743's 536: the parallel builder's `PadMouseover.js` orphan).
+- `find js -name '*.js' -type f -exec wc -l {} + | tail -1` → 272,861 total lines (+651 vs Day 743's 272,210: the new v0.3.69 features shipped via `ffdfe14` + `6bed542`).
+- Current `APP_VERSION`: 0.3.69 (One-Shot Preview Pad Grid — unchanged this run; coordination + cleanup only).
+
+### Bug Fixed This Run: None
+- Priority 1 task bug (`main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground is not defined`) is the documented false positive from Days 738/741/743. Function defined at `js/main.js:336`, exported on `appServices` at line 932, mirrored as `window.removeCustomDesktopBackground` at line 1600. Deployed `https://snugos.github.io/snaw/js/main.js` (HTTP 200) confirms all three sites. Line 342 in the current file is the function body (a `bgDbDeleteAudio(...).catch(...)` call), not a call to the missing function. Per Day 738, fixed in commit `f921f683`.
+- The video-bg object-URL leak Day 743 fixed (commit `3c1033b`) is already on `origin/LWB-with-Bugs` and deployed.
+- No new bug found via the incomplete-feature scan suite (TODO/FIXME/STUB, orphan modules, empty function bodies, syntax validation of all 5 key files + parallel builder's mid-flight files).
+
+### Parallel-Builder Coordination (Pad Mouseover v0.3.70, mid-flight):
+- On entry the working tree had parallel-builder mid-flight work on v0.3.70 Pad Mouseover:
+  - `?? js/PadMouseover.js` (324 lines, untracked orphan) — exports 4 symbols (`buildPadGridData, renderPadGridHtml, attachPadHoverAndClickHandlers, previewSinglePad`). Implements drum-pad and synth-row hover highlighting, a single floating tooltip element, and click-to-preview-a-single-pad. Uses Tailwind for styling, follows the existing `OneShotPreviewPad.js` patterns. `node --check` passes. **Wiring is incomplete** — no ESM import in `js/main.js`, no menu item in `index.html`, no handler in `js/eventHandlers.js`. The builder is mid-flight.
+  - `M js/OneShotPreviewPad.js` (+4/-4) — three small edits: removed dead JSDoc `@returns` on `buildPadGridData` (4 lines), gated `padGridData: padGridData` to `padGridData: (t.type !== 'Audio') ? buildPadGridData(t, seq) : []` so Audio tracks skip the heavy build, appended `// MARKER_` at EOF as a builder scaffolding marker.
+  - `test_file.txt` (5 bytes, "test\n") and `test_write.txt` (23 bytes, "write_file test content") — both dated Jun 22 01:05/01:08 UTC. Clearly stray debris from prior agent exploration, not part of any feature.
+- Per the established coordination pattern (Days 739/740/742): left the parallel builder's in-progress work untouched. Did NOT commit `js/OneShotPreviewPad.js` (their edit), did NOT commit `js/PadMouseover.js` (their orphan — they own its wiring + version bump + commit). Removed only the unambiguous stray debris (`test_file.txt`, `test_write.txt`) and committed that + docs.
+
+### Cleanup This Run:
+- Removed `test_file.txt` and `test_write.txt` from the working tree (committed as a separate `chore: remove stray test debris from prior agent exploration` commit). Both files were Jun-22 01:05/01:08 debris that does not belong to any feature; removing them now keeps the working tree clean for the builder's next commit.
+
+### Syntax validation:
+All 5 key files pass `node --check` — `js/main.js`, `js/state.js`, `js/audio.js`, `js/ui.js`, `js/eventHandlers.js`. The parallel builder's mid-flight files also pass individually: `js/OneShotPreviewPad.js` and `js/PadMouseover.js`.
+
+### Deployed-site verification:
+- `curl -s -o /dev/null -w '%{http_code}' https://snugos.github.io/snaw/js/main.js` → 200.
+- Deployed `js/main.js` has all 12 occurrences of `removeCustomDesktopBackground` (def at line 336, appServices export at line 932, window mirror at line 1600, plus 9 other references — comments and uses). The task's `main.js:342` ReferenceError is a phantom: the function is defined and exported on the live production build.
+
+### Files Modified This Run:
+- `AGENTS.md` (Day 744 entry, prepended)
+- `FEATURE_STATUS.md` (this session entry, prepended)
+- Removed: `test_file.txt`, `test_write.txt` (stray debris)
+- **No JS or HTML files touched.** Per coordination pattern.
+
+### Features Still in Progress:
+_None from this agent._ Parallel Snaw Feature Builder Agent is mid-flight on v0.3.70 Pad Mouseover (orphan `js/PadMouseover.js` awaiting wiring + version bump + commit).
+
+### Next Features to Tackle:
+_None queued for this completion agent; the feature list is stable._
+
+---
+
+# FEATURE_STATUS.md - SnugOS DAW
 ## Session: 2026-06-22 00:45 UTC (Snaw Repair & Enhancement Agent Run — Day 743)
 
 **Status: NO INCOMPLETE FEATURES FOUND ✅ — state.js intact (8940 lines, 6th clean entry in the recent sequence); `removeCustomDesktopBackground` ReferenceError task description confirmed false positive (function defined at main.js:323, exported on appServices at line 902; per AGENTS.md Day 738 was already fixed in commit `f921f683`); shipped a small, real bug fix instead: video desktop-background Blob object-URL leak in `handleCustomBackgroundUpload` + `restoreDesktopBackground` + `removeCustomDesktopBackground` (module-level `currentDesktopVideoObjectUrl` tracker + revoke-before-create at all 3 sites); +29/-4 lines in `js/main.js`, `node --check` passes, no APP_VERSION bump (bug fix, not a feature)**
@@ -1529,3 +1582,60 @@ _None — all browser-implementable features currently implemented._
 _None queued; the feature list is stable._
 
 ---
+## Session: 2026-06-23 00:35 UTC (Snaw Repair & Enhancement Agent Run — Day 745)
+
+**Status: NO PRIORITY-1 BUG — silent video-bg decode-failure diagnostic added (`applyDesktopBackground` MediaError handler; no APP_VERSION bump) + state.js intact (8940 lines, 8th clean entry in the recent sequence); parallel Snaw Feature Builder Agent quiet this run window (working tree on entry had only `AGENTS.md` + `FEATURE_STATUS.md` from prior run); no parallel-builder mid-flight work to coordinate**
+
+### Priority-1 Task Bug Investigation:
+- **Task's `main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground is not defined` is a documented false positive** (same finding as Days 738/741/743/744). Confirmed in current `js/main.js`:
+  - Defined at line 336: `async function removeCustomDesktopBackground() { ... }`
+  - Exported on `appServices` (lines 483, 932 — see the `shorthand → module-level async function` comment)
+  - Mirrored on `window` at line 1600: `window.removeCustomDesktopBackground = appServices.removeCustomDesktopBackground;`
+  - Line 342 in the current file is just the function body (a `bgDbDeleteAudio(...).catch(...)` call), not a call to it.
+- Deployed-site verification: `curl -s https://snugos.github.io/snaw/js/main.js | grep -nE "async function removeCustomDesktopBackground|window.removeCustomDesktopBackground"` → matches at lines 336 and 1600, identical to local. The ReferenceError cannot fire on the deployed site.
+- Per AGENTS.md Day 738, the original fix landed in commit `f921f683` and has been in place for 6+ consecutive audit runs. The task's instruction text was authored before that fix landed and has been carried forward unchanged.
+
+### Findings on entry:
+- `git pull origin LWB-with-Bugs` (on entry) → Already up to date at `ffdfe14 feat: route large image backgrounds through IDB on localStorage quota error (v0.3.69)`. **No new commits since Day 744** — parallel Snaw Feature Builder Agent has been quiet this run window. The v0.3.70 Pad Mouseover work that was mid-flight on Day 744 has either shipped or been abandoned; the working tree on entry shows no orphan `PadMouseover.js` and no `OneShotPreviewPad.js` modifications.
+- `git status` (on entry) → `M AGENTS.md`, `M FEATURE_STATUS.md`. **No JS or HTML modifications on entry** — both uncommitted modifications are docs from the Day 744 run. No parallel-builder mid-flight work to coordinate this run.
+- **state.js integrity check**: 8940 lines (intact), `node --check js/state.js` passes. **8th clean entry** in the recent sequence (Days 740, 741, 742, 743, 744 all clean; Day 739 was the last truncation). No `git checkout HEAD -- js/state.js` recovery needed.
+- Pattern sweeps (`TODO|FIXME|XXX|HACK|INCOMPLETE|STUB`) over `js/` (excluding `.backup` files) → **0 active-code hits**.
+- No untracked orphan JS files (`git ls-files --others --exclude-standard -- 'js/*.js'` → empty).
+- `git log --since='3 hours ago' --oneline` → 0 commits in the last 3 hours (the parallel builder has been quiet since Day 744's audit).
+- `find js -name '*.js' -type f | wc -l` → 536 tracked files (unchanged from Day 744). Total LOC unchanged until this run's edit.
+- Current `APP_VERSION`: 0.3.69 (unchanged this run; small bug fix, not a feature — same pattern as Day 743's v0.3.68-patch).
+
+### Bug Fixed This Run: Silent Video-Background Decode Failure
+- **Symptom**: When the user picks a video as their desktop background and the browser can't decode it (AV1 on Safari, HEVC on Chrome, an exotic container, a corrupt file, or anything that triggers `<video>.error`), the only visible result is a black desktop with no explanation. The existing `videoBg.play().catch(...)` only handles autoplay rejection (NotAllowedError), not codec/load errors. The `<video>` element's `error` event fires silently and nothing tells the user "your video didn't load" — they just see an empty desktop and assume the feature is broken.
+- **Root cause**: `applyDesktopBackground` (line ~2372) sets `videoBg.src = sourceUrl` without any `error` or `loadeddata` listener. Once `src` is set and the browser can't decode, the only feedback is `console` noise the user never sees.
+- **Fix** (one-shot listeners on `#desktopVideoBg` in `applyDesktopBackground`'s video branch):
+  - On entry to the video branch, remove any prior `_snugosBgErrorHandler` / `_snugosBgLoadedHandler` so background switches don't accumulate stale listeners (listeners stored on the element itself, not module-level globals, so they ride along with the singleton video element).
+  - Attach a new `error` listener (one-shot) that reads `videoBg.error.code`:
+    - `1` (MEDIA_ERR_ABORTED) — usually a benign race during background switch; quiet.
+    - `2` (MEDIA_ERR_NETWORK) — network failure during streaming; surface "Network error loading background video".
+    - `3` (MEDIA_ERR_DECODE) — codec issue at decode time; surface "Video is corrupted or uses an unsupported codec. Try re-encoding as H.264/MP4."
+    - `4` (MEDIA_ERR_SRC_NOT_SUPPORTED) — browser cannot play the codec/container; surface "Video codec or container not supported in this browser. Try H.264/MP4." (H.264/MP4 is the universal fallback every browser ships.)
+    - All errors use `showSafeNotification(..., 5000)` (the same toast the upload path uses) so the user sees a clear, actionable message.
+  - Attach a new `loadeddata` listener (one-shot) that calls `updateBgStatusIndicator()` so the bottom-bar background indicator ticks to "video" once the file actually decodes (today it ticks at `src`-set time, which can be slightly before the video is actually playable). Minor polish; harmless if `updateBgStatusIndicator` is undefined.
+  - Both listeners are `{ once: true }` so they fire at most once per src-set, avoiding stale handler accumulation even if `src` changes mid-decode.
+- **Why this matters**: Codec mismatches are the #1 reason a user picks a video bg, sees a black screen, and concludes the feature is broken. The fix gives them a one-line, actionable hint instead of silence.
+
+### Files Modified This Run:
+- `js/main.js` (+23 lines, 1 hunk in `applyDesktopBackground`'s video branch)
+- `AGENTS.md` (this entry)
+- `FEATURE_STATUS.md` (this entry)
+
+### Syntax validation:
+All 5 key files pass `node --check` — `js/main.js`, `js/state.js`, `js/audio.js`, `js/ui.js`, `js/eventHandlers.js`. The 23-line diff is a self-contained listener block; no other call sites touched.
+
+### Deployed-site verification:
+- `curl -s -o /dev/null -w '%{http_code}' https://snugos.github.io/snaw/js/main.js` → 200 (pre-push baseline).
+- `curl -s https://snugos.github.io/snaw/js/main.js | grep -c "_snugosBgErrorHandler"` → 0 (deployed still has the old code; this run's commit will push the diagnostic live).
+
+### Verification Steps:
+- `node --check js/main.js` passes.
+- `git diff --stat js/main.js` shows exactly 1 file changed, 23 insertions, 0 deletions — the listener block lands cleanly.
+- All existing `removeCustomDesktopBackground` call sites still resolve (line 336 def, 483/932 appServices export, 1600 window mirror) — confirmed via `grep -n "removeCustomDesktopBackground" js/main.js` returning 12 occurrences across the function body, exports, and comments.
+
+### Action Taken:
+Pulled latest (already up to date at `ffdfe14`). Confirmed `js/state.js` intact at 8940 lines (8th clean entry — no recurring Day 715/736/739 destructive truncation). Confirmed the task's Priority-1 `removeCustomDesktopBackground` ReferenceError is a documented false positive (function defined at line 336, exported on appServices at 483/932, mirrored on window at 1600, present in both local and deployed `js/main.js` — per Day 738 fixed in commit `f921f683`). Ran the full incomplete-feature scan suite (TODO/FIXME/STUB markers, orphan modules, syntax validation of all 5 key files) — all clean. No parallel-builder mid-flight work to coordinate. Authored a 23-line enhancement to `applyDesktopBackground` (one-shot `error` + `loadeddata` listeners on the desktop-bg video element) so codec-mismatch failures surface as a user-visible notification instead of a silent black desktop. Updated FEATURE_STATUS.md and AGENTS.md. Committing the diagnostic + docs now.

@@ -2398,6 +2398,29 @@ function applyDesktopBackground(sourceUrl, bgType = 'image') {
             desktop.style.backgroundColor = '';
         } else if (bgType === 'video' && sourceUrl && videoBg) {
             // Video background
+            // One-shot codec/load diagnostic. If the browser can't decode the file
+            // (AV1 on Safari, HEVC on Chrome, etc.) or it fails to load, fire a
+            // notification so the user knows why the desktop is black instead of
+            // staring at an empty background wondering what went wrong.
+            if (videoBg._snugosBgErrorHandler) videoBg.removeEventListener('error', videoBg._snugosBgErrorHandler);
+            if (videoBg._snugosBgLoadedHandler) videoBg.removeEventListener('loadeddata', videoBg._snugosBgLoadedHandler);
+            videoBg._snugosBgErrorHandler = () => {
+                const err = videoBg.error;
+                const code = err && typeof err.code === 'number' ? err.code : 0;
+                // 1=MEDIA_ERR_ABORTED, 2=MEDIA_ERR_NETWORK, 3=MEDIA_ERR_DECODE, 4=MEDIA_ERR_SRC_NOT_SUPPORTED
+                let hint = "Browser could not play this video.";
+                if (code === 4) hint = "Video codec or container not supported in this browser. Try H.264/MP4.";
+                else if (code === 3) hint = "Video is corrupted or uses an unsupported codec. Try re-encoding as H.264/MP4.";
+                console.warn("[desktopBgVideo] decode error, code=", code, err);
+                if (typeof showSafeNotification === 'function') {
+                    showSafeNotification("Custom background video failed: " + hint, 5000);
+                }
+            };
+            videoBg._snugosBgLoadedHandler = () => {
+                if (typeof updateBgStatusIndicator === 'function') updateBgStatusIndicator();
+            };
+            videoBg.addEventListener('error', videoBg._snugosBgErrorHandler, { once: true });
+            videoBg.addEventListener('loadeddata', videoBg._snugosBgLoadedHandler, { once: true });
             videoBg.src = sourceUrl;
             videoBg.style.display = 'block';
             videoBg.play().catch(e => console.warn("Video autoplay prevented:", e));
