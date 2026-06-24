@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.72"; // 2026-06-23 - Mix-Bus Group Presets: save & re-apply whole-mix state across a set of tracks (volume, pan, mute/solo, color, effects, sends, detune) (v0.3.72)
+export const APP_VERSION = "0.3.73"; // 2026-06-23 - Plugin Bypass Per-Track: per-track bypass toggle for the entire effect chain; preserves effect settings/params while routing source straight to gainNode (v0.3.73)
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks

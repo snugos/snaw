@@ -169,6 +169,10 @@ function showTrackContextMenu(x, y, trackId) {
                 <button class="w-full text-left px-6 py-1.5 text-sm text-white hover:bg-gray-700" data-action="trillNotes" data-direction="both" data-taps="8" data-interval="2" data-track-id="${trackId}">Trill Both (±2 st, 8 taps)</button>
             </div>
             ` : ''}
+            <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="toggleEffectsBypass" data-track-id="${trackId}">
+                <span class="w-4">⏸</span>
+                <span>${(() => { try { return track.getEffectsBypassed && track.getEffectsBypassed() ? 'Re-enable Effects' : 'Bypass All Effects'; } catch(e) { return 'Bypass All Effects'; } })()}</span>
+            </button>
             <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="markRoleMenu" data-track-id="${trackId}">
                 <span class="w-4">🏷️</span>
                 <span>Mark as Role...</span>
@@ -410,6 +414,23 @@ function handleTrackAction(action, trackId, btn) {
                 localAppServices.openTrackEffectPresetsPanel(trackId);
             } else {
                 localAppServices.showNotification?.('Effect Presets not available', 2000);
+            }
+            break;
+
+        case 'toggleEffectsBypass':
+            // Plugin Bypass Per-Track (v0.3.73) - toggle the entire effect chain on/off
+            if (track.toggleEffectsBypassed) {
+                track.toggleEffectsBypassed(true);
+                const bypassed = track.getEffectsBypassed && track.getEffectsBypassed();
+                localAppServices.showNotification?.(
+                    bypassed ? `Bypassed all effects on ${track.name} (dry signal)` : `Re-enabled effects on ${track.name}`,
+                    2000
+                );
+                // Refresh UI elements that show the bypass state
+                if (localAppServices.updateTrackUI) localAppServices.updateTrackUI(trackId, 'effectsBypassChanged');
+                if (localAppServices.renderMixerChannelStripContent) localAppServices.renderMixerChannelStripContent();
+            } else {
+                localAppServices.showNotification?.('Bypass not available on this track', 2000);
             }
             break;
 

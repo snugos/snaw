@@ -7774,6 +7774,7 @@ function renderTrackStrip(track) {
                 <button class="strip-mute-btn w-8 h-6 text-xs rounded ${isMuted ? 'bg-red-500 text-white' : 'bg-gray-700 text-gray-400 hover:bg-red-900'}" data-track-id="${track.id}" title="Mute">M</button>
                 <button class="strip-solo-btn w-8 h-6 text-xs rounded ${isSolo ? 'bg-yellow-500 text-black' : 'bg-gray-700 text-gray-400 hover:bg-yellow-900'}" data-track-id="${track.id}" title="Solo">S</button>
                 <button class="strip-arm-btn w-8 h-6 text-xs rounded ${isArmed ? 'bg-red-600 text-white animate-pulse' : 'bg-gray-700 text-gray-400 hover:bg-red-600'}" data-track-id="${track.id}" title="Record Arm">R</button>
+                <button class="strip-bypass-btn w-8 h-6 text-xs rounded ${(track.effectsBypassed || (track.getEffectsBypassed && track.getEffectsBypassed())) ? 'bg-orange-500 text-white' : 'bg-gray-700 text-gray-400 hover:bg-orange-700'}" data-track-id="${track.id}" title="Bypass all effects (dry)">B</button>
             </div>
             
             <!-- Pan knob display -->
@@ -7965,6 +7966,17 @@ function setupMixerChannelStripEvents(container, tracks) {
             if (trackId !== 'master' && localAppServices.toggleTrackRecArm) {
                 if (localAppServices.captureStateForUndo) localAppServices.captureStateForUndo(`Toggle record arm for track ${trackId}`);
                 localAppServices.toggleTrackRecArm(trackId);
+                renderMixerChannelStripContent();
+            }
+        });
+    });
+
+    // Bypass button events (Plugin Bypass Per-Track, v0.3.73)
+    container.querySelectorAll('.strip-bypass-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const trackId = e.target.dataset.trackId;
+            if (trackId !== 'master' && localAppServices.toggleTrackEffectsBypass) {
+                localAppServices.toggleTrackEffectsBypass(trackId, true);
                 renderMixerChannelStripContent();
             }
         });

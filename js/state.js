@@ -2259,6 +2259,8 @@ export function gatherProjectDataInternal() {
                     isMuted: track.isMuted,
                     volume: track.previousVolumeBeforeMute, // Store the actual volume, not the muted one
                     snapResolution: track.snapResolution !== undefined ? track.snapResolution : null,
+                    // Plugin Bypass Per-Track (v0.3.73) - persist bypass state across reloads
+                    effectsBypassed: track.effectsBypassed === true,
                     activeEffects: (track.activeEffects || []).map(effect => ({
                         id: effect.id, type: effect.type,
                         params: effect.params ? JSON.parse(JSON.stringify(effect.params)) : {}
@@ -4689,6 +4691,8 @@ export function gatherProjectDataInternal() {
                     isMuted: track.isMuted,
                     volume: track.previousVolumeBeforeMute, // Store the actual volume, not the muted one
                     snapResolution: track.snapResolution !== undefined ? track.snapResolution : null,
+                    // Plugin Bypass Per-Track (v0.3.73) - persist bypass state across reloads
+                    effectsBypassed: track.effectsBypassed === true,
                     activeEffects: (track.activeEffects || []).map(effect => ({
                         id: effect.id, type: effect.type,
                         params: effect.params ? JSON.parse(JSON.stringify(effect.params)) : {}
@@ -7119,6 +7123,8 @@ export function gatherProjectDataInternal() {
                     isMuted: track.isMuted,
                     volume: track.previousVolumeBeforeMute, // Store the actual volume, not the muted one
                     snapResolution: track.snapResolution !== undefined ? track.snapResolution : null,
+                    // Plugin Bypass Per-Track (v0.3.73) - persist bypass state across reloads
+                    effectsBypassed: track.effectsBypassed === true,
                     activeEffects: (track.activeEffects || []).map(effect => ({
                         id: effect.id, type: effect.type,
                         params: effect.params ? JSON.parse(JSON.stringify(effect.params)) : {}

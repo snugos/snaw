@@ -100,6 +100,10 @@ export class Track {
         this.previousVolumeBeforeMute = initialData?.volume ?? 0.7;
         // MIDI channel for multi-channel MIDI support (1-16, 0 = omni/all channels)
         this.midiChannel = initialData?.midiChannel ?? 0;
+        // Per-track effect-chain bypass (v0.3.73). When true, sources connect directly
+        // to gainNode and the activeEffects array is skipped during rebuildEffectChain.
+        // activeEffects itself is not modified so parameters are preserved for re-enable.
+        this.effectsBypassed = initialData?.effectsBypassed ?? false;
 
         // Synth specific
         if (this.type === 'Synth') {
@@ -1546,8 +1550,38 @@ export class Track {
             console.log(`[Track ${this.id} rebuildEffectChain] Set currentOutputTarget to null (poly sampler/audio clips).`);
         }
 
+        // --- Per-Track Effect Bypass (v0.3.73) ---
+        // When bypassed, route sources directly to gainNode (skip the effect chain).
+        // activeEffects is preserved untouched so effect settings/params survive the toggle.
+        // _bypassGainNodeAlreadyConnected suppresses the post-loop reconnect-to-gainNode
+        // so we never accidentally double-connect or try to connect gainNode->gainNode.
+        let _bypassGainNodeAlreadyConnected = false;
+        if (this.effectsBypassed) {
+            console.log(`[Track ${this.id} rebuildEffectChain] Effect chain BYPASSED — skipping ${this.activeEffects.length} effect(s).`);
+            if (currentOutputTarget) {
+                if (Array.isArray(currentOutputTarget)) {
+                    currentOutputTarget.forEach(outNode => {
+                        if (outNode && !outNode.disposed) try { outNode.connect(this.gainNode); } catch (e) { console.error(`[Track ${this.id}] Bypass: error connecting array source to gainNode:`, e); }
+                    });
+                } else {
+                    try { currentOutputTarget.connect(this.gainNode); } catch (e) { console.error(`[Track ${this.id}] Bypass: error connecting source to gainNode:`, e); }
+                }
+                console.log(`[Track ${this.id} rebuildEffectChain] Bypass: source connected directly to gainNode (effects skipped).`);
+                currentOutputTarget = this.gainNode; // sentinel: post-loop will skip the gainNode reconnect
+                _bypassGainNodeAlreadyConnected = true;
+            } else if (this.type === 'Audio' && this.inputChannel && !this.inputChannel.disposed) {
+                try { this.inputChannel.connect(this.gainNode); console.log(`[Track ${this.id} rebuildEffectChain] Bypass: audio inputChannel connected directly to gainNode.`); }
+                catch(e) { console.error(`[Track ${this.id}] Bypass: error connecting inputChannel to gainNode:`, e); }
+                currentOutputTarget = this.gainNode;
+                _bypassGainNodeAlreadyConnected = true;
+            } else {
+                console.log(`[Track ${this.id} rebuildEffectChain] Bypass: no source to connect (e.g., poly sampler without effects, empty audio track).`);
+            }
+        }
+
 
         this.activeEffects.forEach((effectWrapper, index) => {
+            if (this.effectsBypassed) return; // Bypass is handled above; skip effect chain entirely.
             if (effectWrapper.toneNode && !effectWrapper.toneNode.disposed) {
                 console.log(`[Track ${this.id} rebuildEffectChain] Processing effect ${index}: ${effectWrapper.type}`);
                 if (currentOutputTarget) {
@@ -1567,7 +1601,10 @@ export class Track {
             }
         });
 
-        if (currentOutputTarget) {
+        if (_bypassGainNodeAlreadyConnected) {
+            // Bypass block already routed source(s) → gainNode. Skip post-loop reconnect.
+            console.log(`[Track ${this.id} rebuildEffectChain] Bypass mode: post-loop gainNode reconnect suppressed (already connected by bypass block).`);
+        } else if (currentOutputTarget) {
             if (Array.isArray(currentOutputTarget)) {
                 currentOutputTarget.forEach(outNode => {
                     if (outNode && !outNode.disposed) try { outNode.connect(this.gainNode); } catch (e) { console.error(`[Track ${this.id}] Error connecting array effect output to gainNode:`, e); }
@@ -2268,6 +2305,49 @@ export class Track {
      */
     getRole() {
         return this.role || 'none';
+    }
+
+    /**
+     * Bypass/unbypass the track's entire effect chain (v0.3.73).
+     * When bypassed, sources connect directly to gainNode and the effects array
+     * is skipped during rebuildEffectChain. Effect settings/parameters are kept
+     * intact (activeEffects is not modified) so the user can re-enable later.
+     * @param {boolean} bypassed - True to bypass all effects, false to re-enable
+     * @param {boolean} fromInteraction - Whether this is from a user interaction (capture undo only when true)
+     */
+    setEffectsBypassed(bypassed, fromInteraction = false) {
+        if (!fromInteraction) this._captureUndoState?.(`Set effects bypass on ${this.name}`);
+        const newState = !!bypassed;
+        if (this.effectsBypassed === newState) return; // No-op
+        this.effectsBypassed = newState;
+        console.log(`[Track ${this.id}] Effects bypass set to ${this.effectsBypassed} (${this.activeEffects.length} effect(s) in chain)`);
+        if (fromInteraction && this.appServices.captureStateForUndo) {
+            this.appServices.captureStateForUndo(`${this.effectsBypassed ? 'Bypass' : 'Re-enable'} effects on ${this.name}`);
+        }
+        // Rebuild the audio chain so the new bypass state takes effect immediately.
+        if (typeof this.rebuildEffectChain === 'function') {
+            try { this.rebuildEffectChain(); }
+            catch (e) { console.error(`[Track ${this.id}] setEffectsBypassed: rebuildEffectChain error:`, e); }
+        }
+        if (this.appServices.updateTrackUI) {
+            this.appServices.updateTrackUI(this.id, 'effectsBypassChanged');
+        }
+    }
+
+    /**
+     * Toggle the track's effect-chain bypass (v0.3.73).
+     * Convenience wrapper used by menu items and button handlers.
+     */
+    toggleEffectsBypassed(fromInteraction = false) {
+        this.setEffectsBypassed(!this.effectsBypassed, fromInteraction);
+    }
+
+    /**
+     * Get the current effects-bypass state.
+     * @returns {boolean}
+     */
+    getEffectsBypassed() {
+        return !!this.effectsBypassed;
     }
 
     /**
@@ -11092,10 +11172,10 @@ export class Track {
         } else if (mode === 'morph') {
             // Morphing with crossfade
             for (let i = 0; i < tableSize; i++) {
-                const sign1 = Math.sign(table1[i]);
-                const sign2 = Math.sign(table2[i]);
-                const mag1 = Math.abs(table1[i]);
-                const mag2 = Math.abs(table2[i]);
+                const sign1 = Math.sign(table1[i];
+                const sign2 = Math.sign(table2[i];
+                const mag1 = Math.abs(table1[i];
+                const mag2 = Math.abs(table2[i];
                 const morphedMag = mag1 * (1 - blend) + mag2 * blend;
                 const morphedSign = blend < 0.5 ? sign1 : sign2;
                 result[i] = morphedSign * morphedMag;

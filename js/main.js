@@ -397,6 +397,29 @@ const appServices = {
     handleTrackSolo: eventHandleTrackSolo,
     handleTrackSoloExclusive: eventHandleTrackSoloExclusive,
     handleTrackArm: eventHandleTrackArm,
+    // Plugin Bypass Per-Track (v0.3.73) - per-track effect-chain bypass toggle
+    toggleTrackEffectsBypass: (trackId, fromInteraction = false) => {
+        try {
+            const track = getTrackByIdState(trackId);
+            if (!track) { console.warn(`[appServices.toggleTrackEffectsBypass] Track ${trackId} not found.`); return; }
+            if (typeof track.toggleEffectsBypassed === 'function') {
+                track.toggleEffectsBypassed(fromInteraction === true);
+            } else {
+                console.warn(`[appServices.toggleTrackEffectsBypass] Track ${trackId} has no toggleEffectsBypassed method.`);
+            }
+        } catch (e) { console.error(`[appServices.toggleTrackEffectsBypass] Error for ${trackId}:`, e); }
+    },
+    setTrackEffectsBypass: (trackId, bypassed, fromInteraction = false) => {
+        try {
+            const track = getTrackByIdState(trackId);
+            if (!track) { console.warn(`[appServices.setTrackEffectsBypass] Track ${trackId} not found.`); return; }
+            if (typeof track.setEffectsBypassed === 'function') {
+                track.setEffectsBypassed(bypassed, fromInteraction === true);
+            } else {
+                console.warn(`[appServices.setTrackEffectsBypass] Track ${trackId} has no setEffectsBypassed method.`);
+            }
+        } catch (e) { console.error(`[appServices.setTrackEffectsBypass] Error for ${trackId}:`, e); }
+    },
     handleRemoveTrack: eventHandleRemoveTrack,
     handleTrackArchive: eventHandleTrackArchive,
     handleTrackFreeze: eventHandleTrackFreeze,
@@ -1790,6 +1813,14 @@ function handleTrackUIUpdate(trackId, reason, detail) {
                     const controlsContainer = effectsRackElement.querySelector(`#effectControlsContainer-${track.id}`);
                     if (listDiv && controlsContainer) renderEffectsList(track, 'track', listDiv, controlsContainer);
                  }
+                break;
+            case 'effectsBypassChanged':
+                // Re-render the mixer so the per-track B button reflects the new state.
+                if (mixerElement && typeof updateMixerWindow === 'function') updateMixerWindow();
+                if (typeof showSafeNotification === 'function') {
+                    const label = (track.getEffectsBypassed && track.getEffectsBypassed()) ? 'bypassed (dry)' : 're-enabled (wet)';
+                    showSafeNotification(`Effects ${label} on "${track.name}"`, 1500);
+                }
                 break;
             case 'samplerLoaded':
             case 'instrumentSamplerLoaded':
