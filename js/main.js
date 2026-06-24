@@ -2452,6 +2452,7 @@ async function restoreDesktopBackground() {
                 }
                 currentDesktopVideoObjectUrl = objectUrl;
                 applyDesktopBackground(objectUrl, 'video');
+                if (typeof updateBgStatusIndicator === 'function') updateBgStatusIndicator();
                 return;
             }
             // Blob missing — clear stale video marker, fall through to image fallback
@@ -2484,6 +2485,7 @@ async function restoreDesktopBackground() {
                 }
                 currentDesktopImageObjectUrl = objectUrl;
                 applyDesktopBackground(objectUrl, 'image');
+                if (typeof updateBgStatusIndicator === 'function') updateBgStatusIndicator();
                 return;
             }
         } catch (e) {
@@ -2507,6 +2509,7 @@ async function restoreDesktopBackground() {
                  trimmed.startsWith('https://'));
             if (looksSafe) {
                 applyDesktopBackground(trimmed, 'image');
+                if (typeof updateBgStatusIndicator === 'function') updateBgStatusIndicator();
             } else {
                 console.warn('[restoreDesktopBackground] Stored image bg URL is invalid or uses an unsupported scheme. Clearing marker.');
                 localStorage.removeItem(DESKTOP_BACKGROUND_KEY);
