@@ -50,18 +50,18 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 - **Master Limiter Toggle** - Quick on/off for a brick-wall master limiter to catch overs ✅
 - **Track Reorder Hotkeys** - Alt+ArrowUp / Alt+ArrowDown to move the active track one slot up/down in the track list (v0.3.70) ✅
+- **Mix-Bus Group Presets** - Save the entire group+send+fx+volume state of a group of tracks as a preset you can re-apply (v0.3.72) ✅
 
 ## Current Feature Queue
 
-1. **Mix-Bus Group Presets** - Save the entire group+send+fx+volume state of a group of tracks as a preset you can re-apply
-2. **Plugin Bypass Per-Track** - Quick "bypass" toggle for each track's effect chain to A/B dry vs wet
-3. **Tap Tempo MIDI Clock In** - Use a MIDI controller pad as the tap-tempo source instead of the keyboard `T`
-4. **Track Folder Collapse Memory** - Remember per-project which track folders are collapsed/expanded across reloads
-5. **Click Track Volume Slider** - Independent volume control for the metronome click that doesn't affect the project audio
-6. **Quick-Bounce Markers** - Mark two timeline points and one-click render just the audio between them to a new track
-7. **Drag-to-Reorder Master FX** - Drag master-bus effects in the effects rack to reorder them
-8. **Performance Mode Recall** - Save the current panel layout (open/closed/minimized state for every dockable panel) as a "Performance Mode" you can recall
-9. **Tooltips On Hover For Toolbar Buttons** - Show the keyboard shortcut and a one-line description for every toolbar button on mouseover
+1. **Plugin Bypass Per-Track** - Quick "bypass" toggle for each track's effect chain to A/B dry vs wet
+2. **Tap Tempo MIDI Clock In** - Use a MIDI controller pad as the tap-tempo source instead of the keyboard `T`
+3. **Track Folder Collapse Memory** - Remember per-project which track folders are collapsed/expanded across reloads
+4. **Click Track Volume Slider** - Independent volume control for the metronome click that doesn't affect the project audio
+5. **Quick-Bounce Markers** - Mark two timeline points and one-click render just the audio between them to a new track
+6. **Drag-to-Reorder Master FX** - Drag master-bus effects in the effects rack to reorder them
+7. **Performance Mode Recall** - Save the current panel layout (open/closed/minimized state for every dockable panel) as a "Performance Mode" you can recall
+8. **Tooltips On Hover For Toolbar Buttons** - Show the keyboard shortcut and a one-line description for every toolbar button on mouseover
 
 ## Workflow
 

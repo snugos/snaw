@@ -824,6 +824,12 @@ export function initializePrimaryEventListeners(appContext) {
                     localAppServices.openMasterLimiterPanel?.();
                 } catch(e) { console.error('[Menu] Master Limiter error:', e); }
             },
+            menuMixBusGroupPresets: () => {
+                console.log('[Menu] Mix-Bus Group Presets clicked');
+                try {
+                    localAppServices.openMixBusGroupPresetsPanel?.();
+                } catch(e) { console.error('[Menu] Mix-Bus Group Presets error:', e); }
+            },
             menuWebAudioPluginHost: () => {
                 console.log('[Menu] WebAudio Plugin Host clicked');
                 try {

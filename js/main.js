@@ -126,6 +126,8 @@ import { initSendsOverviewPanel, openSendsOverviewPanel, isSendsOverviewPanelAct
 import { initProjectSearch, openProjectSearchPanel, isProjectSearchPanelOpen, searchProject } from './ProjectSearch.js';
 // Master Limiter - brick-wall master limiter toggle (Tone.Limiter at the end of the master chain)
 import { initMasterLimiter, openMasterLimiterPanel, isMasterLimiterEnabled } from './MasterLimiter.js';
+// Mix-Bus Group Presets - save & re-apply whole-mix state across a set of tracks (volume, pan, mute/solo, color, effects, sends, detune)
+import { initMixBusGroupPresets, openMixBusGroupPresetsPanel, listMixBusGroupPresets, getMixBusGroupPreset, captureMixBusGroupPreset, applyMixBusGroupPreset, deleteMixBusGroupPreset } from './MixBusGroupPresets.js';
 // Guitar Tab Editor
 import { initGuitarTabEditor, openGuitarTabEditor } from './GuitarTabEditor.js';
 import { initTrackColorPanel, openTrackColorPanel } from './TrackColorPanel.js';
@@ -1056,6 +1058,14 @@ const appServices = {
     // Master Limiter - brick-wall limiter toggle panel
     openMasterLimiterPanel,
     isMasterLimiterEnabled,
+    // Mix-Bus Group Presets - save & re-apply whole-mix state across a set of tracks (v0.3.72)
+    initMixBusGroupPresets,
+    openMixBusGroupPresetsPanel,
+    listMixBusGroupPresets,
+    getMixBusGroupPreset,
+    captureMixBusGroupPreset,
+    applyMixBusGroupPreset,
+    deleteMixBusGroupPreset,
     // Master Limiter audio.js accessors — the MasterLimiter.js module calls these
     // to wire/unwire the limiter into the master effect chain (v0.3.65 — Master Limiter feature).
     getMasterLimiterNode,
@@ -2038,6 +2048,8 @@ async function initializeSnugOS() {
         if (typeof initProjectSearch === 'function') initProjectSearch(appServices);
         // Master Limiter initialization (brick-wall limiter toggle)
         if (typeof initMasterLimiter === 'function') initMasterLimiter(appServices);
+        // Mix-Bus Group Presets initialization (v0.3.72)
+        if (typeof initMixBusGroupPresets === 'function') initMixBusGroupPresets(appServices);
         // WebAudio Plugin Host initialization (load AudioWorklet processors into track chains)
         if (typeof initWebAudioPluginHost === 'function') initWebAudioPluginHost(appServices);
         // After the timeline renders existing tracks, paint note indicators for any
