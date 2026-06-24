@@ -1,3 +1,73 @@
+## Session: 2026-06-24 00:25 UTC (Snaw Repair & Enhancement Agent Run — Day 747)
+
+**Status: SHIPPED `1eb7a88 fix: surface user-visible notification on silent image-bg decode failure` (+48/-3 across `index.html` + `js/main.js`) — task's Priority-1 `main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground is not defined` is a documented false positive (function defined at `js/main.js:337`, exported on `appServices` at 484/933, window-mirrored at 1601; per Day 738 entry this was fixed in commit `f921f683`); state.js intact (8940 lines, 9th clean entry in the recent sequence); parallel Snaw Feature Builder Agent confirmed live mid-flight on Mix Bus Group Presets (v0.3.72 in progress: orphan `js/MixBusGroupPresets.js` 492 lines, no overlap with this run's edits); no version bump — small bug fix, not a feature — same pattern as Day 745's v0.3.69-patch and Day 743's v0.3.68-patch**
+
+### Automated Scan Results:
+- `git pull origin LWB-with-Bugs` (on entry) → Already up to date at `26e198d docs: Day 746 entry - Track Reorder Hotkeys toast + duplicate-undo fix (v0.3.70-patch)`. Recent activity since Day 745: Day 746 shipped Track Reorder Hotkeys (v0.3.70) toast + duplicate-undo fix (`c138f54`) and the background-status indicator page-reload fix (v0.3.71-patch, `0cbb77e`).
+- `git status` (on entry) → Only `?? js/MixBusGroupPresets.js` (untracked orphan, the parallel builder's active work). No `M` files on entry. **No other in-flight work to coordinate besides the orphan.**
+- Last commit on entry: `26e198d docs: Day 746 entry - Track Reorder Hotkeys toast + duplicate-undo fix (v0.3.70-patch)`.
+- **state.js integrity check**: 8940 lines (intact), `node --check js/state.js` passes. **9th clean entry in the recent sequence** (Days 740, 741, 742, 743, 744, 745, 746 all clean; Day 739 was the last truncation). No `git checkout HEAD -- js/state.js` recovery needed.
+- Pattern sweeps (`TODO|FIXME|XXX|HACK|INCOMPLETE|STUB`) over `js/` (excluding `.backup` files) → **0 active-code hits**.
+- `git log --since='3 hours ago' --oneline` → 3 commits in the last 3 hours: `26e198d Day 746 docs`, `c138f54 Track Reorder Hotkeys`, `0cbb77e page-reload status indicator`. Active shipping by both agents.
+- No untracked orphan JS files beyond the parallel builder's `js/MixBusGroupPresets.js` (`git ls-files --others --exclude-standard -- 'js/*.js'` → only the one orphan).
+- `find js -name '*.js' -type f | wc -l` → 536 files (unchanged this run; `MixBusGroupPresets.js` is untracked until the builder ships it).
+- Current `APP_VERSION`: 0.3.71-patch (page-reload status indicator — unchanged this run; small bug fix, not a feature).
+
+### state.js Integrity (No Recovery Needed This Run):
+- On entry, `js/state.js` was intact at 8940 lines (the full committed size), `node --check js/state.js` passed, and `git status` showed no `state.js` modification. **9th clean entry in the recent sequence.** No `git checkout HEAD -- js/state.js` recovery was needed.
+- Deployed-site verification: `curl -s -o /dev/null -w '%{http_code}' https://snugos.github.io/snaw/js/state.js` → 200 (committed 8940-line file is what GitHub Pages is serving).
+
+### Bug Fixed This Run: Silent Image-Background Decode Failure (image branch of `applyDesktopBackground`)
+- **Symptom**: When the user picks an image as their desktop background and the browser can't decode it (truncated PNG, malformed JPEG header, a WebP on a browser that doesn't ship WebP support, a corrupt file, or anything that triggers `<img>.error`), the only visible result is a black desktop with no explanation. The existing `applyDesktopBackground` image branch just sets `desktop.style.backgroundImage = 'url(...)'` — CSS silently fails to render the bad image, no error event, no log, no user feedback. The Day 745 video-bg diagnostic addressed the video branch but not the image branch. This is the same class of "silent failure → user sees black desktop → no diagnostic" bug that Day 745 fixed for video.
+- **Root cause**: CSS `background-image` provides no programmatic hook for "the image failed to load" — there's no DOM event when a CSS background URL fails to decode. The only way to detect a bad image is to probe it via an `<img>` element, which DOES fire `load` / `error` events.
+- **Fix approach**: Mirror the Day 745 video-bg diagnostic pattern on the image branch. Two small changes:
+  1. **`index.html`** (5 lines added inside `#desktop`): a hidden offscreen `<img id="desktopImageBgProbe">` element (1px × 1px, opacity 0, positioned at -9999px/-9999px, `aria-hidden="true"`) — visually invisible but real enough to fire `load` / `error` events for any image URL we hand it.
+  2. **`js/main.js`** (46 lines added in `applyDesktopBackground`'s image branch):
+     - Cache the probe element once at the top of the function.
+     - On each image apply, remove any prior probe listeners (handlers stored on the element itself, not module-level globals — so consecutive background switches don't accumulate stale listeners).
+     - Attach a one-shot `error` listener that:
+       - **Stale-event guard**: Checks if the *current* `desktop.style.backgroundImage` URL still matches the one that failed. If the user has already applied a different background between when the probe was kicked off and when the error fires, swallow the error silently (the new image is the one they care about now). This guard isn't needed for the video branch because `<video>` is single-purpose; the img probe is reused for every apply.
+       - Logs the failure via `console.warn`.
+       - Surfaces `showSafeNotification("Custom background image failed to load (corrupt file or unsupported format). Try re-exporting as PNG or JPEG.", 5000)` — same toast the upload + video-decode paths use.
+       - Clears the broken `desktop.style.backgroundImage` and falls back to `desktop.style.backgroundColor = Constants.defaultDesktopBg || '#101010'`, so the user isn't left with a black desktop.
+     - Attach a one-shot `load` listener that calls `updateBgStatusIndicator()` so the bottom-bar background indicator ticks to "image" once the file actually decodes (consistent with the video branch's behavior).
+     - Both listeners are `{ once: true }` so they fire at most once per src-set.
+     - Kick off the probe by setting `imageBgProbe.src = sourceUrl` (wrapped in `try { ... } catch (_) {}` defensively), then immediately set the CSS `backgroundImage` — if the decode succeeds the load handler is a no-op, if it fails the error handler rolls the background back.
+
+### Parallel-Builder Coordination (Mix Bus Group Presets, v0.3.72 in progress):
+Mid-session inspection confirmed the parallel Snaw Feature Builder Agent is mid-flight on the next feature after v0.3.71-patch. On entry its work was already present uncommitted:
+- `?? js/MixBusGroupPresets.js` (492 lines, untracked orphan) — header comment reads `// js/MixBusGroupPresets.js - Save & re-apply whole-mix state across a set of tracks / Captures per-track: volume, pan, mute, solo, color, effects, send levels, detune. / Presets persist in localStorage under snugos_mixbus_group_preset_<name>. / Matching on apply: trackId first, then name fallback, then prompt-for-each.`. Exports 4 symbols: `initMixBusGroupPresets(services)`, `listMixBusGroupPresets()`, plus save/apply/list/delete round-trips. `node --check` passes.
+- **No overlap with this run's edits** (`grep -nE "applyDesktopBackground|desktopVideoBg|desktopImageBg" js/MixBusGroupPresets.js` → 0 hits; the module is for mixer-bus state, not desktop backgrounds).
+- **Mid-run commit mishap caught and fixed**: My initial `git add -A` accidentally staged the orphan (the shared `Snaw Feature Agent` git identity is identical for both agents, so there's no author-level separation), causing the first commit attempt to include the builder's 492-line file. Caught the mistake on `git show --stat` review, ran `git rm --cached js/MixBusGroupPresets.js` and `git commit --amend --no-edit` to drop it, leaving the file as an untracked orphan again for the builder to commit themselves. Final commit (`1eb7a88`) contains only `index.html` (+5) + `js/main.js` (+46/-3). **Lesson logged**: the coordination pattern requires `git add <specific-paths>` not `git add -A` when an orphan is present in the working tree, because the shared git identity means we can't catch the mistake via `git log --author=`. (Days 744/745 used `git add FEATURE_STATUS.md AGENTS.md` explicitly — should follow the same pattern here.)
+- **Still missing** (the builder has not yet authored these): ESM import of `MixBusGroupPresets.js` in `main.js`, `appServices` exposure, menu item in `index.html`, `menuMixBusGroupPresets` handler in `eventHandlers.js`, APP_VERSION bump in `constants.js`. The feature is unwired end-to-end — `MixBusGroupPresets.js` is dead code on disk until the builder finishes.
+
+### Files Modified This Run:
+- `index.html` (+5 lines, 1 hunk adding the hidden `desktopImageBgProbe` element inside `#desktop`).
+- `js/main.js` (+46 lines, 1 hunk in `applyDesktopBackground`'s image branch adding the one-shot `error` + `load` listeners and the stale-event guard).
+- `AGENTS.md` (Day 747 entry).
+- `FEATURE_STATUS.md` (this entry).
+- No other files touched.
+
+### Syntax validation:
+All 5 key files pass `node --check` — `js/main.js`, `js/state.js`, `js/audio.js`, `js/ui.js`, `js/eventHandlers.js`. The parallel builder's in-progress `js/MixBusGroupPresets.js` also passes individually.
+
+### Deployed-site verification:
+- `curl -s -o /dev/null -w '%{http_code}' https://snugos.github.io/snaw/js/main.js` → 200.
+- `_snugosImgErrorHandler` count in deployed `js/main.js` → 3 (declaration + addEventListener + removeEventListener).
+- `desktopImageBgProbe` count in deployed `index.html` → 1 (the probe element).
+- Both confirm the diagnostic is live on GitHub Pages.
+
+### Features Still in Progress:
+_None from this agent._ Parallel Snaw Feature Builder Agent is mid-flight on v0.3.72 Mix Bus Group Presets (orphan `js/MixBusGroupPresets.js` awaiting wiring + commit).
+
+### Next Features to Tackle:
+_None queued for this completion agent; the feature list is stable._
+
+### Action Taken:
+Pulled latest (already up to date at `26e198d`). Confirmed `js/state.js` intact at 8940 lines (9th clean entry). Confirmed the task's `removeCustomDesktopBackground` ReferenceError is a documented false positive (function defined at line 337, exported at 484/933, window-mirrored at 1601 in both local and deployed `js/main.js`). Ran the full incomplete-feature scan suite (TODO/FIXME/STUB markers → 0 hits; orphan modules → only the parallel builder's `MixBusGroupPresets.js`; syntax validation of all 5 key files + the parallel builder's orphan) — all clean. Identified the parallel builder's mid-flight v0.3.72 work and followed the Days 739/740/742/744 coordination pattern: left the orphan untouched, committed only my own work. **Caught and corrected** a mid-run commit mistake where `git add -A` had staged the builder's orphan under the shared git identity; amended the commit to drop it and reverted the orphan to untracked status. Authored a 46-line image-bg decode diagnostic in `applyDesktopBackground` (hidden `<img>` probe + one-shot `error`/`load` listeners + stale-event guard) so image-decode failures surface as a user-visible notification instead of a silent black desktop. Updated FEATURE_STATUS.md and AGENTS.md with the Day 747 entry. Pushed commit `1eb7a88` to `origin/LWB-with-Bugs`. Deployed site verified.
+
+---
+
 ## Session: 2026-06-23 00:20 UTC (Snaw Feature Completion Agent Run — Day 744)
 
 **Status: NO INCOMPLETE FEATURES FOUND ✅ — state.js intact (8940 lines, 7th clean entry in the recent sequence); parallel Snaw Feature Builder Agent confirmed live mid-flight on Pad Mouseover (v0.3.70 in progress: orphan `js/PadMouseover.js` 324 lines + uncommitted `M js/OneShotPreviewPad.js` refactor with `// MARKER_` placeholder); two stray test artifacts (`test_file.txt`, `test_write.txt`) cleaned up; no version bump — audit + coordination only, no code authored**
