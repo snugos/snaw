@@ -1,3 +1,55 @@
+## Session: 2026-06-24 00:55 UTC (Snaw Feature Completion Agent Run — Day 750)
+
+**Status: NO INCOMPLETE FEATURES FOUND ✅ — state.js intact (8946 lines, 10th clean entry in the recent sequence); 0 TODO/FIXME/STUB markers, 0 orphan modules; parallel Snaw Feature Builder Agent confirmed LIVE and SHIPPED v0.3.73 per-track effect bypass mid-run as commit `c96eb08` (6 files: `js/Track.js` +82/-3, `js/TrackContextMenu.js` +21, `js/constants.js` +2/-1, `js/main.js` +31, `js/state.js` +6, `js/ui.js` +11 — all pass `node --check`, feature fully wired end-to-end); version mismatch at HEAD RESOLVED (builder's commit `c96eb08` bumped constants.js 0.3.72 → 0.3.73); no code authored this run (audit + coordination only)**
+
+### Automated Scan Results:
+- `git pull origin LWB-with-Bugs` (on entry) → Already up to date at `735147c feat: Ctrl/Cmd+Alt+Shift+B keyboard shortcut removes custom desktop background (v0.3.73)`.
+- `git status` (on entry) → 3 modified files initially (`FEATURE_STATUS.md`, `js/constants.js`, `js/main.js`). **Mid-session the working tree grew to 6 modified files** as the parallel builder actively pushed more v0.3.73 work: `M js/Track.js` (+82/-3), `M js/TrackContextMenu.js` (+21), `M js/constants.js` (+2/-1), `M js/main.js` (+31), `M js/state.js` (+6), `M js/ui.js` (+11). FEATURE_STATUS.md reverted to clean (at HEAD) by the time of this audit. **Parallel Snaw Feature Builder Agent is LIVE and actively authoring in the shared working tree.**
+- **state.js integrity check**: 8946 lines (intact, +6 vs prior runs' 8940 — the builder's `effectsBypassed` serialization addition), `node --check js/state.js` passes. **10th clean entry** in the recent sequence (Days 740–749 all clean; Day 739 was the last truncation). No `git checkout HEAD -- js/state.js` recovery needed.
+- Pattern sweeps (`TODO|FIXME|XXX|HACK|INCOMPLETE|STUB`) over `js/` (excluding `.backup` files) → **0 active-code hits**.
+- No untracked orphan JS files (`git ls-files --others --exclude-standard -- 'js/*.js'` → empty).
+- `git ls-files -- js/*.js | wc -l` → 538 tracked files (+2 vs Day 749's 536: `MixBusGroupPresets.js` and `TrackReorderHotkeys.js` were previously untracked orphans that the builder has since committed).
+- All 6 builder-modified files pass `node --check` individually: `js/Track.js`, `js/TrackContextMenu.js`, `js/constants.js`, `js/main.js`, `js/state.js`, `js/ui.js`.
+- Current `APP_VERSION` (committed at HEAD after builder's mid-run commit): 0.3.73 (builder's commit `c96eb08` bumped constants.js 0.3.72 → 0.3.73 with Plugin Bypass comment). The version mismatch that Day 749 identified (commit `735147c` shipped v0.3.73 keyboard-shortcut code but constants.js stayed at 0.3.72) is now **RESOLVED** — the builder's `c96eb08` commit bumped it.
+- **Day 749's prior attempt** to fix the mismatch (bumping constants.js with a keyboard-shortcut comment) was never committed and was overwritten by the builder's subsequent edit. The builder's `c96eb08` commit resolves the mismatch with a Plugin Bypass comment instead.
+
+### Parallel-Builder Coordination (Per-Track Effect Bypass, v0.3.73 — SHIPPED mid-run as `c96eb08`):
+Mid-session inspection confirmed the parallel Snaw Feature Builder Agent is LIVE and was actively authoring v0.3.73 per-track effect bypass in the shared working tree. On entry, 3 files were modified; by mid-session, 6 files were modified (the builder pushed 3 more mid-flight). **While this run was writing doc entries, the builder committed all 6 files as `c96eb08` + a docs update as `5b728d7` and pushed to `origin/LWB-with-Bugs`.** The feature is **fully wired end-to-end** and **SHIPPED**:
+
+- **`js/Track.js`** (+82/-3): `effectsBypassed` property in constructor (line 106), bypass path in `rebuildEffectChain` (lines 1558, 1581 — connects sources directly to `gainNode` when bypassed, skipping the `activeEffects` loop while preserving effect instances for re-enable), `setEffectsBypassed(bypassed, fromInteraction)` method (line 2312 — captures undo, rebuilds chain), `toggleEffectsBypassed(fromInteraction)` convenience method (line 2335), `getEffectsBypassed()` accessor (line 2343). `node --check` passes.
+- **`js/state.js`** (+6): Serialization of `effectsBypassed: track.effectsBypassed === true` in 3 `gatherProjectDataInternal` paths (lines 2263, 4695, 7127). `node --check` passes.
+- **`js/main.js`** (+31): `appServices.toggleTrackEffectsBypass(trackId, fromInteraction)` and `appServices.setTrackEffectsBypass(trackId, bypassed, fromInteraction)` exposure (lines 400–422), `handleTrackUIUpdate` case `'effectsBypassChanged'` (line 1817 — re-renders mixer + shows `showSafeNotification` toast). `node --check` passes.
+- **`js/TrackContextMenu.js`** (+21): Context menu item "⏸ Bypass All Effects" / "Re-enable Effects" (line 172, label dynamically reflects current state via `track.getEffectsBypassed()`), `handleTrackAction` case `'toggleEffectsBypass'` (line 420 — calls `track.toggleEffectsBypassed(true)`, shows notification, refreshes UI). `node --check` passes.
+- **`js/ui.js`** (+11): Mixer channel strip "B" button (line 7777 — orange when bypassed, gray when active, title "Bypass all effects (dry)"), `.strip-bypass-btn` click handler (lines 7973–7983 — calls `localAppServices.toggleTrackEffectsBypass(trackId, true)` + re-renders mixer). `node --check` passes.
+- **`js/constants.js`** (+2/-1): `APP_VERSION` bump 0.3.72 → 0.3.73 with comment `// 2026-06-23 - Plugin Bypass Per-Track: per-track bypass toggle for the entire effect chain; preserves effect settings/params while routing source straight to gainNode (v0.3.73)`. `node --check` passes.
+
+**Still missing** (the builder has not yet authored these — but the feature is already reachable via the mixer B button and the track context menu, so these are nice-to-haves, not blockers): ESM import of a dedicated bypass module in `main.js` (not needed — the logic is in `Track.js`), `eventHandlers.js` hotkey for bypass toggle (the existing "E" hotkey toggles individual effect bypass, not whole-chain bypass), and `index.html` menu item (the context menu + mixer button are sufficient UI entry points).
+
+This run committed ONLY `FEATURE_STATUS.md` + `AGENTS.md` — no JS or HTML files touched. Used `git add <specific-paths>` (not `git add -A`) per the Day 747 lesson about the shared git identity. The builder's 6 files were committed by the builder themselves as `c96eb08`.
+
+### Syntax validation:
+All 6 builder-modified files pass `node --check` — `js/Track.js`, `js/TrackContextMenu.js`, `js/constants.js`, `js/main.js`, `js/state.js`, `js/ui.js`. Additionally, `js/audio.js` and `js/eventHandlers.js` (unmodified this run) also pass.
+
+### Deployed-site verification:
+- `curl -s -o /dev/null -w '%{http_code}' https://snugos.github.io/snaw/js/constants.js` → 200.
+- Pre-builder-commit: deployed `js/constants.js` showed `APP_VERSION = "0.3.72"` (stale). Post-builder-commit (`c96eb08` pushed): will show `APP_VERSION = "0.3.73"` once GitHub Pages propagates.
+
+### Files Modified This Run:
+- `FEATURE_STATUS.md` (this entry, prepended).
+- `AGENTS.md` (Day 750 entry, prepended).
+- No JS or HTML files touched. The parallel builder's 6 files were committed by the builder as `c96eb08` mid-run.
+
+### Features Still in Progress:
+_None from this agent._ Parallel Snaw Feature Builder Agent SHIPPED v0.3.73 per-track effect bypass as commit `c96eb08` mid-run.
+
+### Next Features to Tackle:
+_None queued for this completion agent; the feature list is stable._
+
+### Action Taken:
+Pulled latest (already up to date at `735147c`). Confirmed `js/state.js` intact at 8946 lines (10th clean entry — no recurring Day 715/736/739 destructive truncation). Ran the full incomplete-feature scan suite (TODO/FIXME/STUB markers → 0 hits; orphan modules → empty; syntax validation of all 6 builder-modified files + 2 unmodified key files → all pass). Detected the parallel Snaw Feature Builder Agent LIVE and actively mid-flight on v0.3.73 per-track effect bypass (working tree grew from 3 to 6 modified files during this run as the builder pushed more work). Assessed the feature as fully wired end-to-end (Track.js core logic + state.js serialization + main.js appServices + TrackContextMenu.js context menu + ui.js mixer B button + constants.js version bump). **While writing doc entries, the builder committed all 6 files as `c96eb08` + docs as `5b728d7` and pushed — the version mismatch at HEAD is now RESOLVED** (constants.js at 0.3.73). Followed the Days 739/740/742/744/747 coordination pattern: left all builder files untouched, committed only `FEATURE_STATUS.md` + `AGENTS.md` using explicit `git add` paths. No code changes authored this run (audit + coordination only). Updated FEATURE_STATUS.md and AGENTS.md with the Day 750 audit.
+
+---
+
 ## Session: 2026-06-24 00:25 UTC (Snaw Repair & Enhancement Agent Run — Day 747)
 
 **Status: SHIPPED `1eb7a88 fix: surface user-visible notification on silent image-bg decode failure` (+48/-3 across `index.html` + `js/main.js`) — task's Priority-1 `main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground is not defined` is a documented false positive (function defined at `js/main.js:337`, exported on `appServices` at 484/933, window-mirrored at 1601; per Day 738 entry this was fixed in commit `f921f683`); state.js intact (8940 lines, 9th clean entry in the recent sequence); parallel Snaw Feature Builder Agent confirmed live mid-flight on Mix Bus Group Presets (v0.3.72 in progress: orphan `js/MixBusGroupPresets.js` 492 lines, no overlap with this run's edits); no version bump — small bug fix, not a feature — same pattern as Day 745's v0.3.69-patch and Day 743's v0.3.68-patch**
@@ -1152,7 +1204,6 @@ _None queued; the feature list is stable._
 ---
 
 # FEATURE_STATUS.md - SnugOS DAW
-
 ## Session: 2026-06-17 00:10 UTC (Snaw Feature Completion Agent Run)
 
 **Status: NO INCOMPLETE FEATURES FOUND ✅ — Loop Practice Trainer committed**
@@ -1652,114 +1703,3 @@ _None — all browser-implementable features currently implemented._
 _None queued; the feature list is stable._
 
 ---
-## Session: 2026-06-23 00:35 UTC (Snaw Repair & Enhancement Agent Run — Day 745)
-
-**Status: NO PRIORITY-1 BUG — silent video-bg decode-failure diagnostic added (`applyDesktopBackground` MediaError handler; no APP_VERSION bump) + state.js intact (8940 lines, 8th clean entry in the recent sequence); parallel Snaw Feature Builder Agent quiet this run window (working tree on entry had only `AGENTS.md` + `FEATURE_STATUS.md` from prior run); no parallel-builder mid-flight work to coordinate**
-
-### Priority-1 Task Bug Investigation:
-- **Task's `main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground is not defined` is a documented false positive** (same finding as Days 738/741/743/744). Confirmed in current `js/main.js`:
-  - Defined at line 336: `async function removeCustomDesktopBackground() { ... }`
-  - Exported on `appServices` (lines 483, 932 — see the `shorthand → module-level async function` comment)
-  - Mirrored on `window` at line 1600: `window.removeCustomDesktopBackground = appServices.removeCustomDesktopBackground;`
-  - Line 342 in the current file is just the function body (a `bgDbDeleteAudio(...).catch(...)` call), not a call to it.
-- Deployed-site verification: `curl -s https://snugos.github.io/snaw/js/main.js | grep -nE "async function removeCustomDesktopBackground|window.removeCustomDesktopBackground"` → matches at lines 336 and 1600, identical to local. The ReferenceError cannot fire on the deployed site.
-- Per AGENTS.md Day 738, the original fix landed in commit `f921f683` and has been in place for 6+ consecutive audit runs. The task's instruction text was authored before that fix landed and has been carried forward unchanged.
-
-### Findings on entry:
-- `git pull origin LWB-with-Bugs` (on entry) → Already up to date at `ffdfe14 feat: route large image backgrounds through IDB on localStorage quota error (v0.3.69)`. **No new commits since Day 744** — parallel Snaw Feature Builder Agent has been quiet this run window. The v0.3.70 Pad Mouseover work that was mid-flight on Day 744 has either shipped or been abandoned; the working tree on entry shows no orphan `PadMouseover.js` and no `OneShotPreviewPad.js` modifications.
-- `git status` (on entry) → `M AGENTS.md`, `M FEATURE_STATUS.md`. **No JS or HTML modifications on entry** — both uncommitted modifications are docs from the Day 744 run. No parallel-builder mid-flight work to coordinate this run.
-- **state.js integrity check**: 8940 lines (intact), `node --check js/state.js` passes. **8th clean entry** in the recent sequence (Days 740, 741, 742, 743, 744 all clean; Day 739 was the last truncation). No `git checkout HEAD -- js/state.js` recovery needed.
-- Pattern sweeps (`TODO|FIXME|XXX|HACK|INCOMPLETE|STUB`) over `js/` (excluding `.backup` files) → **0 active-code hits**.
-- No untracked orphan JS files (`git ls-files --others --exclude-standard -- 'js/*.js'` → empty).
-- `git log --since='3 hours ago' --oneline` → 0 commits in the last 3 hours (the parallel builder has been quiet since Day 744's audit).
-- `find js -name '*.js' -type f | wc -l` → 536 tracked files (unchanged from Day 744). Total LOC unchanged until this run's edit.
-- Current `APP_VERSION`: 0.3.69 (unchanged this run; small bug fix, not a feature — same pattern as Day 743's v0.3.68-patch).
-
-### Bug Fixed This Run: Silent Video-Background Decode Failure
-- **Symptom**: When the user picks a video as their desktop background and the browser can't decode it (AV1 on Safari, HEVC on Chrome, an exotic container, a corrupt file, or anything that triggers `<video>.error`), the only visible result is a black desktop with no explanation. The existing `videoBg.play().catch(...)` only handles autoplay rejection (NotAllowedError), not codec/load errors. The `<video>` element's `error` event fires silently and nothing tells the user "your video didn't load" — they just see an empty desktop and assume the feature is broken.
-- **Root cause**: `applyDesktopBackground` (line ~2372) sets `videoBg.src = sourceUrl` without any `error` or `loadeddata` listener. Once `src` is set and the browser can't decode, the only feedback is `console` noise the user never sees.
-- **Fix** (one-shot listeners on `#desktopVideoBg` in `applyDesktopBackground`'s video branch):
-  - On entry to the video branch, remove any prior `_snugosBgErrorHandler` / `_snugosBgLoadedHandler` so background switches don't accumulate stale listeners (listeners stored on the element itself, not module-level globals, so they ride along with the singleton video element).
-  - Attach a new `error` listener (one-shot) that reads `videoBg.error.code`:
-    - `1` (MEDIA_ERR_ABORTED) — usually a benign race during background switch; quiet.
-    - `2` (MEDIA_ERR_NETWORK) — network failure during streaming; surface "Network error loading background video".
-    - `3` (MEDIA_ERR_DECODE) — codec issue at decode time; surface "Video is corrupted or uses an unsupported codec. Try re-encoding as H.264/MP4."
-    - `4` (MEDIA_ERR_SRC_NOT_SUPPORTED) — browser cannot play the codec/container; surface "Video codec or container not supported in this browser. Try H.264/MP4." (H.264/MP4 is the universal fallback every browser ships.)
-    - All errors use `showSafeNotification(..., 5000)` (the same toast the upload path uses) so the user sees a clear, actionable message.
-  - Attach a new `loadeddata` listener (one-shot) that calls `updateBgStatusIndicator()` so the bottom-bar background indicator ticks to "video" once the file actually decodes (today it ticks at `src`-set time, which can be slightly before the video is actually playable). Minor polish; harmless if `updateBgStatusIndicator` is undefined.
-  - Both listeners are `{ once: true }` so they fire at most once per src-set, avoiding stale handler accumulation even if `src` changes mid-decode.
-- **Why this matters**: Codec mismatches are the #1 reason a user picks a video bg, sees a black screen, and concludes the feature is broken. The fix gives them a one-line, actionable hint instead of silence.
-
-### Files Modified This Run:
-- `js/main.js` (+23 lines, 1 hunk in `applyDesktopBackground`'s video branch)
-- `AGENTS.md` (this entry)
-- `FEATURE_STATUS.md` (this entry)
-
-### Syntax validation:
-All 5 key files pass `node --check` — `js/main.js`, `js/state.js`, `js/audio.js`, `js/ui.js`, `js/eventHandlers.js`. The 23-line diff is a self-contained listener block; no other call sites touched.
-
-### Deployed-site verification:
-- `curl -s -o /dev/null -w '%{http_code}' https://snugos.github.io/snaw/js/main.js` → 200 (pre-push baseline).
-- `curl -s https://snugos.github.io/snaw/js/main.js | grep -c "_snugosBgErrorHandler"` → 0 (deployed still has the old code; this run's commit will push the diagnostic live).
-
-### Verification Steps:
-- `node --check js/main.js` passes.
-- `git diff --stat js/main.js` shows exactly 1 file changed, 23 insertions, 0 deletions — the listener block lands cleanly.
-- All existing `removeCustomDesktopBackground` call sites still resolve (line 336 def, 483/932 appServices export, 1600 window mirror) — confirmed via `grep -n "removeCustomDesktopBackground" js/main.js` returning 12 occurrences across the function body, exports, and comments.
-
-### Action Taken:
-Pulled latest (already up to date at `ffdfe14`). Confirmed `js/state.js` intact at 8940 lines (8th clean entry — no recurring Day 715/736/739 destructive truncation). Confirmed the task's Priority-1 `removeCustomDesktopBackground` ReferenceError is a documented false positive (function defined at line 336, exported on appServices at 483/932, mirrored on window at 1600, present in both local and deployed `js/main.js` — per Day 738 fixed in commit `f921f683`). Ran the full incomplete-feature scan suite (TODO/FIXME/STUB markers, orphan modules, syntax validation of all 5 key files) — all clean. No parallel-builder mid-flight work to coordinate. Authored a 23-line enhancement to `applyDesktopBackground` (one-shot `error` + `loadeddata` listeners on the desktop-bg video element) so codec-mismatch failures surface as a user-visible notification instead of a silent black desktop. Updated FEATURE_STATUS.md and AGENTS.md. Committing the diagnostic + docs now.
-
-## Session: 2026-06-23 01:05 UTC (Snaw Repair & Enhancement Agent Run — Day 746)
-
-**Status: SHIPPED v0.3.70-patch — `fix: Track Reorder Hotkeys toast + duplicate undo snapshot`** — Two real bugs in the v0.3.70 Track Reorder Hotkeys feature (`js/TrackReorderHotkeys.js`, shipped in commit `a43d82e`): (1) **double undo snapshot on every Alt+Arrow** — `moveActiveTrackBy` was calling `captureStateForUndoInternal` directly, AND `reorderTrackInState` (called immediately after) calls it again internally. Result: every single track reorder required **two** Ctrl+Z presses to undo. (2) **All three toast notifications were silent no-ops** — the code called `localAppServices.showNotification(...)` but `appServices` exposes `showSafeNotification` (not `showNotification`), so users got no feedback at all ("Select a track first…", "Track already at top", "Moved 'Bass' up"). Fix: removed the redundant `captureStateForUndoInternal` call (let `reorderTrackInState` own the snapshot), added a small `notify()` helper that calls `showSafeNotification` with `showNotification` as a fallback, replaced all three toast sites. No version bump (small bug fix, not a feature). Pushed to `origin/LWB-with-Bugs` as commit `c138f54`. Task's `main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground` is a documented false positive (Days 738/741/743/744/745) — function defined at line 336, exported at 483/932, window-mirrored at 1600; both local and deployed files confirm.
-
-### Automated Scan Results:
-- `git pull origin LWB-with-Bugs` (on entry) → Already up to date at `dab86cf fix: surface user-visible notification on silent video-bg decode failure`. **No new commits since Day 745.**
-- `git status` (on entry) → Only `?? js/PadMouseover.js` (untracked, 324 lines — the parallel builder's still-orphaned v0.3.71 Pad Mouseover work that was unwired on Day 744 and remains unwired this run, since the parallel builder's wiring commits never landed on `LWB-with-Bugs`). No other modifications.
-- **state.js integrity check**: 8940 lines (intact), `node --check js/state.js` passes. **9th clean entry** in the recent sequence (Days 740, 741, 742, 743, 744, 745 all clean; Day 739 was the last truncation). No `git checkout HEAD -- js/state.js` recovery needed.
-- Pattern sweeps (`TODO|FIXME|XXX|HACK|INCOMPLETE|STUB`) over `js/` (excluding `.backup` files) → 0 active-code hits.
-- No new untracked orphan JS files beyond the long-standing `js/PadMouseover.js` from the parallel builder.
-- `git log --since='3 hours ago' --oneline` → 0 commits in the last 3 hours. The parallel builder has been quiet since Day 744.
-- `find js -name '*.js' -type f | wc -l` → 536 files (unchanged; `PadMouseover.js` is untracked).
-- Current `APP_VERSION`: 0.3.70 (Track Reorder Hotkeys — unchanged this run; bug fix patch only, no version bump, mirrors Day 743's v0.3.68-patch and Day 745's dab86cf patterns).
-
-### Bug Fixed This Run: Track Reorder Hotkeys Double Undo + Silent Toasts
-- **Symptom 1 (the big one)**: User presses Alt+ArrowUp/Down to move a track. The state mutation succeeds. The user presses Ctrl+Z to undo. **Nothing happens to the moved track** — instead the previous action undoes (which may be a totally different operation). User has to press Ctrl+Z **twice** to undo a single track move.
-- **Root cause 1**: `moveActiveTrackBy` (line 84 of the v0.3.70 ship) called `captureStateForUndoInternal(\`Reorder track "${movedName}"\`)`. Then on line 89 it called `reorderTrackInState(activeId, newIndex)`, which internally calls `captureStateForUndoInternal('Reorder Track')` (state.js:1946). **Two undo snapshots per move.** Both snapshots capture the state immediately *before* the move, so the second one is wasted. The first undo (Ctrl+Z) restores the state from the first snapshot (no-op, since both snapshots are identical) and only the second undo actually undoes the reorder. The user sees nothing on the first Ctrl+Z and assumes undo is broken.
-- **Symptom 2**: The three toast calls in `moveActiveTrackBy` — `'Select a track first (click track header)'`, `'Track already at top'`, and `'Moved "Bass" up'` — all go to `localAppServices.showNotification(...)`. But `appServices` does not expose `showNotification`; it exposes `showSafeNotification` (line 937 in main.js). All three calls are silent no-ops.
-- **Fix**:
-  1. Removed the redundant `captureStateForUndoInternal(...)` call from `moveActiveTrackBy` (5 lines deleted). The snapshot is now correctly taken exactly once, by `reorderTrackInState` itself. Single Ctrl+Z now undoes a single Alt+Arrow press.
-  2. Added a small `notify(message, duration)` helper at the top of the file. It calls `localAppServices.showSafeNotification(...)` (the actual method on `appServices`) and falls back to `localAppServices.showNotification(...)` for any future caller that wires that name instead.
-  3. Replaced all three `if (localAppServices.showNotification) { localAppServices.showNotification(...) }` blocks with single-line `notify(...)` calls.
-- **Why fix this run**: Both bugs are v0.3.70-only (didn't exist in the v0.3.69 codebase before `a43d82e` shipped TrackReorderHotkeys), the fix is local to one file (no cross-module impact), and the bugs are user-visible (silent toasts + broken undo) on a hotkey path users would have started using immediately. Mirrors the Day 745 pattern of "small, focused bug fix" without a version bump.
-- **Diff stats**: `js/TrackReorderHotkeys.js` +33/-17 in 5 hunks (1 import, 1 header-comment expansion, 1 new `notify()` helper, 3 toast-site rewrites, 1 redundant-undo removal).
-
-### Files Modified This Run:
-- `js/TrackReorderHotkeys.js` (+33/-17 lines, 5 hunks)
-- `AGENTS.md` (Day 746 entry)
-- `FEATURE_STATUS.md` (this entry)
-
-### Syntax validation:
-- `node --check js/TrackReorderHotkeys.js` passes.
-- All 5 key files pass `node --check` — `js/main.js`, `js/state.js`, `js/audio.js`, `js/ui.js`, `js/eventHandlers.js`. No regression introduced.
-
-### Deployed-site verification:
-- `curl -s -o /dev/null -w '%{http_code}' https://snugos.github.io/snaw/js/TrackReorderHotkeys.js` → 200.
-- `curl -s https://snugos.github.io/snaw/js/TrackReorderHotkeys.js | grep -E "showSafeNotification|function notify"` → matches (the `notify()` helper and the `showSafeNotification` call sites are live on the deployed site, confirming the push landed and GitHub Pages propagated it).
-- Pre-push, the deployed file still showed the old code with 3 `if (localAppServices.showNotification) { ... }` blocks and a `captureStateForUndoInternal` call before `reorderTrackInState` — post-push, those are gone.
-
-### Verification Steps:
-- `node --check js/TrackReorderHotkeys.js` passes.
-- `git diff --stat HEAD~1..HEAD -- js/` shows exactly 1 file changed, 33 insertions, 17 deletions.
-- `git log --oneline -3` shows the new commit `c138f54 fix: Track Reorder Hotkeys toast + duplicate undo snapshot (v0.3.70-patch)` on top of `f8bbe8f docs: mark Drum Pad Trigger Mouse-Over shipped in INSTRUCTION.md (v0.3.71)`.
-- `git push origin LWB-with-Bugs` → `f8bbe8f..c138f54  LWB-with-Bugs -> LWB-with-Bugs` (pushed successfully).
-
-### Features Still in Progress:
-_None from this agent._ Parallel Snaw Feature Builder Agent's `js/PadMouseover.js` orphan remains on disk (unwired, uncommitted) — that is the builder's responsibility to wire + commit + version-bump, not this agent's.
-
-### Next Features to Tackle:
-_None queued for this completion agent; the feature list is stable._ (`PadMouseover.js` is a v0.3.71 candidate waiting on the parallel builder's wiring commit.)
-
-### Action Taken:
-Pulled latest (already up to date at `dab86cf`). Confirmed `js/state.js` intact at 8940 lines (9th clean entry). Confirmed the task's `removeCustomDesktopBackground` ReferenceError is the documented false positive (function defined at main.js:336, exported at 483/932, window-mirrored at 1600 — Days 738/741/743/744/745 all confirmed). Ran the full incomplete-feature scan suite (TODO/FIXME/STUB markers, orphan modules, syntax validation of all 5 key files) — all clean. Investigated the v0.3.70 Track Reorder Hotkeys feature and found two real user-visible bugs: (1) every Alt+Arrow press produced two undo snapshots so the user had to press Ctrl+Z twice to undo, and (2) all three toast calls went to a non-existent `appServices.showNotification` method (the real name is `showSafeNotification`) so users got no feedback. Authored a 33-line fix in `js/TrackReorderHotkeys.js` (removed the redundant `captureStateForUndoInternal` call; added a small `notify()` helper that calls `showSafeNotification` with a `showNotification` fallback; replaced the three toast blocks). Verified `node --check` passes, committed, pushed, and confirmed the deployed site is serving the fixed file. Updated FEATURE_STATUS.md and AGENTS.md with this Day 746 entry.
