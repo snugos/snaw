@@ -188,6 +188,11 @@
     <div id="desktop" class="pt-14">
         <!-- Video background element -->
         <video id="desktopVideoBg" autoplay loop muted playsinline style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; display: none;"></video>
+        <!-- Image-background decode probe. Hidden offscreen; we attach load/error listeners here so
+             a corrupt or unsupported image (truncated PNG, malformed JPEG header, WebP on a browser
+             that doesn't support it, etc.) surfaces a user-visible notification instead of leaving
+             the user staring at a black desktop. Mirrors the Day 745 desktopVideoBg diagnostic. -->
+        <img id="desktopImageBgProbe" alt="" aria-hidden="true" style="position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; left: -9999px; top: -9999px;">
         <!-- Desktop content -->
     </div>
 

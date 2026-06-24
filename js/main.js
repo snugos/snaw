@@ -2374,12 +2374,13 @@ function updateMetersLoop() {
 function applyDesktopBackground(sourceUrl, bgType = 'image') {
     const desktop = uiElementsCache.desktop;
     const videoBg = document.getElementById('desktopVideoBg');
-    
+    const imageBgProbe = document.getElementById('desktopImageBgProbe');
+
     if (!desktop) {
         console.warn("Desktop element not found in cache for applying background.");
         return;
     }
-    
+
     try {
         // Reset both image and video backgrounds
         desktop.style.backgroundImage = '';
@@ -2388,9 +2389,48 @@ function applyDesktopBackground(sourceUrl, bgType = 'image') {
             videoBg.pause();
             videoBg.src = '';
         }
-        
+
         if (bgType === 'image' && sourceUrl) {
             // Image background
+            // One-shot decode diagnostic. If the image is corrupt, truncated, or uses a
+            // codec the browser can't decode (e.g. WebP on a browser that doesn't ship it,
+            // malformed JPEG/PNG headers), the CSS backgroundImage will silently fail and
+            // the user sees a black desktop. Probe via a hidden img element so we can
+            // surface a clear, actionable notification. Mirrors the Day 745 video-bg
+            // diagnostic on the same desktop-bg pipeline.
+            if (imageBgProbe) {
+                if (imageBgProbe._snugosImgErrorHandler) imageBgProbe.removeEventListener('error', imageBgProbe._snugosImgErrorHandler);
+                if (imageBgProbe._snugosImgLoadHandler) imageBgProbe.removeEventListener('load', imageBgProbe._snugosImgLoadHandler);
+                imageBgProbe._snugosImgErrorHandler = () => {
+                    // Don't fire on a user-initiated switch that arrives mid-decode: only
+                    // surface if the *current* backgroundImage URL is the one that failed.
+                    // (Day 745's video branch doesn't need this guard because the video
+                    // element is single-purpose; the img probe is reused for every apply.)
+                    const currentBg = desktop.style.backgroundImage || '';
+                    if (currentBg.indexOf(sourceUrl) === -1) return;
+                    console.warn("[desktopImageBg] decode failed for sourceUrl:", sourceUrl);
+                    if (typeof showSafeNotification === 'function') {
+                        showSafeNotification(
+                            "Custom background image failed to load (corrupt file or unsupported format). " +
+                            "Try re-exporting as PNG or JPEG.",
+                            5000
+                        );
+                    }
+                    // Clear the broken background so the user isn't left with a black
+                    // desktop; fall back to the default background color.
+                    desktop.style.backgroundImage = '';
+                    desktop.style.backgroundColor = (typeof Constants !== 'undefined' && Constants.defaultDesktopBg) || '#101010';
+                };
+                imageBgProbe._snugosImgLoadHandler = () => {
+                    if (typeof updateBgStatusIndicator === 'function') updateBgStatusIndicator();
+                };
+                imageBgProbe.addEventListener('error', imageBgProbe._snugosImgErrorHandler, { once: true });
+                imageBgProbe.addEventListener('load', imageBgProbe._snugosImgLoadHandler, { once: true });
+                // Kick off the probe; the actual visual application happens immediately
+                // below — if the decode succeeds the load handler is a no-op, if it fails
+                // the error handler rolls the background back.
+                try { imageBgProbe.src = sourceUrl; } catch (probeErr) { /* ignore */ }
+            }
             desktop.style.backgroundImage = `url('${sourceUrl}')`;
             desktop.style.backgroundSize = 'cover';
             desktop.style.backgroundPosition = 'center center';
