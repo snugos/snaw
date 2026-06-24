@@ -1639,3 +1639,57 @@ All 5 key files pass `node --check` — `js/main.js`, `js/state.js`, `js/audio.j
 
 ### Action Taken:
 Pulled latest (already up to date at `ffdfe14`). Confirmed `js/state.js` intact at 8940 lines (8th clean entry — no recurring Day 715/736/739 destructive truncation). Confirmed the task's Priority-1 `removeCustomDesktopBackground` ReferenceError is a documented false positive (function defined at line 336, exported on appServices at 483/932, mirrored on window at 1600, present in both local and deployed `js/main.js` — per Day 738 fixed in commit `f921f683`). Ran the full incomplete-feature scan suite (TODO/FIXME/STUB markers, orphan modules, syntax validation of all 5 key files) — all clean. No parallel-builder mid-flight work to coordinate. Authored a 23-line enhancement to `applyDesktopBackground` (one-shot `error` + `loadeddata` listeners on the desktop-bg video element) so codec-mismatch failures surface as a user-visible notification instead of a silent black desktop. Updated FEATURE_STATUS.md and AGENTS.md. Committing the diagnostic + docs now.
+
+## Session: 2026-06-23 01:05 UTC (Snaw Repair & Enhancement Agent Run — Day 746)
+
+**Status: SHIPPED v0.3.70-patch — `fix: Track Reorder Hotkeys toast + duplicate undo snapshot`** — Two real bugs in the v0.3.70 Track Reorder Hotkeys feature (`js/TrackReorderHotkeys.js`, shipped in commit `a43d82e`): (1) **double undo snapshot on every Alt+Arrow** — `moveActiveTrackBy` was calling `captureStateForUndoInternal` directly, AND `reorderTrackInState` (called immediately after) calls it again internally. Result: every single track reorder required **two** Ctrl+Z presses to undo. (2) **All three toast notifications were silent no-ops** — the code called `localAppServices.showNotification(...)` but `appServices` exposes `showSafeNotification` (not `showNotification`), so users got no feedback at all ("Select a track first…", "Track already at top", "Moved 'Bass' up"). Fix: removed the redundant `captureStateForUndoInternal` call (let `reorderTrackInState` own the snapshot), added a small `notify()` helper that calls `showSafeNotification` with `showNotification` as a fallback, replaced all three toast sites. No version bump (small bug fix, not a feature). Pushed to `origin/LWB-with-Bugs` as commit `c138f54`. Task's `main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground` is a documented false positive (Days 738/741/743/744/745) — function defined at line 336, exported at 483/932, window-mirrored at 1600; both local and deployed files confirm.
+
+### Automated Scan Results:
+- `git pull origin LWB-with-Bugs` (on entry) → Already up to date at `dab86cf fix: surface user-visible notification on silent video-bg decode failure`. **No new commits since Day 745.**
+- `git status` (on entry) → Only `?? js/PadMouseover.js` (untracked, 324 lines — the parallel builder's still-orphaned v0.3.71 Pad Mouseover work that was unwired on Day 744 and remains unwired this run, since the parallel builder's wiring commits never landed on `LWB-with-Bugs`). No other modifications.
+- **state.js integrity check**: 8940 lines (intact), `node --check js/state.js` passes. **9th clean entry** in the recent sequence (Days 740, 741, 742, 743, 744, 745 all clean; Day 739 was the last truncation). No `git checkout HEAD -- js/state.js` recovery needed.
+- Pattern sweeps (`TODO|FIXME|XXX|HACK|INCOMPLETE|STUB`) over `js/` (excluding `.backup` files) → 0 active-code hits.
+- No new untracked orphan JS files beyond the long-standing `js/PadMouseover.js` from the parallel builder.
+- `git log --since='3 hours ago' --oneline` → 0 commits in the last 3 hours. The parallel builder has been quiet since Day 744.
+- `find js -name '*.js' -type f | wc -l` → 536 files (unchanged; `PadMouseover.js` is untracked).
+- Current `APP_VERSION`: 0.3.70 (Track Reorder Hotkeys — unchanged this run; bug fix patch only, no version bump, mirrors Day 743's v0.3.68-patch and Day 745's dab86cf patterns).
+
+### Bug Fixed This Run: Track Reorder Hotkeys Double Undo + Silent Toasts
+- **Symptom 1 (the big one)**: User presses Alt+ArrowUp/Down to move a track. The state mutation succeeds. The user presses Ctrl+Z to undo. **Nothing happens to the moved track** — instead the previous action undoes (which may be a totally different operation). User has to press Ctrl+Z **twice** to undo a single track move.
+- **Root cause 1**: `moveActiveTrackBy` (line 84 of the v0.3.70 ship) called `captureStateForUndoInternal(\`Reorder track "${movedName}"\`)`. Then on line 89 it called `reorderTrackInState(activeId, newIndex)`, which internally calls `captureStateForUndoInternal('Reorder Track')` (state.js:1946). **Two undo snapshots per move.** Both snapshots capture the state immediately *before* the move, so the second one is wasted. The first undo (Ctrl+Z) restores the state from the first snapshot (no-op, since both snapshots are identical) and only the second undo actually undoes the reorder. The user sees nothing on the first Ctrl+Z and assumes undo is broken.
+- **Symptom 2**: The three toast calls in `moveActiveTrackBy` — `'Select a track first (click track header)'`, `'Track already at top'`, and `'Moved "Bass" up'` — all go to `localAppServices.showNotification(...)`. But `appServices` does not expose `showNotification`; it exposes `showSafeNotification` (line 937 in main.js). All three calls are silent no-ops.
+- **Fix**:
+  1. Removed the redundant `captureStateForUndoInternal(...)` call from `moveActiveTrackBy` (5 lines deleted). The snapshot is now correctly taken exactly once, by `reorderTrackInState` itself. Single Ctrl+Z now undoes a single Alt+Arrow press.
+  2. Added a small `notify(message, duration)` helper at the top of the file. It calls `localAppServices.showSafeNotification(...)` (the actual method on `appServices`) and falls back to `localAppServices.showNotification(...)` for any future caller that wires that name instead.
+  3. Replaced all three `if (localAppServices.showNotification) { localAppServices.showNotification(...) }` blocks with single-line `notify(...)` calls.
+- **Why fix this run**: Both bugs are v0.3.70-only (didn't exist in the v0.3.69 codebase before `a43d82e` shipped TrackReorderHotkeys), the fix is local to one file (no cross-module impact), and the bugs are user-visible (silent toasts + broken undo) on a hotkey path users would have started using immediately. Mirrors the Day 745 pattern of "small, focused bug fix" without a version bump.
+- **Diff stats**: `js/TrackReorderHotkeys.js` +33/-17 in 5 hunks (1 import, 1 header-comment expansion, 1 new `notify()` helper, 3 toast-site rewrites, 1 redundant-undo removal).
+
+### Files Modified This Run:
+- `js/TrackReorderHotkeys.js` (+33/-17 lines, 5 hunks)
+- `AGENTS.md` (Day 746 entry)
+- `FEATURE_STATUS.md` (this entry)
+
+### Syntax validation:
+- `node --check js/TrackReorderHotkeys.js` passes.
+- All 5 key files pass `node --check` — `js/main.js`, `js/state.js`, `js/audio.js`, `js/ui.js`, `js/eventHandlers.js`. No regression introduced.
+
+### Deployed-site verification:
+- `curl -s -o /dev/null -w '%{http_code}' https://snugos.github.io/snaw/js/TrackReorderHotkeys.js` → 200.
+- `curl -s https://snugos.github.io/snaw/js/TrackReorderHotkeys.js | grep -E "showSafeNotification|function notify"` → matches (the `notify()` helper and the `showSafeNotification` call sites are live on the deployed site, confirming the push landed and GitHub Pages propagated it).
+- Pre-push, the deployed file still showed the old code with 3 `if (localAppServices.showNotification) { ... }` blocks and a `captureStateForUndoInternal` call before `reorderTrackInState` — post-push, those are gone.
+
+### Verification Steps:
+- `node --check js/TrackReorderHotkeys.js` passes.
+- `git diff --stat HEAD~1..HEAD -- js/` shows exactly 1 file changed, 33 insertions, 17 deletions.
+- `git log --oneline -3` shows the new commit `c138f54 fix: Track Reorder Hotkeys toast + duplicate undo snapshot (v0.3.70-patch)` on top of `f8bbe8f docs: mark Drum Pad Trigger Mouse-Over shipped in INSTRUCTION.md (v0.3.71)`.
+- `git push origin LWB-with-Bugs` → `f8bbe8f..c138f54  LWB-with-Bugs -> LWB-with-Bugs` (pushed successfully).
+
+### Features Still in Progress:
+_None from this agent._ Parallel Snaw Feature Builder Agent's `js/PadMouseover.js` orphan remains on disk (unwired, uncommitted) — that is the builder's responsibility to wire + commit + version-bump, not this agent's.
+
+### Next Features to Tackle:
+_None queued for this completion agent; the feature list is stable._ (`PadMouseover.js` is a v0.3.71 candidate waiting on the parallel builder's wiring commit.)
+
+### Action Taken:
+Pulled latest (already up to date at `dab86cf`). Confirmed `js/state.js` intact at 8940 lines (9th clean entry). Confirmed the task's `removeCustomDesktopBackground` ReferenceError is the documented false positive (function defined at main.js:336, exported at 483/932, window-mirrored at 1600 — Days 738/741/743/744/745 all confirmed). Ran the full incomplete-feature scan suite (TODO/FIXME/STUB markers, orphan modules, syntax validation of all 5 key files) — all clean. Investigated the v0.3.70 Track Reorder Hotkeys feature and found two real user-visible bugs: (1) every Alt+Arrow press produced two undo snapshots so the user had to press Ctrl+Z twice to undo, and (2) all three toast calls went to a non-existent `appServices.showNotification` method (the real name is `showSafeNotification`) so users got no feedback. Authored a 33-line fix in `js/TrackReorderHotkeys.js` (removed the redundant `captureStateForUndoInternal` call; added a small `notify()` helper that calls `showSafeNotification` with a `showNotification` fallback; replaced the three toast blocks). Verified `node --check` passes, committed, pushed, and confirmed the deployed site is serving the fixed file. Updated FEATURE_STATUS.md and AGENTS.md with this Day 746 entry.

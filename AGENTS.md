@@ -1,3 +1,7 @@
+#### Day 746: Track Reorder Hotkeys (v0.3.70) Toast + Duplicate-Undo Fix (2026-06-23)
+- **Run Type**: Snaw Repair & Enhancement Agent (scheduled)
+- **Status**: SHIPPED `c138f54 fix: Track Reorder Hotkeys`
+
 #### Day 744: Clean Audit + Pad Mouseover (v0.3.70) Parallel-Builder Coordination + Stray Test Artifacts Cleanup (2026-06-23)
 - **Run Type**: Snaw Feature Completion Agent (scheduled)
 - **Status**: No incomplete features found in active code. **7th clean `state.js` entry in the recent sequence — no recurring Day 715/736/739 destructive truncation this run.** Parallel Snaw Feature Builder Agent confirmed live mid-flight on Pad Mouseover (v0.3.70 in progress). Two stray test artifacts (`test_file.txt`, `test_write.txt`) cleaned up. No version bump — audit + coordination only, no code authored.
