@@ -1,3 +1,51 @@
+## Session: 2026-06-24 01:20 UTC (Snaw Feature Completion Agent Run — Day 751)
+
+**Status: NO INCOMPLETE FEATURES FOUND ✅ — state.js intact (8946 lines, 11th clean entry in the recent sequence); 0 TODO/FIXME/STUB markers, 0 orphan modules; parallel Snaw Feature Builder Agent confirmed LIVE and mid-flight on TWO coordinated bug fixes (metronome downbeat race fix in `js/audio.js` +72/-5, missing `appServices.addEffectToTrack` in `js/main.js` +55 + `js/MixBusGroupPresets.js` +18 — all 3 uncommitted files pass `node --check`, fixes are real and well-scoped); task's `removeCustomDesktopBackground` ReferenceError confirmed false positive (defined at line 339, 16 occurrences, fixed in `f921f683` per Day 738); no code authored this run (audit + coordination only)**
+
+### Automated Scan Results:
+- `git pull origin LWB-with-Bugs` (on entry) → Already up to date at `dac510e docs: Day 750 audit - clean tree, state.js intact (10th clean entry), builder shipped v0.3.73 per-track effect bypass mid-run (c96eb08)`.
+- `git status` (on entry) → 3 modified files, all parallel-builder mid-flight work: `M js/audio.js` (+72/-5), `M js/main.js` (+55), `M js/MixBusGroupPresets.js` (+18). **Parallel Snaw Feature Builder Agent is LIVE and actively authoring in the shared working tree.**
+- **state.js integrity check**: 8946 lines (intact, unchanged from Day 750), `node --check js/state.js` passes. **11th clean entry** in the recent sequence (Days 740–750 all clean; Day 739 was the last truncation). No `git checkout HEAD -- js/state.js` recovery needed.
+- Pattern sweeps (`TODO|FIXME|XXX|HACK|INCOMPLETE|STUB`) over `js/` (excluding `.backup` files) → **0 active-code hits**.
+- No untracked orphan JS files (`git ls-files --others --exclude-standard -- 'js/*.js'` → empty).
+- `find js -name '*.js' -type f | wc -l` → 539 tracked files (+1 vs Day 750's 538; the +1 is a newly-tracked module from a recent builder commit, not an orphan).
+- All 3 builder-modified files pass `node --check` individually: `js/audio.js`, `js/main.js`, `js/MixBusGroupPresets.js`. Additionally `js/state.js`, `js/Track.js`, `js/ui.js`, `js/eventHandlers.js` (unmodified) also pass.
+- Current `APP_VERSION` (committed at HEAD): 0.3.73 (per-track effect bypass — unchanged this run; audit only).
+
+### Parallel-Builder Coordination (TWO mid-flight fixes, both uncommitted):
+Mid-session inspection confirmed the parallel Snaw Feature Builder Agent is LIVE and actively authoring two coordinated bug fixes in the shared working tree. Both are **fully implemented** but **ALL UNCOMMITTED**:
+
+- **`js/audio.js` (+72/-5): Metronome downbeat race fix** — `startMetronomeScheduling` previously read `Tone.Transport.position` at JS-callback time to test whether the current beat is a downbeat (`parseInt(pos.split(':')[1]) === 0`). On slower machines or audio-thread-starved tabs, the transport playhead can race ahead of the scheduled audio time by the time the JS callback runs, so beats 2/3/4 get mis-flagged as downbeats (high-pitch 1200 Hz click) while the real downbeat gets the low-pitch 440 Hz click. The fix computes the beat position from the scheduled `time` arg (pinned to the audio clock at callback-registration time, race-free) via `Tone.TransportTime(time).toBarsBeatsSixteenths()`, with a legacy fallback to `Tone.Transport.position` if `Tone.TransportTime` is unavailable or throws. Also adds a `lastMetronomeBeatKey` tracker (reset on start) as scaffolding. Header comment reads `Day 751 fix — see AGENTS.md`. `node --check` passes.
+
+- **`js/main.js` (+55): Missing `appServices.addEffectToTrack`** — The `appServices.addEffectToTrack(trackId, effectType, params)` method was referenced by callers (Mix-Bus Group Presets' `applyTrackMix`, project-template loading, track-template application) but was **never defined** on the `appServices` object. Callers silently fell through to a fallback in `MixBusGroupPresets.js` that pushed effect entries with `toneNode: null`, leaving the audio chain empty — applied mix-bus presets / templates would show effects in the UI but produce silence. The fix adds a proper `addEffectToTrack` that looks up the track, gets `createEffectInstance` from `effectsRegistryAccess` (newly exposed in `initializeSnugOS`), merges default + provided params, creates the Tone.js node, pushes `{id, type, toneNode, params}` to `track.activeEffects`, captures undo (unless reconstructing), calls `track.rebuildEffectChain()`, updates track UI, and returns the new effect id (or null on failure). Also exposes `effectsRegistryAccess.createEffectInstance` in `initializeSnugOS()`. `node --check` passes.
+
+- **`js/MixBusGroupPresets.js` (+18): Fallback path now builds real Tone.js node** — The fallback path in `applyTrackMix` (used when `addEffectToTrack` is unavailable) previously pushed `toneNode: null` entries that produced silence. The fix now uses `effectsRegistryAccess.createEffectInstance` to build a real Tone.js node from the stored `{type, params}` snapshot; if the registry is missing, it logs a clear warning and skips the effect rather than pushing a silent entry. `node --check` passes.
+
+- To avoid disrupting the live builder, this run committed ONLY `FEATURE_STATUS.md` + `AGENTS.md` — no JS or HTML files touched. Used `git add <specific-paths>` (not `git add -A`) per the Day 747 lesson about the shared git identity.
+
+### Syntax validation:
+All 3 builder-modified files pass `node --check` — `js/audio.js`, `js/main.js`, `js/MixBusGroupPresets.js`. Additionally `js/state.js`, `js/Track.js`, `js/ui.js`, `js/eventHandlers.js` (unmodified) also pass.
+
+### Deployed-site verification:
+- `curl -s -o /dev/null -w '%{http_code}' https://snugos.github.io/snaw/js/constants.js` → 200.
+- Deployed `APP_VERSION = "0.3.73"` (unchanged this run; audit only).
+
+### Files Modified This Run:
+- `FEATURE_STATUS.md` (Day 751 session entry, prepended).
+- `AGENTS.md` (Day 751 entry, prepended).
+- No JS or HTML files touched. The parallel builder's 3 in-progress files were left exactly as the builder left them.
+
+### Features Still in Progress:
+_None from this agent._ Parallel Snaw Feature Builder Agent is LIVE and mid-flight on two coordinated bug fixes (metronome downbeat race fix + missing `addEffectToTrack`), both uncommitted.
+
+### Next Features to Tackle:
+_None queued for this completion agent; the feature list is stable._
+
+### Action Taken:
+Pulled latest (already up to date at `dac510e`). Confirmed `js/state.js` intact at 8946 lines (11th clean entry — no recurring Day 715/736/739 destructive truncation). Ran the full incomplete-feature scan suite (TODO/FIXME/STUB markers → 0 hits; orphan modules → empty; syntax validation of all 3 builder-modified files + 4 unmodified key files → all pass). Detected the parallel Snaw Feature Builder Agent LIVE and mid-flight on two coordinated bug fixes (metronome downbeat race fix in `js/audio.js` +72/-5; missing `appServices.addEffectToTrack` in `js/main.js` +55 with companion `js/MixBusGroupPresets.js` +18 fallback fix — all 3 uncommitted, all syntax-valid, both fixes real and well-scoped). Confirmed the task's `removeCustomDesktopBackground` ReferenceError is a documented false positive (defined at line 339, 16 occurrences, fixed in `f921f683` per Day 738). Followed the Days 739/740/742/744/747/750 coordination pattern: left all 3 builder files untouched, committed only `FEATURE_STATUS.md` + `AGENTS.md` using explicit `git add` paths. No code changes authored this run (audit + coordination only). Updated FEATURE_STATUS.md and AGENTS.md with the Day 751 audit.
+
+---
+
 ## Session: 2026-06-24 00:55 UTC (Snaw Feature Completion Agent Run — Day 750)
 
 **Status: NO INCOMPLETE FEATURES FOUND ✅ — state.js intact (8946 lines, 10th clean entry in the recent sequence); 0 TODO/FIXME/STUB markers, 0 orphan modules; parallel Snaw Feature Builder Agent confirmed LIVE and SHIPPED v0.3.73 per-track effect bypass mid-run as commit `c96eb08` (6 files: `js/Track.js` +82/-3, `js/TrackContextMenu.js` +21, `js/constants.js` +2/-1, `js/main.js` +31, `js/state.js` +6, `js/ui.js` +11 — all pass `node --check`, feature fully wired end-to-end); version mismatch at HEAD RESOLVED (builder's commit `c96eb08` bumped constants.js 0.3.72 → 0.3.73); no code authored this run (audit + coordination only)**
