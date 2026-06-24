@@ -1626,6 +1626,28 @@ if (typeof window !== 'undefined' && !window.__snawCustomBgShortcutBound) {
     });
 }
 
+// Keyboard shortcut: Ctrl/Cmd+Alt+Shift+B removes the custom desktop background (v0.3.73)
+if (typeof window !== 'undefined' && !window.__snawRemoveCustomBgShortcutBound) {
+    window.__snawRemoveCustomBgShortcutBound = true;
+    window.addEventListener('keydown', (e) => {
+        const isMod = e.ctrlKey || e.metaKey;
+        if (isMod && e.altKey && e.shiftKey && (e.key === 'B' || e.key === 'b')) {
+            const target = e.target;
+            if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return;
+            e.preventDefault();
+            try {
+                if (typeof appServices.removeCustomDesktopBackground === 'function') {
+                    appServices.removeCustomDesktopBackground();
+                } else if (typeof window.removeCustomDesktopBackground === 'function') {
+                    window.removeCustomDesktopBackground();
+                }
+            } catch (err) {
+                console.error('[snaw] Failed to remove custom background via shortcut:', err);
+            }
+        }
+    });
+}
+
 async function handleCustomBackgroundUpload(event) {
     if (!event?.target?.files?.[0]) return;
     const file = event.target.files[0];
