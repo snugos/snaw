@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.73"; // 2026-06-23 - Plugin Bypass Per-Track: per-track bypass toggle for the entire effect chain; preserves effect settings/params while routing source straight to gainNode (v0.3.73)
+export const APP_VERSION = "0.3.74"; // 2026-06-24 - Automated daily merge & bug fix: syntax fixes in main.js (missing paren in Array.isArray) & Track.js (4 missing parens in wavetable morph); state.js duplicate-declaration corruption flagged for manual review (v0.3.74)
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks

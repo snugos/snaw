@@ -11172,10 +11172,10 @@ export class Track {
         } else if (mode === 'morph') {
             // Morphing with crossfade
             for (let i = 0; i < tableSize; i++) {
-                const sign1 = Math.sign(table1[i];
-                const sign2 = Math.sign(table2[i];
-                const mag1 = Math.abs(table1[i];
-                const mag2 = Math.abs(table2[i];
+                const sign1 = Math.sign(table1[i]);
+                const sign2 = Math.sign(table2[i]);
+                const mag1 = Math.abs(table1[i]);
+                const mag2 = Math.abs(table2[i]);
                 const morphedMag = mag1 * (1 - blend) + mag2 * blend;
                 const morphedSign = blend < 0.5 ? sign1 : sign2;
                 result[i] = morphedSign * morphedMag;
