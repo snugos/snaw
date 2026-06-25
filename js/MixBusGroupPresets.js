@@ -246,14 +246,39 @@ function applyTrackMix(track, snapshot) {
                     console.warn('[MixBusGroupPresets] addEffectToTrack failed; falling back to direct push', e);
                 }
             }
-            // Fallback: build a minimal entry directly (the existing loadEffectPreset path also pushes effects this way)
+            // Fallback: build a real Tone.js node via the effects registry so the
+            // effect actually processes audio. Previously this pushed { toneNode: null },
+            // which left the audio chain empty — applied presets showed effects in the
+            // UI but produced silence. If the registry is unavailable, skip the effect
+            // rather than pushing a silent entry.
             try {
+                const registry = localAppServices.effectsRegistryAccess;
+                const createFn = registry && typeof registry.createEffectInstance === 'function'
+                    ? registry.createEffectInstance
+                    : null;
+                const defaultsFn = registry && typeof registry.getEffectDefaultParams === 'function'
+                    ? registry.getEffectDefaultParams
+                    : null;
+                if (!createFn) {
+                    console.warn(`[MixBusGroupPresets] effectsRegistryAccess.createEffectInstance unavailable; skipping effect "${effectData.type}" on track ${track.id}.`);
+                    return;
+                }
+                const mergedParams = Object.assign(
+                    {},
+                    defaultsFn ? (defaultsFn(effectData.type) || {}) : {},
+                    effectData.params || {}
+                );
+                const toneNode = createFn(effectData.type, mergedParams);
+                if (!toneNode) {
+                    console.warn(`[MixBusGroupPresets] createEffectInstance returned null for "${effectData.type}"; skipping.`);
+                    return;
+                }
                 if (!Array.isArray(track.activeEffects)) track.activeEffects = [];
                 track.activeEffects.push({
                     id: `effect-${track.id}-${effectData.type}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
                     type: effectData.type,
-                    toneNode: null,
-                    params: JSON.parse(JSON.stringify(effectData.params || {}))
+                    toneNode: toneNode,
+                    params: JSON.parse(JSON.stringify(mergedParams))
                 });
             } catch (e) { console.warn('[MixBusGroupPresets] direct effect push failed', e); }
         });
