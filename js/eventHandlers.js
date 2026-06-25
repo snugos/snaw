@@ -688,7 +688,7 @@ export function initializePrimaryEventListeners(appContext) {
                         return;
                     }
                     // First click: dynamically import + init + open the panel.
-                    import('./MIDITapTempo.js').then(m => {
+                    import('./js/MIDITapTempo.js').then(m => {
                         try {
                             if (m.initMIDITapTempo) m.initMIDITapTempo(localAppServices);
                             if (m.toggleMIDITapTempoPanel) m.toggleMIDITapTempoPanel();
@@ -1027,7 +1027,7 @@ export function initializePrimaryEventListeners(appContext) {
 
 
         // Pre-warm the MIDITapTempo module so the first menu click opens the panel instantly.
-        import('./MIDITapTempo.js').then(module => {
+        import('./js/MIDITapTempo.js').then(module => {
             if (module.initMIDITapTempo) module.initMIDITapTempo(localAppServices);
             if (module.installGlobalKeyShortcut) module.installGlobalKeyShortcut();
         }).catch(err => console.error('[EventHandlers] Failed to pre-load MIDITapTempo:', err));
