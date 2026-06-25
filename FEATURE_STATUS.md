@@ -1,3 +1,68 @@
+## Session: 2026-06-25 00:50 UTC (Snaw Repair & Enhancement Agent Run — Day 753)
+
+**Status: TASK PRIORITY-1 BUG IS FALSE POSITIVE ✅ (6th consecutive run, Days 738/741/743/744/745/746/747/750/751/752/753) — `removeCustomDesktopBackground` is defined (js/main.js:339), exported on `appServices` (lines 486, 935), mirrored as `window.removeCustomDesktopBackground` (line 1604), and present **16 times** in both local AND deployed `js/main.js` (`grep -c "removeCustomDesktopBackground" js/main.js` → 16; `curl -s https://snugos.github.io/snaw/js/main.js | grep -c` → 16). Per Day 738 entry this was fixed in commit `f921f683`. NO REAL PRIORITY-1 BUG TO FIX THIS RUN.**
+
+**REAL BUG FOUND + SHIPPED: `closeMIDITapTempoPanel` Learning-State Leak** in the freshly-shipped v0.3.75 MIDI Tap Tempo module (commit `6d66faf`, ~18 hours before this run). When a user opened the MIDI Tap Tempo panel, clicked "Learn", then closed the panel, the module-level `isLearning = true` flag stayed set — any subsequent MIDI note-on was silently consumed by the learning branch with no UI feedback and no way to cancel except by triggering one more note-on. 6-line fix in `js/MIDITapTempo.js`: reset `isLearning = false` on close + surface a 2s "MIDI Tap Tempo: learning cancelled." toast via `localAppServices.showNotification`. Committed as `28d9bd2`, pushed to `origin/LWB-with-Bugs`. Deployed verification: `curl -s https://snugos.github.io/snaw/js/MIDITapTempo.js | grep -c 'learning cancelled'` → 1, confirming the fix is live on GitHub Pages. **No APP_VERSION bump** — small patch to a 1-day-old feature, same pattern as Day 743's v0.3.68-patch (video-bg object-URL leak fix) and Day 745's video-bg diagnostic (silent-decode-failure notification).
+
+**Parallel-Builder Coordination: AVOIDED DUPLICATE WORK** — at start of this run I planned to write an image-bg decode diagnostic (mirror of Day 745's video-bg diagnostic) because `applyDesktopBackground`'s image branch had no error/load listeners. Checked git history before touching the file and discovered commit `1eb7a88 fix: surface user-visible notification on silent image-bg decode failure` had already landed between Day 752 and now (the parallel builder shipped it). The fix is essentially identical to what I would have written (probe via `<img id=desktopImageBgProbe>`, one-shot error/load listeners, "re-export as PNG or JPEG" toast on error, rollback to default background color, tick `updateBgStatusIndicator` on load). Saved ~30 min of duplicate work by checking git history first.
+
+### Automated Scan Results:
+- **TODO/FIXME/XXX/HACK/INCOMPLETE/STUB markers in active `js/` code**: 0 hits (`grep -rn 'TODO\|FIXME\|XXX\|HACK\|STUB\|INCOMPLETE' js/ --include='*.js' | grep -v '.backup' | grep -v '// MARKER_'` → empty).
+- **Untracked orphan JS files**: 0 (`git ls-files --others --exclude-standard -- 'js/*.js'` → empty).
+- **state.js integrity**: 8946 lines (intact, unchanged from Day 752), `node --check js/state.js` passes. **13th clean entry** in the recent sequence (Days 740-752 all clean; Day 739 was the last truncation). No `git checkout HEAD -- js/state.js` recovery needed.
+- **Tracked JS file count**: 540 (`git ls-files -- js/*.js | wc -l` → 540, +1 vs Day 752's 539: the new `js/MIDITapTempo.js` from v0.3.75).
+- **Total LOC**: ~278,800 (`find js -name '*.js' -type f -exec wc -l {} + | tail -1`, +~6,000 vs Day 752's 272,861: the new module + ongoing feature work).
+- **Recent commits**: 4 in the last day (`6d66faf`, `47eea2b`, `15d3363`, `a4d188d`). **Parallel builder has been very active** — shipped 4+ features/bugfixes in the last day (v0.3.71 Pad Mouseover, v0.3.72 Mix-Bus Group Presets, v0.3.73 Per-Track Effect Bypass + Ctrl-Alt-Shift-B shortcut, v0.3.75 MIDI Tap Tempo, plus the Day 747 image-bg diagnostic).
+- **Current APP_VERSION** (committed at HEAD before this run): 0.3.75 (MIDI Tap Tempo — unchanged this run; small patch, no version bump).
+
+### Syntax Validation:
+All 6 key files pass `node --check`:
+- `js/main.js` (2681 lines, OK)
+- `js/state.js` (8946 lines, OK)
+- `js/audio.js` (1994 lines, OK)
+- `js/ui.js` (8167 lines, OK)
+- `js/eventHandlers.js` (3181 lines, OK)
+- `js/MIDITapTempo.js` (431 lines after this run's +6 lines, OK)
+
+### Deployed-Site Verification:
+- `curl -s -o /dev/null -w '%{http_code}' https://snugos.github.io/snaw/js/MIDITapTempo.js` → 200.
+- `curl -s https://snugos.github.io/snaw/js/MIDITapTempo.js | grep -c 'learning cancelled'` → **1** (confirms this run's fix is live on GitHub Pages).
+- `curl -s https://snugos.github.io/snaw/js/main.js | grep -c "removeCustomDesktopBackground"` → **16** (confirms the Priority-1 task bug is a phantom: function defined + exported + mirrored + used in production).
+- `curl -s https://snugos.github.io/snaw/index.html | grep -c 'desktopImageBgProbe'` → **1** (confirms the parallel builder's Day 747 image-bg diagnostic is live on production).
+- `curl -s https://snugos.github.io/snaw/js/MIDITapTempo.js | head -1` → `// js/MIDITapTempo.js - MIDI Controller Pad as Tap-Tempo Source (v0.3.75)` (confirms v0.3.75 is deployed).
+
+### Bug Fixed This Run: `closeMIDITapTempoPanel` Learning-State Leak
+- **Symptom**: User opens MIDI Tap Tempo panel (Start menu → MIDI Tap Tempo, or Ctrl/Cmd+Shift+M) → clicks "Learn" → closes the panel (via × button or `closeMIDITapTempoPanel()` directly) → the module-level `isLearning = true` flag remains set. Any subsequent MIDI note-on — for the lifetime of the tab — is silently consumed by `handleMIDITapMessage`'s learning branch (lines 114-128 of js/MIDITapTempo.js), which sets `settings.noteFilter = String(data1)` and shows a "note bound" toast. User gets no warning that learn mode is still active, no UI to cancel it, and a stray note-on that was meant to play their instrument silently rebinds the filter. Worse: no way to exit the state except by triggering one more note-on.
+- **Root cause**: `closeMIDITapTempoPanel` (lines 277-283 before this run) only removed the panel DOM element and set `panelVisible = false`. It never touched `isLearning`. The "Press note…" learn-mode button text is only rendered when the panel is open (`updatePanelUI`'s template literal at line 341), so the user has no visual cue that learning is still armed.
+- **Fix**: Added 6 lines at the end of `closeMIDITapTempoPanel` (js/MIDITapTempo.js:285-290):
+    ```js
+    if (isLearning) {
+        isLearning = false;
+        if (localAppServices.showNotification) {
+            localAppServices.showNotification('MIDI Tap Tempo: learning cancelled.', 2000);
+        }
+    }
+    ```
+    Idempotent (guarded by `if (isLearning)`), uses the same `localAppServices.showNotification` toast helper the rest of the module uses for user feedback, and matches the existing 2-3s duration convention (compare `startLearnNote`'s 3000ms "press a pad/note to bind…" toast at lines 220-222 and `handleMIDITapMessage`'s 2500ms "note X bound" toast at line 123).
+- **Commit**: `28d9bd2 fix(MIDITapTempo): reset isLearning flag when panel closes (v0.3.75-patch)`, 1 file changed, 6 insertions(+), pushed to `origin/LWB-with-Bugs`.
+
+### Files Modified This Run:
+- `js/MIDITapTempo.js` (+6 lines, 1 hunk at the end of `closeMIDITapTempoPanel`)
+- `AGENTS.md` (Day 753 entry prepended at line 1)
+- `FEATURE_STATUS.md` (this session entry prepended at line 1)
+- No other files touched.
+
+### Features Still In Progress:
+_None from this agent._ Parallel Snaw Feature Builder Agent shipped v0.3.71 (Pad Mouseover), v0.3.72 (Mix-Bus Group Presets), v0.3.73 (Per-Track Effect Bypass + Ctrl-Alt-Shift-B shortcut), v0.3.75 (MIDI Tap Tempo) in the last week — list is stable, queue is healthy.
+
+### Next Features to Tackle:
+_None queued for this repair agent; the feature list is stable._
+
+### Action Taken:
+Pulled latest (advanced from `15d3363` to `6d66faf`, +14 commits including v0.3.71/72/73/75 features and the Day 747 image-bg diagnostic the parallel builder shipped — the image-bg diagnostic I'd planned to write was already landed by commit `1eb7a88`, avoiding ~30 min of duplicate work). Confirmed `js/state.js` intact at 8946 lines (13th clean entry). Confirmed the task's `removeCustomDesktopBackground` ReferenceError is a documented false positive (function defined at line 339, exported at 486/935, window-mirrored at 1604, **16 occurrences in both local AND deployed `js/main.js`**). Ran the full incomplete-feature scan suite — all clean (0 TODO/FIXME/STUB markers, 0 orphan modules, all 6 key files pass `node --check`). Inspected the freshly-shipped v0.3.75 `js/MIDITapTempo.js`, found the `closeMIDITapTempoPanel` learning-state leak (clicking "Learn" then closing the panel left `isLearning = true` set indefinitely, silently consuming the next MIDI note-on as a filter rebind). Authored the 6-line fix (reset `isLearning = false` on close + show a 2s "MIDI Tap Tempo: learning cancelled." toast via `localAppServices.showNotification`). Verified `node --check` passes on all 6 key files. Committed as `28d9bd2`, pushed to `origin/LWB-with-Bugs`. Verified the fix is live on `https://snugos.github.io/snaw/js/MIDITapTempo.js` (`grep -c 'learning cancelled'` → 1). Updated FEATURE_STATUS.md (this entry) and AGENTS.md (Day 753 entry) with the full audit + bugfix + coordination story.
+
+---
+
 ## Session: 2026-06-24 01:50 UTC (Snaw Repair & Enhancement Agent Run — Day 752)
 
 **Status: NO INCOMPLETE FEATURES FOUND ✅ — state.js intact (8946 lines, 12th clean entry in the recent sequence); 0 TODO/FIXME/STUB markers, 0 orphan modules; parallel Snaw Feature Builder Agent STILL LIVE mid-flight on the SAME TWO coordinated bug fixes from Day 751 (metronome downbeat race fix in `js/audio.js` +72/-5, missing `appServices.addEffectToTrack` in `js/main.js` +55 + `js/MixBusGroupPresets.js` +18 — all 3 uncommitted files pass `node --check`, no new commits since Day 751's `15d3363` automated merge); task's `removeCustomDesktopBackground` ReferenceError confirmed false positive (defined at line 339, **16 occurrences in both local AND deployed `js/main.js`**, fixed in `f921f683` per Day 738); no code authored this run (audit + coordination only)**
