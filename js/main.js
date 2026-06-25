@@ -295,6 +295,8 @@ import {
     captureStateForUndoInternal, undoLastActionInternal, redoLastActionInternal,
     gatherProjectDataInternal, reconstructDAWInternal, saveProjectInternal,
     saveProjectTemplate, loadProjectTemplate, getProjectTemplateNames, getProjectTemplate, deleteProjectTemplate,
+    // Auto-save (used by AutoSaveIndicator — must be reachable from appServices.stateModule)
+    getLastAutoSaveTime,
 } from './state.js';
 
 // --- showSafeNotification ---
@@ -420,6 +422,51 @@ const appServices = {
             }
         } catch (e) { console.error(`[appServices.setTrackEffectsBypass] Error for ${trackId}:`, e); }
     },
+    // addEffectToTrack: create a real Tone.js effect node and push it into a
+    // track's activeEffects chain. Used by Mix-Bus Group Presets, project
+    // templates, and track templates. Without this, callers fall through to a
+    // fallback that pushes { toneNode: null } entries — effects appear in the
+    // UI but produce silence. Returns the new effect id, or null on failure.
+    addEffectToTrack: (trackId, effectType, params = {}) => {
+        try {
+            const track = getTrackByIdState(trackId);
+            if (!track) { console.warn(`[appServices.addEffectToTrack] Track ${trackId} not found.`); return null; }
+            const registry = appServices.effectsRegistryAccess;
+            if (!registry || typeof registry.createEffectInstance !== 'function') {
+                console.warn(`[appServices.addEffectToTrack] effectsRegistryAccess.createEffectInstance not available; cannot build real node for ${effectType}.`);
+                return null;
+            }
+            const defaults = typeof registry.getEffectDefaultParams === 'function' ? registry.getEffectDefaultParams(effectType) : {};
+            const mergedParams = Object.assign({}, defaults, params);
+            const toneNode = registry.createEffectInstance(effectType, mergedParams);
+            if (!toneNode) {
+                console.warn(`[appServices.addEffectToTrack] createEffectInstance returned null for type "${effectType}".`);
+                return null;
+            }
+            const effectId = `effect-${trackId}-${effectType}-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+            if (!Array.isArray(track.activeEffects)) track.activeEffects = [];
+            track.activeEffects.push({
+                id: effectId,
+                type: effectType,
+                toneNode: toneNode,
+                params: JSON.parse(JSON.stringify(mergedParams))
+            });
+            const isReconstructing = appServices.getIsReconstructingDAW ? appServices.getIsReconstructingDAW() : false;
+            if (!isReconstructing && captureStateForUndoInternal) {
+                captureStateForUndoInternal(`Add ${effectType} to ${track.name}`);
+            }
+            if (typeof track.rebuildEffectChain === 'function') {
+                try { track.rebuildEffectChain(); } catch (rcErr) { console.warn(`[appServices.addEffectToTrack] rebuildEffectChain failed:`, rcErr); }
+            }
+            if (typeof appServices.updateTrackUI === 'function') {
+                try { appServices.updateTrackUI(trackId, 'effectsListChanged'); } catch (uiErr) { /* non-fatal */ }
+            }
+            return effectId;
+        } catch (e) {
+            console.error(`[appServices.addEffectToTrack] Error for track ${trackId}, effect ${effectType}:`, e);
+            return null;
+        }
+    },
     handleRemoveTrack: eventHandleRemoveTrack,
     handleTrackArchive: eventHandleTrackArchive,
     handleTrackFreeze: eventHandleTrackFreeze,
@@ -506,6 +553,21 @@ const appServices = {
             });
         }
     },
+    // --- State module passthrough ---
+    // Downstream modules (e.g. AutoSaveIndicator) look up state-only getters via
+    // `appServices.stateModule.foo()`. Without this, AutoSaveIndicator's
+    // `getLastSaveTime()` falls through to a localStorage key nothing writes to,
+    // and the indicator permanently shows "Not saved" even after auto-save has
+    // run. Exposing the imported state symbols here closes that gap.
+    stateModule: {
+        getLastAutoSaveTime: () => {
+            try {
+                if (typeof getLastAutoSaveTime === 'function') return getLastAutoSaveTime();
+            } catch (_) { /* fall through to 0 */ }
+            return 0;
+        },
+    },
+
     removeCustomDesktopBackground, // Shorthand → module-level async function (uses appServices.bgDb.init())
 
     // --- Track access helpers ---
@@ -1948,6 +2010,7 @@ async function initializeSnugOS() {
                 appServices.effectsRegistryAccess.AVAILABLE_EFFECTS = effectsRegistry.AVAILABLE_EFFECTS || {};
                 appServices.effectsRegistryAccess.getEffectParamDefinitions = effectsRegistry.getEffectParamDefinitions || (() => []);
                 appServices.effectsRegistryAccess.getEffectDefaultParams = effectsRegistry.getEffectDefaultParams || (() => ({}));
+                appServices.effectsRegistryAccess.createEffectInstance = effectsRegistry.createEffectInstance || null;
                 appServices.effectsRegistryAccess.synthEngineControlDefinitions = effectsRegistry.synthEngineControlDefinitions || {};
                 console.log("[Main initializeSnugOS] Effects registry dynamically imported and assigned.");
             } else {
