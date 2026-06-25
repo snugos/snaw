@@ -1938,6 +1938,29 @@ export function getSidechainBusInput() {
     return sidechainBus;
 }
 
+// Sidechain helper: try to connect `src` -> `dst`, surfacing a user-visible
+// notification if the connect throws. Empty `catch(e) {}` previously swallowed
+// the failure and let the caller return `true` (claiming sidechain was active),
+// so the compressor never received the sidechain input but the user still saw
+// a "Sidechain: Mic connected to compressor." success toast. Now each connect
+// either succeeds or reports the failure with a clear, actionable message and
+// the caller knows the audio route wasn't actually established.
+function _connectSidechainNode(src, dst, label) {
+    try {
+        src.connect(dst);
+        return true;
+    } catch (e) {
+        console.warn(`[Audio sidechain] Failed to connect ${label}:`, e?.message || e);
+        if (localAppServices.showNotification) {
+            localAppServices.showNotification(
+                `Sidechain: Could not connect ${label}. ${e?.message || 'Audio graph rejected the connection.'}`,
+                4000
+            );
+        }
+        return false;
+    }
+}
+
 export async function enableSidechainFromMic(compressorNode) {
     if (!compressorNode || compressorNode.disposed) {
         console.warn('[Audio enableSidechainFromMic] Invalid compressor node provided.');
@@ -1945,8 +1968,9 @@ export async function enableSidechainFromMic(compressorNode) {
     }
     if (micForSidechain && micForSidechain.state === 'started') {
         const bus = getSidechainBusInput();
-        try { micForSidechain.connect(bus); } catch(e) {}
-        try { bus.connect(compressorNode); } catch(e) {}
+        const ok1 = _connectSidechainNode(micForSidechain, bus, 'mic -> sidechain bus');
+        const ok2 = _connectSidechainNode(bus, compressorNode, 'sidechain bus -> compressor');
+        if (!(ok1 && ok2)) return false;
         return true;
     }
     try {
@@ -1956,8 +1980,9 @@ export async function enableSidechainFromMic(compressorNode) {
         await micStream.open();
         micForSidechain = micStream;
         const bus = getSidechainBusInput();
-        try { micStream.connect(bus); } catch(e) {}
-        try { bus.connect(compressorNode); } catch(e) {}
+        const ok1 = _connectSidechainNode(micStream, bus, 'mic -> sidechain bus');
+        const ok2 = _connectSidechainNode(bus, compressorNode, 'sidechain bus -> compressor');
+        if (!(ok1 && ok2)) return false;
         if (localAppServices.showNotification) {
             localAppServices.showNotification('Sidechain: Mic connected to compressor.', 2000);
         }
@@ -1997,9 +2022,9 @@ export async function enableSidechainFromTrackIn(trackId, compressorNode) {
         return false;
     }
     const bus = getSidechainBusInput();
-    try { track.inputChannel.connect(bus); } catch(e) {}
-    try { bus.connect(compressorNode); } catch(e) {}
-    return true;
+    const ok1 = _connectSidechainNode(track.inputChannel, bus, `track ${trackId} input -> sidechain bus`);
+    const ok2 = _connectSidechainNode(bus, compressorNode, 'sidechain bus -> compressor');
+    return ok1 && ok2;
 }
 
 export function disableSidechainBus() {
