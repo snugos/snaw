@@ -502,11 +502,31 @@ export function startMetronomeScheduling(interval = '4n') {
     
     // Schedule metronome clicks
     metronomeScheduleId = Tone.Transport.scheduleRepeat((time) => {
-        // Get the position to determine if it's a downbeat (beat 1)
-        const pos = Tone.Transport.position;
-        const parts = pos.split(':');
-        const beatsInBar = parseInt(parts[1], 10);
-        const isDownbeat = beatsInBar === 0;
+        // Determine whether this scheduled click lands on a downbeat (beat 1).
+        // IMPORTANT: derive the beat position from the scheduled `time` arg
+        // (pinned to the audio clock at callback-registration time), NOT from
+        // `Tone.Transport.position` read at JS-callback-execution time. On slow
+        // machines or audio-thread-starved tabs the transport playhead can race
+        // ahead of the scheduled audio time, which would mis-flag beats 2/3/4 as
+        // downbeats (high-pitch 1200Hz click) while the real downbeat gets the
+        // low-pitch 440Hz click.
+        let isDownbeat = true;
+        try {
+            // Tone.TransportTime converts a seconds value to a bars:beats:sixteenths position.
+            const bbs = Tone.TransportTime(time).toBarsBeatsSixteenths();
+            const parts = bbs.split(':');
+            const beatsInBar = parseInt(parts[1], 10);
+            isDownbeat = beatsInBar === 0;
+        } catch (e) {
+            // Legacy fallback: if TransportTime is unavailable or throws, fall
+            // back to reading the transport position (the old race-prone path).
+            try {
+                const pos = Tone.Transport.position;
+                const parts = pos.split(':');
+                const beatsInBar = parseInt(parts[1], 10);
+                isDownbeat = beatsInBar === 0;
+            } catch (_) { isDownbeat = true; }
+        }
         
         // Apply adaptive timing offset if enabled
         let adjustedTime = time;
