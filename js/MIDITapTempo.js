@@ -232,6 +232,7 @@ export function getLastAppliedBpm() { return lastAppliedBpm; }
 export function resetTapCount() {
     tapCount = 0;
     lastAppliedBpm = null;
+    lastTapAt = 0; // Clear debounce timer so the first tap after reset is never skipped
     if (panelVisible) updatePanelUI();
 }
 
@@ -335,6 +336,15 @@ function updatePanelUI() {
                     ${tapCount} tap${tapCount === 1 ? '' : 's'}
                 </div>
             </div>
+            <button class="midi-tap-reset" style="
+                padding: 4px 10px;
+                background: #333;
+                color: #eee;
+                border: 1px solid #555;
+                border-radius: 4px;
+                font-size: 11px;
+                cursor: pointer;
+            " title="Reset tap count and last-applied BPM">Reset</button>
         </div>
 
         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
@@ -379,6 +389,9 @@ function updatePanelUI() {
     `;
 
     panelElement.querySelector('.midi-tap-close').addEventListener('click', closeMIDITapTempoPanel);
+    panelElement.querySelector('.midi-tap-reset').addEventListener('click', () => {
+        resetTapCount();
+    });
     panelElement.querySelector('.midi-tap-enabled').addEventListener('change', (e) => {
         setMIDITapTempoEnabled(e.target.checked);
     });
