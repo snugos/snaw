@@ -280,6 +280,12 @@ export function closeMIDITapTempoPanel() {
         panelElement = null;
     }
     panelVisible = false;
+    if (isLearning) {
+        isLearning = false;
+        if (localAppServices.showNotification) {
+            localAppServices.showNotification('MIDI Tap Tempo: learning cancelled.', 2000);
+        }
+    }
 }
 
 function pulsePanelTap() {

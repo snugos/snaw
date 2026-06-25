@@ -1025,6 +1025,13 @@ export function initializePrimaryEventListeners(appContext) {
             }
         }
 
+
+        // Pre-warm the MIDITapTempo module so the first menu click opens the panel instantly.
+        import('./MIDITapTempo.js').then(module => {
+            if (module.initMIDITapTempo) module.initMIDITapTempo(localAppServices);
+            if (module.installGlobalKeyShortcut) module.installGlobalKeyShortcut();
+        }).catch(err => console.error('[EventHandlers] Failed to pre-load MIDITapTempo:', err));
+
         if (uiCache.loadProjectInput) {
             uiCache.loadProjectInput.addEventListener('change', (e) => {
                 if (localAppServices.handleProjectFileLoad) {
@@ -1809,14 +1816,6 @@ export function attachGlobalControlEvents(elements) {
             }).catch(err => console.error('[EventHandlers] Failed to load TapTempoSettings:', err));
         });
     }
-
-    // Pre-warm the MIDITapTempo module so the first menu click opens the panel instantly.
-    console.log('[EventHandlers] Pre-warming MIDITapTempo...');
-    import('./MIDITapTempo.js').then(module => {
-        console.log('[EventHandlers] MIDITapTempo pre-warm loaded; init=' + (module.initMIDITapTempo ? 'true' : 'false'));
-        if (module.initMIDITapTempo) module.initMIDITapTempo(localAppServices);
-        if (module.installGlobalKeyShortcut) module.installGlobalKeyShortcut();
-    }).catch(err => console.error('[EventHandlers] Failed to pre-load MIDITapTempo:', err));
 
     // Initialize Tap Avg Display
     if (window.TapAvgDisplay && window.TapAvgDisplay.initTapAvgDisplay) {
