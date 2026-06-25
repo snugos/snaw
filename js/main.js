@@ -204,6 +204,8 @@ import { initClipReverse, openClipReversePanel, reverseAudioClip, reverseMIDISeq
 import { initQuickVolumeRamp, openQuickVolumeRampPanel, toggleQuickVolumeRampPanel } from './QuickVolumeRamp.js';
 // WebAudio Plugin Host - Load AudioWorklet processors into track effect chains (VST-style plugins)
 import { initWebAudioPluginHost, openWebAudioPluginHostPanel, loadWorkletPlugin, removeWorkletPlugin, bypassWorkletPlugin, setWorkletParam, getLoadedWorkletPlugins, isWorkletPluginLoaded } from './WebAudioPluginHost.js';
+// Track Folder Collapse Memory - remember per-project which track folders are collapsed/expanded (v0.3.76)
+import { initTrackFolderCollapseMemory, rememberFolderCollapse, recallFolderCollapse, applyRememberedCollapseToGroups, applyRememberedCollapseToStacks, clearCurrentProjectCollapseMemory } from './TrackFolderCollapseMemory.js';
 // Sidechain Volume Envelope - Draw ducking curves on clips for sidechain effects
 import { initSidechainVolumeEnvelope, openSidechainVolumeEnvelopePanel, getSidechainEnvelope } from './SidechainVolumeEnvelope.js';
 // Sidechain Visualizer - Visual indicator for sidechain routing and ducking status
@@ -2070,6 +2072,7 @@ async function initializeSnugOS() {
         if (typeof initBounceSelectedToAudio === 'function') initBounceSelectedToAudio(appServices); // Bounce Selected to Audio initialization
         if (typeof initKeyboardOctaveShift === 'function') initKeyboardOctaveShift(appServices); // Keyboard Octave Shift - quick octave up/down
         if (typeof initTimelineZoomMemory === 'function') initTimelineZoomMemory(appServices); // Timeline Zoom Memory - remember zoom per project
+        if (typeof initTrackFolderCollapseMemory === 'function') initTrackFolderCollapseMemory(appServices); // Track Folder Collapse Memory - remember per-project which track folders are collapsed/expanded (v0.3.76)
         if (typeof initCountInAudio === 'function') initCountInAudio(appServices); // Count-In Audio initialization
         if (typeof initCountInSettingsPanel === 'function') initCountInSettingsPanel(appServices); // Count-In Settings Panel initialization
         setTimeout(() => { if (typeof setupCountInUI === 'function') setupCountInUI(); }, 100); // Setup count-in UI controls

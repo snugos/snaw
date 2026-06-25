@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.75"; // 2026-06-25 - MIDI Tap Tempo: use a MIDI controller pad as the tap-tempo source (note/channel filters, learn mode, auto-apply BPM, persistent settings)
+export const APP_VERSION = "0.3.76"; // 2026-06-25 - Track Folder Collapse Memory: remember per-project which track folders are collapsed/expanded across reloads
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks
