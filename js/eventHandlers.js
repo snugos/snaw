@@ -679,6 +679,26 @@ export function initializePrimaryEventListeners(appContext) {
                     localAppServices.openAudioTapTempoPanel?.();
                 } catch(e) { console.error('[Menu] Audio Tap Tempo error:', e); }
             },
+            menuMidiTapTempo: () => {
+                console.log('[Menu] MIDI Tap Tempo clicked');
+                try {
+                    // Always try the global hook first so subsequent clicks are instant.
+                    if (window.MIDITapTempo?.toggleMIDITapTempoPanel) {
+                        window.MIDITapTempo.toggleMIDITapTempoPanel();
+                        return;
+                    }
+                    // First click: dynamically import + init + open the panel.
+                    import('./MIDITapTempo.js').then(m => {
+                        try {
+                            if (m.initMIDITapTempo) m.initMIDITapTempo(localAppServices);
+                            if (m.toggleMIDITapTempoPanel) m.toggleMIDITapTempoPanel();
+                            if (m.installGlobalKeyShortcut) m.installGlobalKeyShortcut();
+                        } catch (openErr) {
+                            console.error('[Menu] MIDI Tap Tempo open error:', openErr);
+                        }
+                    }).catch(err => console.error('[Menu] Failed to load MIDITapTempo:', err));
+                } catch(e) { console.error('[Menu] MIDI Tap Tempo error:', e); }
+            },
             menuAITempoSuggestion: () => {
                 console.log('[Menu] AI Tempo Suggestion clicked');
                 try {
@@ -1790,6 +1810,14 @@ export function attachGlobalControlEvents(elements) {
         });
     }
 
+    // Pre-warm the MIDITapTempo module so the first menu click opens the panel instantly.
+    console.log('[EventHandlers] Pre-warming MIDITapTempo...');
+    import('./MIDITapTempo.js').then(module => {
+        console.log('[EventHandlers] MIDITapTempo pre-warm loaded; init=' + (module.initMIDITapTempo ? 'true' : 'false'));
+        if (module.initMIDITapTempo) module.initMIDITapTempo(localAppServices);
+        if (module.installGlobalKeyShortcut) module.installGlobalKeyShortcut();
+    }).catch(err => console.error('[EventHandlers] Failed to pre-load MIDITapTempo:', err));
+
     // Initialize Tap Avg Display
     if (window.TapAvgDisplay && window.TapAvgDisplay.initTapAvgDisplay) {
         window.TapAvgDisplay.initTapAvgDisplay(localAppServices);
@@ -1971,6 +1999,22 @@ async function handleMIDIMessage(message) {
                     return;
                 }
             }
+        }
+
+        // Handle MIDI Tap Tempo (v0.3.75). When enabled, note-ons that match the
+        // user's configured note/channel filter are consumed as taps instead of
+        // being dispatched to the armed track. This lets the user tap a single
+        // pad or controller button to set the project tempo, using the same
+        // handleTapTempo() pipeline as the `T` key.
+        try {
+            const tapMod = window.MIDITapTempo;
+            if (tapMod && typeof tapMod.handleMIDITapMessage === 'function') {
+                const consumed = await tapMod.handleMIDITapMessage(status, data1, data2, channel);
+                if (consumed) return;
+            }
+        } catch (tapErr) {
+            // Never let a tap-tempo error break the rest of the MIDI path.
+            console.warn('[EventHandlers handleMIDIMessage] MIDITapTempo hook error:', tapErr);
         }
 
         // Handle CC messages for mapped parameters

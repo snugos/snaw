@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.74"; // 2026-06-24 - Automated daily merge & bug fix: syntax fixes in main.js (missing paren in Array.isArray) & Track.js (4 missing parens in wavetable morph); state.js duplicate-declaration corruption flagged for manual review (v0.3.74)
+export const APP_VERSION = "0.3.75"; // 2026-06-25 - MIDI Tap Tempo: use a MIDI controller pad as the tap-tempo source (note/channel filters, learn mode, auto-apply BPM, persistent settings)
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks
