@@ -785,7 +785,29 @@ export function setMasterLimiterEnabled(enabled) {
     masterLimiterEnabled = next;
     // Lazily create the node now so it's ready for the rebuild.
     if (masterLimiterEnabled) {
-        try { getMasterLimiterNode(); } catch(e) { console.warn('[Audio setMasterLimiterEnabled] getMasterLimiterNode failed:', e?.message); }
+        try {
+            const node = getMasterLimiterNode();
+            // If the limiter node failed to create (e.g. Tone.Limiter constructor
+            // threw because the AudioContext isn't running), revert the flag and
+            // surface a user-visible notification. Previously this silently left
+            // masterLimiterEnabled=true while the node was null, so the chain
+            // rebuild skipped the limiter wiring but the UI showed it as "enabled".
+            if (!node) {
+                masterLimiterEnabled = false;
+                console.error('[Audio setMasterLimiterEnabled] getMasterLimiterNode returned null; limiter not wired into chain.');
+                if (localAppServices.showNotification) {
+                    localAppServices.showNotification('Master Limiter: could not create limiter node. Is audio initialized?', 4000);
+                }
+                return masterLimiterEnabled;
+            }
+        } catch(e) {
+            masterLimiterEnabled = false;
+            console.warn('[Audio setMasterLimiterEnabled] getMasterLimiterNode threw:', e?.message);
+            if (localAppServices.showNotification) {
+                localAppServices.showNotification('Master Limiter: could not create limiter node.', 4000);
+            }
+            return masterLimiterEnabled;
+        }
     }
     // Always rebuild so the chain reflects the new state (with/without limiter).
     try {
