@@ -1,3 +1,54 @@
+## Session: 2026-06-24 01:50 UTC (Snaw Repair & Enhancement Agent Run — Day 752)
+
+**Status: NO INCOMPLETE FEATURES FOUND ✅ — state.js intact (8946 lines, 12th clean entry in the recent sequence); 0 TODO/FIXME/STUB markers, 0 orphan modules; parallel Snaw Feature Builder Agent STILL LIVE mid-flight on the SAME TWO coordinated bug fixes from Day 751 (metronome downbeat race fix in `js/audio.js` +72/-5, missing `appServices.addEffectToTrack` in `js/main.js` +55 + `js/MixBusGroupPresets.js` +18 — all 3 uncommitted files pass `node --check`, no new commits since Day 751's `15d3363` automated merge); task's `removeCustomDesktopBackground` ReferenceError confirmed false positive (defined at line 339, **16 occurrences in both local AND deployed `js/main.js`**, fixed in `f921f683` per Day 738); no code authored this run (audit + coordination only)**
+
+### Automated Scan Results:
+- `git pull origin LWB-with-Bugs` (on entry) → Already up to date at `15d3363 Automated daily merge & bug fix (2026-06-24)`.
+- `git status` (on entry) → 3 modified files, unchanged from Day 751: `M js/audio.js` (+72/-5), `M js/main.js` (+55), `M js/MixBusGroupPresets.js` (+18). **Parallel Snaw Feature Builder Agent is STILL LIVE** — same 3 in-progress files from Day 751, still uncommitted.
+- **state.js integrity check**: 8946 lines (intact, unchanged from Days 750/751), `node --check js/state.js` passes. **12th clean entry** in the recent sequence (Days 740–751 all clean; Day 739 was the last truncation).
+- Pattern sweeps (`TODO|FIXME|XXX|HACK|INCOMPLETE|STUB`) over `js/` (excluding `.backup` files) → **0 active-code hits**.
+- No untracked orphan JS files (`git ls-files --others --exclude-standard -- 'js/*.js'` → empty).
+- `git ls-files -- js/*.js | wc -l` → 539 tracked files (unchanged from Day 751).
+- All 3 builder-modified files pass `node --check` individually: `js/audio.js`, `js/main.js`, `js/MixBusGroupPresets.js`. Additionally `js/state.js`, `js/Track.js`, `js/ui.js`, `js/eventHandlers.js` (unmodified) also pass.
+- Current `APP_VERSION` (committed at HEAD): 0.3.73 (unchanged this run; audit only).
+
+### Task's Priority-1 bug (`main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground is not defined`):
+Same documented false positive as Days 738/741/743/744/745/746/747/750/751 — function defined at `js/main.js:339`, exported on `appServices`, mirrored as `window.removeCustomDesktopBackground`. `grep -c "removeCustomDesktopBackground" js/main.js` → **16 occurrences** locally. `curl -s https://snugos.github.io/snaw/js/main.js | grep -c "removeCustomDesktopBackground"` → **16 occurrences** deployed. Per Day 738 entry this was fixed in commit `f921f683`. **No Priority-1 bug to fix this run.**
+
+### Parallel-Builder Coordination (TWO mid-flight fixes, both STILL uncommitted from Day 751):
+Mid-session inspection re-confirmed the parallel Snaw Feature Builder Agent is STILL LIVE — its 3 in-progress files are in the exact same state as Day 751 (no builder commit since Day 751's automated `15d3363` merge):
+
+- **`js/audio.js` (+72/-5): Metronome downbeat race fix** — `startMetronomeScheduling` previously read `Tone.Transport.position` at JS-callback time to test for downbeat. On slow machines the playhead races ahead of the scheduled audio time, mis-flagging beats 2/3/4 as downbeats (high-pitch 1200 Hz click) while the real downbeat gets the low-pitch 440 Hz click. Fix computes beat position from the scheduled `time` arg (pinned to the audio clock, race-free) via `Tone.TransportTime(time).toBarsBeatsSixteenths()`, with legacy fallback. Adds `lastMetronomeBeatKey` tracker. `node --check` passes.
+
+- **`js/main.js` (+55): Missing `appServices.addEffectToTrack`** — The method was referenced by callers (Mix-Bus Group Presets' `applyTrackMix`, project-template loading, track-template application) but never defined on the `appServices` object. Callers silently fell through to a fallback in `MixBusGroupPresets.js` that pushed effect entries with `toneNode: null`, leaving the audio chain empty — applied mix-bus presets / templates would show effects in the UI but produce silence. Fix adds proper `addEffectToTrack` (looks up the track, gets `createEffectInstance` from `effectsRegistryAccess` newly exposed in `initializeSnugOS`, merges default + provided params, creates the Tone.js node, pushes `{id, type, toneNode, params}` to `track.activeEffects`, captures undo unless reconstructing, calls `track.rebuildEffectChain()`, updates track UI, returns the new effect id or null on failure). Also exposes `effectsRegistryAccess.createEffectInstance`. `node --check` passes.
+
+- **`js/MixBusGroupPresets.js` (+18): Fallback path now builds real Tone.js node** — Fallback in `applyTrackMix` (used when `addEffectToTrack` is unavailable) previously pushed `toneNode: null` entries that produced silence. Now uses `effectsRegistryAccess.createEffectInstance` to build a real Tone.js node from the stored `{type, params}` snapshot; if the registry is missing, logs a clear warning and skips the effect rather than pushing a silent entry. `node --check` passes.
+
+- To avoid disrupting the live builder, this run committed ONLY `FEATURE_STATUS.md` + `AGENTS.md` — no JS or HTML files touched. Used `git add <specific-paths>` (not `git add -A`) per the Day 747 lesson about the shared git identity.
+
+### Syntax validation:
+All 3 builder-modified files pass `node --check` — `js/audio.js`, `js/main.js`, `js/MixBusGroupPresets.js`. Additionally `js/state.js`, `js/Track.js`, `js/ui.js`, `js/eventHandlers.js` (unmodified) also pass.
+
+### Deployed-site verification:
+- `curl -s -o /dev/null -w '%{http_code}' https://snugos.github.io/snaw/js/main.js` → 200. Deployed still has the pre-`15d3363` baseline; builder's 3 in-progress fixes will land when it commits.
+- `grep -c "removeCustomDesktopBackground"` → 16 in both local and deployed `js/main.js`, confirming the function is live on production and the ReferenceError is a phantom.
+
+### Files Modified This Run:
+- `FEATURE_STATUS.md` (Day 752 session entry, prepended).
+- `AGENTS.md` (Day 752 entry, prepended).
+- No JS or HTML files touched. The parallel builder's 3 in-progress files were left exactly as the builder left them.
+
+### Features Still in Progress:
+_None from this agent._ Parallel Snaw Feature Builder Agent is STILL LIVE and mid-flight on two coordinated bug fixes (metronome downbeat race fix + missing `addEffectToTrack`), both uncommitted from Day 751.
+
+### Next Features to Tackle:
+_None queued for this repair/enhancement agent; the feature list is stable._
+
+### Action Taken:
+Pulled latest (already up to date at `15d3363`). Confirmed `js/state.js` intact at 8946 lines (12th clean entry — no recurring Day 715/736/739 destructive truncation). Ran the full incomplete-feature scan suite (TODO/FIXME/STUB markers → 0 hits; orphan modules → empty; syntax validation of all 3 builder-modified files + 4 unmodified key files → all pass). Re-detected the parallel Snaw Feature Builder Agent STILL LIVE and mid-flight on the same TWO coordinated bug fixes from Day 751 (all 3 uncommitted, all syntax-valid, both fixes real and well-scoped — unchanged from Day 751). Re-confirmed the task's `removeCustomDesktopBackground` ReferenceError is a documented false positive (16 occurrences in both local AND deployed `js/main.js`, defined at line 339, fixed in `f921f683` per Day 738). Followed the Days 739/740/742/744/747/750/751 coordination pattern: left all 3 builder files untouched, committed only `FEATURE_STATUS.md` + `AGENTS.md` using explicit `git add` paths. No code changes authored this run (audit + coordination only). Updated FEATURE_STATUS.md and AGENTS.md with the Day 752 audit.
+
+---
+
 ## Session: 2026-06-24 01:20 UTC (Snaw Feature Completion Agent Run — Day 751)
 
 **Status: NO INCOMPLETE FEATURES FOUND ✅ — state.js intact (8946 lines, 11th clean entry in the recent sequence); 0 TODO/FIXME/STUB markers, 0 orphan modules; parallel Snaw Feature Builder Agent confirmed LIVE and mid-flight on TWO coordinated bug fixes (metronome downbeat race fix in `js/audio.js` +72/-5, missing `appServices.addEffectToTrack` in `js/main.js` +55 + `js/MixBusGroupPresets.js` +18 — all 3 uncommitted files pass `node --check`, fixes are real and well-scoped); task's `removeCustomDesktopBackground` ReferenceError confirmed false positive (defined at line 339, 16 occurrences, fixed in `f921f683` per Day 738); no code authored this run (audit + coordination only)**
