@@ -1,3 +1,56 @@
+## Session: 2026-06-26 00:05 UTC (Snaw Repair & Enhancement Agent Run — Day 755)
+
+**Status: TASK PRIORITY-1 BUG IS FALSE POSITIVE ✅ (8th consecutive run, Days 738/741/743/744/745/746/747/750/751/752/753/754/755) — `removeCustomDesktopBackground` is defined (js/main.js:339), exported on `appServices` (lines 486, 935), mirrored as `window.removeCustomDesktopBackground` (line 1604), and present **16 times** in both local AND deployed `js/main.js`. Per Day 738 entry this was fixed in commit `f921f683`. NO REAL PRIORITY-1 BUG TO FIX THIS RUN.**
+
+**REAL BUG FOUND + SHIPPED: `applyRememberedCollapseToStacks` Undo-Stack Pollution** in `js/TrackFolderCollapseMemory.js` (v0.3.76, shipped by parallel builder ~22h before this run as commit `0ac7a45`). The function called `mod.toggleStackCollapse(stackId)` for every stack stored as `collapsed: true` in localStorage. That underlying function (`js/TrackStack.js:238-249`) unconditionally calls `localAppServices.captureStateForUndo('Collapse Track Stack "..."')` after toggling — so app-load restore for a project with N remembered-collapsed stacks polluted the undo stack with N spurious "Collapse Track Stack" entries the user never asked for (each one is a no-op since the stack is already collapsed after restore — undoing would just toggle back to expanded, which itself captures another undo entry, creating a cycle). 6-line fix in `js/TrackFolderCollapseMemory.js`: replaced `mod.toggleStackCollapse(stackId)` with direct `stack.isCollapsed = true` mutation followed by `mod.updateTrackVisibility()`, bypassing the wrapped toggle's undo-capture. The toggle wrapper is still in place for genuine user-initiated collapses (TrackStack panel toggle button still calls `toggleStackCollapse` and still captures undo). Diff: +4/-2 lines (one line direct mutation, one line visibility refresh, one updated guard checking `mod.updateTrackVisibility` instead of `mod.toggleStackCollapse`, plus expanded JSDoc explaining the bypass). Smoke test `/tmp/tfcm-smoke.mjs` simulated 3 remembered-collapsed stacks + 1 manual user toggle: before fix → restore captured 3 undo entries (FAIL); after fix → restore captured 0 undo entries, manual toggle still captured 1 undo entry (PASS). Surgical fix — only the restore path bypasses undo, user-facing toggles unchanged. Committed as `7539b8a`, pushed to `origin/LWB-with-Bugs`. Deployed verification: `curl -s https://snugos.github.io/snaw/js/TrackFolderCollapseMemory.js | sed -n '105,135p'` shows the new `stack.isCollapsed = true; mod.updateTrackVisibility();` body — fix confirmed live on GitHub Pages. **No APP_VERSION bump** — small patch to a 1-day-old feature, same pattern as Days 745/747/753/754.
+
+**Pulled +6 commits since Day 754**: `9eadccce` (MIDI Tap Tempo Reset button), `c1866e59` (MixBusGroupPresets toneNode fallback fix), `aeab6451` (addEffectToTrack + createEffectInstance exposure), `b6b50e04` (metronome downbeat race fix), `f8f0694e` (masterLimiterEnabled revert on Tone.Limiter creation failure), `0ac7a45c` (v0.3.76 Track Folder Collapse Memory feature). `js/state.js` intact at 8946 lines (10th clean entry in recent sequence — Days 740-754 all clean; Day 739 was the last truncation). `node --check` passes on all 6 key files: `js/main.js`, `js/state.js`, `js/audio.js`, `js/ui.js`, `js/eventHandlers.js`, `js/TrackFolderCollapseMemory.js`.
+
+## Session: 2026-06-25 01:30 UTC (Snaw Repair & Enhancement Agent Run — Day 754)
+
+**Status: TASK PRIORITY-1 BUG IS FALSE POSITIVE ✅ (7th consecutive run, Days 738/741/743/744/745/746/747/750/751/752/753/754) — `removeCustomDesktopBackground` is defined (js/main.js:339), exported on `appServices` (lines 486, 935), mirrored as `window.removeCustomDesktopBackground` (line 1604), and present **16 times** in both local AND deployed `js/main.js` (`grep -c "removeCustomDesktopBackground" js/main.js` → 16; `curl -s https://snugos.github.io/snaw/js/main.js | grep -c` → 16). Per Day 738 entry this was fixed in commit `f921f683`. NO REAL PRIORITY-1 BUG TO FIX THIS RUN.**
+
+**REAL BUG FOUND + SHIPPED: Sidechain Connect-Failure Silent-`true`** in `js/audio.js`. `enableSidechainFromMic(compressorNode)` + `enableSidechainFromTrackIn(trackId, compressorNode)` wrapped each WebAudio `connect()` call in `try { ... } catch(e) {}` (empty catch) and unconditionally returned `true` after the catch — so when the connect threw (disposed compressor, busy bus, output-channel mismatch, AudioContext closed mid-call), the function returned `true` AND surfaced a misleading "Sidechain: Mic connected to compressor." success toast. The compressor never received the sidechain input but the user had no way to know. 32-line fix in `js/audio.js`: introduced `_connectSidechainNode(src, dst, label)` helper that returns `true`/`false` and surfaces a 4s "Sidechain: Could not connect <label>. <error message>." toast on failure, rewired both `enableSidechainFromMic` call sites (mic-already-open branch + fresh-mic branch) and the `enableSidechainFromTrackIn` call site to gate `return true` on both connects succeeding. Committed as `6b6aac4d` after `git pull --rebase` against the parallel builder's `9eadccce` (v0.3.75-patch MIDI Tap Tempo Reset button), pushed to `origin/LWB-with-Bugs`. Deployed verification: `curl -s https://snugos.github.io/snaw/js/audio.js | grep -c "_connectSidechainNode"` → 7 (1 declaration + 6 call-site references), confirming the fix is live on GitHub Pages. **No APP_VERSION bump** — small patch-level fix, same pattern as Day 745's video-bg diagnostic, Day 747's image-bg diagnostic, Day 753's MIDI Tap Tempo learning-leak fix (all were patch-level fixes that didn't warrant a version bump).
+
+**Parallel-Builder Coordination: NO DISRUPTION** — pulled latest at entry found 4 parallel-builder commits since Day 753 (all small bugfixes to existing files; no new modules, no uncommitted mid-flight work). The fix shipped cleanly after `git pull --rebase` against the parallel builder's HEAD. No coordination pattern was needed this run.
+
+### Automated Scan Results:
+- **TODO/FIXME/XXX/HACK/INCOMPLETE/STUB markers in active `js/` code**: 0 hits (`grep -rn 'TODO\|FIXME\|XXX\|HACK\|STUB\|INCOMPLETE' js/ --include='*.js' | grep -v '.backup' | grep -v '// MARKER_'` → empty).
+- **Untracked orphan JS files**: 0 (`git ls-files --others --exclude-standard -- 'js/*.js'` → empty).
+- **state.js integrity**: 8946 lines (intact, unchanged from Day 753), `node --check js/state.js` passes. **9th clean entry** in the recent sequence (Days 740-753 all clean; Day 739 was the last truncation). No `git checkout HEAD -- js/state.js` recovery needed.
+- **Tracked JS file count**: 540 (`git ls-files -- js/*.js | wc -l` → 540, unchanged from Day 753; the parallel builder's 4 commits this window were all small bugfixes to existing files).
+- **Recent commits**: 4 in the last 30 min (`9eadccce`, `c1866e59`, `aeab6451`, `b6b50e04`) + 1 this run (`6b6aac4d`). **Parallel builder has been very active** — landed the Day 751/752 mid-flight fixes this window (metronome downbeat race + missing `addEffectToTrack` + MixBusGroupPresets fallback), plus the v0.3.75-patch MIDI Tap Tempo Reset button.
+- **Current APP_VERSION** (committed at HEAD before this run): 0.3.75 (unchanged this run; small patch, no version bump).
+
+### Syntax Validation:
+All 5 key files pass `node --check`:
+- `js/main.js` (OK)
+- `js/state.js` (8946 lines, OK)
+- `js/audio.js` (2039 lines after this run's +25 lines, OK)
+- `js/ui.js` (OK)
+- `js/eventHandlers.js` (OK)
+
+### Deployed-Site Verification:
+- `curl -s -o /dev/null -w '%{http_code}' https://snugos.github.io/snaw/js/audio.js` → 200.
+- `curl -s https://snugos.github.io/snaw/js/audio.js | grep -c "_connectSidechainNode"` → **7** (1 declaration + 6 call-site references across the 3 rewired functions). **Fix confirmed live on GitHub Pages.**
+- `curl -s https://snugos.github.io/snaw/js/main.js | grep -c "removeCustomDesktopBackground"` → **16** (confirms the Priority-1 task bug is a phantom: function defined + exported + mirrored + used in production).
+
+### Bug Fixed This Run: Sidechain Connect-Failure Silent-`true`
+- **Symptom**: When the user enables sidechain via `enableSidechainFromMic(compressorNode)` or `enableSidechainFromTrackIn(trackId, compressorNode)`, the two WebAudio `connect()` calls (source → sidechain bus, sidechain bus → compressor) were wrapped in `try { ... } catch(e) {}` (empty catch). If either connect threw (disposed compressor, busy bus, output-channel mismatch, AudioContext closed mid-call), the function would:
+    1. Silently swallow the exception (no `console.warn`, no user notification, no return-`false`).
+    2. Continue executing the success path (e.g. show the "Sidechain: Mic connected to compressor." success toast).
+    3. Return `true` to its caller.
+- **Root cause**: defensive try/catch with empty bodies (3 sites in `js/audio.js`: `enableSidechainFromMic` × 2, `enableSidechainFromTrackIn` × 1) is the same anti-pattern Day 745/747 caught in the desktop-bg path. Connect errors deserve to be surfaced — they signal a real WebAudio constraint violation, not a transient race.
+- **Fix**: introduced a `_connectSidechainNode(src, dst, label)` helper (23 lines including docstring) that:
+    1. Tries `src.connect(dst)` in a try/catch.
+    2. On success, returns `true`.
+    3. On failure, logs `[Audio sidechain] Failed to connect <label>: <error message>` to the console AND surfaces a 4-second user-visible notification `Sidechain: Could not connect <label>. <error message>` via `localAppServices.showNotification` (the same toast helper the rest of the module uses), then returns `false`.
+- **Then rewired the 3 call sites** to:
+    1. Capture the boolean from each connect call.
+    2. Gate `return true` on `ok1 && ok2`.
+    3. Return `false` (and skip the success toast) on any connect failure.
+- The function now reports the truth: if either connect fails, the function returns `false` and the user gets a clear, actionable error message naming which connection failed and why.
+
 ## Session: 2026-06-25 00:50 UTC (Snaw Repair & Enhancement Agent Run — Day 753)
 
 **Status: TASK PRIORITY-1 BUG IS FALSE POSITIVE ✅ (6th consecutive run, Days 738/741/743/744/745/746/747/750/751/752/753) — `removeCustomDesktopBackground` is defined (js/main.js:339), exported on `appServices` (lines 486, 935), mirrored as `window.removeCustomDesktopBackground` (line 1604), and present **16 times** in both local AND deployed `js/main.js` (`grep -c "removeCustomDesktopBackground" js/main.js` → 16; `curl -s https://snugos.github.io/snaw/js/main.js | grep -c` → 16). Per Day 738 entry this was fixed in commit `f921f683`. NO REAL PRIORITY-1 BUG TO FIX THIS RUN.**
