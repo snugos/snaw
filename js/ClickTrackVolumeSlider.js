@@ -22,6 +22,11 @@ let transportSliderBound = false;
 let transportControlEl = null;
 let transportSliderEl = null;
 let transportDisplayEl = null;
+// Handle for the panel-side slider rendered by renderClickTrackVolumePanelSlider.
+// Stored here (instead of relying on DOM lookups) so the transport-toolbar slider
+// can push state changes to the panel slider and vice versa — both sides are
+// declared as a "single source of truth" in state.js, so any change must propagate.
+let panelSliderHandle = null;
 
 /**
  * Push current state-side volume to audio-side gain.
@@ -61,6 +66,11 @@ function syncTransportSliderFromState() {
     const pct = Math.round(vol * 100);
     transportSliderEl.value = String(pct);
     if (transportDisplayEl) transportDisplayEl.textContent = pct + '%';
+    // Propagate to the panel slider (if it's currently mounted) so the two
+    // sliders stay in sync when one is moved without the user touching the other.
+    if (panelSliderHandle && typeof panelSliderHandle.sync === 'function') {
+        try { panelSliderHandle.sync(); } catch (e) { /* noop */ }
+    }
 }
 
 /**
@@ -74,7 +84,9 @@ function handleTransportSliderInput(rawValue) {
         setMetronomeVolumeState(vol);
     }
     applyVolumeToAudioGain(vol);
-    if (transportDisplayEl) transportDisplayEl.textContent = pct + '%';
+    // Use the central sync path so both the transport display AND the panel
+    // slider (when mounted) stay aligned with the new state value.
+    syncTransportSliderFromState();
 }
 
 /**
@@ -198,12 +210,15 @@ export function renderClickTrackVolumePanelSlider(container) {
 
     sync();
 
-    return {
+    const handle = {
         sync,
         destroy: () => {
             try { container.innerHTML = ''; } catch (e) { /* noop */ }
+            if (panelSliderHandle === handle) panelSliderHandle = null;
         }
     };
+    panelSliderHandle = handle;
+    return handle;
 }
 
 /**
