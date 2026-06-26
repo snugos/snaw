@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.76"; // 2026-06-25 - Track Folder Collapse Memory: remember per-project which track folders are collapsed/expanded across reloads
+export const APP_VERSION = "0.3.77"; // 2026-06-26 - Click Track Volume Slider: independent volume control for the metronome click that doesn't affect the project audio
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks

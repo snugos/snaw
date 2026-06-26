@@ -5,6 +5,9 @@ let metronomeInterval = null;
 let currentBeat = 0;
 let isRunning = false;
 
+// Click Track Volume Slider (v0.3.77) - panel-side volume control.
+import { renderClickTrackVolumePanelSlider, getClickTrackVolume, setClickTrackVolume } from './ClickTrackVolumeSlider.js';
+
 // Audio context for click sounds (lazy init)
 let audioContext = null;
 
@@ -339,6 +342,8 @@ function renderMetronomeContent() {
                     ${SOUND_TYPES.map(t => `<option value="${t}" ${settings.soundType === t ? 'selected' : ''}>${SOUND_LABELS[t]}</option>`).join('')}
                 </select>
             </div>
+
+            <div id="metronomeClickVolumeContainer" class="w-full px-2"></div>
         </div>
     `;
     
@@ -383,6 +388,12 @@ function renderMetronomeContent() {
     document.getElementById('metronomeSoundType')?.addEventListener('change', (e) => {
         setMetronomeSoundType(e.target.value);
     });
+
+    // Click Track Volume Slider (v0.3.77) - panel-side row.
+    const clickVolContainer = document.getElementById('metronomeClickVolumeContainer');
+    if (clickVolContainer && typeof renderClickTrackVolumePanelSlider === 'function') {
+        renderClickTrackVolumePanelSlider(clickVolContainer);
+    }
     
     // Tap tempo
     let tapTimes = [];
