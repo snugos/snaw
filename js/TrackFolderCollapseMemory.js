@@ -105,13 +105,16 @@ export function applyRememberedCollapseToGroups() {
 
 /**
  * Apply remembered collapse state to every existing TrackStack entry.
+ * Mutates stack.isCollapsed directly (bypassing mod.toggleStackCollapse so the
+ * restore doesn't pollute the undo stack with N "Collapse Track Stack"
+ * entries the user never asked for), then refreshes visibility.
  * @returns {Promise<number>}
  */
 export async function applyRememberedCollapseToStacks() {
     try {
         const mod = await import('./TrackStack.js');
         if (!mod || typeof mod.getTrackStacks !== 'function'
-                 || typeof mod.toggleStackCollapse !== 'function') return 0;
+                 || typeof mod.updateTrackVisibility !== 'function') return 0;
         const stacks = mod.getTrackStacks();
         if (!stacks || typeof stacks !== 'object') return 0;
         let applied = 0;
@@ -119,7 +122,8 @@ export async function applyRememberedCollapseToStacks() {
             if (!stack || stack.id === undefined) return;
             const remembered = recallFolderCollapse('stack', stack.id);
             if (remembered === true && !stack.isCollapsed) {
-                mod.toggleStackCollapse(stack.id);
+                stack.isCollapsed = true;
+                mod.updateTrackVisibility();
                 applied++;
             }
         });
