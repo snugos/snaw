@@ -1993,6 +1993,9 @@ export async function enableSidechainFromMic(compressorNode) {
         const ok1 = _connectSidechainNode(micForSidechain, bus, 'mic -> sidechain bus');
         const ok2 = _connectSidechainNode(bus, compressorNode, 'sidechain bus -> compressor');
         if (!(ok1 && ok2)) return false;
+        if (localAppServices.showNotification) {
+            localAppServices.showNotification('Sidechain: Mic reconnected to compressor.', 2000);
+        }
         return true;
     }
     try {
@@ -2046,6 +2049,9 @@ export async function enableSidechainFromTrackIn(trackId, compressorNode) {
     const bus = getSidechainBusInput();
     const ok1 = _connectSidechainNode(track.inputChannel, bus, `track ${trackId} input -> sidechain bus`);
     const ok2 = _connectSidechainNode(bus, compressorNode, 'sidechain bus -> compressor');
+    if (ok1 && ok2 && localAppServices.showNotification) {
+        localAppServices.showNotification(`Sidechain: Track ${trackId} input connected to compressor.`, 2000);
+    }
     return ok1 && ok2;
 }
 
