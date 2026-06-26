@@ -45,6 +45,8 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 - **Loop Until Marker** - Extend the active loop region to the next/previous timeline marker (or both adjacent markers); works against Timeline Markers, Loop Region Markers, and state.js markers with auto-merge/dedup; optional auto-mode that re-snaps the loop end when the playhead crosses it (v0.3.63) ✅
 - **Project Search** - Search all track names + clip names + notes for a substring ✅
 - **Drum Pad Trigger Mouse-Over** - When the one-shot preview pad is open, mouse-over each pad to highlight the note name and velocity range; click a single pad to preview just that pad in isolation (v0.3.71) ✅
+- **Click Track Volume Slider** - Independent volume control for the metronome click that doesn't affect the project audio (v0.3.77) ✅
+- **Quick Bounce (in-place)** - Ctrl/Cmd+Shift+B skips the bounce dialog and immediately renders selected clips (or all clips on the first non-empty track if nothing is selected) to audio in place (v0.3.78) ✅
 
 ## Completed Features (recent)
 
@@ -58,11 +60,10 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Click Track Volume Slider** - Independent volume control for the metronome click that doesn't affect the project audio
-2. **Quick-Bounce Markers** - Mark two timeline points and one-click render just the audio between them to a new track
-3. **Drag-to-Reorder Master FX** - Drag master-bus effects in the effects rack to reorder them
-4. **Performance Mode Recall** - Save the current panel layout (open/closed/minimized state for every dockable panel) as a "Performance Mode" you can recall
-5. **Tooltips On Hover For Toolbar Buttons** - Show the keyboard shortcut and a one-line description for every toolbar button on mouseover
+1. **Quick-Bounce Markers** - Mark two timeline points and one-click render just the audio between them to a new track
+2. **Drag-to-Reorder Master FX** - Drag master-bus effects in the effects rack to reorder them
+3. **Performance Mode Recall** - Save the current panel layout (open/closed/minimized state for every dockable panel) as a "Performance Mode" you can recall
+4. **Tooltips On Hover For Toolbar Buttons** - Show the keyboard shortcut and a one-line description for every toolbar button on mouseover
 
 ## Workflow
 
