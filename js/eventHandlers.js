@@ -36,6 +36,8 @@ import {
     // Metronome State
     getMetronomeEnabled, setMetronomeEnabled, getMetronomeVolume, setMetronomeVolume,
     getAdaptiveMetronomeEnabled, setAdaptiveMetronomeEnabled, recordNoteTiming,
+    // Click Track Volume Slider (v0.3.77)
+    refreshClickTrackVolumeSlider,
     // Group Edit State
     getSelectedNotes, getSelectedNotesCount, getActiveSequenceIdForSelection,
     setSelectedNotes, addSelectedNote, removeSelectedNote, toggleSelectedNote,
@@ -1136,39 +1138,23 @@ export function attachGlobalControlEvents(elements) {
                     // If disabling, stop metronome scheduling
                     stopMetronomeScheduling();
                 }
+                // Refresh transport-toolbar click volume slider visibility + value.
+                if (typeof refreshClickTrackVolumeSlider === 'function') {
+                    refreshClickTrackVolumeSlider();
+                }
             }
         });
     }
     // === End Metronome Controls ===
 
     // === Metronome Volume Control ===
-    if (metronomeVolumeSlider) {
-        // Initialize slider value from state
-        if (typeof getMetronomeVolume === 'function') {
-            const vol = getMetronomeVolume();
-            metronomeVolumeSlider.value = Math.round(vol * 100);
-            if (metronomeVolumeDisplay) metronomeVolumeDisplay.textContent = Math.round(vol * 100) + '%';
-        }
-
-        metronomeVolumeSlider.addEventListener('input', (e) => {
-            const vol = parseInt(e.target.value) / 100;
-            if (typeof setMetronomeVolume === 'function') {
-                setMetronomeVolume(vol);
-            }
-            if (metronomeVolumeDisplay) metronomeVolumeDisplay.textContent = e.target.value + '%';
-        });
-
-        metronomeVolumeSlider.addEventListener('change', (e) => {
-            const vol = parseInt(e.target.value) / 100;
-            if (typeof setMetronomeVolume === 'function') {
-                setMetronomeVolume(vol);
-            }
-            // Sync to audio engine
-            if (typeof playMetronomeClick === 'function') {
-                playMetronomeClick(true);
-            }
-        });
-    }
+    // The transport-toolbar metronome volume slider is owned by js/ClickTrackVolumeSlider.js
+    // (Click Track Volume Slider feature, v0.3.77). That module binds the slider on init,
+    // wires it to BOTH state.js's setMetronomeVolume AND audio.js's setMetronomeVolume
+    // (so transport-time scheduled clicks actually get quieter/louder), toggles the
+    // wrapper visibility based on getMetronomeEnabled(), and mirrors the slider into the
+    // standalone Metronome panel. Previously this block only updated state.js, so the
+    // slider had no audible effect on scheduled metronome clicks.
     // === End Metronome Volume Control ===
 
     // === Performance Monitor Button ===
@@ -2404,6 +2390,17 @@ document.addEventListener('keydown', (event) => {
                         localAppServices.showNotification('Bounce feature not available', 2000);
                     }
                 }
+            }
+            return;
+        }
+        // Ctrl+Shift+B - Quick Bounce (no dialog) for selected clips, or all clips on first non-empty track
+        if (key === 'B' && event.shiftKey && (event.ctrlKey || event.metaKey) && !event.altKey) {
+            event.preventDefault();
+            if (typeof localAppServices.quickBounce === 'function') {
+                const selectedClipIds = localAppServices.getSelectedClipIds?.() || [];
+                localAppServices.quickBounce(selectedClipIds);
+            } else if (localAppServices.showNotification) {
+                localAppServices.showNotification('Quick Bounce not available', 2000);
             }
             return;
         }

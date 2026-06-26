@@ -71,6 +71,7 @@ import { initScaleHighlightMode, openScaleHighlightPanel, isNoteInScale, getNote
 import { initScaleHighlightGlobal, openScaleHighlightGlobalPanel, toggleGlobalScaleHighlight, setGlobalScale, setGlobalRootNote, isGlobalScaleHighlightEnabled } from './ScaleHighlightGlobal.js';
 import { initAudioRecorder, startRecording, stopRecording, isRecordingActive, requestMicAccess, getRecordingStatus, cleanupRecording, openAudioRecordingPanel } from './AudioRecorder.js';
 import { initBounceSelectedToAudio, bounceSelectedClipsToAudio, openBounceDialog } from './BounceSelectedToAudio.js';
+import { initQuickBounce, quickBounce } from './QuickBounce.js'; // Quick Bounce (v0.3.78)
 import { initKeyboardOctaveShift, getCurrentOctaveShift, setOctaveShift, resetOctaveShift } from './KeyboardOctaveShift.js';
 import { initTimelineZoomMemory, getStoredZoom, saveZoom } from './TimelineZoomMemory.js';
 import { initCountInAudio, setupCountInUI, playCountIn, isCountInActive } from './CountInAudio.js';
@@ -94,6 +95,7 @@ import { initLyricsTrack, openLyricsTrackPanel, getLyrics, addLyric, importLyric
 import { openTempoRamperPanel } from './TempoRamperUI.js';
 import { initTempoRamperVisual, openTempoRamperVisual } from './TempoRamperVisual.js';
 import { initClipContextMenu } from './ClipContextMenu.js';
+import { initClickTrackVolumeSlider } from './ClickTrackVolumeSlider.js'; // Click Track Volume Slider (v0.3.77)
 import { initClipboardHistoryManager } from './ClipboardHistoryManager.js';
 import { initClipSelectionManager } from './ClipSelectionManager.js';
 import { initClipFadePresets, openClipFadePresetsPanel, closeClipFadePresetsPanel, addFadePreset, getFadePresets, getClipFadeMenuItems, getClipFadeMenuItemsSimple, applyFadePresetToClip } from './ClipFadePresets.js';
@@ -1329,7 +1331,11 @@ const appServices = {
     initBounceSelectedToAudio,
     bounceSelectedClipsToAudio,
     openBounceDialog,
-    
+
+    // Quick Bounce
+    initQuickBounce,
+    quickBounce,
+
     // Keyboard Octave Shift
     initKeyboardOctaveShift,
     getCurrentOctaveShift,
@@ -2043,6 +2049,7 @@ async function initializeSnugOS() {
         if (typeof initTrackHeadphoneMix === 'function') initTrackHeadphoneMix(appServices); // Headphone Mix initialization
         if (typeof initTrackSoloChain === 'function') initTrackSoloChain(appServices); // Track Solo Chain initialization
         if (typeof initMetronomeVisual === 'function') initMetronomeVisual(appServices); // Metronome Visual Beat Indicator
+        if (typeof initClickTrackVolumeSlider === 'function') initClickTrackVolumeSlider(appServices); // Click Track Volume Slider initialization (v0.3.77)
         if (typeof initTempoJumpMarkers === 'function') initTempoJumpMarkers(appServices); // Tempo Jump Markers initialization
         if (typeof initLoopRegionQuickSet === 'function') initLoopRegionQuickSet(appServices); // Loop Region Quick Set initialization
         if (typeof initLoopRegionMarkers === 'function') initLoopRegionMarkers(appServices); // Loop Region Markers initialization
@@ -2070,6 +2077,7 @@ async function initializeSnugOS() {
         if (typeof initClipChopperGridMenu === 'function') { initClipChopperGridMenu(); } // Quick Slice Tool - Shift+S to slice
         if (typeof initAudioRecorder === 'function') initAudioRecorder(appServices); // Audio Recorder initialization
         if (typeof initBounceSelectedToAudio === 'function') initBounceSelectedToAudio(appServices); // Bounce Selected to Audio initialization
+        if (typeof initQuickBounce === 'function') initQuickBounce(appServices); // Quick Bounce initialization (v0.3.78)
         if (typeof initKeyboardOctaveShift === 'function') initKeyboardOctaveShift(appServices); // Keyboard Octave Shift - quick octave up/down
         if (typeof initTimelineZoomMemory === 'function') initTimelineZoomMemory(appServices); // Timeline Zoom Memory - remember zoom per project
         if (typeof initTrackFolderCollapseMemory === 'function') initTrackFolderCollapseMemory(appServices); // Track Folder Collapse Memory - remember per-project which track folders are collapsed/expanded (v0.3.76)
