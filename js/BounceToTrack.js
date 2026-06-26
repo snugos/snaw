@@ -43,7 +43,12 @@ function getSelectedTrack() {
 }
 
 function getSelectedClipIds() {
-    return typeof localAppServices.getSelectedClipIds === 'function' ? (localAppServices.getSelectedClipIds() || []) : [];
+    // ClipSelectionManager.getSelectedClipIds() returns a Set; convert to Array
+    // so .length and array indexing work downstream (panel render, selection guard).
+    const sel = typeof localAppServices.getSelectedClipIds === 'function'
+        ? (localAppServices.getSelectedClipIds() || null)
+        : null;
+    return sel instanceof Set ? Array.from(sel) : (sel || []);
 }
 
 function estimateDuration(track, clipIds = null) {

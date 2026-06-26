@@ -64,9 +64,12 @@ export async function quickBounce() {
         return false;
     }
 
-    const selectedClipIds = typeof localAppServices.getSelectedClipIds === 'function'
-        ? (localAppServices.getSelectedClipIds() || [])
-        : [];
+    const sel = typeof localAppServices.getSelectedClipIds === 'function'
+        ? (localAppServices.getSelectedClipIds() || null)
+        : null;
+    // ClipSelectionManager.getSelectedClipIds() returns a Set; convert to Array
+    // so .length works (Sets have .size, not .length).
+    const selectedClipIds = sel instanceof Set ? Array.from(sel) : (sel || []);
 
     let track = null;
     let clipIds = null;

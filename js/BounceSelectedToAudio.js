@@ -39,7 +39,10 @@ export async function bounceSelectedClipsToAudio(trackId, clipIds = null) {
     // Get clips to bounce
     let clipsToBounce = clipIds;
     if (!clipsToBounce || clipsToBounce.length === 0) {
-        clipsToBounce = localAppServices.getSelectedClipIds?.() || [];
+        // ClipSelectionManager.getSelectedClipIds() returns a Set; convert to Array
+        // so downstream code can index it (clipsToBounce[i]) and read .length.
+        const sel = localAppServices.getSelectedClipIds?.();
+        clipsToBounce = sel instanceof Set ? Array.from(sel) : (sel || []);
     }
 
     if (clipsToBounce.length === 0) {
@@ -211,8 +214,10 @@ export function openBounceDialog(trackId) {
         return;
     }
 
-    const selectedClipIds = localAppServices.getSelectedClipIds?.() || [];
-    
+    const sel = localAppServices.getSelectedClipIds?.();
+    const selectedClipIds = sel instanceof Set ? Array.from(sel) : (sel || []);
+    const selectedClipCount = sel instanceof Set ? sel.size : (selectedClipIds.length || 0);
+
     const contentContainer = document.createElement('div');
     contentContainer.id = 'bounceDialogContent';
     contentContainer.className = 'p-4 bg-gray-100 dark:bg-slate-800';
@@ -224,7 +229,7 @@ export function openBounceDialog(trackId) {
                 Track: <span class="font-medium">${track.name}</span>
             </div>
             <div class="text-sm text-gray-600 dark:text-gray-400">
-                Selected clips: <span class="font-medium">${selectedClipIds.length || 'None'}</span>
+                Selected clips: <span class="font-medium">${selectedClipCount || 'None'}</span>
             </div>
             ${isBouncing ? `
                 <div class="space-y-2">

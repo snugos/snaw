@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.78"; // 2026-06-26 - Quick Bounce: one-click in-place bounce for selected clips (Ctrl/Cmd+Shift+B), plus v0.3.77 Click Track Volume Slider
+export const APP_VERSION = "0.3.79"; // 2026-06-26 - Quick Bounce Set-vs-Array patch: convert ClipSelectionManager.getSelectedClipIds() Set->Array in BounceSelectedToAudio, BounceToTrack, and QuickBounce so .length / indexing work (bouncing selected clips was silently failing). Builds on v0.3.78 Quick Bounce + v0.3.77 Click Track Volume Slider.
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks
