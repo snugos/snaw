@@ -804,6 +804,12 @@ export function initializePrimaryEventListeners(appContext) {
                     localAppServices.openBounceToTrackPanel?.();
                 } catch(e) { console.error('[Menu] Bounce To Track error:', e); }
             },
+            menuQuickBounceMarkers: () => {
+                console.log('[Menu] Quick-Bounce Markers clicked');
+                try {
+                    localAppServices.openQuickBounceMarkersPanel?.();
+                } catch(e) { console.error('[Menu] Quick-Bounce Markers error:', e); }
+            },
             menuWaveformVisualizer: () => {
                 console.log('[Menu] Waveform Visualizer clicked');
                 try {

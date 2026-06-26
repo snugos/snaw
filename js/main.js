@@ -117,6 +117,8 @@ import { initTrackNotes, openNotesPanel as openTrackNotesPanel, openNoteForCurre
 import { initOneShotPreviewPad, initOneShotPreviewPadStateReferences, openOneShotPreviewPadPanel, previewTrackOneShot, stopTrackOneShotPreview, stopAllOneShotPreviews, isTrackPreviewing } from './OneShotPreviewPad.js';
 // Bounce To Track - render track or selected clips to a new audio track
 import { initBounceToTrack, openBounceToTrackPanel, bounceSelectedToTrack, isBounceToTrackActive, getLastBounceResult } from './BounceToTrack.js';
+// Quick-Bounce Markers - mark two timeline points and render only the audio between them to a new audio track
+import { initQuickBounceMarkers, openQuickBounceMarkersPanel, bounceTrackBetweenMarkers, getLastQuickBounce } from './QuickBounceMarkers.js';
 // Waveform Visualizer - draw waveform thumbnails + zoomable waveform for selected audio clip
 import { initWaveformVisualizer, openWaveformVisualizerPanel, isWaveformVisualizerActive } from './WaveformVisualizer.js';
 // Drum Kit Piece Selector - quickly load curated synthesized drum kit pieces into pads of a Sampler (Pads) track
@@ -1127,6 +1129,9 @@ const appServices = {
     bounceSelectedToTrack,
     isBounceToTrackActive,
     getLastBounceResult,
+    openQuickBounceMarkersPanel,
+    bounceTrackBetweenMarkers,
+    getLastQuickBounce,
     openWaveformVisualizerPanel,
     isWaveformVisualizerActive,
     openDrumKitPieceSelectorPanel,
@@ -2163,6 +2168,8 @@ async function initializeSnugOS() {
         );
         // Bounce To Track initialization
         if (typeof initBounceToTrack === 'function') initBounceToTrack(appServices);
+        // Quick-Bounce Markers initialization (v0.3.80)
+        if (typeof initQuickBounceMarkers === 'function') initQuickBounceMarkers(appServices);
         // Waveform Visualizer initialization
         if (typeof initWaveformVisualizer === 'function') initWaveformVisualizer(appServices);
         // Drum Kit Piece Selector initialization
