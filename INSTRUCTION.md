@@ -58,12 +58,12 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 - **Plugin Bypass Per-Track** - Per-track effect-chain bypass (mixer B button + right-click context menu); sources route directly to gainNode while effect settings/params are preserved (v0.3.73) ✅
 - **Tap Tempo MIDI Clock In** - Use a MIDI controller pad as the tap-tempo source instead of the keyboard `T` ✅
 - **Track Folder Collapse Memory** - Remember collapsed state of track folders across sessions ✅
+- **Drag-to-Reorder Master FX** - Drag-and-drop reorder the master-bus effects in the Master Effects Rack window (v0.3.81) ✅
 
 ## Current Feature Queue
 
-1. **Drag-to-Reorder Master FX** - Drag master-bus effects in the effects rack to reorder them
-2. **Performance Mode Recall** - Save the current panel layout (open/closed/minimized state for every dockable panel) as a "Performance Mode" you can recall
-3. **Tooltips On Hover For Toolbar Buttons** - Show the keyboard shortcut and a one-line description for every toolbar button on mouseover
+1. **Performance Mode Recall** - Save the current panel layout (open/closed/minimized state for every dockable panel) as a "Performance Mode" you can recall
+2. **Tooltips On Hover For Toolbar Buttons** - Show the keyboard shortcut and a one-line description for every toolbar button on mouseover
 
 ## Workflow
 

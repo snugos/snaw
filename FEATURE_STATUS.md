@@ -1,3 +1,44 @@
+## Session: 2026-06-26 17:45 UTC (Snaw Feature Builder Agent Run — Day 757)
+
+**Status: SHIPPED — Drag-to-Reorder Master FX (v0.3.81)** via commit `f4b82d5`. Picked the next feature from `INSTRUCTION.md` (Drag-to-Reorder Master FX, position 1 in the queue) and shipped a complete dockable Master Effects Rack window with drag-and-drop reordering, add/remove, bypass, and per-effect parameter editing.
+
+**Feature shipped: Drag-to-Reorder Master FX (v0.3.81)** — A new dockable Master Effects Rack window that exposes the previously hidden master-bus effects chain:
+- **New module** `js/MasterEffectsRack.js` (519 lines): `initMasterEffectsRack(services)` (wires up the module), `openMasterEffectsRackWindow(winState)` (creates the dockable window via `appServices.createWindow`), `renderMasterEffectsRackPanel(container)` (re-renders the panel — called from `appServices.updateMasterEffectsRackUI`), `getMasterEffectsRackVersion()`, `isMasterEffectsRackOpen()`.
+- **Drag-and-drop reorder** (the headline feature): each effect row has a `⋮⋮` drag handle on the left (`mer-drag-handle`, marked `draggable="true"`). Native HTML5 drag-and-drop API used (same pattern as `js/TrackLaneReorder.js`). On dragover, a cyan top/bottom border highlights where the drop will land (CSS classes `.mer-drop-before` / `.mer-drop-after`). Drop calculates the new index based on mouse Y midpoint and calls `appServices.reorderMasterEffect(effectId, newIndex)`, which routes through `reorderMasterEffectInState` (state.js:2072) and `reorderMasterEffectInAudio` (audio.js:1167 — which calls `rebuildMasterEffectChain` to re-wire the audio chain in the new order).
+- **Add effects**: dropdown + Add button at the top of the panel, populated from `appServices.effectsRegistryAccess.AVAILABLE_EFFECTS`. Calls `appServices.addMasterEffect(effectType)` (already existed in main.js:911).
+- **Remove effects**: per-row red `✕` button. Calls `appServices.removeMasterEffect(effectId)` (already existed in main.js:928).
+- **Bypass effects**: per-row yellow/gray `BYP`/`ON` button. Routes through `appServices.toggleMasterEffectBypass(effectId)` (NEW — wired this run, since state.js:2082 already had `toggleMasterEffectBypass` but it was never exposed on appServices) → state mutates `effect.bypassed` + `effect.params.wet` (saving previous wet to `previousWetValue` for un-bypass restore) → calls `appServices.setMasterEffectWet` (NEW — wired this run; audio.js:1172 already had `setMasterEffectWet` but it was never exposed on appServices) → ramps the Tone.js effect node's wet param.
+- **Per-effect parameter editor**: clicking an effect row selects it (highlighted with blue border); the bottom half of the panel renders the effect's parameter definitions via `appServices.effectsRegistryAccess.getEffectParamDefinitions(effectType)` — sliders for `knob` type (with live readouts in cyan), dropdowns for `select` type, checkboxes for `checkbox` type. Changes call `appServices.updateMasterEffectParam(effectId, paramPath, value)` which routes through `updateMasterEffectParamInState` + `updateMasterEffectParamInAudio` (both already existed in main.js:944).
+- **Undo integration**: `reorderMasterEffect` and `toggleMasterEffectBypass` both capture undo state via `appServices.captureStateForUndo` (the same path the existing `addMasterEffect`/`removeMasterEffect` use), so every rack mutation is undoable.
+
+**Why this matters**: `state.js` already had `addMasterEffectToState`/`removeMasterEffectFromState`/`updateMasterEffectParamInState`/`reorderMasterEffectInState`/`toggleMasterEffectBypass`, and `audio.js` had `addMasterEffectToAudio`/`removeMasterEffectFromAudio`/`updateMasterEffectParamInAudio`/`reorderMasterEffectInAudio`/`setMasterEffectWet`, and `main.js` already wired `appServices.addMasterEffect`/`removeMasterEffect`/`updateMasterEffectParam`/`reorderMasterEffect`. The `masterEffectsChainState` was fully functional in state.js (loaded/saved with projects). The Start menu had a `menuOpenMasterEffects` entry that called `appServices.openMasterEffectsRackWindow` — **but that function was never defined**. Clicking "Master Effects Rack" from the Start menu silently no-op'd (eventHandlers.js:339 used optional chaining `?.()`). The entire master FX chain was orphaned — users could load projects with master effects but had no way to see, add, remove, reorder, or edit them at runtime. This run builds the missing UI window (the headline Drag-to-Reorder feature is the most-visible piece, but the whole panel completes the master FX chain UX).
+
+**Files modified**:
+- `js/MasterEffectsRack.js` (NEW, 519 lines)
+- `js/main.js` (+25/-12 lines: import + appServices exports + init call + 2 new appServices functions `toggleMasterEffectBypass` and `setMasterEffectWet` + fix to `updateMasterEffectsRackUI` which was previously broken — it called `renderEffectsList` which was never defined, now calls `renderMasterEffectsRackPanel`)
+- `js/constants.js` (APP_VERSION 0.3.80 → 0.3.81)
+- `style.css` (+13 lines: `.mer-drop-before` / `.mer-drop-after` cyan top/bottom border indicators + `.mer-drag-handle:active { cursor: grabbing }`)
+- `INSTRUCTION.md` (queue updated: Drag-to-Reorder Master FX shipped → Performance Mode Recall is now queue position 1)
+
+**No `state.js`/`audio.js`/`eventHandlers.js` changes**: those modules already had every needed function. This run purely wires them up + builds the UI.
+
+**Syntax validation**: `node --check` passes on all modified files — `js/MasterEffectsRack.js`, `js/main.js`, `js/constants.js`.
+
+**Deployed-site verification**: `curl -s https://snugos.github.io/snaw/js/MasterEffectsRack.js | head -3` → 200 OK with the new file. `curl -s https://snugos.github.io/snaw/js/constants.js | grep "APP_VERSION"` → `"0.3.81"`. `curl -s https://snugos.github.io/snaw/js/main.js | grep -c "MasterEffectsRack"` → 11 (import + init + 2 service functions + export + 2 references in `updateMasterEffectsRackUI` + comment). Module is loadable from the deployed page via dynamic import (verified via `agent-browser eval` → `await import('https://snugos.github.io/snaw/js/MasterEffectsRack.js')` returns the 5 expected exports: `getMasterEffectsRackVersion, initMasterEffectsRack, isMasterEffectsRackOpen, openMasterEffectsRackWindow, renderMasterEffectsRackPanel`).
+
+**Browser smoke (via agent-browser)**:
+- Dynamic import of `js/MasterEffectsRack.js` succeeds, all 5 public exports are functions.
+- `renderMasterEffectsRackPanel` renders 3 master effect rows (mock state with 3 effects) — each row has 1 drag handle, 1 bypass button, 1 remove button, all marked `draggable="true"` for the handle.
+- Simulated dragstart/dragover/drop sequence correctly populates `_draggedEffectId` from `dataTransfer.setData` and calls the reorder callback with the correct target index.
+- `openMasterEffectsRackWindow` creates a window with title "Master Effects Rack" and the correct content container `#masterEffectsRackContent`.
+- Static analysis confirms all `appServices` calls (addMasterEffect / removeMasterEffect / updateMasterEffectParam / reorderMasterEffect / toggleMasterEffectBypass / setMasterEffectWet / getMasterEffectsState / updateMasterEffectsRackUI / showNotification / captureStateForUndo) are present in the deployed main.js.
+
+**Note on app boot**: The deployed site has a pre-existing `state.js` SyntaxError (`Identifier 'exportPresets' has already been declared` at 4 duplicate `let exportPresets = {};` lines) that blocks full `window.appServices` initialization. This is a known bug for the parallel Snaw Repair & Enhancement Agent (mentioned in Day 755's FEATURE_STATUS session entry: *"`state.js` has duplicate `let exportPresets = {};` declarations at 4 locations (lines 1156, 3873, 6305, 8737). This is a SyntaxError when the module is parsed as a single unit and breaks the entire app's boot"*). The drag-to-reorder feature itself works (verified via direct dynamic import + `openMasterEffectsRackWindow` + `renderMasterEffectsRackPanel` calls), and will be fully wired once the repair agent resolves the `state.js` SyntaxError. This is out of scope for the feature builder.
+
+**Next features to tackle**: Per `INSTRUCTION.md` current queue — Performance Mode Recall (save/restore panel layout as a preset), Tooltips On Hover For Toolbar Buttons (tooltip each toolbar button with its keyboard shortcut + one-line description).
+
+---
+
 ## Session: 2026-06-26 17:15 UTC (Snaw Repair & Enhancement Agent Run — Day 757)
 
 **Status: TASK PRIORITY-1 BUG IS FALSE POSITIVE ✅ (13th consecutive run, Days 738/741/743/744/745/746/747/750/751/752/753/754/755/755 Run 2/756/757) — `removeCustomDesktopBackground` is defined, exported, mirrored, and present 16 times in both local AND deployed `js/main.js`. Per Day 738 entry this was fixed in commit `f921f683`. NO REAL PRIORITY-1 BUG TO FIX THIS RUN.**
