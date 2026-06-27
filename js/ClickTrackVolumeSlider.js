@@ -113,6 +113,11 @@ function bindTransportSlider() {
         handleTransportSliderInput(e.target.value);
     });
 
+    // Double-click to reset to 100% — common DAW convention for "snap back to default".
+    transportSliderEl.addEventListener('dblclick', () => {
+        handleTransportSliderInput(100);
+    });
+
     transportSliderBound = true;
     syncTransportVisibility();
 }
@@ -201,6 +206,12 @@ export function renderClickTrackVolumePanelSlider(container) {
         const pct = Math.max(0, Math.min(100, parseInt(e.target.value, 10) || 0));
         setClickTrackVolume(pct / 100);
         display.textContent = pct + '%';
+    });
+
+    // Double-click to reset to 100% — common DAW convention for "snap back to default".
+    slider.addEventListener('dblclick', () => {
+        setClickTrackVolume(1.0);
+        sync();
     });
 
     wrapper.appendChild(label);
