@@ -1213,6 +1213,35 @@ const appServices = {
             return typeof getMasterMeterNode === 'function' ? getMasterMeterNode() : null;
         } catch (e) { return null; }
     },
+    // --- Master effects state passthrough ---
+    // v0.3.81 ships the Master Effects Rack UI and the audio chain
+    // (rebuildMasterEffectChain in audio.js) but never wired the state getter
+    // onto appServices. As a result every consumer site that reads
+    // `localAppServices.getMasterEffects?.()` or
+    // `localAppServices.getMasterEffectsState?.()` silently no-ops — the UI
+    // always renders "No master effects yet" and adding a master effect
+    // updates the state store but never rebuilds the audio chain. Both keys
+    // are exposed so callers using either name (`getMasterEffects` in
+    // PresetMorphing.js / audio.js / eventHandlers.js; `getMasterEffectsState`
+    // in MasterEffectsRack.js / ui.js) resolve to the same state array.
+    getMasterEffects: () => {
+        try {
+            const arr = typeof getMasterEffectsState === 'function' ? getMasterEffectsState() : [];
+            return Array.isArray(arr) ? arr : [];
+        } catch (e) {
+            console.warn('[appServices.getMasterEffects] Error reading state:', e);
+            return [];
+        }
+    },
+    getMasterEffectsState: () => {
+        try {
+            const arr = typeof getMasterEffectsState === 'function' ? getMasterEffectsState() : [];
+            return Array.isArray(arr) ? arr : [];
+        } catch (e) {
+            console.warn('[appServices.getMasterEffectsState] Error reading state:', e);
+            return [];
+        }
+    },
     openDuplicateOffsetDialog,
     openTrackIconPickerPanel,
     openChordVoicingPanel,
