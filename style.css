@@ -864,3 +864,16 @@ input::placeholder,
 .perf-indicator .perf-divider {
     color: #555;
 }
+
+/* Master Effects Rack drag-to-reorder visual feedback */
+.mer-drop-before {
+    box-shadow: inset 0 3px 0 0 #38bdf8 !important;
+    background-color: rgba(56, 189, 248, 0.1) !important;
+}
+.mer-drop-after {
+    box-shadow: inset 0 -3px 0 0 #38bdf8 !important;
+    background-color: rgba(56, 189, 248, 0.1) !important;
+}
+.mer-drag-handle:active {
+    cursor: grabbing;
+}

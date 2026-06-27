@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.80"; // 2026-06-26 - Quick-Bounce Markers: mark start + end on the timeline and one-click render just the audio between them to a new track (M = set start, Shift+M = set end). Includes v0.3.79 Set-vs-Array bounce fix, v0.3.78 Quick Bounce, v0.3.77 Click Track Volume Slider.
+export const APP_VERSION = "0.3.81"; // 2026-06-26 - Drag-to-Reorder Master FX: new Master Effects Rack window with drag-to-reorder, add/remove/bypass, and per-effect parameter editors. Includes v0.3.80 Quick-Bounce Markers, v0.3.79 Set-vs-Array bounce fix, v0.3.78 Quick Bounce, v0.3.77 Click Track Volume Slider.
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks

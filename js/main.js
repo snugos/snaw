@@ -130,6 +130,7 @@ import { initSendsOverviewPanel, openSendsOverviewPanel, isSendsOverviewPanelAct
 import { initProjectSearch, openProjectSearchPanel, isProjectSearchPanelOpen, searchProject } from './ProjectSearch.js';
 // Master Limiter - brick-wall master limiter toggle (Tone.Limiter at the end of the master chain)
 import { initMasterLimiter, openMasterLimiterPanel, isMasterLimiterEnabled } from './MasterLimiter.js';
+import { initMasterEffectsRack, openMasterEffectsRackWindow, renderMasterEffectsRackPanel } from './MasterEffectsRack.js';
 // Mix-Bus Group Presets - save & re-apply whole-mix state across a set of tracks (volume, pan, mute/solo, color, effects, sends, detune)
 import { initMixBusGroupPresets, openMixBusGroupPresetsPanel, listMixBusGroupPresets, getMixBusGroupPreset, captureMixBusGroupPreset, applyMixBusGroupPreset, deleteMixBusGroupPreset } from './MixBusGroupPresets.js';
 // Guitar Tab Editor
@@ -240,7 +241,7 @@ import * as FeatureAdditions from './FeatureAdditions.js';
 // build a File with the correct MIME type for the sound browser drop pipeline.
 // getMasterMeterNode is used by the Loudness Meter panel to tap the master bus for
 // true-peak analysis and to read the per-tick dB value for LUFS computation.
-import { getMimeTypeFromFilename, getMasterMeterNode, getMasterLimiterNode, setMasterLimiterEnabled, setMasterLimiterThresholdDb, setMasterLimiterCeilingDb, getMasterLimiterReductionDb, getMasterLimiterThresholdDb, getMasterLimiterCeilingDb, isMasterLimiterEnabled as audioIsMasterLimiterEnabledImpl } from './audio.js';
+import { getMimeTypeFromFilename, getMasterMeterNode, getMasterLimiterNode, setMasterLimiterEnabled, setMasterLimiterThresholdDb, setMasterLimiterCeilingDb, getMasterLimiterReductionDb, getMasterLimiterThresholdDb, getMasterLimiterCeilingDb, isMasterLimiterEnabled as audioIsMasterLimiterEnabledImpl, setMasterEffectWet } from './audio.js';
 // setupGenericDropZoneListeners is imported here but used via appServices by ui.js
 import { showNotification as utilShowNotification, createContextMenu, createDropZoneHTML, setupGenericDropZoneListeners } from './utils.js';
 import { openKeyboardShortcutsPanel } from './ui.js';
@@ -284,7 +285,7 @@ import {
     setRecordingTrackIdState, setRecordingStartTimeState, setActiveSequencerTrackIdState,
     setPlaybackModeState,
     addMasterEffectToState, removeMasterEffectFromState,
-    updateMasterEffectParamInState, reorderMasterEffectInState,
+    updateMasterEffectParamInState, reorderMasterEffectInState, toggleMasterEffectBypass,
     // MIDI Learn
     getMidiLearnMode, setMidiLearnMode, getMidiLearnTarget, setMidiLearnTarget,
     getMidiMappings, addMidiMapping, removeMidiMapping, getMidiMappingForCC, clearAllMidiMappings,
@@ -957,6 +958,20 @@ const appServices = {
             showSafeNotification("Failed to reorder master effect.", 3000);
         }
     },
+    toggleMasterEffectBypass: (effectId) => {
+        try {
+            const isReconstructing = appServices.getIsReconstructingDAW ? appServices.getIsReconstructingDAW() : false;
+            if (!isReconstructing && appServices.captureStateForUndo) appServices.captureStateForUndo(`Bypass Master effect`);
+            toggleMasterEffectBypass(effectId);
+            if (appServices.updateMasterEffectsRackUI) appServices.updateMasterEffectsRackUI();
+        } catch (error) {
+            console.error(`[Main toggleMasterEffectBypass] Error toggling bypass for ${effectId}:`, error);
+        }
+    },
+    setMasterEffectWet: (effectId, wetValue) => {
+        try { setMasterEffectWet(effectId, wetValue); }
+        catch (error) { console.error(`[Main setMasterEffectWet] Error setting wet for ${effectId}:`, error); }
+    },
     setActualMasterVolume: (volumeValue) => {
         if (typeof getActualMasterGainNodeFromAudio === 'function') {
             const actualMasterNode = getActualMasterGainNodeFromAudio();
@@ -1078,12 +1093,11 @@ const appServices = {
     updateMasterEffectsRackUI: () => {
         try {
             const masterRackWindow = getWindowByIdState('masterEffectsRack');
-            if (masterRackWindow?.element && !masterRackWindow.isMinimized && typeof renderEffectsList === 'function') {
-                const listDiv = masterRackWindow.element.querySelector('#effectsList-master');
-                const controlsContainer = masterRackWindow.element.querySelector('#effectControlsContainer-master');
-                if (listDiv && controlsContainer) {
-                    renderEffectsList(null, 'master', listDiv, controlsContainer);
-                } else { console.warn("Master effects rack UI elements not found for update."); }
+            if (masterRackWindow?.element && !masterRackWindow.isMinimized) {
+                const container = masterRackWindow.element.querySelector('#masterEffectsRackContent');
+                if (container && typeof renderMasterEffectsRackPanel === 'function') {
+                    renderMasterEffectsRackPanel(container);
+                }
             }
         } catch (error) { console.warn("[Main updateMasterEffectsRackUI] Error:", error); }
     },
@@ -1152,6 +1166,8 @@ const appServices = {
     // Master Limiter - brick-wall limiter toggle panel
     openMasterLimiterPanel,
     isMasterLimiterEnabled,
+    // Master Effects Rack - drag-to-reorder master FX UI (v0.3.81)
+    openMasterEffectsRackWindow,
     // Mix-Bus Group Presets - save & re-apply whole-mix state across a set of tracks (v0.3.72)
     initMixBusGroupPresets,
     openMixBusGroupPresetsPanel,
@@ -2182,6 +2198,8 @@ async function initializeSnugOS() {
         if (typeof initProjectSearch === 'function') initProjectSearch(appServices);
         // Master Limiter initialization (brick-wall limiter toggle)
         if (typeof initMasterLimiter === 'function') initMasterLimiter(appServices);
+        // Master Effects Rack initialization (drag-to-reorder master FX UI, v0.3.81)
+        if (typeof initMasterEffectsRack === 'function') initMasterEffectsRack(appServices);
         // Mix-Bus Group Presets initialization (v0.3.72)
         if (typeof initMixBusGroupPresets === 'function') initMixBusGroupPresets(appServices);
         // WebAudio Plugin Host initialization (load AudioWorklet processors into track chains)
