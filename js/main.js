@@ -133,6 +133,8 @@ import { initMasterLimiter, openMasterLimiterPanel, isMasterLimiterEnabled } fro
 import { initMasterEffectsRack, openMasterEffectsRackWindow, renderMasterEffectsRackPanel } from './MasterEffectsRack.js';
 // Mix-Bus Group Presets - save & re-apply whole-mix state across a set of tracks (volume, pan, mute/solo, color, effects, sends, detune)
 import { initMixBusGroupPresets, openMixBusGroupPresetsPanel, listMixBusGroupPresets, getMixBusGroupPreset, captureMixBusGroupPreset, applyMixBusGroupPreset, deleteMixBusGroupPreset } from './MixBusGroupPresets.js';
+// Performance Mode Recall - save & recall panel-layout snapshots (which panels are open/minimized) as named presets
+import { initPerformanceModeRecall, openPerformanceModeRecallPanel, isPerformanceModeRecallPanelOpen, getPerformanceModeRecallVersion, registerWindowOpener as registerPerformanceModeWindowOpener, unregisterWindowOpener as unregisterPerformanceModeWindowOpener } from './PerformanceModeRecall.js';
 // Guitar Tab Editor
 import { initGuitarTabEditor, openGuitarTabEditor } from './GuitarTabEditor.js';
 import { initTrackColorPanel, openTrackColorPanel } from './TrackColorPanel.js';
@@ -1176,6 +1178,13 @@ const appServices = {
     captureMixBusGroupPreset,
     applyMixBusGroupPreset,
     deleteMixBusGroupPreset,
+    // Performance Mode Recall - save & recall panel-layout snapshots (which panels are open/minimized) as named presets
+    initPerformanceModeRecall,
+    openPerformanceModeRecallPanel,
+    isPerformanceModeRecallPanelOpen,
+    getPerformanceModeRecallVersion,
+    registerPerformanceModeWindowOpener,
+    unregisterPerformanceModeWindowOpener,
     // Master Limiter audio.js accessors — the MasterLimiter.js module calls these
     // to wire/unwire the limiter into the master effect chain (v0.3.65 — Master Limiter feature).
     getMasterLimiterNode,
@@ -2231,6 +2240,25 @@ async function initializeSnugOS() {
         if (typeof initMasterEffectsRack === 'function') initMasterEffectsRack(appServices);
         // Mix-Bus Group Presets initialization (v0.3.72)
         if (typeof initMixBusGroupPresets === 'function') initMixBusGroupPresets(appServices);
+        // Performance Mode Recall initialization (v0.3.82 - save/recall panel layouts)
+        if (typeof initPerformanceModeRecall === 'function') initPerformanceModeRecall(appServices);
+        // Register openers for built-in panels so Performance Mode Recall can reopen them
+        // (openers take no args and re-open the panel). Adding more is harmless — unknown
+        // ids in a preset are simply logged and skipped, so this is safe across revisions.
+        if (typeof registerPerformanceModeWindowOpener === 'function') {
+            try { registerPerformanceModeWindowOpener('mixer', () => appServices.openMixerWindow?.()); } catch (_) {}
+            try { registerPerformanceModeWindowOpener('masterEffectsRack', () => appServices.openMasterEffectsRackWindow?.()); } catch (_) {}
+            try { registerPerformanceModeWindowOpener('masterLimiter', () => appServices.openMasterLimiterPanel?.()); } catch (_) {}
+            try { registerPerformanceModeWindowOpener('loudnessMeter', () => appServices.openLoudnessMeterPanel?.()); } catch (_) {}
+            try { registerPerformanceModeWindowOpener('sendsOverview', () => appServices.openSendsOverviewPanel?.()); } catch (_) {}
+            try { registerPerformanceModeWindowOpener('pianoRollEditor', () => appServices.openPianoRollEditor?.()); } catch (_) {}
+            try { registerPerformanceModeWindowOpener('mixBusGroupPresets', () => appServices.openMixBusGroupPresetsPanel?.()); } catch (_) {}
+            try { registerPerformanceModeWindowOpener('mixerChannelStripPresets', () => appServices.openMixerChannelStripPresetsPanel?.()); } catch (_) {}
+            try { registerPerformanceModeWindowOpener('quickStack', () => appServices.openQuickStackPanel?.()); } catch (_) {}
+            try { registerPerformanceModeWindowOpener('clickTrackVolume', () => appServices.openClickTrackVolumePanel?.()); } catch (_) {}
+            try { registerPerformanceModeWindowOpener('projectSearch', () => appServices.openProjectSearchPanel?.()); } catch (_) {}
+            try { registerPerformanceModeWindowOpener('transportTimecode', () => appServices.openTransportTimecodeUI?.()); } catch (_) {}
+        }
         // WebAudio Plugin Host initialization (load AudioWorklet processors into track chains)
         if (typeof initWebAudioPluginHost === 'function') initWebAudioPluginHost(appServices);
         // After the timeline renders existing tracks, paint note indicators for any

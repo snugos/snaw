@@ -858,6 +858,12 @@ export function initializePrimaryEventListeners(appContext) {
                     localAppServices.openMixBusGroupPresetsPanel?.();
                 } catch(e) { console.error('[Menu] Mix-Bus Group Presets error:', e); }
             },
+            menuPerformanceModeRecall: () => {
+                console.log('[Menu] Performance Mode Recall clicked');
+                try {
+                    localAppServices.openPerformanceModeRecallPanel?.();
+                } catch(e) { console.error('[Menu] Performance Mode Recall error:', e); }
+            },
             menuWebAudioPluginHost: () => {
                 console.log('[Menu] WebAudio Plugin Host clicked');
                 try {

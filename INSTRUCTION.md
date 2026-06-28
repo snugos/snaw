@@ -62,8 +62,7 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Performance Mode Recall** - Save the current panel layout (open/closed/minimized state for every dockable panel) as a "Performance Mode" you can recall
-2. **Tooltips On Hover For Toolbar Buttons** - Show the keyboard shortcut and a one-line description for every toolbar button on mouseover
+1. **Tooltips On Hover For Toolbar Buttons** - Show the keyboard shortcut and a one-line description for every toolbar button on mouseover
 
 ## Workflow
 
