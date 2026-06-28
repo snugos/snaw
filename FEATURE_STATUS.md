@@ -1,3 +1,32 @@
+## Session: 2026-06-28 00:50 UTC (Snaw Repair Agent Run — Day 758 Run 2)
+
+**Status: SHIPPED — ToolbarTooltips refresh wiring fix** via commit `fdbdce6`. Found and fixed a silent runtime bug in the freshly-shipped v0.3.83 Toolbar Tooltips module (`js/ToolbarTooltips.js`, `1ddfc7d5`): `refreshToolbarTooltipTargets()` is exported on the module and imported in `js/main.js:134`, but was **never called** anywhere AND **never exposed on `appServices`**. Net effect: `ToolbarTooltips._attach()` runs once at `initToolbarTooltips(appServices)` (main.js:2245) and walks the DOM attaching `mouseenter`/`mousemove`/`mouseleave` listeners to every `[title]` element in `#globalControlsBar` / `#taskbar` / `#statusBar` / `#startMenu` that exists AT INIT TIME. But `SnugWindow.createTaskbarButton()` (`js/SnugWindow.js:363`) is called every time a window opens and dynamically `appendChild`s a new `<button class="taskbar-button" title="…">` to `#taskbarButtons`. Those new buttons NEVER get custom tooltips — users only see the slow native browser `title` tooltip on the new taskbar entries, defeating the entire point of the v0.3.83 feature for any non-initial window. 13-line fix: (a) `js/SnugWindow.js` — added a defensive `try { if (typeof this.appServices.refreshToolbarTooltipTargets === 'function') this.appServices.refreshToolbarTooltipTargets(); } catch (e) { console.warn(...) }` call inside `createTaskbarButton` right after the `appendChild` line (12 lines total: 7-line comment block + 5-line try/catch); (b) `js/main.js` — added `refreshToolbarTooltipTargets,` to the `appServices` object (1 line). Smoke-tested via `/tmp/snugwindow-tooltip-fix-smoke.mjs` — all 4 structural assertions pass. **No APP_VERSION bump** — small wiring fix to a 3.5-hour-old feature, same patch-level pattern as Days 745/747/753/754/755 Run 2/756/757/757 Run 2/758/758 Run 2. Priority-1 `removeCustomDesktopBackground` ReferenceError remains a documented false positive for the **16th consecutive run** (16 occurrences in both local AND deployed `js/main.js`).
+
+### Automated Scan Results:
+- **TODO/FIXME/XXX/HACK/INCOMPLETE/STUB markers in active `js/` code**: 0 hits.
+- **Untracked orphan JS files**: 0.
+- **state.js integrity**: 8946 lines on disk, `node --check js/state.js` passes. **14th clean entry** in the recent sequence.
+- **Tracked JS file count**: 546 (was 544 at Day 758 Run 1 — gained `js/PerformanceModeRecall.js` from v0.3.82 and `js/ToolbarTooltips.js` from v0.3.83).
+- **Recent commits**: 3 in the last ~4h (parallel builder: `11afabe feat: Performance Mode Recall (v0.3.82)`, `088295ea fix(MasterEffectsRack): double-click on range param slider resets it to its default`, `1ddfc7d5 feat: Toolbar Tooltips (v0.3.83)`).
+- **Current APP_VERSION** (committed at HEAD after this run): 0.3.83 (Toolbar Tooltips — unchanged this run; small wiring fix, no version bump).
+
+### Syntax Validation:
+Both modified files pass `node --check`:
+- `js/SnugWindow.js` (593 lines after this run's +12 lines — verified)
+- `js/main.js` (2846 lines after this run's +1 line — verified)
+
+### Deployed-Site Verification:
+- `curl -s https://snugos.github.io/snaw/js/SnugWindow.js | grep -c "refreshToolbarTooltipTargets"` → **4** (the call + comment + try/catch + typeof check all live, deploy confirmed after 30s).
+- `curl -s https://snugos.github.io/snaw/js/SnugWindow.js | wc -l` → 592 lines (file deployed in full, no truncation).
+- `curl -s https://snugos.github.io/snaw/js/main.js | grep -c "refreshToolbarTooltipTargets"` → 1 (the new `appServices` export is live; the original import at line 134 is in the deployed file but grep counts only unique matches by line).
+- `curl -s https://snugos.github.io/snaw/js/main.js | grep -c "removeCustomDesktopBackground"` → 16 (Priority-1 task bug remains a phantom).
+- `curl -s https://snugos.github.io/snaw/js/constants.js | grep "^export const APP_VERSION"` → `0.3.83` (Toolbar Tooltips from `1ddfc7d5` is live).
+
+### Action Taken:
+Pulled latest (already at v0.3.83 HEAD `1ddfc7d5`, clean). Confirmed `js/state.js` intact at 8946 lines (14th clean entry). Confirmed the task's `removeCustomDesktopBackground` ReferenceError is a documented false positive (16 occurrences in both local and deployed `js/main.js`). Inspected `js/ToolbarTooltips.js` (the v0.3.83 module) and discovered `refreshToolbarTooltipTargets` was defined AND imported but never called anywhere AND never exposed on `appServices`. Inspected `js/SnugWindow.js:createTaskbarButton` to confirm taskbar buttons are dynamically added on every window open (yes — line 374 `appendChild`). Added the defensive try/catch refresh call right after `appendChild` in `createTaskbarButton`, plus exposed `refreshToolbarTooltipTargets` on `appServices`. Wrote `/tmp/snugwindow-tooltip-fix-smoke.mjs` — all 4 structural assertions pass. Verified `node --check` passes on both modified files. Committed as `fdbdce6`, pushed to `origin/LWB-with-Bugs`. Verified the fix is live on `https://snugos.github.io/snaw/js/SnugWindow.js` (4 occurrences) and `https://snugos.github.io/snaw/js/main.js` (1 new export) after 30s GitHub Pages deploy delay. Updated FEATURE_STATUS.md and AGENTS.md with this Day 758 Run 2 entry.
+
+---
+
 ## Session: 2026-06-28 00:26 UTC (Snaw Repair Agent Run — Day 758 Run 1)
 
 **Status: SHIPPED — MasterEffectsRack dblclick-to-reset** via commit `088295e`. Added a `dblclick` listener on each range-input param slider in `js/MasterEffectsRack.js` (the freshly-shipped v0.3.81 module) that snaps the slider back to its `pDef.defaultValue` and routes through the existing `_updateParam` path so the audio chain updates identically to a manual drag. Matches the DAW "double-click to reset" convention used elsewhere in Snaw (ClickTrackVolumeSlider.js Day 757's `4c7b822`, PianoRollEditor.js:471, ChordProgressionBuilder.js:471, PlayheadMarkerDrop.js:54-57, TimelineRulerClick.js:60, TempoJumpMarkers.js:215). 19-line change (+1 line for `data-default-value` on the range input, +18 lines for the dblclick listener with explanatory comment block). Smoke-tested via `/tmp/mer-dblclick-smoke.mjs` — all 7 assertions pass. **Also observed**: parallel Snaw Feature Builder Agent shipped v0.3.82 Performance Mode Recall (`11afabe`) between this run's start and finish — their work was preserved in `stash@{0}` + `stash@{1}` (separate stash for `INSTRUCTION.md` update). No APP_VERSION bump — UX patch on a 1-day-old feature. Priority-1 `removeCustomDesktopBackground` ReferenceError remains a documented false positive for the 15th consecutive run.
