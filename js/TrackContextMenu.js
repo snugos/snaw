@@ -227,6 +227,17 @@ function showTrackContextMenu(x, y, trackId) {
                 <span>Add/Edit Track Note</span>
             </button>
         </div>
+            <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="insertSilenceMenu" data-track-id="${trackId}">
+                <span class="w-4">⏳</span>
+                <span>Insert Silence Here...</span>
+                <span class="ml-auto text-xs text-gray-500">▸</span>
+            </button>
+            <div id="insertSilenceSubmenu-${trackId}" class="hidden bg-gray-800 rounded mt-1 mb-1">
+                <button class="w-full text-left px-6 py-1.5 text-sm text-white hover:bg-gray-700" data-action="insertSilence" data-bars="1" data-track-id="${trackId}">1 Bar</button>
+                <button class="w-full text-left px-6 py-1.5 text-sm text-white hover:bg-gray-700" data-action="insertSilence" data-bars="2" data-track-id="${trackId}">2 Bars</button>
+                <button class="w-full text-left px-6 py-1.5 text-sm text-white hover:bg-gray-700" data-action="insertSilence" data-bars="4" data-track-id="${trackId}">4 Bars</button>
+                <button class="w-full text-left px-6 py-1.5 text-sm text-white hover:bg-gray-700" data-action="insertSilence" data-bars="8" data-track-id="${trackId}">8 Bars</button>
+            </div>
         <div class="border-t border-gray-700 mt-1 pt-1">
             ${freezeMenuItems}
             <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="bounce" data-track-id="${trackId}">
@@ -279,6 +290,12 @@ function showTrackContextMenu(x, y, trackId) {
             if (action === 'markRoleMenu') {
                 e.stopPropagation();
                 const sub = menu.querySelector(`#markRoleSubmenu-${tId}`);
+                if (sub) sub.classList.toggle('hidden');
+                return;
+            }
+            if (action === 'insertSilenceMenu') {
+                e.stopPropagation();
+                const sub = menu.querySelector(`#insertSilenceSubmenu-${tId}`);
                 if (sub) sub.classList.toggle('hidden');
                 return;
             }
@@ -517,6 +534,54 @@ function handleTrackAction(action, trackId, btn) {
                 localAppServices.showNotification?.('Track Notes not available', 2000);
             }
             break;
+
+        case 'insertSilence': {
+            // Insert N bars of silence at the current playhead on this track.
+            // Shifts every clip whose startTime >= playheadTime by +silenceSeconds,
+            // creating an empty gap at the playhead position.
+            const barsRaw = parseFloat(btn?.dataset?.bars);
+            const bars = Number.isFinite(barsRaw) && barsRaw > 0 ? barsRaw : 1;
+            const bpm = (typeof Tone !== 'undefined' && Tone.Transport && Tone.Transport.bpm && typeof Tone.Transport.bpm.value === 'number' && Tone.Transport.bpm.value > 0)
+                ? Tone.Transport.bpm.value
+                : 120;
+            const secondsPerBeat = 60 / bpm;
+            const secondsPerBar = secondsPerBeat * 4; // 4/4 assumed
+            const silenceSeconds = bars * secondsPerBar;
+            const playheadSeconds = (typeof Tone !== 'undefined' && Tone.Transport && typeof Tone.Transport.seconds === 'number')
+                ? Tone.Transport.seconds
+                : 0;
+
+            if (!Array.isArray(track.timelineClips)) {
+                localAppServices.showNotification?.('No clips on this track', 1500);
+                break;
+            }
+
+            const shiftedClips = [];
+            for (const clip of track.timelineClips) {
+                if (clip && typeof clip.startTime === 'number' && clip.startTime >= playheadSeconds - 1e-6) {
+                    clip.startTime = clip.startTime + silenceSeconds;
+                    shiftedClips.push(clip.name || clip.id || 'clip');
+                }
+            }
+
+            if (shiftedClips.length === 0) {
+                localAppServices.showNotification?.(`No clips to shift (nothing starts after the playhead)`, 2000);
+                break;
+            }
+
+            if (localAppServices.captureStateForUndo) {
+                localAppServices.captureStateForUndo(`Insert ${bars} bar(s) of silence on ${track.name || 'Track'}`);
+            }
+
+            // Keep timelineClips sorted by startTime so downstream rendering is consistent.
+            if (typeof track.timelineClips.sort === 'function') {
+                track.timelineClips.sort((a, b) => (a.startTime || 0) - (b.startTime || 0));
+            }
+
+            if (localAppServices.renderTimeline) localAppServices.renderTimeline();
+            localAppServices.showNotification?.(`Inserted ${bars} bar(s) of silence — shifted ${shiftedClips.length} clip(s)`, 2500);
+            break;
+        }
             
         case 'freeze':
             if (track.freeze) {
