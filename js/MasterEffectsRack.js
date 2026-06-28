@@ -229,6 +229,7 @@ function _renderParamControl(pDef, params) {
             <input type="range" class="mer-param w-full accent-cyan-400"
                    data-param-key="${pDef.key}" data-param-type="range"
                    data-decimals="${decimals}" data-suffix="${suffix}"
+                   data-default-value="${defVal}"
                    min="${min}" max="${max}" step="${step}" value="${num}" />
         </div>
     `;
@@ -309,6 +310,24 @@ function _wireListEvents(container, effects) {
 
         input.addEventListener('input', onChange);
         input.addEventListener('change', onChange);
+
+        // DAW convention: double-click a slider to snap it back to its default.
+        // We stash the default on data-default-value in _renderParamControl, then
+        // route through _updateParam so the audio chain updates identically to a
+        // manual drag. Range inputs only — selects/checkboxes already have a
+        // single explicit value.
+        if (type === 'range') {
+            input.addEventListener('dblclick', (e) => {
+                e.preventDefault();
+                const defStr = input.dataset.defaultValue;
+                const defNum = parseFloat(defStr);
+                if (!Number.isFinite(defNum)) return;
+                input.value = String(defNum);
+                _updateParam(_selectedEffectId, key, defNum);
+                const readout = input.parentElement && input.parentElement.querySelector('.mer-param-readout');
+                if (readout) readout.textContent = `${defNum.toFixed(decimals)}${suffix}`;
+            });
+        }
     });
 }
 
