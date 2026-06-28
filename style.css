@@ -877,3 +877,8 @@ input::placeholder,
 .mer-drag-handle:active {
     cursor: grabbing;
 }
+/* CSS :active doesn't fire during HTML5 drag, so MER.js toggles this class
+   on the handle inside its dragstart/dragend handlers. */
+.mer-drag-handle.mer-dragging {
+    cursor: grabbing;
+}

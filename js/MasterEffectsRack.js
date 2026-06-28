@@ -322,13 +322,22 @@ function _onDragStart(e, effectId, container) {
         e.dataTransfer.setData('text/plain', effectId);
     } catch (err) { /* some browsers throw on setData in sandboxed iframes */ }
     row.classList.add('opacity-50', 'border-blue-400');
+    // CSS :active doesn't fire during HTML5 drag, so toggle .mer-dragging on the
+    // handle to switch the cursor to `grabbing` while a drag is in flight.
+    const handle = row.querySelector('.mer-drag-handle');
+    if (handle) handle.classList.add('mer-dragging');
     _dragDepth = 0;
 }
 
 function _onDragEnd(e, container) {
     if (_draggedEffectId) {
         const row = container.querySelector(`.mer-row[data-effect-id="${_draggedEffectId}"]`);
-        if (row) row.classList.remove('opacity-50', 'border-blue-400');
+        if (row) {
+            row.classList.remove('opacity-50', 'border-blue-400');
+            // Clear the dragging cursor on the handle so it goes back to `grab`.
+            const handle = row.querySelector('.mer-drag-handle');
+            if (handle) handle.classList.remove('mer-dragging');
+        }
     }
     container.querySelectorAll('.mer-drop-before, .mer-drop-after').forEach(el => {
         el.classList.remove('mer-drop-before', 'mer-drop-after');
