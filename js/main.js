@@ -1200,6 +1200,7 @@ const appServices = {
     // Toolbar Tooltips - custom hover tooltips for toolbar buttons (v0.3.83)
     setToolbarTooltipsEnabled,
     isToolbarTooltipsEnabled,
+    refreshToolbarTooltipTargets,
     // WebAudio Plugin Host - load AudioWorklet processors (VST-style plugins) by URL
     openWebAudioPluginHostPanel,
     initWebAudioPluginHost,

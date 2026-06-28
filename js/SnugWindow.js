@@ -373,6 +373,18 @@ export class SnugWindow {
         this.taskbarButton.dataset.windowId = this.id;
         taskbarButtonsContainer.appendChild(this.taskbarButton);
 
+        // Re-scan for new toolbar/taskbar buttons so the custom hover tooltips (v0.3.83)
+        // attach to this dynamically-added taskbar button. Without this refresh, the
+        // tooltip module only sees the buttons that existed at init time and silently
+        // skips new taskbar entries — users would only see the slow native title tooltip.
+        // refreshToolbarTooltipTargets is a no-op if the tooltips module is disabled or
+        // already attached to this exact set (it detaches then re-attaches internally).
+        try {
+            if (typeof this.appServices.refreshToolbarTooltipTargets === 'function') {
+                this.appServices.refreshToolbarTooltipTargets();
+            }
+        } catch (e) { console.warn(`[SnugWindow ${this.id}] refreshToolbarTooltipTargets failed:`, e); }
+
         this.taskbarButton.addEventListener('click', () => {
             if (!this.element) return;
             if (this.isMinimized) {
