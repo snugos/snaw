@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.82"; // 2026-06-26 - Drag-to-Reorder Master FX: new Master Effects Rack window with drag-to-reorder, add/remove/bypass, and per-effect parameter editors. Includes v0.3.80 Quick-Bounce Markers, v0.3.79 Set-vs-Array bounce fix, v0.3.78 Quick Bounce, v0.3.77 Click Track Volume Slider.
+export const APP_VERSION = "0.3.83"; // 2026-06-27 - Toolbar Tooltips (v0.3.83): snappy custom hover tooltips on every transport/statusbar/taskbar button with a title attribute. Parses the title into a one-line description and an optional shortcut (e.g. "(Space)"). Native title= is suppressed so we get the styled tooltip instead. Toggled via Start menu. Also includes v0.3.82 Performance Mode Recall, v0.3.81 Master Effects Rack drag-to-reorder, v0.3.80 Quick-Bounce Markers, v0.3.79 Set-vs-Array bounce fix, v0.3.78 Quick Bounce, v0.3.77 Click Track Volume Slider.
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks

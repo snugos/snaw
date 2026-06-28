@@ -130,6 +130,8 @@ import { initSendsOverviewPanel, openSendsOverviewPanel, isSendsOverviewPanelAct
 import { initProjectSearch, openProjectSearchPanel, isProjectSearchPanelOpen, searchProject } from './ProjectSearch.js';
 // Master Limiter - brick-wall master limiter toggle (Tone.Limiter at the end of the master chain)
 import { initMasterLimiter, openMasterLimiterPanel, isMasterLimiterEnabled } from './MasterLimiter.js';
+// Toolbar Tooltips - custom hover tooltips for transport / status / taskbar / start-menu buttons
+import { initToolbarTooltips, isToolbarTooltipsEnabled, setToolbarTooltipsEnabled, toggleToolbarTooltips, getToolbarTooltipsVersion, refreshToolbarTooltipTargets } from './ToolbarTooltips.js';
 import { initMasterEffectsRack, openMasterEffectsRackWindow, renderMasterEffectsRackPanel } from './MasterEffectsRack.js';
 // Mix-Bus Group Presets - save & re-apply whole-mix state across a set of tracks (volume, pan, mute/solo, color, effects, sends, detune)
 import { initMixBusGroupPresets, openMixBusGroupPresetsPanel, listMixBusGroupPresets, getMixBusGroupPreset, captureMixBusGroupPreset, applyMixBusGroupPreset, deleteMixBusGroupPreset } from './MixBusGroupPresets.js';
@@ -1195,6 +1197,9 @@ const appServices = {
     getMasterLimiterThresholdDb,
     getMasterLimiterCeilingDb,
     audioIsMasterLimiterEnabled: audioIsMasterLimiterEnabledImpl,
+    // Toolbar Tooltips - custom hover tooltips for toolbar buttons (v0.3.83)
+    setToolbarTooltipsEnabled,
+    isToolbarTooltipsEnabled,
     // WebAudio Plugin Host - load AudioWorklet processors (VST-style plugins) by URL
     openWebAudioPluginHostPanel,
     initWebAudioPluginHost,
@@ -2236,6 +2241,8 @@ async function initializeSnugOS() {
         if (typeof initProjectSearch === 'function') initProjectSearch(appServices);
         // Master Limiter initialization (brick-wall limiter toggle)
         if (typeof initMasterLimiter === 'function') initMasterLimiter(appServices);
+        // Toolbar Tooltips initialization (custom hover tooltips for toolbar buttons, v0.3.83)
+        if (typeof initToolbarTooltips === 'function') initToolbarTooltips(appServices);
         // Master Effects Rack initialization (drag-to-reorder master FX UI, v0.3.81)
         if (typeof initMasterEffectsRack === 'function') initMasterEffectsRack(appServices);
         // Mix-Bus Group Presets initialization (v0.3.72)

@@ -852,6 +852,15 @@ export function initializePrimaryEventListeners(appContext) {
                     localAppServices.openMasterLimiterPanel?.();
                 } catch(e) { console.error('[Menu] Master Limiter error:', e); }
             },
+            menuToolbarTooltips: () => {
+                try {
+                    const enabled = !!localAppServices.isToolbarTooltipsEnabled?.();
+                    const next = !enabled;
+                    localAppServices.setToolbarTooltipsEnabled?.(next);
+                    const menuEl = document.getElementById('menuToolbarTooltips');
+                    if (menuEl) menuEl.textContent = `Toolbar Tooltips: ${next ? 'On' : 'Off'}`;
+                } catch(e) { console.error('[Menu] Toolbar Tooltips error:', e); }
+            },
             menuMixBusGroupPresets: () => {
                 console.log('[Menu] Mix-Bus Group Presets clicked');
                 try {
