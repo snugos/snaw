@@ -578,6 +578,14 @@ const appServices = {
             } catch (_) { /* fall through to 0 */ }
             return 0;
         },
+        // Loop region passthroughs (v0.3.86 — LoopLengthDisplay)
+        getLoopRegionEnabled: () => getLoopRegionEnabled(),
+        setLoopRegionEnabled: (enabled) => setLoopRegionEnabled(enabled),
+        getLoopRegionStart: () => getLoopRegionStart(),
+        setLoopRegionStart: (start) => setLoopRegionStart(start),
+        getLoopRegionEnd: () => getLoopRegionEnd(),
+        setLoopRegionEnd: (end) => setLoopRegionEnd(end),
+        getLoopRegion: () => getLoopRegion(),
     },
 
     removeCustomDesktopBackground, // Shorthand → module-level async function (uses appServices.bgDb.init())
