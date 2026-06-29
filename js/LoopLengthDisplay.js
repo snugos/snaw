@@ -24,6 +24,27 @@ let rafHandle = null;
 let isPolling = false;
 let bound = false;
 
+// Sanity bounds for loop region values typed into the transport inputs.
+// MAX_LOOP_REGION_SECONDS caps accidental huge entries (e.g. a typo of "100000")
+// that would otherwise produce a loop longer than any sensible project — the
+// default Tone.js Transport length is 30s and even marathon sessions rarely
+// loop over an hour. MIN_LOOP_REGION_START keeps start non-negative.
+const MAX_LOOP_REGION_SECONDS = 3600;
+const MIN_LOOP_REGION_START = 0;
+
+// Parse a value from an input element safely. Returns null if the input is
+// empty or non-numeric (so the caller can skip the write rather than
+// fabricating a fallback like 0 or 16). Returns a clamped finite number
+// otherwise.
+function _parseBoundedLoopValue(raw, min, max) {
+    if (raw === '' || raw === null || raw === undefined) return null;
+    const n = parseFloat(raw);
+    if (!Number.isFinite(n)) return null;
+    if (n < min) return min;
+    if (n > max) return max;
+    return n;
+}
+
 function formatLength(lengthSeconds) {
     if (!Number.isFinite(lengthSeconds) || lengthSeconds < 0) return '0:00.000';
     const totalMs = Math.round(lengthSeconds * 1000);
@@ -79,18 +100,29 @@ function stopPolling() {
 function bindInputs() {
     if (bound) return;
     if (!loopStartInputEl || !loopEndInputEl) return;
-    const handler = () => {
-        const newStart = parseFloat(loopStartInputEl.value) || 0;
-        const newEnd = parseFloat(loopEndInputEl.value) || 0;
+    const handler = (isFinal) => () => {
+        const newStart = _parseBoundedLoopValue(loopStartInputEl.value, MIN_LOOP_REGION_START, MAX_LOOP_REGION_SECONDS);
+        const newEnd = _parseBoundedLoopValue(loopEndInputEl.value, MIN_LOOP_REGION_START, MAX_LOOP_REGION_SECONDS);
+        // Only commit when both inputs yielded finite values. Mid-typing
+        // (e.g. user just typed "-") leaves newStart/newEnd null — skip the
+        // write so state.js doesn't see a transient invalid value.
+        if (newStart === null || newEnd === null) return;
         try { setLoopRegionStart(newStart); } catch (e) { /* no-op */ }
         try { setLoopRegionEnd(newEnd); } catch (e) { /* no-op */ }
+        // On the final 'change' event (blur/Enter), echo the sanitized value
+        // back to the input so the user sees what got committed. Skip on
+        // 'input' to avoid stomping the user's cursor while they're typing.
+        if (isFinal) {
+            loopStartInputEl.value = String(newStart);
+            loopEndInputEl.value = String(newEnd);
+        }
         lastRenderedLengthMs = null;
         renderDisplay();
     };
-    loopStartInputEl.addEventListener('input', handler);
-    loopEndInputEl.addEventListener('input', handler);
-    loopStartInputEl.addEventListener('change', handler);
-    loopEndInputEl.addEventListener('change', handler);
+    loopStartInputEl.addEventListener('input', handler(false));
+    loopEndInputEl.addEventListener('input', handler(false));
+    loopStartInputEl.addEventListener('change', handler(true));
+    loopEndInputEl.addEventListener('change', handler(true));
     bound = true;
 }
 
