@@ -8,6 +8,11 @@
 //     Presets, Loop Until Marker, Loop Region Quick Set, Loop Region Markers,
 //     Loop Region Snap, Loop Practice Trainer, Bounce-To-Track, etc.)
 //
+// Hover the length display to see bars:beats:tick in the tooltip, e.g.
+// "Loop length: 16.00s (8.0.0 @ 120 BPM)" — parallels the v0.3.84 Bar/Beat
+// Ruler Readout pattern from TimelineRulerClick.js so users can match loop
+// regions to musical structure without doing the math in their head.
+//
 // Keeping the wiring surface minimal: one DOM span (#loopLengthDisplay) gets
 // re-rendered. The state-side read uses the canonical getters exposed via
 // appServices (getLoopRegionStart / getLoopRegionEnd) — same pattern as
@@ -20,6 +25,7 @@ let displayEl = null;
 let loopStartInputEl = null;
 let loopEndInputEl = null;
 let lastRenderedLengthMs = null;
+let lastRenderedTitleKey = null;
 let rafHandle = null;
 let isPolling = false;
 let bound = false;
@@ -54,6 +60,49 @@ function formatLength(lengthSeconds) {
     return `${minutes}:${String(seconds).padStart(2, '0')}.${String(millis).padStart(3, '0')}`;
 }
 
+/**
+ * Convert seconds to "bars.beats.sixteenths" string using Tone.TransportTime.
+ * Mirrors getBarBeatTick() in TimelineRulerClick.js (v0.3.84 Bar/Beat Ruler
+ * Readout) so users see the same format wherever they look up a position.
+ * Falls back to a manual bpm-based calc if Tone is unavailable.
+ * @param {number} time - Time in seconds
+ * @returns {string} "bars.beats.sixteenths"
+ */
+function getBarBeatTick(time) {
+    try {
+        if (typeof Tone !== 'undefined' && typeof Tone.TransportTime === 'function') {
+            const bbs = Tone.TransportTime(time).toBarsBeatsSixteenths();
+            return bbs.replace(/:/g, '.');
+        }
+    } catch (_) { /* fall through to manual calc */ }
+    try {
+        const bpm = (typeof Tone !== 'undefined' && Tone.Transport && Tone.Transport.bpm)
+            ? Tone.Transport.bpm.value : 120;
+        const totalSixteenths = (time * bpm / 60) * 4;
+        const bars = Math.floor(totalSixteenths / 16);
+        const rem = totalSixteenths - bars * 16;
+        const beats = Math.floor(rem / 4);
+        const ticks = Math.floor(rem - beats * 4);
+        return `${bars}.${beats}.${ticks}`;
+    } catch (_) {
+        return '0.0.0';
+    }
+}
+
+/**
+ * Current Tone.js Transport BPM, rounded to integer for stable title caching.
+ * Defaults to 120 if Tone isn't initialized yet.
+ * @returns {number}
+ */
+function getCurrentBpm() {
+    try {
+        if (typeof Tone !== 'undefined' && Tone.Transport && Tone.Transport.bpm) {
+            return Math.round(Tone.Transport.bpm.value);
+        }
+    } catch (_) { /* fall through */ }
+    return 120;
+}
+
 function readLoopLengthSeconds() {
     try {
         const start = parseFloat(getLoopRegionStart()) || 0;
@@ -69,12 +118,27 @@ function renderDisplay() {
     const seconds = readLoopLengthSeconds();
     if (seconds === null) {
         displayEl.textContent = '—';
+        displayEl.title = 'Loop region length: unavailable';
+        lastRenderedLengthMs = null;
+        lastRenderedTitleKey = null;
         return;
     }
     const ms = Math.round(seconds * 1000);
-    if (ms === lastRenderedLengthMs) return;
-    lastRenderedLengthMs = ms;
-    displayEl.textContent = formatLength(seconds);
+    if (ms !== lastRenderedLengthMs) {
+        lastRenderedLengthMs = ms;
+        displayEl.textContent = formatLength(seconds);
+    }
+    // Title is tracked separately from text content because the BBT readout
+    // depends on the current BPM (which can change while the loop length stays
+    // the same). Without an independent cache key the title would go stale
+    // whenever the user tweaks tempo without touching the loop region.
+    const bpm = getCurrentBpm();
+    const bbt = getBarBeatTick(seconds);
+    const titleKey = `${ms}|${bpm}`;
+    if (titleKey !== lastRenderedTitleKey) {
+        lastRenderedTitleKey = titleKey;
+        displayEl.title = `Loop length: ${seconds.toFixed(3)}s (${bbt} @ ${bpm} BPM)`;
+    }
 }
 
 function poll() {
