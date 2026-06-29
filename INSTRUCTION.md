@@ -63,16 +63,16 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 - **Bar/Beat Ruler Readout** - Hover the timeline ruler to show bar:beat:tick + seconds (v0.3.84) ✅
 - **Track Header Right-Click → Insert Silence** - Right-click a track header → "Insert Silence Here..." submenu (1/2/4/8 bar presets) shifts every clip whose startTime ≥ playhead by N bars (computed from current BPM, 4/4 assumed); captures undo, sorts timelineClips, re-renders the timeline (v0.3.85) ✅
 - **Loop Length Display In Status Bar** - Show the loop region's exact length (mm:ss.ms) next to the existing loop inputs in the transport bar (v0.3.86) ✅
+- **One-Click Random Pitch Snap** - Press `g` to snap all currently-selected piano-roll notes' pitches to the nearest scale degree of the active Scale Lock (v0.3.87) ✅
 
 ## Current Feature Queue
 
-1. **One-Click Random Pitch Snap** - Press a hotkey to snap all currently-selected notes' pitches to the nearest scale degree of the active Scale Lock
-2. **MIDI Activity Log** - Small rolling log of the last 8 MIDI events (note on/off, CC) with timestamps in a collapsible panel
-3. **Undo Last Record Arm Toggle** - If you accidentally hit the Record button during playback, Cmd+Z restores the previous arm state without disturbing other state
-4. **Quick "Duplicate Track" Hotkey** - Shift+D duplicates the currently-selected track (or active track if no selection) directly under the source
-5. **Pitch Bend Lane In Piano Roll** - Add a thin pitch-bend lane below the velocity lane in the piano roll with drag-to-draw bend curves per note
-6. **Project Auto-Save Counter** - Show a small counter in the status bar (e.g. "AutoSave: 7 today") so users know the auto-save is working
-7. **Per-Track MIDI Channel Display** - Show the active MIDI channel (1-16 or "Omni") for each track in the track header next to the instrument icon
+1. **MIDI Activity Log** - Small rolling log of the last 8 MIDI events (note on/off, CC) with timestamps in a collapsible panel
+2. **Undo Last Record Arm Toggle** - If you accidentally hit the Record button during playback, Cmd+Z restores the previous arm state without disturbing other state
+3. **Quick "Duplicate Track" Hotkey** - Shift+D duplicates the currently-selected track (or active track if no selection) directly under the source
+4. **Pitch Bend Lane In Piano Roll** - Add a thin pitch-bend lane below the velocity lane in the piano roll with drag-to-draw bend curves per note
+5. **Project Auto-Save Counter** - Show a small counter in the status bar (e.g. "AutoSave: 7 today") so users know the auto-save is working
+6. **Per-Track MIDI Channel Display** - Show the active MIDI channel (1-16 or "Omni") for each track in the track header next to the instrument icon
 
 ## Workflow
 
