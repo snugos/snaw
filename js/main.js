@@ -89,6 +89,7 @@ import { initLoopRegionMarkers, openLoopRegionMarkersPanel, addLoopRegionMarker 
 import { initLoopRegionSnap, openLoopSnapPanel, isLoopSnapEnabled, toggleLoopSnap, getSnapConfig } from './LoopRegionSnap.js';
 import { initLoopRegionPresets, openLoopRegionPresetsPanel } from './LoopRegionPresets.js';
 import { initLoopUntilMarker, openLoopUntilMarkerPanel, extendLoopToNextMarker, extendLoopToPreviousMarker, extendLoopToBothMarkers, setLoopUntilMarkerAutoEnabled, isLoopUntilMarkerAutoEnabled } from './LoopUntilMarker.js';
+import { initLoopLengthDisplay, refreshLoopLengthDisplay } from './LoopLengthDisplay.js';
 import { initAutoSaveIndicator, showSaveStatus, getSaveStatus } from './AutoSaveIndicator.js';
 import { initExportSelection, openExportSelectionPanel } from './ExportSelection.js';
 import { initLyricsTrack, openLyricsTrackPanel, getLyrics, addLyric, importLyricsText, setLyricsTrackEnabled, getCurrentLyric } from './LyricsTrack.js';
@@ -1282,6 +1283,7 @@ const appServices = {
     extendLoopToBothMarkers,
     setLoopUntilMarkerAutoEnabled,
     isLoopUntilMarkerAutoEnabled,
+    refreshLoopLengthDisplay,
     openGrooveExtractorPanel,
     openSmartFXChainPanel,
     openTrackDelayCompensationPanel,
@@ -2121,6 +2123,7 @@ async function initializeSnugOS() {
         if (typeof initLoopRegionSnap === 'function') initLoopRegionSnap(appServices); // Loop Region Snap initialization
         if (typeof initLoopRegionPresets === 'function') initLoopRegionPresets(appServices); // Loop Region Presets initialization
         if (typeof initLoopUntilMarker === 'function') initLoopUntilMarker(appServices); // Loop Until Marker initialization
+        if (typeof initLoopLengthDisplay === 'function') initLoopLengthDisplay(appServices); // Loop Length Display initialization (v0.3.86)
         if (typeof initAutoSaveIndicator === 'function') initAutoSaveIndicator(appServices); // Auto-save Indicator initialization
         if (typeof initLyricsTrack === 'function') initLyricsTrack(appServices); // Lyrics Track initialization
         if (typeof initLyricsDisplay === 'function') initLyricsDisplay(appServices); // Lyrics Display Karaoke Mode
