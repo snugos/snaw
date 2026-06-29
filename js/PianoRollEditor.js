@@ -2,6 +2,7 @@
 // A true piano roll showing notes as bars on a timeline with full note editing capabilities
 
 import { getCurrentScaleSettings, isNoteInScale, getNoteScaleClass } from './ScaleHighlightMode.js';
+import { snapNoteToScale } from './ScaleLock.js';
 
 let localAppServices = {};
 let pianoRollWindow = null;
@@ -38,6 +39,7 @@ let quantizeGrid = 16; // 16 = 16th notes
 
 export function initPianoRollEditor(appServicesFromMain) {
     localAppServices = appServicesFromMain || {};
+    if (typeof window !== 'undefined') window.snapSelectedNotesToScale = snapSelectedNotesToScale;
     console.log('[PianoRollEditor] Module initialized');
 }
 
@@ -675,6 +677,83 @@ function editNoteProperties(track, activeSeq, row, step) {
 
         renderPianoRollContent(currentPianoRollTrackId);
     }
+}
+
+// Snap selected notes' pitches to the nearest scale degree of the active Scale Lock
+export function snapSelectedNotesToScale() {
+    if (selectedNotes.size === 0) {
+        if (localAppServices.showNotification) localAppServices.showNotification('Snap to Scale: select notes in the Piano Roll first', 2200);
+        return false;
+    }
+
+    const tracks = localAppServices.getTracks ? localAppServices.getTracks() : [];
+    const track = tracks.find(t => t.id === currentPianoRollTrackId);
+    if (!track) return false;
+
+    const activeSeq = track.sequences?.find(s => s.id === track.activeSequenceId) || track.sequences?.[0];
+    if (!activeSeq?.data) return false;
+
+    // Collect (row, step) of every selected note
+    const positions = [];
+    selectedNotes.forEach(id => {
+        const parts = id.replace('pr-note-', '').split('-');
+        if (parts.length !== 2) return;
+        const r = Number(parts[0]);
+        const s = Number(parts[1]);
+        if (!Number.isFinite(r) || !Number.isFinite(s)) return;
+        positions.push({ r, s });
+    });
+    if (positions.length === 0) return false;
+
+    let changedAny = false;
+    const nextSelection = new Set();
+
+    positions.forEach(({ r, s }) => {
+        const note = activeSeq.data[r]?.[s];
+        if (!note) return;
+        const oldMidi = r + 36;
+        const newMidi = snapNoteToScale(oldMidi);
+        const newRow = newMidi - 36;
+        if (newRow === r) {
+            nextSelection.add(`pr-note-${r}-${s}`);
+            return;
+        }
+        // Move note to the new row (preserve velocity, duration, etc.)
+        if (!activeSeq.data[newRow]) activeSeq.data[newRow] = [];
+        if (activeSeq.data[newRow][s] !== null && activeSeq.data[newRow][s] !== undefined) {
+            // Destination occupied — bail on this one so we don't clobber existing notes.
+            nextSelection.add(`pr-note-${r}-${s}`);
+            return;
+        }
+        activeSeq.data[newRow][s] = { ...note };
+        activeSeq.data[r][s] = null;
+        changedAny = true;
+        nextSelection.add(`pr-note-${newRow}-${s}`);
+    });
+
+    if (!changedAny) {
+        // Nothing actually moved — refresh selection pointer and exit.
+        selectedNotes = nextSelection;
+        window.selectedNotes = selectedNotes;
+        return false;
+    }
+
+    if (track.appServices?.captureStateForUndo) {
+        track.appServices.captureStateForUndo(`Snap ${positions.length} note(s) to scale`);
+    }
+
+    selectedNotes = nextSelection;
+    window.selectedNotes = selectedNotes;
+
+    if (track.recreateToneSequence) {
+        track.recreateToneSequence(true);
+    }
+    if (track.appServices?.updateTrackUI) {
+        track.appServices.updateTrackUI(track.id, 'sequenceChanged');
+    }
+
+    renderPianoRollContent(currentPianoRollTrackId);
+    return true;
 }
 
 // Update the piano roll panel

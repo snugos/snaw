@@ -64,7 +64,7 @@ import { openTrackDelayCompensationPanel, openLatencyCompensationPanel } from '.
 import { initTrackReorderHotkeys, moveActiveTrackBy, isTrackReorderHotkeysInitialized } from './TrackReorderHotkeys.js'; // Track Reorder Hotkeys - Alt+ArrowUp/Down to move active track (v0.3.70)
 import { openGrooveExtractorPanel } from './GrooveExtractor.js';
 import { openStepSequencerView } from './StepSequencerView.js';
-import { openPianoRollEditor, initPianoRollEditor } from './PianoRollEditor.js';
+import { openPianoRollEditor, initPianoRollEditor, snapSelectedNotesToScale } from './PianoRollEditor.js';
 import { initMidiVelocityEditor, openMidiVelocityEditorPanel, setSelectedNotesVelocity, applyVelocityRamp, applyVelocityRandom } from './MidiVelocityEditor.js';
 import { initCCStepSequencer, openCCStepSequencer, getCCPatternData, setCCPatternData } from './CCStepSequencer.js';
 import { initScaleHighlightMode, openScaleHighlightPanel, isNoteInScale, getNoteScaleClass, quantizeNoteToScale } from './ScaleHighlightMode.js';
@@ -1380,6 +1380,7 @@ const appServices = {
     openGrooveExtractorPanel,
     openStepSequencerView,
     openPianoRollEditor,
+    snapSelectedNotesToScale,
     openMidiVelocityEditorPanel,
     setSelectedNotesVelocity,
     applyVelocityRamp,

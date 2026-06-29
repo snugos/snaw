@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.86"; // 2026-06-28 - Loop Length Display (v0.3.86): mm:ss.ms length readout next to the loop start/end inputs in the transport bar; live updates on input change + low-frequency poll to catch programmatic changes. Also includes v0.3.85 Insert Silence At Playhead, v0.3.84 Bar/Beat Ruler Readout, v0.3.83 Toolbar Tooltips, v0.3.82 Performance Mode Recall, v0.3.81 Master Effects Rack drag-to-reorder, v0.3.80 Quick-Bounce Markers, v0.3.79 Set-vs-Array bounce fix, v0.3.78 Quick Bounce, v0.3.77 Click Track Volume Slider.
+export const APP_VERSION = "0.3.87"; // 2026-06-28 - One-Click Random Pitch Snap (v0.3.87): `g` keyboard shortcut snaps all selected piano-roll notes to the nearest scale degree of the active Scale Lock; preserves velocity/duration, avoids destination collisions, captures undo, routes through recreateToneSequence + updateTrackUI, surfaces a no-selection notification when fired with an empty selection; integrated via KeyboardShortcuts.js 'Piano Roll' category and exposed on appServices.
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks

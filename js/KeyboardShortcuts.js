@@ -74,6 +74,7 @@ const KeyboardShortcuts = (function() {
     register('x', ['ctrl'], () => { if (typeof cutSelection === 'function') cutSelection(); }, 'Cut', 'Edit');
     register('f', ['ctrl', 'shift'], () => { if (typeof openAudioFadePresetPanel === 'function') openAudioFadePresetPanel({ getSelectedClips: () => { if (typeof getSelectedObjects === 'function') { const selected = getSelectedObjects(); return selected.filter(obj => obj && obj.type === 'clip'); } return []; }, applyFadeToClip: (clipId, buffer) => { if (typeof updateClipAudio === 'function') updateClipAudio(clipId, buffer); } }); }, 'Audio Fade Presets', 'Edit');
     register('?', [], () => { if (typeof openKeyboardShortcutsPanel === 'function') openKeyboardShortcutsPanel(); }, 'Show Keyboard Shortcuts Panel', 'General');
+    register('g', [], () => { if (typeof window.snapSelectedNotesToScale === 'function') window.snapSelectedNotesToScale(); else if (typeof snapSelectedNotesToScale === 'function') snapSelectedNotesToScale(); }, 'Snap Selected Notes To Scale (Piano Roll)', 'Piano Roll');
 
     return { register, enable, disable, isEnabled, clear, getShortcutsByCategory, exportShortcuts };
 })();
