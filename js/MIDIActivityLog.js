@@ -227,7 +227,6 @@ export function toggleMIDIActivityLog() {
  * @param {object} appServices - the shared services bag
  */
 export function initMIDIActivityLog(appServices) {
-    window.__MAL = true;
     localAppServices = appServices || {};
     panelEl = document.getElementById('midiActivityLogPanel');
     listEl = document.getElementById('midiActivityLogList');
@@ -261,5 +260,4 @@ export function initMIDIActivityLog(appServices) {
     // Start hidden by default — the toggle button is the entry point.
     setVisible(false);
     console.log('[MIDIActivityLog] Initialized');
-    window.__MIDIActivityLogInited = true;
 }
