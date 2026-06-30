@@ -1,3 +1,48 @@
+## Session: 2026-06-30 00:46 UTC (Snaw Repair Agent Run — Day 759 Run 4)
+
+**Status: SHIPPED — MIDIActivityLog Age-Label Freshness Fix** via commit `7de090f`. Found and fixed a real, silent staleness bug in the v0.3.88 MIDI Activity Log panel (`js/MIDIActivityLog.js`, shipped in `5e20a7d` ~32min before this run): the rolling log shows each event with a relative timestamp like `"now"`, `"5.0s"`, `"1.2m"`, but those ages were only recomputed when the event signature changed. For a quiet stream (no new MIDI for several seconds), the displayed ages stayed frozen — the user would see `noteon C4 v=100 5.0s` and after 30 more seconds it would still say `5.0s` until a new event arrived. Root cause: `renderList()` builds a `lastRenderSignature` from event type+channel+data1+data2+time and early-returns if it matches the prior signature. So when nothing in the buffer changes, the DOM age labels are never rewritten. The poll runs every 500ms (`setTimeout(poll, POLL_INTERVAL_MS)`) and calls `renderList()` on every tick, but the early-return short-circuits the age refresh. 19-line additive fix in `js/MIDIActivityLog.js`: (a) added a new module-level helper `refreshAges()` that walks the existing `.mal-row` elements in the DOM and updates only their `.mal-age` text content using `formatAge(entry.time)` — purely DOM-mutation, no `innerHTML` rewrites, no signature churn, no flickering; (b) called `refreshAges()` from `poll()` AFTER `renderList()` so a quiet stream still sees its ages tick forward `now → 0.5s → 1.0s → 1.5s → …` every 500ms. Helper exits early if the panel isn't visible (empty-state shown, no rows, or empty buffer), so the cost on a hidden panel is one DOM lookup + a no-op. **No APP_VERSION bump** — small UX/wiring fix to a 30-minute-old feature, same patch-level pattern as Days 745/747/753/754/755 Run 2/756/757/757 Run 2/758 Run 1/758 Run 2/759 Run 2/759 Run 3. Priority-1 `removeCustomDesktopBackground` ReferenceError remains a documented false positive for the **18th consecutive run** (Days 738-759 Run 4 all confirm; grep returns 16 occurrences in both local and deployed `js/main.js`, the function is defined at `js/main.js:350`, exported on `appServices`, mirrored as `window.removeCustomDesktopBackground`).
+
+### Automated Scan Results:
+- **TODO/FIXME/XXX/HACK/INCOMPLETE/STUB markers in active `js/` code**: 0 hits.
+- **Untracked orphan JS files**: 0.
+- **state.js integrity**: 8946 lines on disk, `node --check js/state.js` passes. **18th clean entry** in the recent sequence (Days 740-759 Run 4 all clean; Day 739 was the last truncation).
+- **Tracked JS file count**: 549 (unchanged from Day 759 Run 3).
+- **Recent commits**: 1 new since Day 759 Run 3 — this run's `7de090f`.
+- **Current APP_VERSION** (committed at HEAD after this run): 0.3.88 (MIDI Activity Log from `5e20a7d`, unchanged this run; small UX fix, no version bump).
+
+### Syntax Validation:
+`js/MIDIActivityLog.js` passes `node --check` (281 lines after the fix, up from 262). Also passes on all 6 key files unchanged since last run: `js/main.js` (2862 lines), `js/state.js` (8946 lines), `js/audio.js`, `js/ui.js`, `js/eventHandlers.js`, `js/constants.js`.
+
+### Smoke Test:
+Wrote `/tmp/mal-age-tick-smoke.mjs` (13 structural assertions, all pass):
+- `refreshAges` helper defined ✓
+- `poll()` calls `renderList()` ✓
+- `poll()` calls `refreshAges()` ✓
+- `poll()` order: render before refresh ✓
+- `refreshAges` uses `querySelectorAll('.mal-row')` ✓
+- `refreshAges` uses `querySelector('.mal-age')` ✓
+- `refreshAges` uses `formatAge()` ✓
+- `refreshAges` does NOT use `innerHTML` ✓
+- `renderList` still early-returns on signature match (perf preserved) ✓
+- `initMIDIActivityLog` still exported ✓
+- `refreshMIDIActivityLog` still exported ✓
+- `setMIDIActivityLogVisible` still exported ✓
+- `toggleMIDIActivityLog` still exported ✓
+
+### Deployed-Site Verification:
+After commit `7de090f` and `git push origin LWB-with-Bugs` (push succeeded: `ec6d450..7de090f  LWB-with-Bugs -> LWB-with-Bugs`), waited 30s for GitHub Pages to deploy, then `curl -s https://snugos.github.io/snaw/js/MIDIActivityLog.js | grep -c "refreshAges"` → **2** (helper definition + call in poll). `curl -s https://snugos.github.io/snaw/js/MIDIActivityLog.js | wc -l` → 281 lines (matches local file). `curl -s https://snugos.github.io/snaw/js/MIDIActivityLog.js | grep -c "MIDIActivityLog] Initialized"` → 1 (legit startup `console.log` preserved). `curl -s https://snugos.github.io/snaw/js/main.js | grep -c "removeCustomDesktopBackground"` → 16 (Priority-1 task bug remains a phantom, as documented across 18 consecutive runs).
+
+### Features Still in Progress:
+_None from this agent._ The full feature list remains: v0.3.75 (MIDI Tap Tempo), v0.3.75-patch (Reset button), v0.3.76 (Track Folder Collapse Memory), v0.3.77 (Click Track Volume Slider), v0.3.78 (Quick Bounce), v0.3.79 (Set-vs-Array patch), v0.3.80 (Quick-Bounce Markers), v0.3.81 (Drag-to-Reorder Master FX), v0.3.82 (Performance Mode Recall), v0.3.83 (Toolbar Tooltips), v0.3.84 (Bar/Beat Ruler Readout), v0.3.85 (Track Header Right-Click → Insert Silence), v0.3.86 (Loop Length Display), v0.3.87 (One-Click Random Pitch Snap), v0.3.88 (MIDI Activity Log).
+
+### Next Features to Tackle:
+_None queued for this repair/enhancement agent; the feature list is stable._
+
+### Action Taken:
+Pulled latest (advanced HEAD `8b111d1` → already in sync). Confirmed `js/state.js` intact at 8946 lines (18th clean entry). Confirmed the task's `removeCustomDesktopBackground` ReferenceError is a documented false positive (18th consecutive run, 16 occurrences in both local and deployed `js/main.js`). Inspected the v0.3.88 MIDI Activity Log module (`js/MIDIActivityLog.js`, 262 lines) and discovered the age labels were only refreshed on signature change — a quiet MIDI stream would see stale ages. Wrote 19-line additive patch: new `refreshAges()` helper that walks `.mal-row` elements and updates only `.mal-age` text content (no `innerHTML`, no flicker), called from `poll()` after `renderList()`. Wrote `/tmp/mal-age-tick-smoke.mjs` — all 13 structural assertions pass. Verified `node --check` passes on the modified file (281 lines). Committed as `7de090f`, pushed to `origin/LWB-with-Bugs`. Verified the fix is live on `https://snugos.github.io/snaw/js/MIDIActivityLog.js` (2 `refreshAges` occurrences, 281 lines) after 30s GitHub Pages deploy delay. Updated FEATURE_STATUS.md (this entry, prepended) and AGENTS.md (Day 759 Run 4 entry, prepended).
+
+---
+
 ## Session: 2026-06-30 00:38 UTC (Snaw Repair Agent Run — Day 759 Run 3)
 
 **Status: SHIPPED — MIDIActivityLog Debug-Flag Cleanup** via commit (this run). Found and removed two write-only debug-flag assignments that the parallel Snaw Feature Builder Agent accidentally shipped in the v0.3.88 MIDI Activity Log module (`js/MIDIActivityLog.js`): `window.__MAL = true;` (added by `747d04a debug: add window.__MAL early marker`, 2026-06-30 00:30 UTC) and `window.__MIDIActivityLogInited = true;` (added by `13468cc debug: add window.__MIDIActivityLogInited flag`, 2026-06-30 00:25 UTC). Both flags are **purely write-only** — verified via `grep -rn "__MAL\b\|__MIDIActivityLogInited" --include="*.js" --include="*.html" js/ index.html` returned ONLY the two write sites in `js/MIDIActivityLog.js:230` and `js/MIDIActivityLog.js:264`. No reader exists anywhere in the codebase — these are temporary diagnostic markers the parallel builder used during v0.3.88 dev but forgot to remove. The flags are also live on the deployed site (`curl -s https://snugos.github.io/snaw/js/MIDIActivityLog.js | grep -E "__MAL\b|__MIDIActivityLogInited"` returns both lines). 2-line fix: deleted both `window.__X = true;` lines (no replacements, no behavior change — `initMIDIActivityLog()` still does everything it did before, just without the orphan globals). `node --check js/MIDIActivityLog.js` passes after cleanup. **No APP_VERSION bump** — this is dead-code removal in a same-day feature, same patch-level pattern as Days 745/747/753/754/755 Run 2/756/757/757 Run 2/758 Run 1/758 Run 2/759 Run 2. Priority-1 `removeCustomDesktopBackground` ReferenceError remains a documented false positive for the **17th consecutive run** (Days 738-759 Run 3 all confirm; grep returns 16 occurrences in both local and deployed `js/main.js`, the function is defined at `js/main.js:350`, exported on `appServices`, mirrored as `window.removeCustomDesktopBackground`).
