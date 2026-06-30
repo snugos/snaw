@@ -556,21 +556,31 @@ function handleTrackAction(action, trackId, btn) {
                 break;
             }
 
+            // Peek at how many clips would shift before mutating anything. If none would shift,
+            // bail early without capturing undo (matches humanizeVelocity / trillNotes: capture
+            // happens only when the action will actually mutate state).
+            const candidateClipCount = track.timelineClips.reduce((n, clip) =>
+                (clip && typeof clip.startTime === 'number' && clip.startTime >= playheadSeconds - 1e-6) ? n + 1 : n, 0);
+
+            if (candidateClipCount === 0) {
+                localAppServices.showNotification?.(`No clips to shift (nothing starts after the playhead)`, 2000);
+                break;
+            }
+
+            // Capture undo state BEFORE mutating clip.startTime so undo restores the pre-shift
+            // positions. Matches the pattern used by humanizeVelocity / trillNotes in this same
+            // file (capture first, mutate second). Without this reorder, undoing an Insert Silence
+            // action silently no-ops because the captured state == live state.
+            if (localAppServices.captureStateForUndo) {
+                localAppServices.captureStateForUndo(`Insert ${bars} bar(s) of silence on ${track.name || 'Track'}`);
+            }
+
             const shiftedClips = [];
             for (const clip of track.timelineClips) {
                 if (clip && typeof clip.startTime === 'number' && clip.startTime >= playheadSeconds - 1e-6) {
                     clip.startTime = clip.startTime + silenceSeconds;
                     shiftedClips.push(clip.name || clip.id || 'clip');
                 }
-            }
-
-            if (shiftedClips.length === 0) {
-                localAppServices.showNotification?.(`No clips to shift (nothing starts after the playhead)`, 2000);
-                break;
-            }
-
-            if (localAppServices.captureStateForUndo) {
-                localAppServices.captureStateForUndo(`Insert ${bars} bar(s) of silence on ${track.name || 'Track'}`);
             }
 
             // Keep timelineClips sorted by startTime so downstream rendering is consistent.
