@@ -154,7 +154,20 @@ function stopPolling() {
 function setVisible(visible) {
     isVisible = !!visible;
     if (panelEl) {
-        panelEl.style.display = isVisible ? 'flex' : 'none';
+        // Toggle both the inline style AND the 'hidden' Tailwind class.
+        // The HTML ships with both `class="hidden"` and `style="display:none"`
+        // as belt-and-suspenders to prevent any flash of unstyled content
+        // before init runs. Once init runs we own the visibility and use
+        // the inline style; the 'hidden' class is cleared so it doesn't
+        // fight our inline style (Tailwind's .hidden { display: none } has
+        // a specificity that doesn't beat inline styles, but clearing it
+        // keeps the DOM state consistent and easier to debug).
+        if (isVisible) {
+            panelEl.classList.remove('hidden');
+            panelEl.style.display = 'flex';
+        } else {
+            panelEl.style.display = 'none';
+        }
     }
     if (toggleBtn) {
         toggleBtn.classList.toggle('mal-toggle-active', isVisible);
