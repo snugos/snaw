@@ -227,6 +227,7 @@ export function toggleMIDIActivityLog() {
  * @param {object} appServices - the shared services bag
  */
 export function initMIDIActivityLog(appServices) {
+    window.__MAL = true;
     localAppServices = appServices || {};
     panelEl = document.getElementById('midiActivityLogPanel');
     listEl = document.getElementById('midiActivityLogList');
