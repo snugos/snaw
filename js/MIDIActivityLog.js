@@ -260,4 +260,5 @@ export function initMIDIActivityLog(appServices) {
     // Start hidden by default — the toggle button is the entry point.
     setVisible(false);
     console.log('[MIDIActivityLog] Initialized');
+    window.__MIDIActivityLogInited = true;
 }
