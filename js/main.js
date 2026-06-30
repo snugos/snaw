@@ -91,6 +91,7 @@ import { initLoopRegionPresets, openLoopRegionPresetsPanel } from './LoopRegionP
 import { initLoopUntilMarker, openLoopUntilMarkerPanel, extendLoopToNextMarker, extendLoopToPreviousMarker, extendLoopToBothMarkers, setLoopUntilMarkerAutoEnabled, isLoopUntilMarkerAutoEnabled } from './LoopUntilMarker.js';
 import { initLoopLengthDisplay, refreshLoopLengthDisplay } from './LoopLengthDisplay.js';
 import { initAutoSaveIndicator, showSaveStatus, getSaveStatus } from './AutoSaveIndicator.js';
+import { initMIDIActivityLog, refreshMIDIActivityLog, setMIDIActivityLogVisible, toggleMIDIActivityLog } from './MIDIActivityLog.js';
 import { initExportSelection, openExportSelectionPanel } from './ExportSelection.js';
 import { initLyricsTrack, openLyricsTrackPanel, getLyrics, addLyric, importLyricsText, setLyricsTrackEnabled, getCurrentLyric } from './LyricsTrack.js';
 import { openTempoRamperPanel } from './TempoRamperUI.js';
@@ -1292,6 +1293,9 @@ const appServices = {
     setLoopUntilMarkerAutoEnabled,
     isLoopUntilMarkerAutoEnabled,
     refreshLoopLengthDisplay,
+    refreshMIDIActivityLog,
+    setMIDIActivityLogVisible,
+    toggleMIDIActivityLog,
     openGrooveExtractorPanel,
     openSmartFXChainPanel,
     openTrackDelayCompensationPanel,
@@ -2133,6 +2137,7 @@ async function initializeSnugOS() {
         if (typeof initLoopRegionPresets === 'function') initLoopRegionPresets(appServices); // Loop Region Presets initialization
         if (typeof initLoopUntilMarker === 'function') initLoopUntilMarker(appServices); // Loop Until Marker initialization
         if (typeof initLoopLengthDisplay === 'function') initLoopLengthDisplay(appServices); // Loop Length Display initialization (v0.3.86)
+        if (typeof initMIDIActivityLog === 'function') initMIDIActivityLog(appServices); // MIDI Activity Log initialization (v0.3.88)
         if (typeof initAutoSaveIndicator === 'function') initAutoSaveIndicator(appServices); // Auto-save Indicator initialization
         if (typeof initLyricsTrack === 'function') initLyricsTrack(appServices); // Lyrics Track initialization
         if (typeof initLyricsDisplay === 'function') initLyricsDisplay(appServices); // Lyrics Display Karaoke Mode

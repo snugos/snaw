@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.87"; // 2026-06-28 - One-Click Random Pitch Snap (v0.3.87): `g` keyboard shortcut snaps all selected piano-roll notes to the nearest scale degree of the active Scale Lock; preserves velocity/duration, avoids destination collisions, captures undo, routes through recreateToneSequence + updateTrackUI, surfaces a no-selection notification when fired with an empty selection; integrated via KeyboardShortcuts.js 'Piano Roll' category and exposed on appServices.
+export const APP_VERSION = "0.3.88"; // 2026-06-30 - MIDI Activity Log (v0.3.88): in-app collapsible panel showing the last 8 MIDI events (note on/off, CC, pitch bend, clock, active sensing, reset) with relative timestamps
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks
