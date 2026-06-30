@@ -708,27 +708,60 @@ export function snapSelectedNotesToScale() {
     let changedAny = false;
     const nextSelection = new Set();
 
+    // Peek pass: figure out which positions would actually move, and whether
+    // any destination collision would prevent a move, BEFORE we capture undo.
+    // This way we can (a) bail early with a notification if nothing would
+    // change, without polluting the undo stack with a no-op snapshot, and
+    // (b) capture undo BEFORE any mutation, matching the canonical
+    // humanizeVelocity / trillNotes / Insert Silence pattern (the undo
+    // capture deep-copies the live state — calling it after mutation would
+    // capture the post-mutation state, so undo would be a silent no-op).
+    const movablePositions = [];
     positions.forEach(({ r, s }) => {
         const note = activeSeq.data[r]?.[s];
         if (!note) return;
         const oldMidi = r + 36;
         const newMidi = snapNoteToScale(oldMidi);
         const newRow = newMidi - 36;
-        if (newRow === r) {
+        if (newRow === r) return;
+        // Destination occupied — skip so we don't clobber existing notes.
+        if (activeSeq.data[newRow] && activeSeq.data[newRow][s] != null) return;
+        movablePositions.push({ r, s, newRow });
+    });
+
+    if (movablePositions.length === 0) {
+        // Nothing actually moves — keep selection on the original notes so the
+        // user can adjust their selection without losing it, and exit without
+        // capturing undo (no-op snapshot would pollute the undo stack).
+        positions.forEach(({ r, s }) => {
             nextSelection.add(`pr-note-${r}-${s}`);
-            return;
-        }
-        // Move note to the new row (preserve velocity, duration, etc.)
+        });
+        selectedNotes = nextSelection;
+        window.selectedNotes = selectedNotes;
+        return false;
+    }
+
+    // Capture undo BEFORE mutating, matching the canonical pattern.
+    if (track.appServices?.captureStateForUndo) {
+        track.appServices.captureStateForUndo(`Snap ${movablePositions.length} note(s) to scale`);
+    }
+
+    movablePositions.forEach(({ r, s, newRow }) => {
+        const note = activeSeq.data[r]?.[s];
+        if (!note) return;
         if (!activeSeq.data[newRow]) activeSeq.data[newRow] = [];
-        if (activeSeq.data[newRow][s] !== null && activeSeq.data[newRow][s] !== undefined) {
-            // Destination occupied — bail on this one so we don't clobber existing notes.
-            nextSelection.add(`pr-note-${r}-${s}`);
-            return;
-        }
         activeSeq.data[newRow][s] = { ...note };
         activeSeq.data[r][s] = null;
         changedAny = true;
         nextSelection.add(`pr-note-${newRow}-${s}`);
+    });
+
+    // Preserve selection for notes that didn't move (so the user's
+    // selection isn't dropped when only some notes snap).
+    positions.forEach(({ r, s }) => {
+        if (!nextSelection.has(`pr-note-${r}-${s}`)) {
+            nextSelection.add(`pr-note-${r}-${s}`);
+        }
     });
 
     if (!changedAny) {
@@ -736,10 +769,6 @@ export function snapSelectedNotesToScale() {
         selectedNotes = nextSelection;
         window.selectedNotes = selectedNotes;
         return false;
-    }
-
-    if (track.appServices?.captureStateForUndo) {
-        track.appServices.captureStateForUndo(`Snap ${positions.length} note(s) to scale`);
     }
 
     selectedNotes = nextSelection;
