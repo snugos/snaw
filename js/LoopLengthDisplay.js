@@ -35,8 +35,18 @@ let bound = false;
 // that would otherwise produce a loop longer than any sensible project — the
 // default Tone.js Transport length is 30s and even marathon sessions rarely
 // loop over an hour. MIN_LOOP_REGION_START keeps start non-negative.
+// MIN_LOOP_DURATION_SEC enforces the cross-field invariant end > start:
+// state.js's setLoopRegionStart/End don't validate the relative order, so
+// a user typing start=10 then end=5 would commit an inverted region and
+// `eventHandlers.js:1415-1417` would then push that inverted region into
+// `Tone.Transport.loopStart=10, loopEnd=5` on next play — which Tone treats
+// as a no-op loop (silently disables looping). Snapping end up to
+// start + MIN_LOOP_DURATION_SEC keeps the region valid without surprising
+// the user (they get a brief notification) and avoids the silent-broken-loop
+// failure mode.
 const MAX_LOOP_REGION_SECONDS = 3600;
 const MIN_LOOP_REGION_START = 0;
+const MIN_LOOP_DURATION_SEC = 0.1;
 
 // Parse a value from an input element safely. Returns null if the input is
 // empty or non-numeric (so the caller can skip the write rather than
@@ -171,12 +181,33 @@ function bindInputs() {
         // (e.g. user just typed "-") leaves newStart/newEnd null — skip the
         // write so state.js doesn't see a transient invalid value.
         if (newStart === null || newEnd === null) return;
+        // Cross-field invariant: end must be strictly greater than start.
+        // Without this guard, typing start=10 then end=5 commits an inverted
+        // region to state.js, which `eventHandlers.js:1415-1417` then pushes
+        // verbatim into `Tone.Transport.loopStart=10, loopEnd=5` — Tone treats
+        // loopEnd <= loopStart as a no-op loop (silently disables looping),
+        // so the user clicks Play, hears nothing loop, and has no idea why.
+        // Snap end up to start + MIN_LOOP_DURATION_SEC to keep the region
+        // valid without surprising the user.
+        if (newEnd <= newStart) {
+            newEnd = Math.min(newStart + MIN_LOOP_DURATION_SEC, MAX_LOOP_REGION_SECONDS);
+            if (localAppServices.showNotification) {
+                localAppServices.showNotification(
+                    `Loop end must be after start — snapped to ${newEnd.toFixed(3)}s`,
+                    1800
+                );
+            }
+        }
         try { setLoopRegionStart(newStart); } catch (e) { /* no-op */ }
         try { setLoopRegionEnd(newEnd); } catch (e) { /* no-op */ }
         // On the final 'change' event (blur/Enter), echo the sanitized value
         // back to the input so the user sees what got committed. Skip on
         // 'input' to avoid stomping the user's cursor while they're typing.
-        if (isFinal) {
+        // If we snapped end above, mirror that snap into the input field
+        // even on the live 'input' path (it's only a final write because
+        // the user's typed value is being silently replaced — better they
+        // see the snap than keep staring at their now-rejected value).
+        if (isFinal || newEnd !== _parseBoundedLoopValue(loopEndInputEl.value, MIN_LOOP_REGION_START, MAX_LOOP_REGION_SECONDS)) {
             loopStartInputEl.value = String(newStart);
             loopEndInputEl.value = String(newEnd);
         }
