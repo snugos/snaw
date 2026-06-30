@@ -87,6 +87,21 @@ function getTypeClass(entry) {
     }
 }
 
+function refreshAges() {
+    if (!listEl || !emptyEl) return;
+    if (emptyEl.style.display !== 'none') return;
+    const rows = listEl.querySelectorAll('.mal-row');
+    if (rows.length === 0) return;
+    const events = getRecentEvents();
+    if (events.length === 0) return;
+    rows.forEach((row, idx) => {
+        const entry = events[idx];
+        if (!entry) return;
+        const ageEl = row.querySelector('.mal-age');
+        if (ageEl) ageEl.textContent = formatAge(entry.time);
+    });
+}
+
 function renderList() {
     if (!listEl || !emptyEl) return;
     const events = getRecentEvents();
@@ -136,6 +151,10 @@ function renderList() {
 function poll() {
     if (pollHandle === null) return;
     renderList();
+    // Always tick the age labels (separate concern from event-list
+    // signature — a quiet stream should still show "now" → "1.0s" → "2.0s"
+    // even when no new events have arrived between polls).
+    refreshAges();
     pollHandle = setTimeout(poll, POLL_INTERVAL_MS);
 }
 
