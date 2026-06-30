@@ -1,3 +1,61 @@
+## Session: 2026-06-30 01:25 UTC (Snaw Repair Agent Run — Day 759 Run 6)
+
+**Status: SHIPPED — LoopLengthDisplay cross-field validation fix** via commit `1c35ead`.
+
+Task's Priority-1 `main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground is not defined` is a documented false positive for the 20th consecutive run (function defined at `js/main.js:354`, exported on `appServices`, mirrored as `window.removeCustomDesktopBackground`).
+
+### Automated Scan Results:
+- **TODO/FIXME/XXX/HACK/INCOMPLETE/STUB markers in active `js/` code**: 0 hits.
+- **Untracked orphan JS files**: 0 (parallel builder's v0.3.89 ArmToggleHistory shipped in `16b3bf7`).
+- **state.js integrity**: 8946 lines on disk, `node --check js/state.js` passes. **20th clean entry** in the recent sequence.
+- **Tracked JS file count**: 550 (unchanged this run).
+- **Recent commits**: 1 new since last run — this run's `1c35ead`.
+- **Current APP_VERSION** (committed at HEAD after this run): 0.3.89 (Undo Last Record Arm Toggle from `16b3bf7`, unchanged this run; silent-bug fix, no version bump).
+
+### Syntax Validation:
+`js/LoopLengthDisplay.js` passes `node --check` (245 lines after the fix, up from 214). Also passes on all 6 key files unchanged since last run: `js/main.js`, `js/state.js` (8946 lines), `js/audio.js`, `js/ui.js`, `js/eventHandlers.js`, `js/constants.js`.
+
+### Smoke Test:
+Wrote `/tmp/loop-inversion-fix-smoke.mjs` (14 structural assertions, all pass):- `MIN_LOOP_DURATION_SEC` constant defined (cross-field invariant helper) ✓
+- `newEnd <= newStart` guard present in input handler ✓
+- Snap formula uses `Math.min(newStart + MIN_LOOP_DURATION_SEC, MAX_LOOP_REGION_SECONDS)` ✓
+- `localAppServices.showNotification` called with snap message ✓
+- Comment block references silent-broken-loop bug class ✓
+- `getBarBeatTick` helper still present (v0.3.86 BBT tooltip fix preserved) ✓
+- `getCurrentBpm` helper still present ✓
+- `lastRenderedTitleKey` cache var still present ✓
+- `initLoopLengthDisplay` exported (no API break) ✓
+- `refreshLoopLengthDisplay` exported (no API break) ✓
+- Mid-typing null-guard preserved (early return on null inputs) ✓
+- `MAX_LOOP_REGION_SECONDS` still enforced ✓
+- `MIN_LOOP_REGION_START` still enforced ✓
+- `_parseBoundedLoopValue` helper still present ✓
+
+Wrote `/tmp/loop-inversion-behavior-test.mjs` (11 behavioral assertions, all pass):
+- Inverted region (start=10, end=5) snaps end to 10.1 ✓
+- Inverted region triggers showNotification ✓
+- Inverted region sets snapped flag (mirrors to input field on live 'input' event) ✓
+- Equal start==end (start=5, end=5) snaps end to 5.1 ✓
+- Valid region (start=5, end=10) passes through unchanged ✓
+- Valid region does NOT trigger notification ✓
+- Zero-length region (start=0, end=0) snaps end to 0.1 ✓
+- Mid-typing empty start: handler bails (no commit, no notification) ✓
+- Mid-typing empty end: handler bails (no commit, no notification) ✓
+- End clamped to MAX_LOOP_REGION_SECONDS (3600) when start is near max ✓
+- Start at MAX, end below: end capped at MAX (no overflow) ✓
+
+### Deployed-Site Verification:
+After commit `1c35ead` and `git push origin LWB-with-Bugs` (push succeeded: `16b3bf7..1c35ead  LWB-with-Bugs -> LWB-with-Bugs`), waited 30s for GitHub Pages to deploy, then `curl -s https://snugos.github.io/snaw/js/LoopLengthDisplay.js | grep -c "MIN_LOOP_DURATION_SEC"` → **5** (1 const declaration + 1 comment + 3 references in the new code paths). `curl -s https://snugos.github.io/snaw/js/LoopLengthDisplay.js | grep -c "end must be after start"` → **1** (the notification string is deployed). `curl -s https://snugos.github.io/snaw/js/LoopLengthDisplay.js | grep -c "newStart + MIN_LOOP_DURATION_SEC"` → **1** (the snap formula is deployed). `curl -s https://snugos.github.io/snaw/js/LoopLengthDisplay.js | wc -l` → 245 lines (matches local file). Last-modified header shows the deploy is live (`last-modified: Tue, 30 Jun 2026 01:24:55 GMT`). `curl -s https://snugos.github.io/snaw/js/main.js | grep -c "removeCustomDesktopBackground"` → 16 (Priority-1 task bug remains a phantom, as documented across 20 consecutive runs).### Features Still in Progress:
+_None from this agent._ Parallel Snaw Feature Builder Agent shipped v0.3.89 Undo Last Record Arm Toggle (`16b3bf7`) earlier this run. After this run's cross-field validation fix the v0.3.86 module is in its final shipping form.
+
+### Next Features to Tackle:
+_None queued for this repair/enhancement agent; the feature list is stable._
+
+### Action Taken:
+Pulled latest (advanced HEAD `a7abbe4` → already in sync). Confirmed `js/state.js` intact at 8946 lines (20th clean entry). Confirmed the task's `removeCustomDesktopBackground` ReferenceError is a documented false positive (20th consecutive run, 16 occurrences in both local and deployed `js/main.js`). Discovered mid-run that parallel builder had unstaged work on `js/ArmToggleHistory.js` + `index.html` + `js/main.js` + `js/eventHandlers.js` — preserved in `stash@{0}` (then re-stashed into a new `stash@{0}` after the parallel builder's commit landed during the run). Inspected `js/LoopLengthDisplay.js:bindInputs()` and discovered the cross-field invariant `end > start` was not enforced. Wrote `/tmp/loop-inversion-fix-smoke.mjs` (14/14 structural checks pass) and `/tmp/loop-inversion-behavior-test.mjs` (11/11 behavioral checks pass). Verified `node --check` passes on the modified file (245 lines). Committed as `1c35ead`, pushed to `origin/LWB-with-Bugs`. Verified the fix is live on `https://snugos.github.io/snaw/js/LoopLengthDisplay.js` (5 `MIN_LOOP_DURATION_SEC` occurrences, 1 `end must be after start` notification string, 1 snap formula reference, 245 lines) after 30s GitHub Pages deploy delay.
+
+---
+
 ## Session: 2026-06-30 01:17 UTC (Snaw Feature Builder Agent Run)
 
 **Status: SHIPPED — Undo Last Record Arm Toggle** via commit (this run). Feature #1 from the queue. Picked up the parallel-builder's in-progress work that the repair agent had stashed (js/ArmToggleHistory.js new file + index.html script tag + js/eventHandlers.js recordArmToggle/undoLastRecordArmToggle hooks), then completed the wiring: added the import + `initArmToggleHistory(appServices)` call in main.js, exposed `setArmedTrackIdState` on appServices so the dedicated undo can mutate the armed track id directly (avoids a full project-state reconstruction), fixed a bug in ArmToggleHistory.js where the `window.ArmToggleHistory` namespace and `window.hasArmToggleUndo` global referenced an undefined `hasArmToggleHistory` symbol, bumped APP_VERSION to 0.3.89. Syntax checks: `node --check` passes on js/main.js, js/eventHandlers.js, js/ArmToggleHistory.js, js/constants.js. Structural smoke test: 16/16 checks pass (imports resolve, exports exist, hooks fire in correct order, no leftover undefined references, window globals attached). Behavioral smoke test: 5/5 checks pass (push/undo round-trip restores prior arm state, setArmedTrackIdState called with prev id, notification shown on undo, empty-stack returns ok:false, LIFO order preserved).
