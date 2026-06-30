@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.88"; // 2026-06-30 - MIDI Activity Log (v0.3.88): in-app collapsible panel showing the last 8 MIDI events (note on/off, CC, pitch bend, clock, active sensing, reset) with relative timestamps
+export const APP_VERSION = "0.3.89"; // 2026-06-30 - Undo Last Record Arm Toggle (v0.3.89): Cmd+Z right after arming a track restores the previous arm state without triggering a full project-state reconstruction (no playback/tempo/clip-position disturbance). Backed by js/ArmToggleHistory.js
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks

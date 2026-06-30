@@ -2205,6 +2205,12 @@ document.addEventListener('keydown', (event) => {
         }
 
         if (key === 'z' && (event.ctrlKey || event.metaKey)) {
+            // Prefer the dedicated arm-toggle undo when the last action was an arm
+            // toggle — this restores only the armedTrackId without touching playback
+            // position, tempo, clip positions, etc. (which a full-project undo would).
+            if (typeof window.undoLastRecordArmToggle === 'function' && window.undoLastRecordArmToggle()) {
+                return;
+            }
             if (localAppServices.undoLastAction) localAppServices.undoLastAction();
             return;
         }
@@ -2739,6 +2745,13 @@ export function handleTrackArm(trackId) {
         if (!track) { console.warn(`[EventHandlers] Arm: Track ${trackId} not found.`); return; }
         const currentArmedId = getArmedTrackId();
         const isCurrentlyArmed = currentArmedId === track.id;
+        // Record into the dedicated arm-toggle history (used by undoLastRecordArmToggle
+        // for a localized Cmd+Z that restores only the armedTrackId without disturbing
+        // playback state, tempo, clip positions, etc.). The full-project undo below
+        // remains in place as a fallback — undoLastRecordArmToggle is the preferred path.
+        if (typeof window.recordArmToggle === 'function') {
+            window.recordArmToggle(currentArmedId, isCurrentlyArmed ? null : track.id, track.id, track.name);
+        }
         captureStateForUndo(`${isCurrentlyArmed ? "Disarm" : "Arm"} Track "${track.name}" for Input`);
         setArmedTrackId(isCurrentlyArmed ? null : track.id);
 

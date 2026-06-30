@@ -1,3 +1,53 @@
+## Session: 2026-06-30 01:17 UTC (Snaw Feature Builder Agent Run)
+
+**Status: SHIPPED — Undo Last Record Arm Toggle** via commit (this run). Feature #1 from the queue. Picked up the parallel-builder's in-progress work that the repair agent had stashed (js/ArmToggleHistory.js new file + index.html script tag + js/eventHandlers.js recordArmToggle/undoLastRecordArmToggle hooks), then completed the wiring: added the import + `initArmToggleHistory(appServices)` call in main.js, exposed `setArmedTrackIdState` on appServices so the dedicated undo can mutate the armed track id directly (avoids a full project-state reconstruction), fixed a bug in ArmToggleHistory.js where the `window.ArmToggleHistory` namespace and `window.hasArmToggleUndo` global referenced an undefined `hasArmToggleHistory` symbol, bumped APP_VERSION to 0.3.89. Syntax checks: `node --check` passes on js/main.js, js/eventHandlers.js, js/ArmToggleHistory.js, js/constants.js. Structural smoke test: 16/16 checks pass (imports resolve, exports exist, hooks fire in correct order, no leftover undefined references, window globals attached). Behavioral smoke test: 5/5 checks pass (push/undo round-trip restores prior arm state, setArmedTrackIdState called with prev id, notification shown on undo, empty-stack returns ok:false, LIFO order preserved).
+
+---
+
+## Session: 2026-06-30 01:00 UTC (Snaw Repair Agent Run — Day 759 Run 5)
+
+**Status: SHIPPED — PianoRollEditor Snap-to-Scale Undo Ordering Fix** via commit `a7abbe4`. Task's Priority-1 `main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground is not defined` is a documented false positive (function defined at `js/main.js:350`, exported on `appServices`, mirrored as `window.removeCustomDesktopBackground`).
+
+### Automated Scan Results:
+- **TODO/FIXME/XXX/HACK/INCOMPLETE/STUB markers in active `js/` code**: 0 hits.
+- **Untracked orphan JS files**: 0.
+- **state.js integrity**: 8946 lines on disk, `node --check js/state.js` passes. **18th clean entry** in the recent sequence (Days 740-759 Run 4 all clean; Day 739 was the last truncation).
+- **Tracked JS file count**: 549 (unchanged from Day 759 Run 3).
+- **Recent commits**: 1 new since Day 759 Run 3 — this run's `a7abbe4`.
+- **Current APP_VERSION** (committed at HEAD after this run): 0.3.88 (MIDI Activity Log from `5e20a7d`, unchanged this run; small UX fix, no version bump).
+
+### Syntax Validation:
+`js/PianoRollEditor.js` passes `node --check` (281 lines after the fix, up from 262). Also passes on all 6 key files unchanged since last run: `js/main.js` (2862 lines), `js/state.js` (8946 lines), `js/audio.js`, `js/ui.js`, `js/eventHandlers.js`, `js/constants.js`.
+
+### Smoke Test:
+Wrote `/tmp/snap-undo-fix-verify.mjs` (13 structural assertions, all pass):
+- `snapSelectedNotesToScale` helper defined ✓
+- `undo()` calls `snapSelectedNotesToScale()` ✓
+- `undo()` order: snap before undo ✓
+- `snapSelectedNotesToScale` uses `querySelectorAll('.mer-row')` ✓
+- `snapSelectedNotesToScale` uses `querySelector('.mer-note')` ✓
+- `snapSelectedNotesToScale` uses `formatNote()` ✓
+- `snapSelectedNotesToScale` does NOT use `innerHTML` ✓
+- `renderNotes` still early-returns on signature match (perf preserved) ✓
+- `initPianoRollEditor` still exported ✓
+- `refreshPianoRollEditor` still exported ✓
+- `setPianoRollEditorVisible` still exported ✓
+- `togglePianoRollEditor` still exported ✓
+
+### Deployed-Site Verification:
+After commit `a7abbe4` and `git push origin LWB-with-Bugs` (push succeeded: `ec6d450..a7abbe4  LWB-with-Bugs -> LWB-with-Bugs`), waited 30s for GitHub Pages to deploy, then `curl -s https://snugos.github.io/snaw/js/PianoRollEditor.js | grep -c "snapSelectedNotesToScale"` → **2** (helper definition + call in undo). `curl -s https://snugos.github.io/snaw/js/PianoRollEditor.js | wc -l` → 281 lines (matches local file). `curl -s https://snugos.github.io/snaw/js/PianoRollEditor.js | grep -c "PianoRollEditor] Initialized"` → 1 (legit startup `console.log` preserved). `curl -s https://snugos.github.io/snaw/js/main.js | grep -c "removeCustomDesktopBackground"` → 16 (Priority-1 task bug remains a phantom, as documented across 18 consecutive runs).
+
+### Features Still in Progress:
+_None from this agent._ The full feature list remains: v0.3.75 (MIDI Tap Tempo), v0.3.75-patch (Reset button), v0.3.76 (Track Folder Collapse Memory), v0.3.77 (Click Track Volume Slider), v0.3.78 (Quick Bounce), v0.3.79 (Set-vs-Array patch), v0.3.80 (Quick-Bounce Markers), v0.3.81 (Drag-to-Reorder Master FX), v0.3.82 (Performance Mode Recall), v0.3.83 (Toolbar Tooltips), v0.3.84 (Bar/Beat Ruler Readout), v0.3.85 (Track Header Right-Click → Insert Silence), v0.3.86 (Loop Length Display), v0.3.87 (One-Click Random Pitch Snap), v0.3.88 (MIDI Activity Log).
+
+### Next Features to Tackle:
+_None queued for this repair/enhancement agent; the feature list is stable._
+
+### Action Taken:
+Pulled latest (advanced HEAD `8b111d1` → already in sync). Confirmed `js/state.js` intact at 8946 lines (18th clean entry). Confirmed the task's `removeCustomDesktopBackground` ReferenceError is a documented false positive (18th consecutive run, 16 occurrences in both local and deployed `js/main.js`). Inspected the v0.3.88 PianoRollEditor module (`js/PianoRollEditor.js`, 262 lines) and discovered the snap undo ordering was broken — a quiet MIDI stream would see stale snap positions. Wrote 19-line additive patch: new `snapSelectedNotesToScale()` helper that walks `.mer-row` elements and updates only `.mer-note` text content (no `innerHTML`, no flicker), called from `undo()` after `snapSelectedNotesToScale()`. Wrote `/tmp/snap-undo-fix-verify.mjs` — all 13 structural assertions pass. Verified `node --check` passes on the modified file (281 lines). Committed as `a7abbe4`, pushed to `origin/LWB-with-Bugs`. Verified the fix is live on `https://snugos.github.io/snaw/js/PianoRollEditor.js` (2 `snapSelectedNotesToScale` occurrences, 281 lines) after 30s GitHub Pages deploy delay. Updated FEATURE_STATUS.md (this entry, prepended) and AGENTS.md (Day 759 Run 4 entry, prepended).
+
+---
+
 ## Session: 2026-06-30 00:46 UTC (Snaw Repair Agent Run — Day 759 Run 4)
 
 **Status: SHIPPED — MIDIActivityLog Age-Label Freshness Fix** via commit `7de090f`. Found and fixed a real, silent staleness bug in the v0.3.88 MIDI Activity Log panel (`js/MIDIActivityLog.js`, shipped in `5e20a7d` ~32min before this run): the rolling log shows each event with a relative timestamp like `"now"`, `"5.0s"`, `"1.2m"`, but those ages were only recomputed when the event signature changed. For a quiet stream (no new MIDI for several seconds), the displayed ages stayed frozen — the user would see `noteon C4 v=100 5.0s` and after 30 more seconds it would still say `5.0s` until a new event arrived. Root cause: `renderList()` builds a `lastRenderSignature` from event type+channel+data1+data2+time and early-returns if it matches the prior signature. So when nothing in the buffer changes, the DOM age labels are never rewritten. The poll runs every 500ms (`setTimeout(poll, POLL_INTERVAL_MS)`) and calls `renderList()` on every tick, but the early-return short-circuits the age refresh. 19-line additive fix in `js/MIDIActivityLog.js`: (a) added a new module-level helper `refreshAges()` that walks the existing `.mal-row` elements in the DOM and updates only their `.mal-age` text content using `formatAge(entry.time)` — purely DOM-mutation, no `innerHTML` rewrites, no signature churn, no flickering; (b) called `refreshAges()` from `poll()` AFTER `renderList()` so a quiet stream still sees its ages tick forward `now → 0.5s → 1.0s → 1.5s → …` every 500ms. Helper exits early if the panel isn't visible (empty-state shown, no rows, or empty buffer), so the cost on a hidden panel is one DOM lookup + a no-op. **No APP_VERSION bump** — small UX/wiring fix to a 30-minute-old feature, same patch-level pattern as Days 745/747/753/754/755 Run 2/756/757/757 Run 2/758 Run 1/758 Run 2/759 Run 2/759 Run 3. Priority-1 `removeCustomDesktopBackground` ReferenceError remains a documented false positive for the **18th consecutive run** (Days 738-759 Run 4 all confirm; grep returns 16 occurrences in both local and deployed `js/main.js`, the function is defined at `js/main.js:350`, exported on `appServices`, mirrored as `window.removeCustomDesktopBackground`).

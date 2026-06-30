@@ -65,14 +65,14 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 - **Track Header Right-Click → Insert Silence** - Right-click a track header → "Insert Silence Here..." submenu (1/2/4/8 bar presets) shifts every clip whose startTime ≥ playhead by N bars (computed from current BPM, 4/4 assumed); captures undo, sorts timelineClips, re-renders the timeline (v0.3.85) ✅
 - **Loop Length Display In Status Bar** - Show the loop region's exact length (mm:ss.ms) next to the existing loop inputs in the transport bar (v0.3.86) ✅
 - **One-Click Random Pitch Snap** - Press `g` to snap all currently-selected piano-roll notes' pitches to the nearest scale degree of the active Scale Lock (v0.3.87) ✅
+- **Undo Last Record Arm Toggle** - Cmd+Z right after arming a track (or hitting Record during playback) restores the previous arm state via a dedicated undo stack in js/ArmToggleHistory.js — avoids the playback/tempo/clip-position churn of a full project-state undo. Click a track's record-arm button, hit Cmd+Z, you're back where you started (v0.3.89) ✅
 
 ## Current Feature Queue
 
-1. **Undo Last Record Arm Toggle** - If you accidentally hit the Record button during playback, Cmd+Z restores the previous arm state without disturbing other state
-2. **Quick "Duplicate Track" Hotkey** - Shift+D duplicates the currently-selected track (or active track if no selection) directly under the source
-3. **Pitch Bend Lane In Piano Roll** - Add a thin pitch-bend lane below the velocity lane in the piano roll with drag-to-draw bend curves per note
-4. **Project Auto-Save Counter** - Show a small counter in the status bar (e.g. "AutoSave: 7 today") so users know the auto-save is working
-5. **Per-Track MIDI Channel Display** - Show the active MIDI channel (1-16 or "Omni") for each track in the track header next to the instrument icon
+1. **Quick "Duplicate Track" Hotkey** - Shift+D duplicates the currently-selected track (or active track if no selection) directly under the source
+2. **Pitch Bend Lane In Piano Roll** - Add a thin pitch-bend lane below the velocity lane in the piano roll with drag-to-draw bend curves per note
+3. **Project Auto-Save Counter** - Show a small counter in the status bar (e.g. "AutoSave: 7 today") so users know the auto-save is working
+4. **Per-Track MIDI Channel Display** - Show the active MIDI channel (1-16 or "Omni") for each track in the track header next to the instrument icon
 
 ## Workflow
 
