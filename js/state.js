@@ -3107,6 +3107,65 @@ let autoSaveIntervalId = null;
 let lastAutoSaveTime = 0;
 let isAutoSaving = false;
 
+// Auto-save counter (v0.3.92) — tracks total session saves + today's saves.
+// Persisted in localStorage so the count survives page reloads and "today"
+// rolls over cleanly at local midnight.
+const AUTOSAVE_COUNT_LS_KEY = 'snugos_autosave_count';
+let autoSaveCount = 0;
+let autoSaveCountToday = 0;
+let autoSaveCountDate = ''; // YYYY-MM-DD in local time
+
+function _loadAutoSaveCountFromStorage() {
+    try {
+        const raw = localStorage.getItem(AUTOSAVE_COUNT_LS_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (typeof parsed.total === 'number' && parsed.total >= 0) {
+            autoSaveCount = parsed.total;
+        }
+        if (typeof parsed.today === 'number' && parsed.today >= 0) {
+            autoSaveCountToday = parsed.today;
+        }
+        if (typeof parsed.date === 'string') {
+            autoSaveCountDate = parsed.date;
+        }
+    } catch (e) {
+        // Ignore corrupt storage — counter will start fresh
+    }
+}
+
+function _saveAutoSaveCountToStorage() {
+    try {
+        localStorage.setItem(AUTOSAVE_COUNT_LS_KEY, JSON.stringify({
+            total: autoSaveCount,
+            today: autoSaveCountToday,
+            date: autoSaveCountDate
+        }));
+    } catch (e) {
+        // localStorage may be full or disabled — non-fatal
+    }
+}
+
+function _getTodayDateString() {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+}
+
+function _incrementAutoSaveCount() {
+    const today = _getTodayDateString();
+    if (today !== autoSaveCountDate) {
+        // Day rolled over (or first ever save) — reset today's count
+        autoSaveCountDate = today;
+        autoSaveCountToday = 0;
+    }
+    autoSaveCount += 1;
+    autoSaveCountToday += 1;
+    _saveAutoSaveCountToStorage();
+}
+
 /**
  * Starts the auto-save timer. Called during app initialization.
  */
@@ -3191,6 +3250,7 @@ async function autoSaveProjectState() {
         
         await storeProjectState(AUTOSAVE_KEY, projectData);
         lastAutoSaveTime = Date.now();
+        _incrementAutoSaveCount(); // v0.3.92 — bump counter for status bar display
         console.log('[AutoSave] Project state saved successfully at', new Date(lastAutoSaveTime).toISOString());
         
     } catch (error) {
@@ -3347,9 +3407,38 @@ export function getAutoSaveStatus() {
         isEnabled: autoSaveIntervalId !== null,
         intervalMs: AUTOSAVE_INTERVAL_MS,
         lastSaveTime: lastAutoSaveTime,
-        isSaving: isAutoSaving
+        isSaving: isAutoSaving,
+        count: autoSaveCount,
+        countToday: autoSaveCountToday
     };
 }
+
+/**
+ * Gets the cumulative auto-save count (total across this browser's history of
+ * sessions — persisted in localStorage so it survives reloads). (v0.3.92)
+ */
+export function getAutoSaveCount() {
+    return autoSaveCount;
+}
+
+/**
+ * Gets the number of auto-saves performed today (local-time day boundary).
+ * Resets to 0 when local midnight rolls over. (v0.3.92)
+ */
+export function getAutoSaveCountToday() {
+    const today = _getTodayDateString();
+    if (today !== autoSaveCountDate) {
+        // Day has rolled over since last save — lazy reset
+        autoSaveCountDate = today;
+        autoSaveCountToday = 0;
+        _saveAutoSaveCountToStorage();
+    }
+    return autoSaveCountToday;
+}
+
+// Load persisted counter at module init so it's available immediately
+// (and so getAutoSaveCount() works before any save happens in this session).
+_loadAutoSaveCountFromStorage();
 
 // --- Audio Normalization Settings ---
 let autoNormalizeEnabled = true;

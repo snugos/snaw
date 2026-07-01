@@ -92,6 +92,7 @@ import { initLoopRegionPresets, openLoopRegionPresetsPanel } from './LoopRegionP
 import { initLoopUntilMarker, openLoopUntilMarkerPanel, extendLoopToNextMarker, extendLoopToPreviousMarker, extendLoopToBothMarkers, setLoopUntilMarkerAutoEnabled, isLoopUntilMarkerAutoEnabled } from './LoopUntilMarker.js';
 import { initLoopLengthDisplay, refreshLoopLengthDisplay } from './LoopLengthDisplay.js';
 import { initAutoSaveIndicator, showSaveStatus, getSaveStatus } from './AutoSaveIndicator.js';
+import { initAutoSaveCounter, getAutoSaveCounterStatus } from './AutoSaveCounter.js'; // v0.3.92
 import { initMIDIActivityLog, refreshMIDIActivityLog, setMIDIActivityLogVisible, toggleMIDIActivityLog } from './MIDIActivityLog.js';
 import { initExportSelection, openExportSelectionPanel } from './ExportSelection.js';
 import { initLyricsTrack, openLyricsTrackPanel, getLyrics, addLyric, importLyricsText, setLyricsTrackEnabled, getCurrentLyric } from './LyricsTrack.js';
@@ -311,6 +312,8 @@ import {
     saveProjectTemplate, loadProjectTemplate, getProjectTemplateNames, getProjectTemplate, deleteProjectTemplate,
     // Auto-save (used by AutoSaveIndicator — must be reachable from appServices.stateModule)
     getLastAutoSaveTime,
+    // Auto-save counter (v0.3.92)
+    getAutoSaveCount, getAutoSaveCountToday,
 } from './state.js';
 
 import {
@@ -581,6 +584,19 @@ const appServices = {
         getLastAutoSaveTime: () => {
             try {
                 if (typeof getLastAutoSaveTime === 'function') return getLastAutoSaveTime();
+            } catch (_) { /* fall through to 0 */ }
+            return 0;
+        },
+        // Auto-save counter (v0.3.92) — used by AutoSaveCounter module
+        getAutoSaveCount: () => {
+            try {
+                if (typeof getAutoSaveCount === 'function') return getAutoSaveCount();
+            } catch (_) { /* fall through to 0 */ }
+            return 0;
+        },
+        getAutoSaveCountToday: () => {
+            try {
+                if (typeof getAutoSaveCountToday === 'function') return getAutoSaveCountToday();
             } catch (_) { /* fall through to 0 */ }
             return 0;
         },
@@ -2148,6 +2164,7 @@ async function initializeSnugOS() {
         if (typeof initLoopLengthDisplay === 'function') initLoopLengthDisplay(appServices); // Loop Length Display initialization (v0.3.86)
         if (typeof initMIDIActivityLog === 'function') initMIDIActivityLog(appServices); // MIDI Activity Log initialization (v0.3.88)
         if (typeof initAutoSaveIndicator === 'function') initAutoSaveIndicator(appServices); // Auto-save Indicator initialization
+        if (typeof initAutoSaveCounter === 'function') initAutoSaveCounter(appServices); // Auto-save Counter (v0.3.92)
         if (typeof initLyricsTrack === 'function') initLyricsTrack(appServices); // Lyrics Track initialization
         if (typeof initLyricsDisplay === 'function') initLyricsDisplay(appServices); // Lyrics Display Karaoke Mode
         if (typeof initTimeSignaturePerTrack === 'function') initTimeSignaturePerTrack(appServices); // Time Signature Per Track initialization

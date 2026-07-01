@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.90"; // 2026-06-30 - Duplicate Track Under Source Hotkey (v0.3.90): Press Shift+D to duplicate the currently-selected track (or active sequencer track if none selected) and place the new copy DIRECTLY UNDER the source — not at the end of the track list like the existing Ctrl+D. Lets users build a stacked family of parallel variations for stems workflows. Backed by js/DuplicateTrackHotkey.js. Also adds the shortcut to the KeyboardShortcuts panel.
+export const APP_VERSION = "0.3.92"; // 2026-07-01 - Project Auto-Save Counter (v0.3.92): Small "AutoSave: N today (M total)" indicator in the status bar — N resets at local midnight, M persists across reloads via localStorage. Backed by js/AutoSaveCounter.js. Confirms the auto-save system is working.
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks
