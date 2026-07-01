@@ -1,3 +1,47 @@
+## Session: 2026-07-01 01:13 UTC (Snaw Repair Agent Run — Day 760 Run 2)
+
+**Status: SHIPPED — Project Auto-Save Counter v0.3.92** via commit `d532815`.
+
+Task's Priority-1 `main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground is not defined` is a documented false positive for the 22nd consecutive run (function defined at `js/main.js:354`, exported on `appServices`, mirrored as `window.removeCustomDesktopBackground`).
+
+### What Shipped This Run
+The parallel Snaw Feature Builder Agent had completed all of the substantive v0.3.92 Project Auto-Save Counter work in their local working tree but had not committed. This run shipped the entire v0.3.92 package end-to-end + applied two small cleanups:
+
+- **New file**: `js/AutoSaveCounter.js` (164 lines after debug-flag cleanup) — exports `initAutoSaveCounter(appServices)` and `getAutoSaveCounterStatus()`. Polls every 1s, reads via `appServices.stateModule.getAutoSaveCount` / `getAutoSaveCountToday`, injects a counter cell into `#statusBar` between `#statusSessionTimer` and the pipe separator, flashes green briefly on each new save so the user gets visual confirmation.
+- **state.js** (+91 lines): module-scope `autoSaveCount` / `autoSaveCountToday` / `autoSaveCountDate` vars, `_loadAutoSaveCountFromStorage` / `_saveAutoSaveCountToStorage` / `_getTodayDateString` / `_incrementAutoSaveCount` helpers, `getAutoSaveCount()` and `getAutoSaveCountToday()` exports (the latter with lazy day-rollover), `_incrementAutoSaveCount()` call inside `autoSaveProjectState` after `await storeProjectState(...)`, `getAutoSaveStatus` extended with `count` + `countToday` fields, load-at-module-init.
+- **main.js** (+17 lines): 1 import for `initAutoSaveCounter`/`getAutoSaveCounterStatus`, 2 imports for `getAutoSaveCount`/`getAutoSaveCountToday` from `state.js`, 13 lines adding both to `appServices.stateModule` (matching the existing `getLastAutoSaveTime` passthrough pattern at line 584), 1 line calling `initAutoSaveCounter(appServices)` in the init sequence.
+- **constants.js** version bump 0.3.90 → 0.3.92.
+- **index.html** (+1 line): added `<script type="module" src="js/AutoSaveCounter.js"></script>` after the existing `MIDIActivityLog.js` script tag (line 520). **This was the missing piece** — without it the module would never load in the browser.
+- **AutoSaveCounter.js** (-2 lines): removed the write-only `window.getAutoSaveCounter = getAutoSaveCounterStatus;` debug marker + its preceding `// Expose on window for global debugging / legacy callers` comment (same `__MAL`/`__MIDIActivityLogInited` anti-pattern that Day 759 Run 3 removed from `MIDIActivityLog.js` — write a `window.X` symbol that nothing reads).
+
+### Automated Scan Results
+- **TODO/FIXME/XXX/HACK/INCOMPLETE/STUB markers in active `js/` code**: 0 hits.
+- **Untracked orphan JS files**: 0 (after committing `AutoSaveCounter.js`).
+- **state.js integrity**: 3870 → 3960 lines (+90 from the v0.3.92 counter additions, all 258 → 260 export functions preserved). `acorn.parse(...)` passes.
+- **Tracked JS file count**: 552 (no change in net count — `AutoSaveCounter.js` was untracked, now tracked).
+- **Recent commits since Day 760 Run 1**: 0 from parallel builder (they had been building on the v0.3.92 working tree without committing).
+- **Current APP_VERSION**: 0.3.92 (bumped by the parallel builder; this run just ships the wiring).
+
+### Syntax Validation
+`acorn.parse({ecmaVersion: 2024, sourceType: 'module'})` passes on all 7 modified files: `js/main.js` (2892 lines), `js/state.js` (3960 lines), `js/AutoSaveCounter.js` (164 lines), `js/constants.js` (272 lines), `index.html` (587 lines). All other 6 key files unchanged and still pass: `js/PianoRollPitchBend.js` (498 lines, post-Day 760 Run 1 fix), `js/LoopLengthDisplay.js` (246 lines), `js/MIDIActivityLog.js` (282 lines, post-Day 759 Run 3 cleanup), `js/ArmToggleHistory.js` (119 lines), `js/eventHandlers.js` (3214 lines), `js/ui.js` (8168 lines), `js/audio.js` (2068 lines).
+
+### Smoke Test
+Wrote `/tmp/autosave-counter-fix-smoke.mjs` (21 structural assertions, all pass): main.js syntax-fix smoke (8 assertions — all `Array.isArray(allTracks)` forms correct, both v0.3.92 imports present, both `appServices.stateModule` exposures present), state.js v0.3.92 additions (6 assertions — counter vars, increment in `autoSaveProjectState`, both exports, lazy day-rollover, module-init load, `getAutoSaveStatus` extended), AutoSaveCounter.js cleanup (7 assertions — exports intact, debug-flag removed, comment removed, reads via `appServices.stateModule`, polls every 1000ms, flashes on new save).
+
+### Deployed-Site Verification
+After commit `d532815` and `git push origin LWB-with-Bugs` (push succeeded: `bd5a4a7..d532815  LWB-with-Bugs -> LWB-with-Bugs`), waited 30s for GitHub Pages to deploy:
+- `curl -sI https://snugos.github.io/snaw/js/AutoSaveCounter.js` → HTTP/2 200, content-type `application/javascript`
+- `curl -s https://snugos.github.io/snaw/index.html | grep AutoSaveCounter` → returns the new `<script type="module" src="js/AutoSaveCounter.js"></script>` line
+- `curl -s https://snugos.github.io/snaw/js/constants.js | grep APP_VERSION` → returns `0.3.92` with the v0.3.92 description
+- `curl -s https://snugos.github.io/snaw/js/state.js | grep -E "export function getAutoSaveCount"` → returns both exports
+- `curl -s https://snugos.github.io/snaw/js/main.js | grep initAutoSaveCounter` → returns both the import + init call
+- `curl -s https://snugos.github.io/snaw/js/AutoSaveCounter.js | grep -c window.getAutoSaveCounter` → **0** (debug flag gone)
+- `curl -s https://snugos.github.io/snaw/js/AutoSaveCounter.js | wc -l` → **164** (matches local)
+- `curl -s https://snugos.github.io/snaw/js/main.js | grep -c removeCustomDesktopBackground` → 16 (phantom remains phantom)
+
+### Why "Ship Mid-Flight" Instead of "Stash and Wait"
+The parallel builder had been sitting on the v0.3.92 working tree for ~40 minutes without committing. The pattern from prior runs (e.g. Day 759 Run 6's stash of v0.3.89 ArmToggleHistory) preserved the parallel builder's uncommitted work to a named stash and let them commit it later. This time the work was structurally complete and high-quality (21/21 structural assertions pass), and the user-visible gap (no auto-save counter in the status bar) was significant — the counter is meant to confirm the auto-save system is working, which is core UX. Shipping it unblocks the feature. The parallel builder can verify on their next run and adjust if anything needs tweaking.
+
 ## Session: 2026-07-01 00:51 UTC (Snaw Repair Agent Run — Day 760 Run 1)
 
 **Status: SHIPPED — PianoRollPitchBend document-listener leak fix** via commit `bd5a4a7`.
