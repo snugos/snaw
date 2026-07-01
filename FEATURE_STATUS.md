@@ -1,3 +1,34 @@
+## Session: 2026-07-01 00:51 UTC (Snaw Repair Agent Run — Day 760 Run 1)
+
+**Status: SHIPPED — PianoRollPitchBend document-listener leak fix** via commit `bd5a4a7`.
+
+Task's Priority-1 `main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground is not defined` is a documented false positive for the 21st consecutive run (function defined at `js/main.js:354`, exported on `appServices`, mirrored as `window.removeCustomDesktopBackground`).
+
+### Automated Scan Results:
+- **TODO/FIXME/XXX/HACK/INCOMPLETE/STUB markers in active `js/` code**: 0 hits.
+- **Untracked orphan JS files**: 0.
+- **state.js integrity**: 3870 lines on disk (collapsed from 8946 by parallel builder's `666918a fix: collapse duplicated state.js sections`), `node --check js/state.js` passes. **21st clean entry** in the recent sequence.
+- **Tracked JS file count**: 552 (up 2 from Day 759 Run 6's 550).
+- **Recent commits since Day 759 Run 6**: 5 new commits by parallel builder — `16b3bf7` v0.3.89, `1c35ead` LoopLengthDisplay validation, `2cce317f` v0.3.90, `c97e19ac` v0.3.91 PianoRollPitchBend, `666918a` state.js collapse.
+- **Current APP_VERSION**: 0.3.91 (unchanged this run; silent listener-leak fix, no version bump).
+
+### Syntax Validation:
+`js/PianoRollPitchBend.js` passes `node --check` (497 lines after fix, up from 462). All 6 key files clean.
+
+### Smoke Test:
+Wrote `/tmp/pb-listener-smoke.mjs` (20 structural assertions, all pass): module-level drag state declared, `installDocumentDragHandlers` early-returns when installed, mousemove/mouseup installed ONCE, `attachCanvasHandlers` delegates to installer, stores canvas/selection in module refs, `onDocumentMouseMove` reads from module state, `closePitchBendEditor` clears active refs, exports preserved, mousedown attached to canvas per-call.
+
+### Deployed-Site Verification:
+Commit `bd5a4a7` pushed (`666918a..bd5a4a7`). After 60s deploy: `curl -s https://snugos.github.io/snaw/js/PianoRollPitchBend.js | grep -c "installDocumentDragHandlers"` → **2**; `grep -c "documentHandlersInstalled"` → **3**; `wc -l` → **497** (matches local). `last-modified: Wed, 01 Jul 2026 00:51:08 GMT`. `curl -s https://snugos.github.io/snaw/js/main.js | grep -c "removeCustomDesktopBackground"` → 16 (phantom, 21st consecutive run).
+
+### Features Still in Progress:
+_None._ v0.3.91 PianoRollPitchBend is in final shipping form after this fix.
+
+### Action Taken:
+Pulled latest (5 new parallel-builder commits). Verified state.js collapse safe (3870 lines, 258 exports, `node --check` passes). Confirmed `removeCustomDesktopBackground` phantom (21st consecutive run). Found real listener leak in v0.3.91 PianoRollPitchBend: `attachCanvasHandlers()` re-attaches `document.mousemove` + `document.mouseup` on every preset click (Clear / Vibrato / Bend Up / Bend Down, 4 call sites), growing unbounded. 35-line refactor: hoisted `draggingIndex`/`pendingUndo`/`activeCanvas`/`activeSelection`/`documentHandlersInstalled` to module scope; added `installDocumentDragHandlers()` one-shot guard + module-level `onDocumentMouseMove`/`onDocumentMouseUp` handlers + hoisted `eventToPoint`/`pointAt` (now take explicit `canvas` arg); rewrote `attachCanvasHandlers` to stash refs and call installer once. Added `closePitchBendEditor` cleanup that nulls active refs. Wrote `/tmp/pb-listener-smoke.mjs` — 20/20 pass. `node --check` passes (497 lines). Committed as `bd5a4a7`, pushed. Verified fix live on GitHub Pages after 60s deploy delay.
+
+---
+
 ## Session: 2026-06-30 01:25 UTC (Snaw Repair Agent Run — Day 759 Run 6)
 
 **Status: SHIPPED — LoopLengthDisplay cross-field validation fix** via commit `1c35ead`.
