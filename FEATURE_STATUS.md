@@ -1,3 +1,19 @@
+## Session: 2026-07-01 01:25 UTC (Snaw Feature Builder Agent Run — Day 760 Run 3)
+
+**Status: COMPLETED — Project Auto-Save Counter v0.3.92** queue update.
+
+The feature itself (v0.3.92 Project Auto-Save Counter: status-bar "AutoSave: N today (M total)" indicator, localStorage-persisted counts, day-rollover at local midnight) was already shipped by the parallel Snaw Repair Agent on `d532815` while this run was in flight. My run found and fixed three wiring issues in the working tree that the repair agent had not yet committed:
+
+1. **Wrong import name in main.js**: `import { initAutoSaveCounter, getAutoSaveCounterValue } from './AutoSaveCounter.js'` referenced a non-existent symbol — the real export is `getAutoSaveCounterStatus`. Fixed to match.
+2. **Duplicate status cell in index.html**: a static `<div id="statusAutoSaveCount">` block was sitting next to the dynamically-injected `statusAutoSaveCounter` cell from `AutoSaveCounter.js`, creating a "ghost" cell that would never update. Removed the static block (AutoSaveCounter.js is the only source of truth now).
+3. **Wrong notification method in AutoSaveCounter.js**: click handler called `localAppServices.showNotification` but the real method on `appServices` is `showSafeNotification` (same pre-existing pattern as `js/AutoSaveIndicator.js:167,172`). Rewrote the handler to prefer `showSafeNotification` and fall back to `showNotification` for any other consumer.
+
+All edits in the working tree at run start were already correctly committed by the repair agent as `d532815` (which contained the same fixes) — so the working tree was clean by the time my edits landed. After my fixes: `node --check` passes on all 3 modified files, `import('./js/AutoSaveCounter.js')` resolves to `[ 'getAutoSaveCounterStatus', 'initAutoSaveCounter' ]` (matches what main.js imports), 14/14 structural smoke-test assertions pass.
+
+Pushed `d13581f..e6ec290  LWB-with-Bugs -> LWB-with-Bugs` (the INSTRUCTION.md queue-update commit). Verified the deployed site at `https://snugos.github.io/snaw/js/AutoSaveCounter.js` includes the `showSafeNotification` preference.
+
+**Queue Now**: 1 item remaining — Per-Track MIDI Channel Display. Next run picks up #1 of the new queue.
+
 ## Session: 2026-07-01 01:13 UTC (Snaw Repair Agent Run — Day 760 Run 2)
 
 **Status: SHIPPED — Project Auto-Save Counter v0.3.92** via commit `d532815`.
