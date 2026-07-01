@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.89"; // 2026-06-30 - Undo Last Record Arm Toggle (v0.3.89): Cmd+Z right after arming a track restores the previous arm state without triggering a full project-state reconstruction (no playback/tempo/clip-position disturbance). Backed by js/ArmToggleHistory.js
+export const APP_VERSION = "0.3.90"; // 2026-06-30 - Duplicate Track Under Source Hotkey (v0.3.90): Press Shift+D to duplicate the currently-selected track (or active sequencer track if none selected) and place the new copy DIRECTLY UNDER the source — not at the end of the track list like the existing Ctrl+D. Lets users build a stacked family of parallel variations for stems workflows. Backed by js/DuplicateTrackHotkey.js. Also adds the shortcut to the KeyboardShortcuts panel.
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks

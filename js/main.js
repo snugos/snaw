@@ -152,6 +152,7 @@ import { initTrackLaneResize } from './TrackLaneResize.js';
 import { initPerformanceMonitor, initPerformanceIndicator, openPerformancePanel, closePerformancePanel, getPerformanceSnapshot } from './PerformanceMonitor.js';
 import { initUndoHistoryPanel, openUndoHistoryPanel } from './UndoHistoryPanel.js';
 import { initArmToggleHistory } from './ArmToggleHistory.js';
+import { initDuplicateTrackHotkey } from './DuplicateTrackHotkey.js';
 import { initMidiChordDisplay, updateMidiChordLabels, toggleMidiChordDisplay, isMidiChordDisplayEnabled } from './MidiChordDisplay.js';
 import { initSpectrumAnalyzer, openSpectrumAnalyzerPanel } from './SpectrumAnalyzer.js';
 import { initBeatSyncedLFOPanel, openBeatSyncedLFOPanel } from './BeatSyncedLFOPanel.js';
@@ -2199,6 +2200,7 @@ async function initializeSnugOS() {
         if (typeof initPerformanceIndicator === 'function') initPerformanceIndicator(); // Performance indicator initialization
         if (typeof initUndoHistoryPanel === 'function') initUndoHistoryPanel(); // Undo history panel initialization
         if (typeof initArmToggleHistory === 'function') initArmToggleHistory(appServices); // Arm Toggle History - dedicated undo for record-arm toggles (v0.3.89)
+        if (typeof initDuplicateTrackHotkey === 'function') initDuplicateTrackHotkey(appServices); // Duplicate Track Hotkey - Shift+D duplicates selected/active track and places it directly under the source (v0.3.90)
         if (typeof initGuitarTabEditor === 'function') initGuitarTabEditor(appServices); // Guitar Tab Editor initialization
         if (typeof initSpectrumAnalyzer === 'function') initSpectrumAnalyzer(appServices); // Spectrum Analyzer initialization
         if (typeof initBeatSyncedLFOPanel === 'function') initBeatSyncedLFOPanel(appServices); // Beat-synced LFO panel initialization

@@ -66,13 +66,13 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 - **Loop Length Display In Status Bar** - Show the loop region's exact length (mm:ss.ms) next to the existing loop inputs in the transport bar (v0.3.86) ✅
 - **One-Click Random Pitch Snap** - Press `g` to snap all currently-selected piano-roll notes' pitches to the nearest scale degree of the active Scale Lock (v0.3.87) ✅
 - **Undo Last Record Arm Toggle** - Cmd+Z right after arming a track (or hitting Record during playback) restores the previous arm state via a dedicated undo stack in js/ArmToggleHistory.js — avoids the playback/tempo/clip-position churn of a full project-state undo. Click a track's record-arm button, hit Cmd+Z, you're back where you started (v0.3.89) ✅
+- **Quick "Duplicate Track Under Source" Hotkey** - Press Shift+D to duplicate the currently-selected track (or active sequencer track if no explicit selection) and place the new copy DIRECTLY UNDER the source — not at the end of the track list like the existing Ctrl+D. Lets users branch a single source into a stacked family of parallel variations for stems workflows. Undo captures both the duplicate and the reorder (backed by js/DuplicateTrackHotkey.js, registered in the KeyboardShortcuts panel) (v0.3.90) ✅
 
 ## Current Feature Queue
 
-1. **Quick "Duplicate Track" Hotkey** - Shift+D duplicates the currently-selected track (or active track if no selection) directly under the source
-2. **Pitch Bend Lane In Piano Roll** - Add a thin pitch-bend lane below the velocity lane in the piano roll with drag-to-draw bend curves per note
-3. **Project Auto-Save Counter** - Show a small counter in the status bar (e.g. "AutoSave: 7 today") so users know the auto-save is working
-4. **Per-Track MIDI Channel Display** - Show the active MIDI channel (1-16 or "Omni") for each track in the track header next to the instrument icon
+1. **Pitch Bend Lane In Piano Roll** - Add a thin pitch-bend lane below the velocity lane in the piano roll with drag-to-draw bend curves per note
+2. **Project Auto-Save Counter** - Show a small counter in the status bar (e.g. "AutoSave: 7 today") so users know the auto-save is working
+3. **Per-Track MIDI Channel Display** - Show the active MIDI channel (1-16 or "Omni") for each track in the track header next to the instrument icon
 
 ## Workflow
 
