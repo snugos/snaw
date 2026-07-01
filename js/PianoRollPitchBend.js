@@ -17,6 +17,20 @@ let pitchBendContent = null;
 let canvasPoints = []; // local working copy for the editor
 let suppressRefresh = false;
 
+// Drag state lives at module scope so the single pair of document-level
+// mousemove/mouseup listeners (installed once below) can read it across
+// every canvas re-attach. Previously these refs were local to each
+// attachCanvasHandlers() invocation, but attachCanvasHandlers() is called
+// on every preset button (Clear / Vibrato / Bend Up / Bend Down) because
+// each one re-runs renderPitchBendContent() which rewires the canvas.
+// That meant every preset click added 2 more document listeners — a
+// silent memory/handler leak that grew unbounded over a long session.
+let draggingIndex = -1;
+let pendingUndo = false;
+let activeCanvas = null;
+let activeSelection = [];
+let documentHandlersInstalled = false;
+
 const PITCH_BEND_RANGE_CENTS = 200;
 
 function getSelectedNotesFromPianoRoll() {
@@ -216,6 +230,12 @@ export function closePitchBendEditor() {
     }
     pitchBendWindow = null;
     pitchBendContent = null;
+    // Drop refs to the now-detached canvas and the selection that targeted
+    // it, so the long-lived document listeners don't try to mutate them.
+    // draggingIndex/pendingUndo are module-scope and will naturally reset
+    // on the next mousedown.
+    activeCanvas = null;
+    activeSelection = [];
 }
 
 function renderPitchBendContent() {
@@ -360,35 +380,73 @@ function wirePitchBendContent(selection) {
     }
 }
 
+function installDocumentDragHandlers() {
+    if (documentHandlersInstalled) return;
+    if (typeof document === 'undefined') return;
+    document.addEventListener('mousemove', onDocumentMouseMove);
+    document.addEventListener('mouseup', onDocumentMouseUp);
+    documentHandlersInstalled = true;
+}
+
+function onDocumentMouseMove(e) {
+    if (draggingIndex < 0) return;
+    if (!activeCanvas) return;
+    const p = eventToPoint(e, activeCanvas);
+    canvasPoints[draggingIndex] = p;
+    canvasPoints.sort((a, b) => a.offset - b.offset);
+    // recompute dragging index after sort
+    draggingIndex = canvasPoints.findIndex(q => q === p);
+    if (draggingIndex < 0) draggingIndex = 0;
+    setBendForSelection(activeSelection, canvasPoints);
+    drawCanvas(activeCanvas, canvasPoints);
+    refreshPianoRoll();
+}
+
+function onDocumentMouseUp() {
+    if (draggingIndex >= 0) {
+        pendingUndo = false;
+    }
+    draggingIndex = -1;
+}
+
+function eventToPoint(e, canvas) {
+    const rect = canvas.getBoundingClientRect();
+    const x = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+    const y = Math.max(0, Math.min(rect.height, e.clientY - rect.top));
+    const offset = x / rect.width;
+    const value = -((y / rect.height) * 2 - 1) * PITCH_BEND_RANGE_CENTS;
+    return { offset, value: Math.max(-PITCH_BEND_RANGE_CENTS, Math.min(PITCH_BEND_RANGE_CENTS, value)) };
+}
+
+function pointAt(e, canvas) {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    for (let i = 0; i < canvasPoints.length; i++) {
+        const px = canvasPoints[i].offset * rect.width;
+        const py = rect.height / 2 - (canvasPoints[i].value / PITCH_BEND_RANGE_CENTS) * (rect.height / 2 - 4);
+        if (Math.hypot(px - x, py - y) <= 6) return i;
+    }
+    return -1;
+}
+
 function attachCanvasHandlers(canvas, selection) {
-    let draggingIndex = -1;
-    let pendingUndo = false;
-
-    const eventToPoint = (e) => {
-        const rect = canvas.getBoundingClientRect();
-        const x = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
-        const y = Math.max(0, Math.min(rect.height, e.clientY - rect.top));
-        const offset = x / rect.width;
-        const value = -((y / rect.height) * 2 - 1) * PITCH_BEND_RANGE_CENTS;
-        return { offset, value: Math.max(-PITCH_BEND_RANGE_CENTS, Math.min(PITCH_BEND_RANGE_CENTS, value)) };
-    };
-
-    const pointAt = (e) => {
-        const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        for (let i = 0; i < canvasPoints.length; i++) {
-            const px = canvasPoints[i].offset * rect.width;
-            const py = rect.height / 2 - (canvasPoints[i].value / PITCH_BEND_RANGE_CENTS) * (rect.height / 2 - 4);
-            if (Math.hypot(px - x, py - y) <= 6) return i;
-        }
-        return -1;
-    };
+    // Install the document-level mousemove/mouseup pair ONCE for the
+    // lifetime of the module — every canvas re-attach only re-wires the
+    // canvas mousedown. We also stash refs to the current canvas +
+    // selection in module scope so the document handlers know what to
+    // mutate. The canvas element is recreated by renderPitchBendContent()
+    // (innerHTML rewrite) so the previous mousedown listener is GC'd with
+    // its old canvas; the document listeners are the long-lived ones and
+    // must not be re-added.
+    activeCanvas = canvas;
+    activeSelection = selection;
+    installDocumentDragHandlers();
 
     canvas.addEventListener('mousedown', (e) => {
         if (e.button === 2) {
             // right click: delete
-            const idx = pointAt(e);
+            const idx = pointAt(e, canvas);
             if (idx >= 0) {
                 if (!pendingUndo) {
                     captureUndoForSelection(selection, 'Edit pitch bend');
@@ -402,7 +460,7 @@ function attachCanvasHandlers(canvas, selection) {
             }
             return;
         }
-        const idx = pointAt(e);
+        const idx = pointAt(e, canvas);
         if (idx >= 0) {
             draggingIndex = idx;
             if (!pendingUndo) {
@@ -414,7 +472,7 @@ function attachCanvasHandlers(canvas, selection) {
                 captureUndoForSelection(selection, 'Add pitch bend point');
                 pendingUndo = true;
             }
-            const p = eventToPoint(e);
+            const p = eventToPoint(e, canvas);
             const insertAt = findInsertIndex(canvasPoints, p.offset);
             canvasPoints.splice(insertAt, 0, p);
             draggingIndex = insertAt;
@@ -424,29 +482,6 @@ function attachCanvasHandlers(canvas, selection) {
             refreshPianoRoll();
         }
     });
-
-    const onMove = (e) => {
-        if (draggingIndex < 0) return;
-        const p = eventToPoint(e);
-        canvasPoints[draggingIndex] = p;
-        canvasPoints.sort((a, b) => a.offset - b.offset);
-        // recompute dragging index after sort
-        draggingIndex = canvasPoints.findIndex(q => q === p);
-        if (draggingIndex < 0) draggingIndex = 0;
-        setBendForSelection(selection, canvasPoints);
-        drawCanvas(canvas, canvasPoints);
-        refreshPianoRoll();
-    };
-
-    const onUp = () => {
-        if (draggingIndex >= 0) {
-            pendingUndo = false;
-        }
-        draggingIndex = -1;
-    };
-
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
 
     canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 }
