@@ -68,11 +68,11 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 - **Undo Last Record Arm Toggle** - Cmd+Z right after arming a track (or hitting Record during playback) restores the previous arm state via a dedicated undo stack in js/ArmToggleHistory.js — avoids the playback/tempo/clip-position churn of a full project-state undo. Click a track's record-arm button, hit Cmd+Z, you're back where you started (v0.3.89) ✅
 - **Quick "Duplicate Track Under Source" Hotkey** - Press Shift+D to duplicate the currently-selected track (or active sequencer track if no explicit selection) and place the new copy DIRECTLY UNDER the source — not at the end of the track list like the existing Ctrl+D. Lets users branch a single source into a stacked family of parallel variations for stems workflows. Undo captures both the duplicate and the reorder (backed by js/DuplicateTrackHotkey.js, registered in the KeyboardShortcuts panel) (v0.3.90) ✅
 - **Per-Note Pitch Bend Lane In Piano Roll** - New Pitch button in the piano roll toolbar opens a drag-to-edit per-note pitch-bend curve editor (click lane to add point, drag point to move, right-click to delete, +Vibrato/+Bend Up/+Bend Down presets, ±200 cents range). Bend data stored on each note as `note.pitchBend = [{offset, value}]`; notes with a curve get an indigo ring + small dot indicator in the roll. Backed by js/PianoRollPitchBend.js (v0.3.91) ✅
+- **Project Auto-Save Counter** - Status-bar indicator showing "AutoSave: N today (M total)" so the user gets visual confirmation that the background auto-save is working. Today's count (N) resets at local midnight; cumulative total (M) persists across reloads via localStorage. Click for a tooltip-style notification with full info; brief green flash on each new save. Backed by js/AutoSaveCounter.js (v0.3.92) ✅
 
 ## Current Feature Queue
 
-1. **Project Auto-Save Counter** - Show a small counter in the status bar (e.g. "AutoSave: 7 today") so users know the auto-save is working
-2. **Per-Track MIDI Channel Display** - Show the active MIDI channel (1-16 or "Omni") for each track in the track header next to the instrument icon
+1. **Per-Track MIDI Channel Display** - Show the active MIDI channel (1-16 or "Omni") for each track in the track header next to the instrument icon
 
 ## Workflow
 
