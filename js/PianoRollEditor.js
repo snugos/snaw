@@ -133,6 +133,7 @@ function renderPianoRollContent(trackId = null) {
                 <button id="pianoRollDelete" class="px-2 py-1 text-xs bg-red-500 hover:bg-red-600 rounded text-white" title="Delete Selected">Delete</button>
                 <button id="pianoRollScaleLength" class="px-2 py-1 text-xs bg-blue-500 hover:bg-blue-600 rounded text-white" title="Scale Selected Note Lengths">Scale Len</button>
                 <button id="pianoRollVelocity" class="px-2 py-1 text-xs bg-purple-500 hover:bg-purple-600 rounded text-white" title="MIDI Velocity Editor">Velocity</button>
+                <button id="pianoRollPitchBend" class="px-2 py-1 text-xs bg-indigo-500 hover:bg-indigo-600 rounded text-white" title="Pitch Bend Editor (per-note bend curves)">Pitch</button>
                 <button id="pianoRollClose" class="px-2 py-1 text-xs bg-gray-500 hover:bg-gray-600 rounded text-white">Close</button>
             </div>
         </div>
@@ -251,12 +252,14 @@ function renderPianoRollContent(trackId = null) {
                 if (note !== null && note !== undefined) {
                     const velocity = note.velocity || 0.8;
                     const duration = note.duration || 1;
+                    const hasPitchBend = Array.isArray(note.pitchBend) && note.pitchBend.length > 0;
                     const yPos = (numRows - 1 - r) * NOTE_HEIGHT * verticalZoom;
                     const xPos = s * PIANO_ROLL_PPI * horizontalZoom;
                     const noteWidth = Math.max(4, PIANO_ROLL_PPI * horizontalZoom * duration * 0.9);
                     const noteHeight = Math.max(4, NOTE_HEIGHT * verticalZoom - 2);
                     const noteId = `pr-note-${r}-${s}`;
                     const isSelected = selectedNotes.has(noteId);
+                    const ringClass = isSelected ? 'ring-2 ring-yellow-400' : (hasPitchBend ? 'ring-1 ring-indigo-400' : '');
                     
                     // Determine note color based on scale if enabled
                     let noteColor = 'rgba(59, 130, 246, '; // Default blue
@@ -276,14 +279,15 @@ function renderPianoRollContent(trackId = null) {
                     }
 
                     gridAreaHtml += `
-                        <div class="absolute rounded cursor-move note-block ${isSelected ? 'ring-2 ring-yellow-400' : ''}"
+                        <div class="absolute rounded cursor-move note-block ${ringClass}"
                              data-note-row="${r}" data-note-step="${s}" data-note-id="${noteId}"
-                             style="left: ${xPos + 2}px; top: ${yPos + 1}px; 
+                             style="left: ${xPos + 2}px; top: ${yPos + 1}px;
                                     width: ${noteWidth}px; height: ${noteHeight}px;
                                     background-color: ${noteColor}${0.4 + velocity * 0.6});
                                     box-shadow: 0 1px 3px rgba(0,0,0,0.2);">
-                            <div class="w-full h-full flex items-center justify-center">
+                            <div class="w-full h-full flex items-center justify-center relative">
                                 <div class="w-2 h-2 rounded-full bg-white opacity-60"></div>
+                                ${hasPitchBend ? '<div title="Has pitch bend" style="position:absolute;top:1px;right:1px;width:5px;height:5px;border-radius:50%;background:#6366f1;box-shadow:0 0 2px rgba(99,102,241,0.8);"></div>' : ''}
                             </div>
                         </div>
                     `;
@@ -419,6 +423,21 @@ function setupPianoRollEvents(container, track, activeSeq) {
             }).catch(err => {
                 console.error('[PianoRollEditor] Failed to load MidiVelocityEditor:', err);
                 localAppServices.showNotification?.('Velocity Editor unavailable', 2000);
+            });
+        });
+    }
+
+    // Pitch Bend button - opens per-note Pitch Bend Editor
+    const pitchBtn = container.querySelector('#pianoRollPitchBend');
+    if (pitchBtn) {
+        pitchBtn.addEventListener('click', () => {
+            window.selectedNotes = selectedNotes;
+            window.currentPianoRollTrackId = currentPianoRollTrackId;
+            import('./PianoRollPitchBend.js').then(m => {
+                if (m.openPitchBendEditor) m.openPitchBendEditor();
+            }).catch(err => {
+                console.error('[PianoRollEditor] Failed to load PianoRollPitchBend:', err);
+                localAppServices.showNotification?.('Pitch Bend Editor unavailable', 2000);
             });
         });
     }

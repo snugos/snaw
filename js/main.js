@@ -64,7 +64,8 @@ import { openTrackDelayCompensationPanel, openLatencyCompensationPanel } from '.
 import { initTrackReorderHotkeys, moveActiveTrackBy, isTrackReorderHotkeysInitialized } from './TrackReorderHotkeys.js'; // Track Reorder Hotkeys - Alt+ArrowUp/Down to move active track (v0.3.70)
 import { openGrooveExtractorPanel } from './GrooveExtractor.js';
 import { openStepSequencerView } from './StepSequencerView.js';
-import { openPianoRollEditor, initPianoRollEditor, snapSelectedNotesToScale } from './PianoRollEditor.js';
+import { openPianoRollEditor, initPianoRollEditor, snapSelectedNotesToScale, updatePianoRollPanel } from './PianoRollEditor.js';
+import { initPianoRollPitchBend, openPitchBendEditor, getPianoRollPitchBendWindow } from './PianoRollPitchBend.js';
 import { initMidiVelocityEditor, openMidiVelocityEditorPanel, setSelectedNotesVelocity, applyVelocityRamp, applyVelocityRandom } from './MidiVelocityEditor.js';
 import { initCCStepSequencer, openCCStepSequencer, getCCPatternData, setCCPatternData } from './CCStepSequencer.js';
 import { initScaleHighlightMode, openScaleHighlightPanel, isNoteInScale, getNoteScaleClass, quantizeNoteToScale } from './ScaleHighlightMode.js';
@@ -297,8 +298,6 @@ import {
     // MIDI Learn
     getMidiLearnMode, setMidiLearnMode, getMidiLearnTarget, setMidiLearnTarget,
     getMidiMappings, addMidiMapping, removeMidiMapping, getMidiMappingForCC, clearAllMidiMappings,
-    // MIDI Learn Mapped Indicator
-    highlightMappedParameters, clearMappedIndicators, toggleMappedIndicators, areMappedIndicatorsVisible,
     // MIDI CC Visualizer
     getCcVisualizerValues, updateCcVisualizerValue,
     // Loop Region
@@ -313,6 +312,10 @@ import {
     // Auto-save (used by AutoSaveIndicator — must be reachable from appServices.stateModule)
     getLastAutoSaveTime,
 } from './state.js';
+
+import {
+    highlightMappedParameters, clearMappedIndicators, toggleMappedIndicators, areMappedIndicatorsVisible
+} from './MIDILearnMode.js';
 
 // --- showSafeNotification ---
 // Module-level wrapper around the imported utilShowNotification. Many call sites
@@ -1388,6 +1391,9 @@ const appServices = {
     openStepSequencerView,
     openPianoRollEditor,
     snapSelectedNotesToScale,
+    updatePianoRollPanel,
+    openPitchBendEditor,
+    getPianoRollPitchBendWindow,
     openMidiVelocityEditorPanel,
     setSelectedNotesVelocity,
     applyVelocityRamp,
@@ -2152,6 +2158,7 @@ async function initializeSnugOS() {
         if (typeof initClipGroupManager === 'function') initClipGroupManager(appServices); // Clip Group Manager
         if (typeof openStepSequencerView === 'function') openStepSequencerView(appServices); // Step Sequencer View initialization
         if (typeof initPianoRollEditor === 'function') initPianoRollEditor(appServices); // Piano Roll Editor initialization
+        if (typeof initPianoRollPitchBend === 'function') initPianoRollPitchBend(appServices); // Piano Roll Pitch Bend initialization
         if (typeof initMidiVelocityEditor === 'function') initMidiVelocityEditor(appServices); // MIDI Velocity Editor initialization
         if (typeof initCCStepSequencer === 'function') initCCStepSequencer(appServices); // CC Step Sequencer initialization
         if (typeof initScaleHighlightMode === 'function') initScaleHighlightMode(appServices); // Scale Highlight Mode initialization
