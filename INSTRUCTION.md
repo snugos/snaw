@@ -73,6 +73,17 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
+1. **Per-Track Groove Template Selector**
+2. **Project Tempo History Graph**
+3. **Track Freeze with Crossfade**
+4. **MIDI Panic for Individual Tracks**
+5. **Audio Clip Volume Curve Presets**
+6. **Per-Track MIDI CC Presets**
+7. **Step Sequencer Pattern Library**
+8. **Track Grouping by Instrument**
+9. **Project Marker Annotations**
+10. **Audio Clip Labeling**
+
 ## Workflow
 
 ### Step 1: Pick Next Feature
