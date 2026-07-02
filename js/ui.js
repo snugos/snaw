@@ -7761,12 +7761,45 @@ function renderTrackStrip(track) {
     
     const panDisplay = pan === 0 ? 'C' : (pan < 0 ? `L${Math.abs(Math.round(pan * 100))}` : `R${Math.round(pan * 100)}`);
     
+    // MIDI channel badge (v0.3.93). Read by PerTrackMidiChannelDisplay's
+    // delegation handler — clicking the badge opens an inline picker.
+    // Imported lazily so this file can be evaluated standalone before the
+    // module finishes loading (matches how AutoSaveCounter pulls in
+    // appServices.stateModule on first use).
+    let midiChannelBadgeHTML = '';
+    try {
+        if (typeof window !== 'undefined' && window.getMidiChannelBadgeHTML) {
+            midiChannelBadgeHTML = window.getMidiChannelBadgeHTML(track) || '';
+        } else {
+            // Fallback: render the badge inline using the track field
+            // directly. Same visual, no edit affordance until the module
+            // loads.
+            const ch = (typeof track.getMidiChannel === 'function')
+                ? track.getMidiChannel()
+                : (track.midiChannel ?? 0);
+            const safeCh = Math.max(0, Math.min(16, parseInt(ch, 10) || 0));
+            if (track.type !== 'Master' && track.type !== 'Audio' && track.type !== 'Lyrics') {
+                const label = safeCh === 0 ? 'Omni' : `Ch ${safeCh}`;
+                const colorClass = safeCh === 0
+                    ? 'bg-gray-700 text-gray-300 border-gray-600'
+                    : 'bg-emerald-900/60 text-emerald-200 border-emerald-700';
+                midiChannelBadgeHTML = `<span class="midi-channel-badge inline-flex items-center justify-center rounded border ${colorClass} text-[10px] px-1.5 py-0.5 font-mono tracking-tight"
+                    data-track-id="${track.id}"
+                    data-midi-channel="${safeCh}"
+                    title="MIDI channel (click to change)">${label}</span>`;
+            }
+        }
+    } catch (e) { /* non-fatal — leave the badge empty */ }
+
     return `
         <div class="track-strip flex-shrink-0 w-44 bg-gray-800 rounded-lg p-3 flex flex-col gap-2 border border-gray-700" data-track-id="${track.id}">
             <div class="text-center">
                 <div class="w-full h-1 rounded mb-1" style="background: ${trackColor};"></div>
                 <div class="text-xs font-medium text-white truncate" title="${track.name}">${track.name}</div>
-                <div class="text-xs text-gray-500">${track.type || 'Track'}</div>
+                <div class="flex items-center justify-center gap-1 mt-0.5">
+                    <div class="text-xs text-gray-500">${track.type || 'Track'}</div>
+                    ${midiChannelBadgeHTML}
+                </div>
             </div>
             
             <!-- Mute/Solo/Arm buttons -->

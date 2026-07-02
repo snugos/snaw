@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.92"; // 2026-07-01 - Project Auto-Save Counter (v0.3.92): Small "AutoSave: N today (M total)" indicator in the status bar — N resets at local midnight, M persists across reloads via localStorage. Backed by js/AutoSaveCounter.js. Confirms the auto-save system is working.
+export const APP_VERSION = "0.3.93"; // 2026-07-01 - Per-Track MIDI Channel Display (v0.3.93): Small "Ch N" / "Omni" badge in the mixer track-strip header next to the track-type label. Click the badge to open a per-track channel dropdown (Omni + 1–16). Hover for a tooltip. Updates from Track.midiChannel via Track.setMidiChannel. Backed by js/PerTrackMidiChannelDisplay.js.
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks
