@@ -21,11 +21,19 @@ let localAppServices = {};
 let counterElement = null;
 let valueElement = null;
 let lastSeenTotal = -1;
-let lastSeenToday = -1;
 let pollIntervalId = null;
 let flashTimeoutId = null;
 const POLL_INTERVAL_MS = 1000;     // refresh display every 1s (catches day rollover)
 const FLASH_DURATION_MS = 800;     // brief green flash on each new save
+// Activity-level color tokens (gray / yellow / emerald) are managed by
+// refreshDisplay() via classList.add/remove. The flash token (text-green-300)
+// is managed separately by flashValue() so a poll during the 800ms flash
+// window does not wipe the flash — the old code reassigned
+// `valueElement.className = colorClass` on every poll, which replaced all
+// classes (including the flash class) whenever a poll ran during the flash
+// window, making the flash only visible during the variable gap between
+// flash start and the next poll. Keeping the tokens split fixes that.
+const ACTIVITY_COLOR_TOKENS = ['text-emerald-400', 'text-gray-500', 'text-yellow-400'];
 
 export function initAutoSaveCounter(appServices) {
     localAppServices = appServices || {};
@@ -61,24 +69,23 @@ function createCounterElement() {
     `;
 
     // Insert right after the #statusSessionTimer block (which sits just before
-    // the #statusTrackCount block in index.html). Use the existing
-    // pipe-separator pattern: find the | between Session and Tracks, and
-    // place ourselves between the Session block and that pipe.
+    // the #statusTrackCount block in index.html). The status bar already has
+    // pipe separators between every adjacent cell ("|" divs interleaved in
+    // index.html), so all we need to do is insert the counter BEFORE the
+    // existing pipe that sits between Session and Tracks. No new pipe clone
+    // needed — cloning would leave a double-pipe "||" between the counter
+    // and the next cell, which is a visible cosmetic bug.
     const sessionTimer = document.getElementById('statusSessionTimer');
     if (sessionTimer && sessionTimer.parentNode === statusBar) {
-        // Find the next sibling — if it's the pipe separator, insert before
-        // the pipe; otherwise insert right after the Session block.
         const nextSibling = sessionTimer.nextElementSibling;
         if (nextSibling && nextSibling.textContent && nextSibling.textContent.trim() === '|') {
-            // Insert the counter + a fresh pipe separator BEFORE the existing
-            // pipe (so the order stays: Session | AutoSave | Tracks).
+            // Insert the counter BEFORE the existing pipe. Resulting order:
+            // Session | counter | Tracks | Clips | … (no duplicate pipe).
             statusBar.insertBefore(counterElement, nextSibling);
-            // Clone the pipe separator and insert it AFTER the counter to
-            // preserve the alternation pattern.
-            const newPipe = nextSibling.cloneNode(true);
-            statusBar.insertBefore(newPipe, nextSibling);
+        } else if (nextSibling) {
+            statusBar.insertBefore(counterElement, nextSibling);
         } else {
-            statusBar.insertBefore(counterElement, nextSibling);
+            statusBar.appendChild(counterElement);
         }
     } else {
         // Fallback — append to end of status bar.
@@ -133,13 +140,27 @@ function refreshDisplay() {
         flashValue();
     }
     lastSeenTotal = total;
-    lastSeenToday = today;
 
-    // Color coding based on activity level today
+    // Color coding based on activity level today. Use classList (not
+    // className reassignment) so the brief text-green-300 flash added by
+    // flashValue() survives this poll — the old code did
+    // `valueElement.className = colorClass` which replaced all classes and
+    // wiped the flash class whenever a poll ran during the 800ms flash
+    // window. Result: the flash was only visible during the variable gap
+    // between flash start and the next poll, which felt inconsistent.
+    //
+    // We split the color tokens from the flash token: the activity-level
+    // color is in ACTIVITY_COLOR_TOKENS and the flash is its own token
+    // managed by flashValue() / clearFlash(). refreshDisplay() only
+    // touches the activity token so a poll during a flash leaves the
+    // flash class intact. The flash timeout still removes the flash
+    // class as before — if a poll happened to land right at the 800ms
+    // mark, the flash is gone anyway.
     let colorClass = 'text-emerald-400';
     if (today === 0) colorClass = 'text-gray-500';
     else if (today < 3) colorClass = 'text-yellow-400';
-    valueElement.className = colorClass;
+    for (const t of ACTIVITY_COLOR_TOKENS) valueElement.classList.remove(t);
+    valueElement.classList.add(colorClass);
     valueElement.textContent = `${today} today (${total} total)`;
 }
 
@@ -148,8 +169,8 @@ function flashValue() {
     valueElement.classList.add('text-green-300');
     if (flashTimeoutId) clearTimeout(flashTimeoutId);
     flashTimeoutId = setTimeout(() => {
-        // refreshDisplay() will re-apply the proper color next tick;
-        // this just removes the flash override.
+        // Remove only the flash override; the activity-level color class
+        // is managed by refreshDisplay() and stays applied.
         if (valueElement) valueElement.classList.remove('text-green-300');
         flashTimeoutId = null;
     }, FLASH_DURATION_MS);
