@@ -1,3 +1,34 @@
+## Session: 2026-07-02 01:17 UTC (Snaw Repair & Enhancement Agent Run — Day 760 Run 5)
+
+**Status: COMPLETED — PianoRollPitchBend v0.3.91 patch** (silent broken-undo bug in the freshly-shipped v0.3.91 Per-Note Pitch Bend Lane module).
+
+### Bug Fixed
+
+**Silent broken-undo in `js/PianoRollPitchBend.js:onDocumentMouseUp`**: The right-click-delete path in the canvas mousedown handler (`if (e.button === 2)` branch) sets `pendingUndo = true` to coalesce undo with any follow-up canvas edits, but never touches `draggingIndex` (right-click is a point-and-return, not a drag). The original `onDocumentMouseUp` only reset `pendingUndo` when `draggingIndex >= 0`, which missed this case entirely. The net effect: after a SINGLE right-click delete, `pendingUndo` stayed `true` for the rest of the session, and every subsequent canvas mousedown (drag an existing point, click empty canvas to add a new point) skipped its `captureStateForUndo` call because of the `if (!pendingUndo)` guard — Cmd+Z would no longer undo those canvas edits, with no error or visible cue.
+
+### Fix
+
+10-line additive change in `js/PianoRollPitchBend.js:onDocumentMouseUp`:
+- Replaced the gated `if (draggingIndex >= 0) { pendingUndo = false; }` with an unconditional `pendingUndo = false;`
+- Added a 9-line comment block explaining the bug class, the right-click trigger, the user-visible impact, and the intent of the `pendingUndo` flag (coalesce a single user gesture into one undo entry, reset on mouseup as the natural end-of-gesture point)
+- `draggingIndex = -1;` is unchanged (still always reset)
+
+### Verification
+
+- `node --check js/PianoRollPitchBend.js` passes (507 lines)
+- `/home/workspace/prpb-pending-undo-verify.mjs`: 14/14 assertions (structural + behavioral) pass
+- Deployed at `https://snugos.github.io/snaw/js/PianoRollPitchBend.js`: 507 lines, contains fix comment, broken gate gone
+- Commit `46c6e87` pushed to `origin/LWB-with-Bugs`
+- **No APP_VERSION bump** — small wiring fix to a 31-hour-old feature
+
+### Priority-1 Task Bug
+
+`main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground is not defined` confirmed false positive for the **24th consecutive run** — function defined (`js/main.js:354`), exported on `appServices`, mirrored as `window.removeCustomDesktopBackground`. `grep -c "removeCustomDesktopBackground" js/main.js` → 16; `curl -s https://snugos.github.io/snaw/js/main.js | grep -c` → 16.
+
+### Parallel Builder Coordination
+
+Discovered mid-run that parallel Snaw Feature Builder Agent had unstaged work on `js/Track.js` (applyMuteState / applySoloState / recreateToneSequence restoration from the 6c9786a4 refactor, 178-line diff). Preserved in `stash@{0}` with full message describing the in-flight work. Parallel builder shipped v0.3.93 Per-Track MIDI Channel Display (`0c6f81ad`), v0.3.94 Per-Track Groove Template Selector (`00b4c7ce`), and v0.3.95 Project Tempo History Graph (`84264dc7`) during this run's window. The feature queue is currently empty (cleared at `96bce115`).
+
 ## Session: 2026-07-02 00:25 UTC (Snaw Repair & Enhancement Agent Run — Day 760 Run 4)
 
 **Status: COMPLETED — AutoSaveCounter v0.3.92 patch** (three silent bugs in the freshly-shipped v0.3.92 Project Auto-Save Counter module).
