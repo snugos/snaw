@@ -156,6 +156,7 @@ import { initUndoHistoryPanel, openUndoHistoryPanel } from './UndoHistoryPanel.j
 import { initArmToggleHistory } from './ArmToggleHistory.js';
 import { initDuplicateTrackHotkey } from './DuplicateTrackHotkey.js';
 import { initPerTrackMidiChannelDisplay } from './PerTrackMidiChannelDisplay.js';
+import { initPerTrackGrooveTemplateSelector } from './PerTrackGrooveTemplateSelector.js';
 import { initMidiChordDisplay, updateMidiChordLabels, toggleMidiChordDisplay, isMidiChordDisplayEnabled } from './MidiChordDisplay.js';
 import { initSpectrumAnalyzer, openSpectrumAnalyzerPanel } from './SpectrumAnalyzer.js';
 import { initBeatSyncedLFOPanel, openBeatSyncedLFOPanel } from './BeatSyncedLFOPanel.js';
@@ -315,6 +316,8 @@ import {
     getLastAutoSaveTime,
     // Auto-save counter (v0.3.92)
     getAutoSaveCount, getAutoSaveCountToday,
+    // Groove Presets (v0.3.94 — exposed for Per-Track Groove Template Selector)
+    getGroovePresetsState,
 } from './state.js';
 
 import {
@@ -609,6 +612,23 @@ const appServices = {
         getLoopRegionEnd: () => getLoopRegionEnd(),
         setLoopRegionEnd: (end) => setLoopRegionEnd(end),
         getLoopRegion: () => getLoopRegion(),
+        // captureStateForUndo passthrough (v0.3.93 PerTrackMidiChannelDisplay fix) — needed
+        // so the v0.3.93 commitChannelChange() can pre-capture the undo state before the
+        // track.setMidiChannel mutation. The 4 master-effect handlers in main.js (addMasterEffect,
+        // removeMasterEffect, reorderMasterEffect, bypassMasterEffect) were already calling
+        // `appServices.captureStateForUndo` (lines 935/955/972/984) but that property was never
+        // defined on the appServices object — every master-effect undo capture was a silent
+        // no-op. Adding the property here fixes both bugs at once. The state.js-level
+        // captureStateForUndoInternal is the canonical implementation.
+        captureStateForUndo: (description) => {
+            try {
+                if (typeof captureStateForUndoInternal === 'function') {
+                    return captureStateForUndoInternal(description);
+                }
+            } catch (e) {
+                console.warn('[Main appServices.captureStateForUndo] Error:', e);
+            }
+        },
     },
 
     removeCustomDesktopBackground, // Shorthand → module-level async function (uses appServices.bgDb.init())
@@ -619,6 +639,10 @@ const appServices = {
     getTrackById: (trackId) => {
         if (typeof getTrackByIdState === 'function') return getTrackByIdState(trackId);
         return null;
+    },
+    getTracks: () => {
+        if (typeof getTracksState === 'function') return getTracksState();
+        return [];
     },
     // Audio destination for short-lived preview players (loop preview, etc.).
     // Defaults to Tone.Destination; modules can override via appServices for routing.
@@ -1097,6 +1121,10 @@ const appServices = {
     getClipFadePresetNames,
     deleteClipFadePreset,
     applyClipFadePreset,
+
+    // Groove Presets (state-backed, v0.3.94 — exposed for
+    // Per-Track Groove Template Selector badge)
+    getGroovePresetsState,
 
     effectsRegistryAccess: {
         AVAILABLE_EFFECTS: null, getEffectParamDefinitions: null,
@@ -2010,6 +2038,23 @@ function handleTrackUIUpdate(trackId, reason, detail) {
                     showSafeNotification(`"${track.name}" MIDI channel: ${ch}`, 1500);
                 }
                 break;
+            case 'groovePresetChanged':
+                // (v0.3.94) Repaint the mixer so the per-track Groove
+                // badge updates in place. Mirrors the 'midiChannelChanged'
+                // case above. The notification reads the new groove preset
+                // directly from track.groovePreset so it stays accurate
+                // even if the getter returns a different short label.
+                if (mixerElement && typeof updateMixerWindow === 'function') updateMixerWindow();
+                if (typeof showSafeNotification === 'function') {
+                    const preset = track.getGroovePreset ? track.getGroovePreset() : (track.groovePreset || 'none');
+                    const presets = (typeof appServices !== 'undefined' && appServices.getGroovePresets)
+                        ? appServices.getGroovePresets()
+                        : [];
+                    const match = presets.find(p => p.id === preset);
+                    const label = match ? match.name : (preset === 'none' ? 'None (Straight)' : preset);
+                    showSafeNotification(`"${track.name}" groove: ${label}`, 1500);
+                }
+                break;
             case 'samplerLoaded':
             case 'instrumentSamplerLoaded':
                 if (inspectorElement) {
@@ -2239,6 +2284,7 @@ async function initializeSnugOS() {
         if (typeof initArmToggleHistory === 'function') initArmToggleHistory(appServices); // Arm Toggle History - dedicated undo for record-arm toggles (v0.3.89)
         if (typeof initDuplicateTrackHotkey === 'function') initDuplicateTrackHotkey(appServices); // Duplicate Track Hotkey - Shift+D duplicates selected/active track and places it directly under the source (v0.3.90)
         if (typeof initPerTrackMidiChannelDisplay === 'function') initPerTrackMidiChannelDisplay(appServices); // Per-Track MIDI Channel Display - small badge on each track header + click-to-change picker (v0.3.93)
+        if (typeof initPerTrackGrooveTemplateSelector === 'function') initPerTrackGrooveTemplateSelector(appServices); // Per-Track Groove Template Selector - small 'Groove' badge per track + click-to-pick swing preset (v0.3.94)
         if (typeof initGuitarTabEditor === 'function') initGuitarTabEditor(appServices); // Guitar Tab Editor initialization
         if (typeof initSpectrumAnalyzer === 'function') initSpectrumAnalyzer(appServices); // Spectrum Analyzer initialization
         if (typeof initBeatSyncedLFOPanel === 'function') initBeatSyncedLFOPanel(appServices); // Beat-synced LFO panel initialization

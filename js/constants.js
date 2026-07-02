@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.93"; // 2026-07-01 - Per-Track MIDI Channel Display (v0.3.93): Small "Ch N" / "Omni" badge in the mixer track-strip header next to the track-type label. Click the badge to open a per-track channel dropdown (Omni + 1–16). Hover for a tooltip. Updates from Track.midiChannel via Track.setMidiChannel. Backed by js/PerTrackMidiChannelDisplay.js.
+export const APP_VERSION = "0.3.94"; // 2026-07-01 - Per-Track Groove Template Selector (v0.3.94): Small "Groove" badge in the mixer track-strip header (next to the MIDI channel badge) showing the current swing/shuffle preset. Click the badge to open a per-track groove dropdown (None / 33% Shuffle / 50% Swing / 66% Swing / 75% Swing). Updates from Track.groovePreset via Track.setGroovePreset. Backed by js/PerTrackGrooveTemplateSelector.js.
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks

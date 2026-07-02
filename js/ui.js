@@ -7791,6 +7791,53 @@ function renderTrackStrip(track) {
         }
     } catch (e) { /* non-fatal — leave the badge empty */ }
 
+    // Groove badge (v0.3.94). Mirrors the MIDI channel badge pattern
+    // above: read the current groove preset (track.groovePreset,
+    // 'none' = straight, 'swing_50' = 50% swing, etc.) and render a
+    // compact "Swing X%" / "Shuffle X%" / "None" pill. Clicking the
+    // pill opens an inline picker handled by PerTrackGrooveTemplateSelector.
+    // Master / Audio / Lyrics tracks are skipped — only tracks that
+    // produce or accept sequenced notes are relevant for groove timing.
+    let grooveBadgeHTML = '';
+    try {
+        const type = (track.type || '').toString();
+        const skipTypes = ['Master', 'Audio', 'Lyrics'];
+        if (!skipTypes.includes(type)) {
+            if (typeof window !== 'undefined' && window.getGrooveBadgeHTML) {
+                grooveBadgeHTML = window.getGrooveBadgeHTML(track) || '';
+            } else {
+                // Fallback: render the badge inline using the track field
+                // directly. Same visual, no edit affordance until the
+                // module loads. Preset short labels mirror what the
+                // module would produce, so the fallback stays
+                // indistinguishable from the live render.
+                const presetId = (typeof track.getGroovePreset === 'function')
+                    ? track.getGroovePreset()
+                    : (track.groovePreset || 'none');
+                const safeId = (presetId || 'none').toString();
+                let shortLabel = 'None';
+                let colorClass = 'bg-gray-700 text-gray-300 border-gray-600';
+                if (safeId === 'swing_50') {
+                    shortLabel = 'Swing 50';
+                    colorClass = 'bg-purple-900/60 text-purple-200 border-purple-700';
+                } else if (safeId === 'swing_66') {
+                    shortLabel = 'Swing 66';
+                    colorClass = 'bg-purple-900/60 text-purple-200 border-purple-700';
+                } else if (safeId === 'swing_75') {
+                    shortLabel = 'Swing 75';
+                    colorClass = 'bg-purple-900/60 text-purple-200 border-purple-700';
+                } else if (safeId === 'swing_33') {
+                    shortLabel = 'Shuffle 33';
+                    colorClass = 'bg-blue-900/60 text-blue-200 border-blue-700';
+                }
+                grooveBadgeHTML = `<span class="groove-badge inline-flex items-center justify-center rounded border ${colorClass} text-[10px] px-1.5 py-0.5 font-mono tracking-tight"
+                    data-track-id="${track.id}"
+                    data-groove-preset="${safeId}"
+                    title="Groove template (click to change)">${shortLabel}</span>`;
+            }
+        }
+    } catch (e) { /* non-fatal — leave the badge empty */ }
+
     return `
         <div class="track-strip flex-shrink-0 w-44 bg-gray-800 rounded-lg p-3 flex flex-col gap-2 border border-gray-700" data-track-id="${track.id}">
             <div class="text-center">
@@ -7799,6 +7846,7 @@ function renderTrackStrip(track) {
                 <div class="flex items-center justify-center gap-1 mt-0.5">
                     <div class="text-xs text-gray-500">${track.type || 'Track'}</div>
                     ${midiChannelBadgeHTML}
+                    ${grooveBadgeHTML}
                 </div>
             </div>
             
