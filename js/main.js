@@ -157,6 +157,7 @@ import { initArmToggleHistory } from './ArmToggleHistory.js';
 import { initDuplicateTrackHotkey } from './DuplicateTrackHotkey.js';
 import { initPerTrackMidiChannelDisplay } from './PerTrackMidiChannelDisplay.js';
 import { initPerTrackGrooveTemplateSelector } from './PerTrackGrooveTemplateSelector.js';
+import { initTempoHistoryGraph } from './TempoHistoryGraph.js'; // v0.3.95
 import { initMidiChordDisplay, updateMidiChordLabels, toggleMidiChordDisplay, isMidiChordDisplayEnabled } from './MidiChordDisplay.js';
 import { initSpectrumAnalyzer, openSpectrumAnalyzerPanel } from './SpectrumAnalyzer.js';
 import { initBeatSyncedLFOPanel, openBeatSyncedLFOPanel } from './BeatSyncedLFOPanel.js';
