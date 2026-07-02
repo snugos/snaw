@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.95"; // 2026-07-01 - Project Tempo History Graph (v0.3.95): Small status-bar element showing "Tempo: N" with an inline SVG sparkline of the last 16 tempo changes; click to open a popover listing the last 16 changes (newest first) with a Restore button per row that rewinds Tone.Transport.bpm.value to that point and captures undo. Backed by js/TempoHistoryGraph.js.
+export const APP_VERSION = "0.3.96"; // 2026-07-02 - Daily automated merge & bug fix verification
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks
