@@ -403,9 +403,19 @@ function onDocumentMouseMove(e) {
 }
 
 function onDocumentMouseUp() {
-    if (draggingIndex >= 0) {
-        pendingUndo = false;
-    }
+    // Reset pendingUndo unconditionally on mouseup. The original code gated
+    // this on `draggingIndex >= 0`, but that misses the right-click delete
+    // path (which sets pendingUndo = true to coalesce undo with any follow-up
+    // canvas edits, but never sets draggingIndex because right-click is a
+    // point-and-return, not a drag). The net effect: after a single right-
+    // click delete, pendingUndo stayed true forever, and every subsequent
+    // canvas mousedown (drag an existing point, click empty canvas to add a
+    // new point) skipped its `captureUndoForSelection` call — Cmd+Z would
+    // no longer undo those canvas edits, with no error or visible cue. The
+    // intent of the pendingUndo flag is to coalesce a single user gesture
+    // (any combination of right-click delete + drag/add) into one undo
+    // entry, and reset on mouseup is the natural end-of-gesture point.
+    pendingUndo = false;
     draggingIndex = -1;
 }
 
