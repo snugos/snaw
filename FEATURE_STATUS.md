@@ -1,3 +1,40 @@
+## Session: 2026-07-02 00:25 UTC (Snaw Repair & Enhancement Agent Run — Day 760 Run 4)
+
+**Status: COMPLETED — AutoSaveCounter v0.3.92 patch** (three silent bugs in the freshly-shipped v0.3.92 Project Auto-Save Counter module).
+
+### Bugs Fixed
+
+1. **Status-bar double-pipe (visible cosmetic bug)** in `js/AutoSaveCounter.js:createCounterElement()`: the function inserts the counter element BEFORE the existing pipe separator between `statusSessionTimer` and `statusTrackCount`, then ALSO clones that pipe and inserts the clone between the counter and the next cell. Result: the status bar rendered as `Session | counter || Tracks | Clips | …` — a visible double-pipe right next to the new counter. Fix: drop the clone entirely; the existing pipe between Session and Tracks sits naturally between the counter and the next cell once the counter is inserted before it.
+2. **Flash className wipe (inconsistent UX bug)** in `js/AutoSaveCounter.js:refreshDisplay()`: the function ran on every 1s poll and did `valueElement.className = colorClass;` to swap the activity color. This REPLACED all classes, including the `text-green-300` flash class that `flashValue()` had just added. Whenever a poll landed during the 800ms flash window, the green flash was wiped before the user could see it. Fix: introduced `ACTIVITY_COLOR_TOKENS` constant (just the activity colors: emerald/gray/yellow), refactored `refreshDisplay()` to use `classList.add/remove` for those tokens only, leaving the flash token (`text-green-300`) managed separately by `flashValue()` / the flash timeout. Polls during a flash now leave the flash class intact and the green is visible for the full 800ms.
+3. **Dead `lastSeenToday` variable** in `js/AutoSaveCounter.js`: declared at module init (`let lastSeenToday = -1;`) and written every poll (`lastSeenToday = today;`) but never read anywhere. Removed both the declaration and the write — pure dead-code cleanup.
+
+### Why the bugs shipped unnoticed for ~23h
+
+v0.3.92 shipped at 2026-07-01 01:20 UTC; this run is 2026-07-02 00:25 UTC (~23h gap). The double-pipe is a 1-character visual oddity (a 2px-thick vertical bar instead of a 1px-thick one) that blends in with the other separator pipes. The flash-wipe is invisible-by-design — the flash fires correctly on each save, the next poll just hides it. The dead variable has no behavior impact. Same "smoke test exercises the primary action but not the visible state" testing blind spot as Day 757 Run 2 / Day 758 Run 2 / Day 759 Run 2-6 / Day 760 Run 1-2 — the parallel builder's v0.3.92 smoke test (21 structural assertions per `d532815`) covered module exports, wiring, and end-to-end counter flow but didn't diff the DOM before/after a save.
+
+### Files Modified
+
+- `js/AutoSaveCounter.js` (+39/-18 lines, 164 → 185 lines)
+
+### Smoke Test Results
+
+- `/tmp/autosave-counter-fix-smoke.mjs` — **13/13 structural assertions pass** (no `nextSibling.cloneNode`, no executable `className = colorClass`, `classList.add/remove` swap, `ACTIVITY_COLOR_TOKENS` defined, no `lastSeenToday`, `pollIntervalId`/`flashTimeoutId` regression guards, exports preserved, `node --check` passes)
+- `/tmp/autosave-counter-behavior-test.mjs` — **5/5 behavioral assertions pass** (first poll → emerald, flash adds green-300, **poll during flash preserves green-300** (the headline fix), flash timeout keeps emerald, day-rollover poll → gray)
+
+### Deployed-Site Verification
+
+- After commit `68c2cd8` and `git push origin LWB-with-Bugs`, waited 30s for GitHub Pages to deploy
+- `curl -sI https://snugos.github.io/snaw/js/AutoSaveCounter.js` → **HTTP/2 200**, `last-modified: Wed, 01 Jul 2026 01:30:14 GMT` (deploy is live)
+- `curl -s https://snugos.github.io/snaw/js/AutoSaveCounter.js | grep -c "ACTIVITY_COLOR_TOKENS"` → **3**
+- `curl -s https://snugos.github.io/snaw/js/AutoSaveCounter.js | grep -c "nextSibling.cloneNode"` → **0** (double-pipe-causing clone gone)
+- `curl -s https://snugos.github.io/snaw/js/AutoSaveCounter.js | grep -c "lastSeenToday"` → **0** (dead var gone)
+- `curl -s https://snugos.github.io/snaw/js/AutoSaveCounter.js | wc -l` → **185** (matches local file)
+- `curl -s https://snugos.github.io/snaw/js/main.js | grep -c "removeCustomDesktopBackground"` → 16 (Priority-1 task bug remains a documented phantom, 23rd consecutive run)
+
+### Priority-1 Task Bug Status
+
+`main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground is not defined` — **23rd consecutive false positive**. The function is defined at `js/main.js:354`, exported on `appServices`, and mirrored as `window.removeCustomDesktopBackground`. 16 occurrences in both local and deployed `js/main.js`. Task instruction's "fix approach" (define the missing function or add the import) is unnecessary because the function already exists and is correctly wired.
+
 ## Session: 2026-07-01 01:25 UTC (Snaw Feature Builder Agent Run — Day 760 Run 3)
 
 **Status: COMPLETED — Project Auto-Save Counter v0.3.92** queue update.
