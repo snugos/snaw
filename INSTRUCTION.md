@@ -70,19 +70,19 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 - **Per-Note Pitch Bend Lane In Piano Roll** - New Pitch button in the piano roll toolbar opens a drag-to-edit per-note pitch-bend curve editor (click lane to add point, drag point to move, right-click to delete, +Vibrato/+Bend Up/+Bend Down presets, ±200 cents range). Bend data stored on each note as `note.pitchBend = [{offset, value}]`; notes with a curve get an indigo ring + small dot indicator in the roll. Backed by js/PianoRollPitchBend.js (v0.3.91) ✅
 - **Project Auto-Save Counter** - Status-bar indicator showing "AutoSave: N today (M total)" so the user gets visual confirmation that the background auto-save is working. Today's count (N) resets at local midnight; cumulative total (M) persists across reloads via localStorage. Click for a tooltip-style notification with full info; brief green flash on each save. Backed by js/AutoSaveCounter.js (v0.3.92) ✅
 - **Per-Track MIDI Channel Display** - Small "Ch N" / "Omni" badge in each track-strip header (mixer panel) next to the track-type label. Color codes (gray for Omni, emerald for specific channels). Click the badge to open an inline picker (Omni + 1-16) that writes through track.setMidiChannel → undo captured + mixer repainted via the new 'midiChannelChanged' case in handleTrackUIUpdate. Master / Audio / Lyrics tracks skip the badge. Backed by js/PerTrackMidiChannelDisplay.js (v0.3.93) ✅
+- **Per-Track Groove Template Selector** - Small "Groove" badge in each track-strip header (mixer panel) next to the MIDI channel badge showing the current swing/shuffle preset ("None" gray / "Swing 50" / "Swing 66" / "Swing 75" / "Shuffle 33" amber/blue). Click the badge to open an inline picker (None + 4 swing presets) that writes through track.setGroovePreset → undo pre-captured + mixer repainted via the new 'groovePresetChanged' case in handleTrackUIUpdate. Master / Audio / Lyrics tracks skip the badge. Backed by js/PerTrackGrooveTemplateSelector.js (v0.3.94) ✅
 
 ## Current Feature Queue
 
-1. **Per-Track Groove Template Selector**
-2. **Project Tempo History Graph**
-3. **Track Freeze with Crossfade**
-4. **MIDI Panic for Individual Tracks**
-5. **Audio Clip Volume Curve Presets**
-6. **Per-Track MIDI CC Presets**
-7. **Step Sequencer Pattern Library**
-8. **Track Grouping by Instrument**
-9. **Project Marker Annotations**
-10. **Audio Clip Labeling**
+1. **Project Tempo History Graph**
+2. **Track Freeze with Crossfade**
+3. **MIDI Panic for Individual Tracks**
+4. **Audio Clip Volume Curve Presets**
+5. **Per-Track MIDI CC Presets**
+6. **Step Sequencer Pattern Library**
+7. **Track Grouping by Instrument**
+8. **Project Marker Annotations**
+9. **Audio Clip Labeling**
 
 ## Workflow
 
