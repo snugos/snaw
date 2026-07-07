@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.97"; // 2026-07-03 - Daily automated merge & verification - all features confirmed present
+export const APP_VERSION = "0.3.98"; // 2026-07-07 - Daily automated merge & verification - all features confirmed present
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks
