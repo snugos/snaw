@@ -42,6 +42,16 @@ let isPopoverOpen = false;
 let popoverCountEl = null;
 let popoverCountCapEl = null;
 
+// Newest-first snapshot of the history slice that the popover is
+// currently rendering. We need this so `refreshAges()` (called every
+// poll tick while the popover is open) can walk the rendered rows in
+// the same order they appear in the DOM and update only the per-row
+// age span — without re-running `renderPopoverList()` (which would
+// throw away the user's hover state and any in-progress button focus).
+// Same pattern as `MIDIActivityLog.js:refreshAges` (Day 759 Run 3 fix
+// for the same bug class — see that module for the full rationale).
+let lastRenderedPopover = [];
+
 const history = [];   // newest at the end of the array
 
 function readCurrentBpm() {
@@ -245,6 +255,9 @@ function renderPopoverList() {
         </div>`;
     }).join('');
     popoverListEl.innerHTML = rows;
+    // Remember the slice we just rendered so refreshAges() can walk
+    // the rendered rows in the same order on every tick.
+    lastRenderedPopover = recent.slice();
     // Wire up the restore buttons (idempotent — we re-render the whole list
     // each time, so old listeners die with their rows).
     popoverListEl.querySelectorAll('.thg-restore-btn').forEach(btn => {
@@ -370,6 +383,33 @@ function createPopoverElement() {
     });
 }
 
+/**
+ * Update only the per-row age spans in the popover without re-rendering
+ * the rows. Called from the poll tick so age labels stay fresh ("now" →
+ * "1s" → "2s" → ...) even when no new history entries arrive.
+ *
+ * Without this, the popover's age labels only update on the next
+ * pushHistory() / clearHistory() / setPopoverOpen(true) call — so if
+ * the user opens the popover, sits there for 30 seconds, and the tempo
+ * doesn't change, the labels stay frozen at "now" / "5s" / "12s" and
+ * look like a bug. This mirrors MIDIActivityLog.refreshAges (the
+ * v0.3.88 stale-timestamp fix for the same bug class).
+ */
+function refreshAges() {
+    if (!popoverListEl || !isPopoverOpen) return;
+    if (lastRenderedPopover.length === 0) return;
+    const rows = popoverListEl.querySelectorAll('.thg-row');
+    if (rows.length === 0) return;
+    rows.forEach((row, idx) => {
+        const entry = lastRenderedPopover[idx];
+        if (!entry) return;
+        // First <span> in the row is the age label (matches the order
+        // we emit in renderPopoverList: age, bpm, source, button).
+        const ageEl = row.children[0];
+        if (ageEl) ageEl.textContent = formatAge(entry.time);
+    });
+}
+
 function poll() {
     if (pollHandle === null) return;
     try {
@@ -386,6 +426,7 @@ function poll() {
     } catch (e) {
         console.warn('[TempoHistoryGraph] poll error:', e);
     }
+    if (isPopoverOpen) refreshAges();
     pollHandle = setTimeout(poll, POLL_INTERVAL_MS);
 }
 
