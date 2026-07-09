@@ -145,20 +145,47 @@ export async function wrapBufferWithCrossfade(audioBuffer, crossfadeMs) {
 // --- Storage ---
 
 function loadSettingsFromStorage() {
+    // Snapshot the keys once and walk the snapshot. Iterating live
+    // localStorage with localStorage.key(i) inside the same loop where
+    // a `continue` can drop the index is fine, but the original
+    // implementation also called localStorage.getItem(key) without
+    // any guard for null — the `for (let i = 0; i < localStorage.length; i++)`
+    // pattern is technically safe in modern browsers (length is
+    // re-evaluated each iteration), but a localStorage call between
+    // browser tabs during the loop can also be picked up. Walking
+    // the snapshot and catching JSON.parse failures (e.g. corrupted
+    // localStorage entry from a future schema change) is the
+    // defensive pattern. The previous version also aborted the
+    // entire load on the first JSON.parse failure because the
+    // entire loop was wrapped in a single try/catch — so a single
+    // bad entry would wipe every track's crossfade setting on
+    // every page load. Fix: snapshot the keys first, then wrap
+    // only the JSON.parse + set in its own try/catch so one bad
+    // entry can't break the load for the rest.
+    let keys = [];
     try {
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
-            if (!key || !key.startsWith(STORAGE_PREFIX)) continue;
-            const trackId = parseInt(key.slice(STORAGE_PREFIX.length), 10);
-            if (isNaN(trackId)) continue;
-            const raw = localStorage.getItem(key);
-            const parsed = JSON.parse(raw);
-            if (parsed && typeof parsed.ms === 'number') {
-                trackSettings.set(trackId, { ms: parsed.ms });
-            }
+            if (key && key.startsWith(STORAGE_PREFIX)) keys.push(key);
         }
     } catch (e) {
-        console.warn('[TrackFreezeCrossfade] Could not load settings:', e);
+        console.warn('[TrackFreezeCrossfade] Could not enumerate localStorage:', e);
+        return;
+    }
+    for (const key of keys) {
+        const trackId = parseInt(key.slice(STORAGE_PREFIX.length), 10);
+        if (isNaN(trackId)) continue;
+        let parsed = null;
+        try {
+            const raw = localStorage.getItem(key);
+            parsed = JSON.parse(raw);
+        } catch (e) {
+            console.warn(`[TrackFreezeCrossfade] Skipping corrupt setting for track ${trackId}:`, e);
+            continue;
+        }
+        if (parsed && typeof parsed.ms === 'number') {
+            trackSettings.set(trackId, { ms: parsed.ms });
+        }
     }
 }
 
