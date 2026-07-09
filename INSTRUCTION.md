@@ -49,6 +49,7 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 - **Quick Bounce (in-place)** - Ctrl/Cmd+Shift+B skips the bounce dialog and immediately renders selected clips (or all clips on the first non-empty track if nothing is selected) to audio in place (v0.3.78) ✅
 - **Quick-Bounce Markers** - Mark a start + end time on the timeline and one-click render only the audio between them to a brand-new audio track (Tools → Quick-Bounce Markers) (v0.3.80) ✅
 - **MIDI Activity Log** - Small rolling log of the last 8 MIDI events (note on/off, CC) with timestamps in a collapsible panel ✅
+- **Per-Track MIDI Panic** - Small ⚠ button on every track strip (mixer panel) after the existing Mute/Solo/Arm/Bypass row that silences ONLY that one track and sends All-Notes-Off (CC 123) on the track's specific MIDI channel — the rest of the arrangement keeps playing, the global transport does not stop. Uses the same releaseAll() + gainNode ramp-down path as the global ⚠ Panic, but scoped to one track. Omni-configured tracks clear all 16 channels (matches the v0.3.x global panic behavior). Master / Lyrics tracks skip the button (no audio path for Lyrics, no per-track use case for Master — the global panic is the right tool there). The button flashes red on click and a one-line toast confirms. Backed by `js/PerTrackMidiPanic.js` (v0.4.00) ✅
 
 ## Completed Features (recent)
 
@@ -75,13 +76,12 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **MIDI Panic for Individual Tracks**
-2. **Audio Clip Volume Curve Presets**
-3. **Per-Track MIDI CC Presets**
-4. **Step Sequencer Pattern Library**
-5. **Track Grouping by Instrument**
-6. **Project Marker Annotations**
-7. **Audio Clip Labeling**
+1. **Audio Clip Volume Curve Presets**
+2. **Per-Track MIDI CC Presets**
+3. **Step Sequencer Pattern Library**
+4. **Track Grouping by Instrument**
+5. **Project Marker Annotations**
+6. **Audio Clip Labeling**
 
 ## Workflow
 
