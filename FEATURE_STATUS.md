@@ -1,3 +1,39 @@
+## Session: 2026-07-09 23:25 UTC (Snaw Feature Completion Agent Run — Day 767)
+
+**Status: SHIPPED — TempoHistoryGraph popover age-refresh + main.js duplicate-import dedup** (v0.3.95 patch + v0.3.99 wiring cleanup)
+
+### Automated Scan Results
+- **TODO/FIXME/XXX/HACK/INCOMPLETE/STUB markers in active `js/` code**: 0 hits
+- **Untracked orphan JS files**: `js/PerTrackMidiPanic.js` (175 lines, syntax-clean) — parallel builder mid-flight on v0.4.00 Per-Track MIDI Panic. Left untouched per coordination pattern.
+- **state.js integrity**: 3959 lines, `node --check` passes. Clean entry.
+- **Current APP_VERSION**: 0.3.99 (Track Freeze with Crossfade)
+
+### Bugs Fixed
+
+1. **TempoHistoryGraph popover stale age labels (silent UX bug)**: The v0.3.95 Project Tempo History Graph popover shows per-row timestamps like "now", "5s", "1.2m", but those age labels only updated on new history entries or popover-open. If the user opened the popover and sat there for 30 seconds with no tempo change, the labels stayed frozen. Same bug class as `MIDIActivityLog.js:refreshAges` (Day 759 Run 4) — signature-based early-return short-circuits age refresh on a quiet stream.
+   - **Fix**: Added `lastRenderedPopover` module variable to cache the currently-rendered history slice. New `refreshAges()` helper walks `.thg-row` elements in the DOM and updates only per-row age spans (no `innerHTML` rewrite, no flicker). Called from `poll()` after the popover render when `isPopoverOpen`. 41-line additive change in `js/TempoHistoryGraph.js`.
+   - **Commit**: `f24d1e8`
+
+2. **Duplicate `initTempoHistoryGraph` import in main.js**: The committed `main.js` already had the import at line 162. A parallel agent's mid-flight work added a SECOND import at line 95. ESM would throw `SyntaxError: Identifier 'initTempoHistoryGraph' has already been declared`. Removed the duplicate. 1-line delete.
+   - **Commit**: `97b5da7`
+
+### Parallel Builder Coordination
+- On entry, the parallel builder's v0.3.99 Track Freeze with Crossfade work was already committed (`47eea85`, `a709786`). Working tree had uncommitted duplicate import + incomplete TrackFreezeCrossfade wiring that was caught mid-run.
+- After shipping the TempoHistoryGraph age-refresh and dedup, the parallel builder began mid-flight work on v0.4.00 Per-Track MIDI Panic (`js/PerTrackMidiPanic.js` 175 lines, untracked; `js/main.js` +2 lines import; `js/state.js` modified). Left untouched per coordination pattern.
+
+### Deployed-Site Verification
+- `curl -s https://snugos.github.io/snaw/js/TempoHistoryGraph.js | grep -c "refreshAges"` → **6** (declaration + call site + comment references)
+- `curl -s https://snugos.github.io/snaw/js/main.js | grep -c "initTempoHistoryGraph"` → **2** (one import + one init call — dedup confirmed)
+- `curl -s https://snugos.github.io/snaw/js/constants.js | grep APP_VERSION` → `"0.3.99"`
+
+### Features Still in Progress
+- _None from this agent._ Parallel builder mid-flight on v0.4.00 Per-Track MIDI Panic.
+
+### Action Taken
+Pulled latest. Found duplicate TempoHistoryGraph import in uncommitted main.js + TrackFreezeCrossfade changes already committed by parallel builder. Discovered TempoHistoryGraph stale-age bug — same `refreshAges` pattern as MIDIActivityLog. Authored the 41-line fix in `js/TempoHistoryGraph.js`, verified syntax, committed as `f24d1e8`. Committed the duplicate-import fix as `97b5da7`. Pushed both to `origin/LWB-with-Bugs`. Verified deployment. Detected parallel builder's mid-flight v0.4.00 Per-Track MIDI Panic work and left it untouched. Updated FEATURE_STATUS.md.
+
+---
+
 ## Session: 2026-07-02 01:17 UTC (Snaw Repair & Enhancement Agent Run — Day 760 Run 5)
 
 **Status: COMPLETED — PianoRollPitchBend v0.3.91 patch** (silent broken-undo bug in the freshly-shipped v0.3.91 Per-Note Pitch Bend Lane module).
