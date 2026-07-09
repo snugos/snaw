@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.4.00"; // 2026-07-09 - Per-Track MIDI Panic (small ⚠ button on each track strip; silences one track and sends All-Notes-Off on its MIDI channel without stopping the rest of the arrangement)
+export const APP_VERSION = "0.4.01"; // 2026-07-09 - Audio Clip Volume Curve Presets (16 built-in envelope shapes: Fade In/Out, Ramp Up/Down, Tremolo, Pump, Duck, Stutter, Reverse Ramp, Silence Middle, Clear, etc.; per-clip scaling to clip duration; user-saved presets in localStorage; right-click "Volume Curve" on any audio clip + dockable panel)
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks

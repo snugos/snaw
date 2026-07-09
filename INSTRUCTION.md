@@ -49,7 +49,8 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 - **Quick Bounce (in-place)** - Ctrl/Cmd+Shift+B skips the bounce dialog and immediately renders selected clips (or all clips on the first non-empty track if nothing is selected) to audio in place (v0.3.78) ✅
 - **Quick-Bounce Markers** - Mark a start + end time on the timeline and one-click render only the audio between them to a brand-new audio track (Tools → Quick-Bounce Markers) (v0.3.80) ✅
 - **MIDI Activity Log** - Small rolling log of the last 8 MIDI events (note on/off, CC) with timestamps in a collapsible panel ✅
-- **Per-Track MIDI Panic** - Small ⚠ button on every track strip (mixer panel) after the existing Mute/Solo/Arm/Bypass row that silences ONLY that one track and sends All-Notes-Off (CC 123) on the track's specific MIDI channel — the rest of the arrangement keeps playing, the global transport does not stop. Uses the same releaseAll() + gainNode ramp-down path as the global ⚠ Panic, but scoped to one track. Omni-configured tracks clear all 16 channels (matches the v0.3.x global panic behavior). Master / Lyrics tracks skip the button (no audio path for Lyrics, no per-track use case for Master — the global panic is the right tool there). The button flashes red on click and a one-line toast confirms. Backed by `js/PerTrackMidiPanic.js` (v0.4.00) ✅
+- **Per-Track MIDI Panic** - Small ⚠ button on each non-Master / non-Lyrics track strip (right of Bypass) that silences ONLY that one track and sends All-Notes-Off on the track's specific MIDI channel (Omni → all 16). Brief red flash on click + one-line notification with track name. New `js/PerTrackMidiPanic.js` (175 lines): event-delegated click handler, defers to `appServices.panicStopTrackAudio(trackId)` as the single source of truth (also used by future hotkey wiring via `window.panicStopTrackById`). No undo capture (transient playback-state fix, same as global panic). Backed by `js/PerTrackMidiPanic.js` + the new `panicStopTrackAudio` service in `js/main.js` + the new `sendMidiAllNotesOffOnChannel` helper in `js/state.js` (v0.4.00) ✅
+- **Audio Clip Volume Curve Presets** - 16 built-in gain-envelope presets (Fade In/Out 100/300/500ms, Fade In & Out, Ramp Up/Down, Pump Up 4-beat, Duck 30%, Tremolo fast, Stutter 3 hits, Reverse Ramp, Silence Middle, Clear Envelope) plus user-saved presets in localStorage. Each preset is a 1-second reference envelope that scales linearly to the target clip's duration at apply time. Right-click an audio clip → "Volume Curve" → pick a preset (cursor popover with inline mini-SVG envelope previews), or open the dockable "Volume Curve Presets" panel from the start menu. Applied via the existing `track.setClipGainEnvelope(clipId, points)` API (undo captured automatically by the API). Backed by `js/ClipVolumeCurvePresets.js` (v0.4.01) ✅
 
 ## Completed Features (recent)
 
@@ -76,12 +77,11 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Audio Clip Volume Curve Presets**
-2. **Per-Track MIDI CC Presets**
-3. **Step Sequencer Pattern Library**
-4. **Track Grouping by Instrument**
-5. **Project Marker Annotations**
-6. **Audio Clip Labeling**
+1. **Per-Track MIDI CC Presets** - Save the entire CC mapping set for a track (CC #, channel, min/max range, target parameter) as a named preset; quick-apply to another track or project
+2. **Step Sequencer Pattern Library** - Curated set of stock drum/melodic patterns the user can browse and drag into a track's sequencer slot; categorized by genre (house, techno, hip-hop, etc.)
+3. **Track Grouping by Instrument** - Right-click a track header → "Assign to Group: Drums / Bass / Lead / Pad / FX" so mix presets and routing templates can target a logical bundle of tracks
+4. **Project Marker Annotations** - Attach a multi-line text note to any timeline marker (verse lyrics, mix notes, arrangement reminders); tooltip on marker hover shows the note; edit via right-click → "Edit Marker Note"
+5. **Audio Clip Labeling** - Tag any audio clip with a freeform text label (vocal-take #, sample source, etc.) shown as a small overlay on the clip and filterable in the Project Search panel
 
 ## Workflow
 

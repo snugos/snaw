@@ -102,6 +102,8 @@ import { initClipContextMenu } from './ClipContextMenu.js';
 import { initClickTrackVolumeSlider } from './ClickTrackVolumeSlider.js'; // Click Track Volume Slider (v0.3.77)
 import { initClipboardHistoryManager } from './ClipboardHistoryManager.js';
 import { initClipSelectionManager } from './ClipSelectionManager.js';
+// v0.4.01 Clip Volume Curve Presets - per-clip gain-envelope shape presets
+import { initClipVolumeCurvePresets, openClipVolumeCurvePresetsPanel, applyVolumeCurvePresetToSelectedClip, getVolumeCurvePresetsList, registerVolumeCurvePresetMenuItem } from './ClipVolumeCurvePresets.js';
 import { initClipFadePresets, openClipFadePresetsPanel, closeClipFadePresetsPanel, addFadePreset, getFadePresets, getClipFadeMenuItems, getClipFadeMenuItemsSimple, applyFadePresetToClip } from './ClipFadePresets.js';
 import { initClipGroupManager } from './ClipGroupManager.js';
 import { initTrackContextMenu } from './TrackContextMenu.js';
@@ -1401,6 +1403,7 @@ const appServices = {
     openDrumPatternSplitterPanel,
     openClipOpacityPanel,
     openClipFadePresetsPanel,
+    openClipVolumeCurvePresetsPanel, // v0.4.01
     openClipFadeHandlesPanel,
     openStretchMarkersPanel,
     openPitchDriftCorrectionPanel,
@@ -2306,6 +2309,7 @@ async function initializeSnugOS() {
         if (typeof initClipboardHistoryManager === 'function') initClipboardHistoryManager(appServices); // Clipboard History Manager
         if (typeof initClipSelectionManager === 'function') initClipSelectionManager(appServices); // Clip selection manager initialization
         if (typeof initClipFadePresets === 'function') initClipFadePresets(appServices); // Clip Fade Presets initialization
+        if (typeof initClipVolumeCurvePresets === 'function') initClipVolumeCurvePresets(appServices); // Clip Volume Curve Presets initialization (v0.4.01)
         if (typeof initClipGroupManager === 'function') initClipGroupManager(appServices); // Clip Group Manager
         if (typeof openStepSequencerView === 'function') openStepSequencerView(appServices); // Step Sequencer View initialization
         if (typeof initPianoRollEditor === 'function') initPianoRollEditor(appServices); // Piano Roll Editor initialization

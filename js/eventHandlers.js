@@ -861,6 +861,12 @@ export function initializePrimaryEventListeners(appContext) {
                     if (menuEl) menuEl.textContent = `Toolbar Tooltips: ${next ? 'On' : 'Off'}`;
                 } catch(e) { console.error('[Menu] Toolbar Tooltips error:', e); }
             },
+            menuClipVolumeCurvePresets: () => {
+                console.log('[Menu] Clip Volume Curve Presets clicked');
+                try {
+                    localAppServices.openClipVolumeCurvePresetsPanel?.();
+                } catch(e) { console.error('[Menu] Clip Volume Curve Presets error:', e); }
+            },
             menuMixBusGroupPresets: () => {
                 console.log('[Menu] Mix-Bus Group Presets clicked');
                 try {
