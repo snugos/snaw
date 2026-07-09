@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.3.99"; // 2026-07-09 - Track Freeze with Crossfade (per-track fade in/out on freeze + click-to-edit duration on track header)
+export const APP_VERSION = "0.4.00"; // 2026-07-09 - Per-Track MIDI Panic (small ⚠ button on each track strip; silences one track and sends All-Notes-Off on its MIDI channel without stopping the rest of the arrangement)
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks

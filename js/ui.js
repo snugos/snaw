@@ -7838,6 +7838,33 @@ function renderTrackStrip(track) {
         }
     } catch (e) { /* non-fatal — leave the badge empty */ }
 
+    // Per-track MIDI Panic button (v0.4.00). The little ⚠ button after
+    // Bypass silences ONLY this one track and sends All-Notes-Off on
+    // this track's MIDI channel — the rest of the arrangement keeps
+    // playing. Master / Lyrics tracks skip the button (no audio path
+    // for Lyrics, no per-track use case for Master — the global
+    // panic is the right tool there).
+    let perTrackPanicBtnHTML = '';
+    try {
+        const panicType = (track.type || '').toString();
+        if (panicType !== 'Master' && panicType !== 'Lyrics') {
+            if (typeof window !== 'undefined' && window.getPerTrackPanicButtonHTML) {
+                perTrackPanicBtnHTML = window.getPerTrackPanicButtonHTML(track) || '';
+            } else {
+                // Fallback: render the button inline using track.id
+                // directly. Same visual, no behavior until the module
+                // loads (the click handler is event-delegated on
+                // document, so the handler will start working the
+                // moment the module finishes loading — no need to
+                // re-render the mixer).
+                const trackId = track.id != null ? String(track.id) : '';
+                perTrackPanicBtnHTML = `<button type="button" class="strip-track-panic-btn w-8 h-6 text-xs rounded bg-[#3a1010] text-[#ff8888] hover:bg-[#a02020] hover:text-white border border-[#7a2020]"
+                    data-track-id="${trackId}"
+                    title="MIDI Panic for this track only — stops playback, releases notes, sends All-Notes-Off on this track's MIDI channel. Transport keeps playing.">⚠</button>`;
+            }
+        }
+    } catch (e) { /* non-fatal — leave the button empty */ }
+
     return `
         <div class="track-strip flex-shrink-0 w-44 bg-gray-800 rounded-lg p-3 flex flex-col gap-2 border border-gray-700" data-track-id="${track.id}">
             <div class="text-center">
@@ -7856,6 +7883,7 @@ function renderTrackStrip(track) {
                 <button class="strip-solo-btn w-8 h-6 text-xs rounded ${isSolo ? 'bg-yellow-500 text-black' : 'bg-gray-700 text-gray-400 hover:bg-yellow-900'}" data-track-id="${track.id}" title="Solo">S</button>
                 <button class="strip-arm-btn w-8 h-6 text-xs rounded ${isArmed ? 'bg-red-600 text-white animate-pulse' : 'bg-gray-700 text-gray-400 hover:bg-red-600'}" data-track-id="${track.id}" title="Record Arm">R</button>
                 <button class="strip-bypass-btn w-8 h-6 text-xs rounded ${(track.effectsBypassed || (track.getEffectsBypassed && track.getEffectsBypassed())) ? 'bg-orange-500 text-white' : 'bg-gray-700 text-gray-400 hover:bg-orange-700'}" data-track-id="${track.id}" title="Bypass all effects (dry)">B</button>
+                ${perTrackPanicBtnHTML}
             </div>
             
             <!-- Pan knob display -->

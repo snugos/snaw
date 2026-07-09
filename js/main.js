@@ -158,6 +158,7 @@ import { initArmToggleHistory } from './ArmToggleHistory.js';
 import { initDuplicateTrackHotkey } from './DuplicateTrackHotkey.js';
 import { initPerTrackMidiChannelDisplay } from './PerTrackMidiChannelDisplay.js';
 import { initPerTrackGrooveTemplateSelector } from './PerTrackGrooveTemplateSelector.js';
+import { initPerTrackMidiPanic } from './PerTrackMidiPanic.js'; // v0.4.00
 import { initTempoHistoryGraph } from './TempoHistoryGraph.js'; // v0.3.95
 import { initMidiChordDisplay, updateMidiChordLabels, toggleMidiChordDisplay, isMidiChordDisplayEnabled } from './MidiChordDisplay.js';
 import { initSpectrumAnalyzer, openSpectrumAnalyzerPanel } from './SpectrumAnalyzer.js';
@@ -282,7 +283,7 @@ import {
     getTracksState, getTrackByIdState, getOpenWindowsState, getWindowByIdState, getHighestZState,
     getMasterEffectsState, getMasterGainValueState,
     getMidiAccessState, getActiveMIDIInputState,
-    getMidiOutputDevices, sendMidiNoteOn, sendMidiNoteOff, sendMidiCC, sendMidiAllNotesOff, selectMidiOutput, getActiveMidiOutputState,
+    getMidiOutputDevices, sendMidiNoteOn, sendMidiNoteOff, sendMidiCC, sendMidiAllNotesOff, sendMidiAllNotesOffOnChannel, selectMidiOutput, getActiveMidiOutputState,
     getLoadedZipFilesState, getSoundLibraryFileTreesState, getCurrentLibraryNameState,
     getCurrentSoundFileTreeState, getCurrentSoundBrowserPathState, getPreviewPlayerState,
     getClipboardDataState, getAutomationClipboardState, getArmedTrackIdState, getSoloedTrackIdState, isTrackRecordingState,
@@ -772,6 +773,76 @@ const appServices = {
         localStorage.setItem('midiChordPlayerSettings', JSON.stringify(settings));
     },
     
+    // Per-Track MIDI Panic (v0.4.00): stop audio + release notes + clear
+    // active clip players for ONE specific track only. Mirrors the track-
+    // specific half of panicStopAllAudio() but never touches other tracks
+    // and never stops the global transport — the user wants to silence
+    // one stuck track and keep the rest of the arrangement rolling.
+    // Undo is NOT captured because this is a transient playback-state
+    // fix (a button-pressed event), not a project-state mutation.
+    panicStopTrackAudio: (trackId) => {
+        console.log(`[AppServices] Per-Track MIDI Panic for track ${trackId} requested.`);
+        if (trackId == null) return false;
+        const track = (typeof getTrackByIdState === 'function') ? getTrackByIdState(trackId) : null;
+        if (!track) {
+            console.warn(`[AppServices] Per-Track Panic: track ${trackId} not found.`);
+            return false;
+        }
+        if (typeof Tone === 'undefined') return false;
+        const now = Tone.now();
+
+        // 1) Call the track's own stopPlayback() — this stops/disposes
+        //    timeline clip players, patternPlayerSequence, slicer
+        //    mono player, and releases notes on Synth/InstrumentSampler/
+        //    DrumSampler instruments. Same path the global panic uses
+        //    for one track.
+        if (typeof track.stopPlayback === 'function') {
+            try { track.stopPlayback(); }
+            catch (e) { console.warn(`[AppServices PerTrackPanic] stopPlayback failed for track ${trackId}:`, e); }
+        }
+
+        // 2) Aggressive gain ramp-down for synth types (matches the
+        //    global panic behavior so a stuck note that wasn't already
+        //    released by the instrument gets force-muted through the
+        //    track's gainNode).
+        if (track && (track.type === 'Synth' || track.type === 'InstrumentSampler') &&
+            track.gainNode && track.gainNode.gain &&
+            typeof track.gainNode.gain.cancelScheduledValues === 'function' &&
+            typeof track.gainNode.gain.linearRampToValueAtTime === 'function' &&
+            !track.gainNode.disposed) {
+            try {
+                track.gainNode.gain.cancelScheduledValues(now);
+                track.gainNode.gain.linearRampToValueAtTime(0, now + 0.02);
+            } catch (e) {
+                console.warn(`[AppServices PerTrackPanic] gain ramp-down failed for track ${trackId}:`, e);
+            }
+        }
+
+        // 3) Send All-Notes-Off on the track's MIDI channel. If the
+        //    track is set to Omni (0), clear all 16 channels because
+        //    we don't know which one the stuck note came in on. The
+        //    helper is imported from state.js at the top of this file.
+        try {
+            const ch = (typeof track.getMidiChannel === 'function') ? track.getMidiChannel() : (track.midiChannel ?? 0);
+            if (typeof sendMidiAllNotesOffOnChannel === 'function') {
+                if (ch === 0) {
+                    // Omni track — clear all 16 channels
+                    let sent = 0;
+                    for (let c = 1; c <= 16; c++) {
+                        try { sent += sendMidiAllNotesOffOnChannel(c) ? 1 : 0; } catch (e) { /* non-fatal */ }
+                    }
+                    console.log(`[AppServices PerTrackPanic] Cleared MIDI Omni (${sent} channel(s)) for track ${trackId}.`);
+                } else {
+                    const sent = sendMidiAllNotesOffOnChannel(ch);
+                    console.log(`[AppServices PerTrackPanic] Cleared MIDI ch ${ch} for track ${trackId}: ${sent ? 'sent' : 'no output'}.`);
+                }
+            }
+        } catch (midiErr) {
+            console.warn(`[AppServices PerTrackPanic] MIDI All-Notes-Off error for track ${trackId}:`, midiErr);
+        }
+
+        return true;
+    },
     // MODIFICATION: Refined Panic Stop Service
     panicStopAllAudio: () => {
         console.log("[AppServices] Panic Stop All Audio requested.");
@@ -2291,6 +2362,7 @@ async function initializeSnugOS() {
         if (typeof initDuplicateTrackHotkey === 'function') initDuplicateTrackHotkey(appServices); // Duplicate Track Hotkey - Shift+D duplicates selected/active track and places it directly under the source (v0.3.90)
         if (typeof initPerTrackMidiChannelDisplay === 'function') initPerTrackMidiChannelDisplay(appServices); // Per-Track MIDI Channel Display - small badge on each track header + click-to-change picker (v0.3.93)
         if (typeof initPerTrackGrooveTemplateSelector === 'function') initPerTrackGrooveTemplateSelector(appServices); // Per-Track Groove Template Selector - small 'Groove' badge per track + click-to-pick swing preset (v0.3.94)
+        if (typeof initPerTrackMidiPanic === 'function') initPerTrackMidiPanic(appServices); // Per-Track MIDI Panic - small ⚠ button on each track strip + click-to-panic-this-track (v0.4.00)
         if (typeof initTempoHistoryGraph === 'function') initTempoHistoryGraph(appServices); // Project Tempo History Graph - status-bar sparkline + click-to-expand popover with restore buttons (v0.3.95)
         if (typeof initGuitarTabEditor === 'function') initGuitarTabEditor(appServices); // Guitar Tab Editor initialization
         if (typeof initSpectrumAnalyzer === 'function') initSpectrumAnalyzer(appServices); // Spectrum Analyzer initialization

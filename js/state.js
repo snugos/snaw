@@ -1122,6 +1122,42 @@ export function sendMidiAllNotesOff() {
     }
 }
 
+// Send MIDI All Notes Off (CC 123) on a single channel (1-16). Used by
+// Per-Track MIDI Panic (v0.4.00) so the user can clear stuck notes on
+// a single track without affecting the rest of the project.
+// channel param: 1-16. Out-of-range values are clamped; 0 (omni) is
+// treated as "all 16" so a panic on an Omni-configured track still
+// clears every channel (matches the v0.3.x global panic behavior).
+export function sendMidiAllNotesOffOnChannel(channel) {
+    if (!activeMidiOutputGlobal) {
+        console.warn('[MIDI Output] No active MIDI output device selected');
+        return 0;
+    }
+    let channelsSent = 0;
+    try {
+        const ch = parseInt(channel, 10);
+        if (Number.isNaN(ch) || ch < 0 || ch > 16) {
+            console.warn(`[MIDI Output] sendMidiAllNotesOffOnChannel: invalid channel ${channel}`);
+            return 0;
+        }
+        if (ch === 0) {
+            for (let c = 0; c < 16; c++) {
+                const ccMessage = [0xB0 | (c & 0x0F), 123 & 0x7F, 0];
+                activeMidiOutputGlobal.send(ccMessage);
+                channelsSent++;
+            }
+        } else {
+            const ccMessage = [0xB0 | ((ch - 1) & 0x0F), 123 & 0x7F, 0];
+            activeMidiOutputGlobal.send(ccMessage);
+            channelsSent = 1;
+        }
+        return channelsSent;
+    } catch (e) {
+        console.error('[MIDI Output] Error sending All Notes Off on channel:', e);
+        return channelsSent;
+    }
+}
+
 // Select MIDI output device
 export function selectMidiOutput(deviceId) {
     if (!midiAccessGlobal || !midiAccessGlobal.outputs) {
