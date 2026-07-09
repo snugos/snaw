@@ -71,18 +71,17 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 - **Project Auto-Save Counter** - Status-bar indicator showing "AutoSave: N today (M total)" so the user gets visual confirmation that the background auto-save is working. Today's count (N) resets at local midnight; cumulative total (M) persists across reloads via localStorage. Click for a tooltip-style notification with full info; brief green flash on each save. Backed by js/AutoSaveCounter.js (v0.3.92) ✅
 - **Per-Track MIDI Channel Display** - Small "Ch N" / "Omni" badge in each track-strip header (mixer panel) next to the track-type label. Color codes (gray for Omni, emerald for specific channels). Click the badge to open an inline picker (Omni + 1-16) that writes through track.setMidiChannel → undo captured + mixer repainted via the new 'midiChannelChanged' case in handleTrackUIUpdate. Master / Audio / Lyrics tracks skip the badge. Backed by js/PerTrackMidiChannelDisplay.js (v0.3.93) ✅
 - **Per-Track Groove Template Selector** - Small "Groove" badge in each track-strip header (mixer panel) next to the MIDI channel badge showing the current swing/shuffle preset ("None" gray / "Swing 50" / "Swing 66" / "Swing 75" / "Shuffle 33" amber/blue). Click the badge to open an inline picker (None + 4 swing presets) that writes through track.setGroovePreset → undo pre-captured + mixer repainted via the new 'groovePresetChanged' case in handleTrackUIUpdate. Master / Audio / Lyrics tracks skip the badge. Backed by js/PerTrackGrooveTemplateSelector.js (v0.3.94) ✅
+- **Track Freeze with Crossfade** - When freezing a track, apply a per-track configurable fade-in/out envelope (0/25/50/100/250/500/1000/2000 ms) to the rendered audio buffer so the start/end don't click and unfreezing blends cleanly. New `js/TrackFreezeCrossfade.js` module (381 lines): per-track crossfade duration stored in `localStorage` under `snaw_track_freeze_crossfade_<trackId>`, default 100 ms. Each track header shows a small ❄️⚡N indicator (blue when enabled, gray when off) — click to open an inline picker with all duration options. Hooked into the existing `js/TrackFreeze.js` render flow via `window.applyFreezeCrossfadeEnvelope(buffer, trackId)` (called between buffer render and WAV conversion in `freezeTrack`); also exposes `appServices.scheduleUnfreezeRamp(track)` for a fade-in ramp on the live instrument's output gain when the track is unfrozen. Backed by `js/TrackFreezeCrossfade.js` (v0.3.99) ✅
 
 ## Current Feature Queue
 
-1. **Project Tempo History Graph**
-2. **Track Freeze with Crossfade**
-3. **MIDI Panic for Individual Tracks**
-4. **Audio Clip Volume Curve Presets**
-5. **Per-Track MIDI CC Presets**
-6. **Step Sequencer Pattern Library**
-7. **Track Grouping by Instrument**
-8. **Project Marker Annotations**
-9. **Audio Clip Labeling**
+1. **MIDI Panic for Individual Tracks**
+2. **Audio Clip Volume Curve Presets**
+3. **Per-Track MIDI CC Presets**
+4. **Step Sequencer Pattern Library**
+5. **Track Grouping by Instrument**
+6. **Project Marker Annotations**
+7. **Audio Clip Labeling**
 
 ## Workflow
 
