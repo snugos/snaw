@@ -92,6 +92,7 @@ import { initLoopRegionPresets, openLoopRegionPresetsPanel } from './LoopRegionP
 import { initLoopUntilMarker, openLoopUntilMarkerPanel, extendLoopToNextMarker, extendLoopToPreviousMarker, extendLoopToBothMarkers, setLoopUntilMarkerAutoEnabled, isLoopUntilMarkerAutoEnabled } from './LoopUntilMarker.js';
 import { initLoopLengthDisplay, refreshLoopLengthDisplay } from './LoopLengthDisplay.js';
 import { initAutoSaveIndicator, showSaveStatus, getSaveStatus } from './AutoSaveIndicator.js';
+import { initTempoHistoryGraph } from './TempoHistoryGraph.js'; // v0.3.95 — Project Tempo History Graph
 import { initAutoSaveCounter, getAutoSaveCounterStatus } from './AutoSaveCounter.js'; // v0.3.92
 import { initMIDIActivityLog, refreshMIDIActivityLog, setMIDIActivityLogVisible, toggleMIDIActivityLog } from './MIDIActivityLog.js';
 import { initExportSelection, openExportSelectionPanel } from './ExportSelection.js';
@@ -150,6 +151,7 @@ import { initTrackIconPicker, openTrackIconPickerPanel } from './TrackIconPicker
 import { initChordVoicingModes, openChordVoicingPanel } from './ChordVoicingModes.js';
 import { initChordTriggerMode, toggleChordTriggerMode, openChordTriggerPanel, isChordTriggerEnabled, handleChordTriggerKeyDown, handleChordTriggerKeyUp, getChordKeyMappings, setChordKeyMapping } from './ChordTriggerMode.js';
 import { initTrackFreezeQuickToggle } from './TrackFreezeQuickToggle.js';
+import { initTrackFreezeCrossfade, onTrackHeaderRendered as tfCrossfadeHeaderRendered } from './TrackFreezeCrossfade.js';
 import { initTrackLaneResize } from './TrackLaneResize.js';
 import { initPerformanceMonitor, initPerformanceIndicator, openPerformancePanel, closePerformancePanel, getPerformanceSnapshot } from './PerformanceMonitor.js';
 import { initUndoHistoryPanel, openUndoHistoryPanel } from './UndoHistoryPanel.js';
@@ -2116,6 +2118,9 @@ function handleTrackUIUpdate(trackId, reason, detail) {
                 try {
                     if (typeof refreshTrackNoteIndicators === 'function') refreshTrackNoteIndicators();
                 } catch (e) { console.warn('[TrackNotes] refresh failed:', e); }
+                try {
+                    if (typeof tfCrossfadeHeaderRendered === 'function') tfCrossfadeHeaderRendered(trackId);
+                } catch (e) { console.warn('[TrackFreezeCrossfade] header render failed:', e); }
                 break;
             default:
                 console.warn(`[Main UI Update] Unhandled reason: ${reason} for track ${trackId}`);
@@ -2278,6 +2283,7 @@ async function initializeSnugOS() {
         if (typeof initChordTriggerMode === 'function') initChordTriggerMode(appServices); // Chord Trigger Mode initialization
         if (typeof initRhythmRandomizer === 'function') initRhythmRandomizer(appServices); // Rhythm Randomizer initialization
         if (typeof initTrackFreezeQuickToggle === 'function') initTrackFreezeQuickToggle(appServices); // Track Freeze Quick Toggle - F key to freeze
+        if (typeof initTrackFreezeCrossfade === 'function') initTrackFreezeCrossfade(appServices); // Track Freeze Crossfade - per-track fade in/out on freeze/unfreeze (v0.3.99)
         if (typeof initTrackLaneResize === 'function') initTrackLaneResize(appServices); // Track lane resize
         if (typeof initPerformanceMonitor === 'function') initPerformanceMonitor(); // Performance monitor initialization
         if (typeof initPerformanceIndicator === 'function') initPerformanceIndicator(); // Performance indicator initialization

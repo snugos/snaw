@@ -183,6 +183,16 @@ export async function freezeTrack(trackId, durationBars = 4) {
 
         console.log('[TrackFreeze] Rendered buffer duration:', renderedBuffer.duration);
 
+        // Apply Track Freeze Crossfade envelope (fade-in/out to the rendered audio)
+        // so frozen audio doesn't click on start/end and unfreezing can blend cleanly.
+        if (typeof window.applyFreezeCrossfadeEnvelope === 'function') {
+            try {
+                window.applyFreezeCrossfadeEnvelope(renderedBuffer, trackId);
+            } catch (e) {
+                console.warn('[TrackFreeze] applyFreezeCrossfadeEnvelope failed (continuing without):', e);
+            }
+        }
+
         // Convert AudioBuffer to WAV blob
         const wavBlob = await audioBufferToWav(renderedBuffer);
 
