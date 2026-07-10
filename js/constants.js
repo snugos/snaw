@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.4.01"; // 2026-07-09 - Audio Clip Volume Curve Presets (16 built-in envelope shapes: Fade In/Out, Ramp Up/Down, Tremolo, Pump, Duck, Stutter, Reverse Ramp, Silence Middle, Clear, etc.; per-clip scaling to clip duration; user-saved presets in localStorage; right-click "Volume Curve" on any audio clip + dockable panel)
+export const APP_VERSION = "0.4.02"; // 2026-07-10 - Per-Track MIDI CC Presets (small 'CC n' badge in each track-strip header + click-to-open dockable panel for saving/loading the full CC mapping set per track + start-menu entry + dockable panel for non-strip users; user-saved presets in localStorage; built-in starting preset; import/export as JSON; quick-apply to another track; per-track badge auto-refresh on apply)
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks

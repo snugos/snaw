@@ -7865,6 +7865,34 @@ function renderTrackStrip(track) {
         }
     } catch (e) { /* non-fatal — leave the button empty */ }
 
+    // Per-track MIDI CC count badge (v0.4.02). Tiny "CC n" pill
+    // showing how many MIDI CC mappings currently target this track
+    // (read via appServices.listPerTrackMidiCCPresets' inner state —
+    // actually we use listMidiMappingsForTrack from state.js, exposed
+    // through the inline fallback below). Clicking the badge opens
+    // the Per-Track MIDI CC Presets panel for this track. Master /
+    // Audio / Lyrics tracks skip the badge.
+    let ccCountBadgeHTML = '';
+    try {
+        const ccType = (track.type || '').toString();
+        if (ccType !== 'Master' && ccType !== 'Audio' && ccType !== 'Lyrics') {
+            if (typeof window !== 'undefined' && window.getPerTrackCCBadgeHTML) {
+                ccCountBadgeHTML = window.getPerTrackCCBadgeHTML(track) || '';
+            } else {
+                // Fallback: render an empty "CC 0" badge so the user
+                // can still see the affordance before the module
+                // loads. The click handler is event-delegated on
+                // document, so it will start working the moment the
+                // module finishes loading.
+                const ccTrackId = track.id != null ? String(track.id) : '';
+                ccCountBadgeHTML = `<span class="cc-preset-badge inline-flex items-center justify-center rounded border bg-gray-700 text-gray-300 border-gray-600 text-[10px] px-1.5 py-0.5 font-mono tracking-tight"
+                    data-track-id="${ccTrackId}"
+                    data-cc-count="0"
+                    title="MIDI CC mappings for this track (click to manage presets)">CC 0</span>`;
+            }
+        }
+    } catch (e) { /* non-fatal — leave the badge empty */ }
+
     return `
         <div class="track-strip flex-shrink-0 w-44 bg-gray-800 rounded-lg p-3 flex flex-col gap-2 border border-gray-700" data-track-id="${track.id}">
             <div class="text-center">
@@ -7874,6 +7902,7 @@ function renderTrackStrip(track) {
                     <div class="text-xs text-gray-500">${track.type || 'Track'}</div>
                     ${midiChannelBadgeHTML}
                     ${grooveBadgeHTML}
+                    ${ccCountBadgeHTML}
                 </div>
             </div>
             

@@ -867,6 +867,41 @@ export function initializePrimaryEventListeners(appContext) {
                     localAppServices.openClipVolumeCurvePresetsPanel?.();
                 } catch(e) { console.error('[Menu] Clip Volume Curve Presets error:', e); }
             },
+            menuPerTrackMidiCCPresets: () => {
+                console.log('[Menu] Per-Track MIDI CC Presets clicked');
+                try {
+                    // (v0.4.02) Open the per-track CC presets panel for
+                    // the currently active/selected track. If no track
+                    // is active, fall back to opening it for the first
+                    // non-Master / non-Audio / non-Lyrics track so the
+                    // menu is never a dead end.
+                    const getActiveId = (typeof localAppServices.getActiveTrackId === 'function')
+                        ? localAppServices.getActiveTrackId
+                        : (typeof localAppServices.getSelectedTrackId === 'function'
+                            ? localAppServices.getSelectedTrackId
+                            : null);
+                    let trackId = getActiveId ? getActiveId() : null;
+                    if (trackId == null && typeof localAppServices.getTracks === 'function') {
+                        const tracks = localAppServices.getTracks() || [];
+                        const first = tracks.find(t => {
+                            const t2 = (t && t.type) ? String(t.type) : '';
+                            return t2 && t2 !== 'Master' && t2 !== 'Audio' && t2 !== 'Lyrics';
+                        });
+                        if (first) trackId = first.id;
+                    }
+                    if (trackId == null) {
+                        localAppServices.showNotification?.('No track available for Per-Track MIDI CC Presets', 2000);
+                        return;
+                    }
+                    if (typeof localAppServices.openPerTrackMidiCCPresetsForTrack === 'function') {
+                        localAppServices.openPerTrackMidiCCPresetsForTrack(trackId);
+                    } else if (typeof window !== 'undefined' && typeof window.openPerTrackMidiCCPresetsForTrack === 'function') {
+                        window.openPerTrackMidiCCPresetsForTrack(trackId);
+                    } else {
+                        localAppServices.showNotification?.('Per-Track MIDI CC Presets module not loaded yet', 2000);
+                    }
+                } catch(e) { console.error('[Menu] Per-Track MIDI CC Presets error:', e); }
+            },
             menuMixBusGroupPresets: () => {
                 console.log('[Menu] Mix-Bus Group Presets clicked');
                 try {

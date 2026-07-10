@@ -161,6 +161,7 @@ import { initDuplicateTrackHotkey } from './DuplicateTrackHotkey.js';
 import { initPerTrackMidiChannelDisplay } from './PerTrackMidiChannelDisplay.js';
 import { initPerTrackGrooveTemplateSelector } from './PerTrackGrooveTemplateSelector.js';
 import { initPerTrackMidiPanic } from './PerTrackMidiPanic.js'; // v0.4.00
+import { initPerTrackMidiCCPresets, openPerTrackMidiCCPresetsForTrack } from './PerTrackMidiCCPresets.js'; // v0.4.02
 import { initTempoHistoryGraph } from './TempoHistoryGraph.js'; // v0.3.95
 import { initMidiChordDisplay, updateMidiChordLabels, toggleMidiChordDisplay, isMidiChordDisplayEnabled } from './MidiChordDisplay.js';
 import { initSpectrumAnalyzer, openSpectrumAnalyzerPanel } from './SpectrumAnalyzer.js';
@@ -306,6 +307,8 @@ import {
     // MIDI Learn
     getMidiLearnMode, setMidiLearnMode, getMidiLearnTarget, setMidiLearnTarget,
     getMidiMappings, addMidiMapping, removeMidiMapping, getMidiMappingForCC, clearAllMidiMappings,
+    // Per-Track MIDI CC Presets (v0.4.02)
+    getMidiMappingsForTrack, replaceMidiMappingsForTrack, applyMidiMappingPresetForTrack,
     // MIDI CC Visualizer
     getCcVisualizerValues, updateCcVisualizerValue,
     // Loop Region
@@ -633,6 +636,27 @@ const appServices = {
             } catch (e) {
                 console.warn('[Main appServices.captureStateForUndo] Error:', e);
             }
+        },
+        // Per-Track MIDI CC Presets (v0.4.02) — passthroughs so the
+        // v0.4.02 module can read/write per-track mapping sets through
+        // appServices.stateModule without importing state.js directly.
+        getMidiMappingsForTrack: (trackId) => {
+            try {
+                if (typeof getMidiMappingsForTrack === 'function') return getMidiMappingsForTrack(trackId) || [];
+            } catch (e) { /* fall through */ }
+            return [];
+        },
+        replaceMidiMappingsForTrack: (trackId, newMappings) => {
+            try {
+                if (typeof replaceMidiMappingsForTrack === 'function') return replaceMidiMappingsForTrack(trackId, newMappings) || { removed: 0, added: 0 };
+            } catch (e) { /* fall through */ }
+            return { removed: 0, added: 0 };
+        },
+        applyMidiMappingPresetForTrack: (trackId, preset) => {
+            try {
+                if (typeof applyMidiMappingPresetForTrack === 'function') return applyMidiMappingPresetForTrack(trackId, preset) || { removed: 0, added: 0 };
+            } catch (e) { /* fall through */ }
+            return { removed: 0, added: 0 };
         },
     },
 
@@ -1200,6 +1224,32 @@ const appServices = {
     // Groove Presets (state-backed, v0.3.94 — exposed for
     // Per-Track Groove Template Selector badge)
     getGroovePresetsState,
+
+    // Per-Track MIDI CC Presets (v0.4.02 — exposes the
+    // per-track CC panel + get/apply helpers to the rest of
+    // the app). The panel itself does most of its own work
+    // through `localAppServices.getTrackById`; this entry
+    // point is what right-click context menus, future
+    // hotkeys, and the start menu use to open the panel.)
+    openPerTrackMidiCCPresetsForTrack,
+    getMidiMappingsForTrack: (trackId) => {
+        if (typeof appServices !== 'undefined' && appServices.stateModule && typeof appServices.stateModule.getMidiMappingsForTrack === 'function') {
+            return appServices.stateModule.getMidiMappingsForTrack(trackId) || [];
+        }
+        return [];
+    },
+    applyMidiMappingPresetForTrack: (trackId, preset) => {
+        if (typeof appServices !== 'undefined' && appServices.stateModule && typeof appServices.stateModule.applyMidiMappingPresetForTrack === 'function') {
+            return appServices.stateModule.applyMidiMappingPresetForTrack(trackId, preset) || { removed: 0, added: 0 };
+        }
+        return { removed: 0, added: 0 };
+    },
+    listPerTrackMidiCCPresets: () => {
+        if (typeof window !== 'undefined' && typeof window.listPerTrackMidiCCPresets === 'function') {
+            try { return window.listPerTrackMidiCCPresets() || []; } catch (e) { return []; }
+        }
+        return [];
+    },
 
     effectsRegistryAccess: {
         AVAILABLE_EFFECTS: null, getEffectParamDefinitions: null,
@@ -2367,6 +2417,7 @@ async function initializeSnugOS() {
         if (typeof initPerTrackMidiChannelDisplay === 'function') initPerTrackMidiChannelDisplay(appServices); // Per-Track MIDI Channel Display - small badge on each track header + click-to-change picker (v0.3.93)
         if (typeof initPerTrackGrooveTemplateSelector === 'function') initPerTrackGrooveTemplateSelector(appServices); // Per-Track Groove Template Selector - small 'Groove' badge per track + click-to-pick swing preset (v0.3.94)
         if (typeof initPerTrackMidiPanic === 'function') initPerTrackMidiPanic(appServices); // Per-Track MIDI Panic - small ⚠ button on each track strip + click-to-panic-this-track (v0.4.00)
+        if (typeof initPerTrackMidiCCPresets === 'function') initPerTrackMidiCCPresets(appServices); // Per-Track MIDI CC Presets - 'CC' badge on each track header + dockable per-track panel for save/load/apply/delete/export of complete CC mapping sets (v0.4.02)
         if (typeof initTempoHistoryGraph === 'function') initTempoHistoryGraph(appServices); // Project Tempo History Graph - status-bar sparkline + click-to-expand popover with restore buttons (v0.3.95)
         if (typeof initGuitarTabEditor === 'function') initGuitarTabEditor(appServices); // Guitar Tab Editor initialization
         if (typeof initSpectrumAnalyzer === 'function') initSpectrumAnalyzer(appServices); // Spectrum Analyzer initialization

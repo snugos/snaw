@@ -1029,6 +1029,101 @@ export function clearAllMidiMappings() {
     console.log('[State] Cleared all MIDI mappings');
 }
 
+// --- Per-Track MIDI CC Presets (v0.4.02) ---
+// Additive helpers to support saving/applying a complete set of CC
+// mappings for a single track. The mapping set is the same global
+// `midiMappings` map (keyed by 'ccX_channelY'), but these helpers
+// filter and reconstruct it on a per-track basis so the per-track UI
+// badge + panel can show, save, and apply the mappings for one track
+// without disturbing the other tracks' mappings.
+
+/**
+ * Return every mapping that targets the given track id. Mappings are
+ * returned as an array of { key, cc, channel, type, targetId, paramPath,
+ * min, max } objects. Tracks with zero mappings return an empty array.
+ */
+export function getMidiMappingsForTrack(trackId) {
+    if (trackId == null) return [];
+    const out = [];
+    for (const [key, m] of Object.entries(midiMappings)) {
+        if (!m) continue;
+        if (m.type === 'track' && Number(m.targetId) === Number(trackId)) {
+            const ccMatch = /^cc(\d+)_channel(\d+)$/.exec(key);
+            const cc = ccMatch ? parseInt(ccMatch[1], 10) : null;
+            const channel = ccMatch ? parseInt(ccMatch[2], 10) : null;
+            out.push({
+                key,
+                cc,
+                channel,
+                type: m.type,
+                targetId: m.targetId,
+                paramPath: m.paramPath,
+                min: m.min != null ? m.min : 0,
+                max: m.max != null ? m.max : 1
+            });
+        }
+    }
+    return out;
+}
+
+/**
+ * Atomically remove every mapping currently targeting the given track
+ * id, then re-insert the supplied list of mappings as mappings for
+ * THIS track id. Returns { removed, added, kept } so callers can
+ * surface a meaningful undo label / notification.
+ *
+ * `newMappings` is an array of { cc, channel, paramPath, min, max }
+ * (or the richer { key, cc, channel, ... } shape returned by
+ * getMidiMappingsForTrack). targetId is overwritten with the supplied
+ * trackId so a preset captured for one track can be applied to a
+ * different track. Master mappings (type='master') are NEVER touched.
+ */
+export function replaceMidiMappingsForTrack(trackId, newMappings) {
+    if (trackId == null) return { removed: 0, added: 0, kept: 0 };
+    const safeTrackId = Number(trackId);
+    let removed = 0;
+    // First pass: remove every existing mapping for this track.
+    for (const [key, m] of Object.entries(midiMappings)) {
+        if (m && m.type === 'track' && Number(m.targetId) === safeTrackId) {
+            delete midiMappings[key];
+            removed++;
+        }
+    }
+    // Second pass: insert the new mappings (overwrites any global
+    // mapping that happens to share the cc/channel combo, which is
+    // exactly what "applying a preset" should do).
+    let added = 0;
+    if (Array.isArray(newMappings)) {
+        newMappings.forEach((m) => {
+            if (!m) return;
+            const cc = parseInt(m.cc, 10);
+            const channel = parseInt(m.channel, 10);
+            if (!Number.isFinite(cc) || !Number.isFinite(channel)) return;
+            if (cc < 0 || cc > 127 || channel < 0 || channel > 15) return;
+            const key = `cc${cc}_channel${channel}`;
+            midiMappings[key] = {
+                type: 'track',
+                targetId: safeTrackId,
+                paramPath: (typeof m.paramPath === 'string') ? m.paramPath : 'volume',
+                min: (m.min != null && Number.isFinite(Number(m.min))) ? Number(m.min) : 0,
+                max: (m.max != null && Number.isFinite(Number(m.max))) ? Number(m.max) : 1
+            };
+            added++;
+        });
+    }
+    return { removed, added };
+}
+
+/**
+ * Apply the mappings in `preset.data` to the given track id using
+ * replaceMidiMappingsForTrack under the hood. Mirrors the "Load" path
+ * in MIDILearnPresets but on a per-track basis.
+ */
+export function applyMidiMappingPresetForTrack(trackId, preset) {
+    if (!preset || !Array.isArray(preset.data)) return { removed: 0, added: 0 };
+    return replaceMidiMappingsForTrack(trackId, preset.data);
+}
+
 // --- MIDI CC Visualizer ---
 let ccVisualizerValues = {}; // { 'ccX_channelY': number (0-1) }
 let ccVisualizerMaxBars = 16; // Number of bars to show in history
