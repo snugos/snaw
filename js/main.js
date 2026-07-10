@@ -63,7 +63,7 @@ import { initTrackMuteAutomation, openTrackMuteAutomationPanel } from './TrackMu
 import { openTrackDelayCompensationPanel, openLatencyCompensationPanel } from './TrackDelayCompensation.js';
 import { initTrackReorderHotkeys, moveActiveTrackBy, isTrackReorderHotkeysInitialized } from './TrackReorderHotkeys.js'; // Track Reorder Hotkeys - Alt+ArrowUp/Down to move active track (v0.3.70)
 import { openGrooveExtractorPanel } from './GrooveExtractor.js';
-import { openStepSequencerView } from './StepSequencerView.js';
+import { openStepSequencerView, initStepSequencerView } from './StepSequencerView.js';
 import { initStepSequencerPatternLibrary, openStepSequencerPatternLibraryPanel, isStepSequencerPatternLibraryOpen, getDrumPatternList, getMelodicPatternList } from './StepSequencerPatternLibrary.js';
 import { openPianoRollEditor, initPianoRollEditor, snapSelectedNotesToScale, updatePianoRollPanel } from './PianoRollEditor.js';
 import { initPianoRollPitchBend, openPitchBendEditor, getPianoRollPitchBendWindow } from './PianoRollPitchBend.js';
@@ -2366,7 +2366,7 @@ async function initializeSnugOS() {
         if (typeof initClipFadePresets === 'function') initClipFadePresets(appServices); // Clip Fade Presets initialization
         if (typeof initClipVolumeCurvePresets === 'function') initClipVolumeCurvePresets(appServices); // Clip Volume Curve Presets initialization (v0.4.01)
         if (typeof initClipGroupManager === 'function') initClipGroupManager(appServices); // Clip Group Manager
-        if (typeof openStepSequencerView === 'function') openStepSequencerView(appServices); // Step Sequencer View initialization
+        if (typeof openStepSequencerView === 'function') initStepSequencerView(appServices); // Step Sequencer View initialization
         if (typeof initPianoRollEditor === 'function') initPianoRollEditor(appServices); // Piano Roll Editor initialization
         if (typeof initPianoRollPitchBend === 'function') initPianoRollPitchBend(appServices); // Piano Roll Pitch Bend initialization
         if (typeof initMidiVelocityEditor === 'function') initMidiVelocityEditor(appServices); // MIDI Velocity Editor initialization

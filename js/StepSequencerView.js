@@ -28,15 +28,48 @@ function initRowChannels(numRows) {
 // Initialize the step sequencer module
 export function initStepSequencerView(appServicesFromMain) {
     localAppServices = appServicesFromMain || {};
+    // Expose the active-track getter on window so peer modules
+    // (e.g. StepSequencerPatternLibrary) can target the same track
+    // the user is currently editing, without going through the
+    // module-import dance. Mirrors the `openStepSequencerView`
+    // exposure in main.js:1236+. Without this, the Pattern Library
+    // would always default to the first compatible track and
+    // silently apply patterns to the wrong sequencer.
+    if (typeof window !== 'undefined') {
+        if (typeof window.getCurrentStepSequencerTrackId !== 'function') {
+            window.getCurrentStepSequencerTrackId = getCurrentStepSequencerTrackId;
+        }
+        if (typeof window.currentStepSequencerTrackId === 'undefined') {
+            window.currentStepSequencerTrackId = currentStepSequencerTrackId;
+        }
+    }
     console.log('[StepSequencerView] Module initialized');
+}
+
+// Read-only accessor for the currently-active step-sequencer track id.
+// Returns null if no track has been opened in the step sequencer yet.
+export function getCurrentStepSequencerTrackId() {
+    return currentStepSequencerTrackId;
 }
 
 // Open the Step Sequencer panel for a track
 export function openStepSequencerView(trackId = null) {
     const windowId = 'stepSequencerView';
     const openWindows = localAppServices.getOpenWindows ? localAppServices.getOpenWindows() : new Map();
-    
-    if (openWindows.has(windowId) && !savedState) {
+
+    // If the window is already open, focus it and re-render its
+    // content so a track switch reflects immediately. We don't
+    // accept a `savedState` parameter any more — the previous
+    // `&& !savedState` clause referenced an undeclared `savedState`
+    // identifier and threw a ReferenceError on the second open
+    // (the SnugWindow is still in the openWindows map between
+    // minimize+restore, the dockable close X, and a track switch
+    // re-open). The clause is dead — the `savedState`-accepting
+    // signature was removed in commit 7cd92409 but the check was
+    // left in place. Stripping it makes the second-open path
+    // actually do the right thing: focus the existing window and
+    // re-render the content for the new trackId.
+    if (openWindows.has(windowId)) {
         const win = openWindows.get(windowId);
         win.restore();
         renderStepSequencerContent(trackId);
@@ -86,6 +119,16 @@ function renderStepSequencerContent(trackId = null) {
     }
     
     currentStepSequencerTrackId = track.id;
+    // Mirror the module variable onto window so peer modules
+    // (StepSequencerPatternLibrary.pickTargetTrack) that read
+    // `window.currentStepSequencerTrackId` see the live value.
+    // Without this mirror, the Pattern Library would only see
+    // the value snapshotted at initStepSequencerView time —
+    // effectively always `null` — and silently fall back to
+    // `compatible[0]`, applying patterns to the wrong track.
+    if (typeof window !== 'undefined') {
+        window.currentStepSequencerTrackId = currentStepSequencerTrackId;
+    }
 
     // Get active sequence
     const activeSeq = track.sequences?.find(s => s.id === track.activeSequenceId) || track.sequences?.[0];
