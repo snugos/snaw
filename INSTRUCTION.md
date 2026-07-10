@@ -51,6 +51,7 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 - **MIDI Activity Log** - Small rolling log of the last 8 MIDI events (note on/off, CC) with timestamps in a collapsible panel ✅
 - **Per-Track MIDI Panic** - Small ⚠ button on each non-Master / non-Lyrics track strip (right of Bypass) that silences ONLY that one track and sends All-Notes-Off on the track's specific MIDI channel (Omni → all 16). Brief red flash on click + one-line notification with track name. New `js/PerTrackMidiPanic.js` (175 lines): event-delegated click handler, defers to `appServices.panicStopTrackAudio(trackId)` as the single source of truth (also used by future hotkey wiring via `window.panicStopTrackById`). No undo capture (transient playback-state fix, same as global panic). Backed by `js/PerTrackMidiPanic.js` + the new `panicStopTrackAudio` service in `js/main.js` + the new `sendMidiAllNotesOffOnChannel` helper in `js/state.js` (v0.4.00) ✅
 - **Audio Clip Volume Curve Presets** - 16 built-in gain-envelope presets (Fade In/Out 100/300/500ms, Fade In & Out, Ramp Up/Down, Pump Up 4-beat, Duck 30%, Tremolo fast, Stutter 3 hits, Reverse Ramp, Silence Middle, Clear Envelope) plus user-saved presets in localStorage. Each preset is a 1-second reference envelope that scales linearly to the target clip's duration at apply time. Right-click an audio clip → "Volume Curve" → pick a preset (cursor popover with inline mini-SVG envelope previews), or open the dockable "Volume Curve Presets" panel from the start menu. Applied via the existing `track.setClipGainEnvelope(clipId, points)` API (undo captured automatically by the API). Backed by `js/ClipVolumeCurvePresets.js` (v0.4.01) ✅
+- **Per-Track MIDI CC Presets** - Small "CC N" badge in each track-strip header (mixer panel) showing the count of MIDI CC mappings currently targeting that track. Click the badge (or the new "Per-Track MIDI CC Presets" start-menu entry) to open a dockable panel for that track: list every CC mapping targeting the track (CC #, channel, target param, min/max), save the current set as a named preset in localStorage, apply any saved preset to this track (atomically replaces all mappings for the track — undo captured), delete a preset, export a preset as JSON, import a preset from JSON, or quick-apply a built-in "Quick" starter preset (Volume + Pan + Filter Cutoff on the most common CC numbers). Master / Audio / Lyrics tracks skip the badge. Presets are per-user, per-track, stored under `snaw_per_track_midi_cc_presets_<trackId>`. The panel works on whichever track the user opened it for — no need to re-target when the user changes selection. Backed by `js/PerTrackMidiCCPresets.js` (743 lines) + 3 additive exports in `js/state.js` (`getMidiMappingsForTrack`, `replaceMidiMappingsForTrack`, `applyMidiMappingPresetForTrack`) + start-menu entry in `index.html` + a new `cc-preset-badge` slot in the track-strip header rendered by `js/ui.js` (v0.4.02) ✅
 
 ## Completed Features (recent)
 
@@ -77,11 +78,18 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Per-Track MIDI CC Presets** - Save the entire CC mapping set for a track (CC #, channel, min/max range, target parameter) as a named preset; quick-apply to another track or project
-2. **Step Sequencer Pattern Library** - Curated set of stock drum/melodic patterns the user can browse and drag into a track's sequencer slot; categorized by genre (house, techno, hip-hop, etc.)
-3. **Track Grouping by Instrument** - Right-click a track header → "Assign to Group: Drums / Bass / Lead / Pad / FX" so mix presets and routing templates can target a logical bundle of tracks
-4. **Project Marker Annotations** - Attach a multi-line text note to any timeline marker (verse lyrics, mix notes, arrangement reminders); tooltip on marker hover shows the note; edit via right-click → "Edit Marker Note"
-5. **Audio Clip Labeling** - Tag any audio clip with a freeform text label (vocal-take #, sample source, etc.) shown as a small overlay on the clip and filterable in the Project Search panel
+Queue was emptied after v0.4.02 (Per-Track MIDI CC Presets shipped). Brainstormed 10 fresh feature ideas to refill the queue (Day 775 Run 2 brainstorm, 2026-07-10):
+
+1. **Step Sequencer Pattern Library** - Curated set of stock drum/melodic patterns the user can browse and drag into a track's sequencer slot; categorized by genre (house, techno, hip-hop, etc.)
+2. **Track Grouping by Instrument** - Right-click a track header → "Assign to Group: Drums / Bass / Lead / Pad / FX" so mix presets and routing templates can target a logical bundle of tracks
+3. **Project Marker Annotations** - Attach a multi-line text note to any timeline marker (verse lyrics, mix notes, arrangement reminders); tooltip on marker hover shows the note; edit via right-click → "Edit Marker Note"
+4. **Audio Clip Labeling** - Tag any audio clip with a freeform text label (vocal-take #, sample source, etc.) shown as a small overlay on the clip and filterable in the Project Search panel
+5. **Track Send Pre-Fader Toggle** - Add a per-track pre/post-fader toggle for each send bus (currently always post-fader); lets users set up monitor sends vs. FX sends
+6. **Piano Roll CC Lane** - Per-note or per-clip CC automation lanes in the piano roll (e.g. draw a filter-cutoff curve that follows the selected notes), parallel to the existing v0.3.91 Pitch Bend lane
+7. **Track Headroom Indicator** - Color the track-strip header based on how close the current peak is to 0 dBFS (green/yellow/red) so the user can spot hot tracks at a glance
+8. **Drag-to-Duplicate Clip** - Hold Alt while dragging a clip to create a copy that follows the cursor (mirrors Ableton's behavior); bypasses the existing clipboard-based duplicate
+9. **MIDI Controller Scripting Hooks** - Expose a small `window.SnugOS` scriptable surface (e.g. `SnugOS.setParam(trackId, paramPath, value)`) so users can build a virtual MIDI controller from a webpage
+10. **One-Click Render Selection to Audio** - Quick-bounce a selected time range (use the existing loop region or a click-drag selection) to a new audio track in place, with a single hotkey (e.g. Cmd+Shift+R); complements the existing Quick-Bounce (in-place) and Quick-Bounce Markers
 
 ## Workflow
 
