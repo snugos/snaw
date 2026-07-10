@@ -378,6 +378,10 @@ export function openStepSequencerPatternLibraryPanel() {
     contentContainer.id = PANEL_CONTENT_ID;
     contentContainer.className = 'p-3 h-full flex flex-col bg-gray-100 dark:bg-slate-800 overflow-hidden';
 
+    // If the user closes the panel via the SnugWindow X button, SnugWindow.close()
+    // calls onCloseCallback. Reset isPanelOpen there so a subsequent open() doesn't
+    // hit the stale "panel already open" branch referencing a window that no longer
+    // exists in the openWindows map.
     const options = {
         width: 900,
         height: 620,
@@ -386,7 +390,8 @@ export function openStepSequencerPatternLibraryPanel() {
         initialContentKey: WINDOW_ID,
         closable: true,
         minimizable: true,
-        resizable: true
+        resizable: true,
+        onCloseCallback: () => { isPanelOpen = false; }
     };
 
     const win = localAppServices.createWindow?.(WINDOW_ID, 'Step Sequencer Pattern Library', contentContainer, options);
@@ -661,20 +666,20 @@ function applyMelodicPattern(activeSeq, pattern, targetTrack) {
         }
     }
 
-    // Determine how many semitones each row represents. In the StepSequencerView
-    // we use the rule: row 0 = highest pitch (noteNum = numRows-1), row N-1 = lowest.
-    // Each row is one semitone apart. So rowIndex → noteNum = numRows - 1 - rowIndex.
-    // We need to find a target row R such that R = numRows - 1 - (noteNum + offsetSemitones).
-    // → R = (numRows - 1 - noteNum) - offsetSemitones.
-    // We compute noteNum from the pattern's baseRow (baseRow = row that should
-    // receive offset 0). For base row BR, noteNum_base = numRows - 1 - BR.
-    // For a note with scale offset o, the target noteNum = noteNum_base - o
-    // (since offset is in semitones and lower pitch = higher noteNum, so subtract).
-    // The target row for offset o is: numRows - 1 - (noteNum_base - o) = BR + o.
+    // Determine how each scale offset maps to a row. In the StepSequencerView
+    // we use the rule: row 0 = highest pitch (noteNum = numRows-1), row N-1 =
+    // lowest (noteNum = 0). Each row is one semitone apart, and a HIGHER
+    // semitone (higher pitch) maps to a LOWER row index. So for base row BR
+    // (which receives offset 0), the row for offset o is BR - o — this makes
+    // the apply behavior match both the pattern names ("Up Arpeggio" plays
+    // ascending) and the ASCII preview in buildMelodicPreview (higher offset
+    // rendered at the top of the 5-line grid, which the user reads as
+    // "higher pitch"). The previous BR + o formula inverted this and silently
+    // turned every "Up" pattern into a "Down" pattern.
     const baseRow = Math.max(0, Math.min(numRows - 1, pattern.baseRow));
 
     pattern.notes.forEach(n => {
-        const targetRow = baseRow + n.offset;
+        const targetRow = baseRow - n.offset;
         if (targetRow < 0 || targetRow >= numRows) return;
         // Tile across sequence length
         for (let s = n.step; s < numSteps; s += 16) {
