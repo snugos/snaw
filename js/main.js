@@ -163,6 +163,8 @@ import { initPerTrackMidiChannelDisplay } from './PerTrackMidiChannelDisplay.js'
 import { initPerTrackGrooveTemplateSelector } from './PerTrackGrooveTemplateSelector.js';
 import { initPerTrackMidiPanic } from './PerTrackMidiPanic.js'; // v0.4.00
 import { initPerTrackMidiCCPresets, openPerTrackMidiCCPresetsPanel } from './PerTrackMidiCCPresets.js'; // v0.4.02
+// Track Grouping by Instrument - 5 fixed instrument groups (Drums/Bass/Lead/FX/Other) + right-click submenu + dockable panel + per-track group badge (v0.4.04)
+import { initTrackInstrumentGrouping, openTrackInstrumentGroupingPanel, isTrackInstrumentGroupingPanelOpen, getInstrumentGroups, getTracksByInstrumentGroup, getInstrumentGroupSummary, assignTrackToInstrumentGroup, unassignTrackFromInstrumentGroup, getInstrumentGroupContextMenuItems, closeTrackInstrumentGroupingPanel } from './TrackInstrumentGrouping.js'; // v0.4.04
 import { initTempoHistoryGraph } from './TempoHistoryGraph.js'; // v0.3.95
 import { initMidiChordDisplay, updateMidiChordLabels, toggleMidiChordDisplay, isMidiChordDisplayEnabled } from './MidiChordDisplay.js';
 import { initSpectrumAnalyzer, openSpectrumAnalyzerPanel } from './SpectrumAnalyzer.js';
@@ -1346,6 +1348,16 @@ const appServices = {
     isStepSequencerPatternLibraryOpen,
     getDrumPatternList,
     getMelodicPatternList,
+    // Track Grouping by Instrument - 5 fixed groups + right-click submenu + dockable panel (v0.4.04)
+    openTrackInstrumentGroupingPanel,
+    isTrackInstrumentGroupingPanelOpen,
+    closeTrackInstrumentGroupingPanel,
+    getInstrumentGroups,
+    getTracksByInstrumentGroup,
+    getInstrumentGroupSummary,
+    assignTrackToInstrumentGroup,
+    unassignTrackFromInstrumentGroup,
+    getInstrumentGroupContextMenuItems,
     openLoudnessMeterPanel,
     isLoudnessMeterActive,
     updateLoudnessMeter,
@@ -2423,6 +2435,7 @@ async function initializeSnugOS() {
         if (typeof initPerTrackGrooveTemplateSelector === 'function') initPerTrackGrooveTemplateSelector(appServices); // Per-Track Groove Template Selector - small 'Groove' badge per track + click-to-pick swing preset (v0.3.94)
         if (typeof initPerTrackMidiPanic === 'function') initPerTrackMidiPanic(appServices); // Per-Track MIDI Panic - small ⚠ button on each track strip + click-to-panic-this-track (v0.4.00)
         if (typeof initPerTrackMidiCCPresets === 'function') initPerTrackMidiCCPresets(appServices); // Per-Track MIDI CC Presets - 'CC' badge on each track header + dockable per-track panel for save/load/apply/delete/export of complete CC mapping sets (v0.4.02)
+        if (typeof initTrackInstrumentGrouping === 'function') initTrackInstrumentGrouping(appServices); // Track Grouping by Instrument - 5 fixed groups (Drums/Bass/Lead/FX/Other) + right-click submenu + dockable panel (v0.4.04)
         if (typeof initTempoHistoryGraph === 'function') initTempoHistoryGraph(appServices); // Project Tempo History Graph - status-bar sparkline + click-to-expand popover with restore buttons (v0.3.95)
         if (typeof initGuitarTabEditor === 'function') initGuitarTabEditor(appServices); // Guitar Tab Editor initialization
         if (typeof initSpectrumAnalyzer === 'function') initSpectrumAnalyzer(appServices); // Spectrum Analyzer initialization

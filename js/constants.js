@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.4.03"; // 2026-07-10 - Step Sequencer Pattern Library (curated genre-grouped drum + melodic patterns; one-click apply with undo; mini ASCII previews; auto-scales to track length) + bump from v0.4.02. Original v0.4.02 was: Per-Track MIDI CC Presets (small 'CC n' badge in each track-strip header + click-to-open dockable panel for saving/loading the full CC mapping set per track + start-menu entry + dockable panel for non-strip users; user-saved presets in localStorage; built-in starting preset; import/export as JSON; quick-apply to another track; per-track badge auto-refresh on apply)
+export const APP_VERSION = "0.4.04"; // 2026-07-10 - Track Grouping by Instrument (5 fixed instrument groups Drums/Bass/Lead/FX/Other backed by per-track role; dockable panel listing groups + members + per-track remove; right-click context submenu for assignment; helpers for mix presets / routing templates to consume) + bump from v0.4.03. Original v0.4.03 was: Step Sequencer Pattern Library (curated genre-grouped drum + melodic patterns; one-click apply with undo; mini ASCII previews; auto-scales to track length)
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks

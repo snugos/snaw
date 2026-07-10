@@ -445,6 +445,18 @@ export function initializePrimaryEventListeners(appContext) {
                     }
                 } catch(e) { console.error("[Menu] Track Role Panel error:", e); }
             },
+            menuTrackInstrumentGrouping: () => {
+                console.log("[Menu] Track Groups by Instrument clicked");
+                try {
+                    if (typeof localAppServices.openTrackInstrumentGroupingPanel === 'function') {
+                        localAppServices.openTrackInstrumentGroupingPanel();
+                    } else if (typeof window !== 'undefined' && typeof window.openTrackInstrumentGroupingPanel === 'function') {
+                        window.openTrackInstrumentGroupingPanel();
+                    } else {
+                        localAppServices.showNotification?.('Track Groups by Instrument module not loaded yet', 2000);
+                    }
+                } catch(e) { console.error("[Menu] Track Groups by Instrument error:", e); }
+            },
             menuTrackNoiseGate: () => {
                 console.log("[Menu] Track Noise Gate clicked");
                 try {
