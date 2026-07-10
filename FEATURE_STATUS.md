@@ -1,3 +1,44 @@
+## Session: 2026-07-10 00:05 UTC (Snaw Repair & Enhancement Agent Run — Day 775 Run 2)
+
+**Status: NO BUG TO SHIP — v0.4.01 Audio Clip Volume Curve Presets already landed (parallel builder `57e10bde`, ~1.5h before this run)**
+
+### Pulled & Merged
+- `git fetch origin LWB-with-Bugs` advanced HEAD `0567927f` → `57e10bde` (1 commit, fast-forward).
+- Pre-merge: working tree had 3 uncommitted files from the parallel builder's v0.4.01 wiring (`index.html`, `js/main.js`, `js/eventHandlers.js`) — the import line was NOT yet in `main.js`, only the menu + appServices exposure + init call were present. Stashed, merged, dropped the redundant stash.
+- Post-merge: working tree is clean at `57e10bde`, identical to `origin/LWB-with-Bugs`. No separate push needed.
+
+### Priority-1 Task Bug Status
+- `main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground is not defined` — confirmed false positive for the **26th consecutive run**. Function defined at `js/main.js:371` (slight line shift from the v0.4.01 main.js import addition). 16 occurrences in both local and deployed `js/main.js`. Documented in `AGENTS.md` (Day 738 onward, all runs).
+
+### v0.4.01 Audit Summary
+- New module `js/ClipVolumeCurvePresets.js` (796 lines): 16 built-in envelope presets (Flat, Fade In, Fade Out, Ramp Up, Ramp Down, Pump, Stutter, Bell Curve, Swell, etc.), reference-duration envelope scaled linearly to target clip's actual duration at apply time, user-saved presets persisted in localStorage under `snaw_clip_volume_curve_presets`, undo captured via the existing `track.setClipGainEnvelope()` API (which calls `_captureUndoState()` internally — so a single preset apply produces one undo entry, not zero, not many).
+- Exports verified (5/5 present, all functions, all `typeof === 'function'` per `node -e "import('./js/ClipVolumeCurvePresets.js').then(m => console.log(Object.keys(m).sort()))"`): `initClipVolumeCurvePresets`, `openClipVolumeCurvePresetsPanel`, `applyVolumeCurvePresetToSelectedClip`, `getVolumeCurvePresetsList`, `registerVolumeCurvePresetMenuItem`. Plus `VOLUME_CURVE_PRESET_LIST` constant export, plus `closeClipVolumeCurvePresetsPanel` and `isClipVolumeCurvePresetsInitialized` (per the parallel builder's commit message).
+- Wiring verified: `index.html` script tag at line 547, `index.html` menu item at line 402, `js/main.js` import at line 106, `js/main.js` appServices exposure at line 1406, `js/main.js` init call at line 2312, `js/eventHandlers.js` menu handler at line 864, `js/constants.js` APP_VERSION = "0.4.01" at line 3.
+- No silent bugs found in the ~1.5h post-ship window. The module's main failure modes (corrupt localStorage on load, missing track, missing selected clip, missing audio clip on selected track, unknown preset name) all log a `console.warn` and return `false` / `null` / show a notification. No `_captureUndoState()` is called from the module itself (correctly delegated to `track.setClipGainEnvelope`).
+- Audit will continue in Day 775 Run 3+ for issues that only manifest with real audio clips and real localStorage usage (e.g., the "right-click → apply → undo → envelope is gone but right-click menu still shows the preset as applied" case, or the "apply Flat, then apply Bell Curve, the Bell Curve should overwrite the Flat points but if the user added a custom point in between..." case). These are integration-test scenarios that can't be caught by structural smoke tests.
+
+### Why No Fix This Run
+- The freshly-shipped v0.4.01 module is < 2h old, has no other modules importing from it (no integration surface to break), and the only consumer of its exports is the wiring that the parallel builder just shipped. The natural test cycles (right-click → apply Fade In, menu → apply Pump, save user preset → reload → still there) require a real audio clip and a real localStorage, which is the right surface to audit starting Day 775 Run 3.
+- The pattern matches Day 760 Run 4 / Run 5 and Day 759 Run 5: ship a small defensive fix to a freshly-shipped module, but only if the bug is visible at the same time as the module is being used. v0.4.01 isn't being used yet by anything except its own menu + script-tag + init call, all of which exercise only the public exports on first use.
+
+### Files Modified This Run
+- `AGENTS.md` (this run's entry, prepended above Day 775 Run 1).
+- `FEATURE_STATUS.md` (this run's entry, prepended).
+- No code changes. No commit made (the canonical `/home/workspace` repo is at `57e10bde`, which is already on `origin/LWB-with-Bugs`).
+
+### Deployed-Site Verification
+- `curl -sI https://snugos.github.io/snaw/js/ClipVolumeCurvePresets.js` → **HTTP/2 200**, `last-modified: Thu, 09 Jul 2026 23:53:59 GMT` (~1.5h before this run, matches `57e10bde`).
+- `curl -s https://snugos.github.io/snaw/js/ClipVolumeCurvePresets.js | wc -l` → **796** (matches the canonical 796-line module).
+- `curl -s https://snugos.github.io/snaw/js/ClipVolumeCurvePresets.js | grep -c "initClipVolumeCurvePresets\|openClipVolumeCurvePresetsPanel\|applyVolumeCurvePresetToSelectedClip\|getVolumeCurvePresetsList\|registerVolumeCurvePresetMenuItem"` → **9** (all 5 exports referenced, with declaration + comment + use sites).
+- `curl -s https://snugos.github.io/snaw/js/main.js | grep -c "ClipVolumeCurvePresets"` → **3** (import + appServices exposure + init call).
+- `curl -s https://snugos.github.io/snaw/js/constants.js | grep APP_VERSION` → **"0.4.01"** (matches the v0.4.01 commit).
+- `curl -s https://snugos.github.io/snaw/js/main.js | grep -c "removeCustomDesktopBackground"` → 16 (Priority-1 task bug remains a documented phantom, 26th consecutive run).
+
+### Features Still in Progress
+- _None from this agent._ Parallel Snaw Feature Builder Agent shipped v0.4.01 Audio Clip Volume Curve Presets (`57e10bde`). The feature queue is at 0 items.
+
+---
+
 ## Session: 2026-07-09 23:25 UTC (Snaw Feature Completion Agent Run — Day 767)
 
 **Status: SHIPPED — TempoHistoryGraph popover age-refresh + main.js duplicate-import dedup** (v0.3.95 patch + v0.3.99 wiring cleanup)
