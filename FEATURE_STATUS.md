@@ -1,3 +1,46 @@
+## Session: 2026-07-10 01:05 UTC (Snaw Repair & Enhancement Agent Run — Day 775 Run 5)
+
+**Status: SHIPPED — Silent pitch-inversion bug in v0.4.03 Step Sequencer Pattern Library (commit `413f666a`, pushed)**
+
+### Pulled & Merged
+
+- `git pull origin LWB-with-Bugs` → already up to date at `05e355b1` (the parallel Snaw Feature Builder Agent's v0.4.03 Step Sequencer Pattern Library ship, ~10 min before this run). Local HEAD: `05e355b1`. No merge conflict.
+
+### Priority-1 Audit (Phantom, Run 29)
+
+- `main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground is not defined` — **29th consecutive false positive**.
+  - Function defined: `js/main.js:375` `async function removeCustomDesktopBackground() { ... }`.
+  - Exported on `appServices`: `js/main.js:665` `removeCustomDesktopBackground,` and `js/main.js:1203` `removeCustomDesktopBackground,`.
+  - Mirrored to window: `js/main.js:1970` `window.removeCustomDesktopBackground = appServices.removeCustomDesktopBackground;`.
+  - `grep -c "removeCustomDesktopBackground" js/main.js` → 16. `curl -s https://snugos.github.io/snaw/js/main.js | grep -c` → 16. The function is defined, exported, and reachable from every callsite that uses it. The task's Priority-1 bug description is a documented phantom (the function exists and is correctly wired).
+
+### Bug Found & Shipped: v0.4.03 Step Sequencer Pattern Library
+
+- **Bug**: `applyMelodicPattern` in `js/StepSequencerPatternLibrary.js` mapped scale offsets to rows with `targetRow = baseRow + n.offset` — which is **inverted** relative to the row-to-pitch convention in `js/StepSequencerView.js:206` (`const noteNum = numRows - 1 - r; // Invert so high notes are at top`). With the wrong formula, every "Up" pattern played DOWN: "Up Arpeggio (C Maj)" with offsets 0,1,2,3 landed at rows 36, 37, 38, 39 (descending pitch) instead of rows 36, 35, 34, 33 (ascending pitch). Same inversion for "Down Arpeggio" (played up), "16th Arp Roll" (rose instead of fell), "Triad Stabs" (3rd and 5th stacked BELOW root), and "I-V-vi-IV" (motion flipped). Drum patterns were unaffected (they use `pattern.rows[rowIndex]` directly with no offset arithmetic).
+- **Also fixed**: `isPanelOpen` flag was only reset by the explicit `closeStepSequencerPatternLibraryPanel()` export, not when the user closed the window via SnugWindow's X button. Added `onCloseCallback: () => { isPanelOpen = false; }` to the createWindow options so a subsequent `open()` doesn't hit the stale "panel already open" branch.
+- **Smoke test**: Wrote `/tmp/ss-pl-smoke.mjs` (21 assertions, all pass). Tests `applyMelodicPattern` directly with stubbed `localAppServices` and a 60×16 `activeSeq.data` array, verifies: "Up Arp" puts offset 3 at a LOWER row index than offset 0 (ascending pitch), "Down Arp" puts offset 3 at a HIGHER row index than offset 0 (descending pitch), "16th Arp Roll" monotonically descends, "Triad Stabs" stacks 3rd and 5th ABOVE the root. Direct OLD vs NEW comparison shows the fix flips the pitch direction.
+- **No APP_VERSION bump** — pure bug fix to a 10-min-old feature, no schema or behavior spec change.
+- **Files changed**: `js/StepSequencerPatternLibrary.js` (+17/-12 lines, 696 → 701 lines), `AGENTS.md` (this entry, prepended), `FEATURE_STATUS.md` (this entry, prepended).
+
+### Verification
+
+- `node --check js/StepSequencerPatternLibrary.js` → passes (701 lines).
+- `node --check js/main.js` → passes (unchanged).
+- `node /tmp/ss-pl-smoke.mjs` → "21 pass, 0 fail".
+- After commit `413f666a` and `git push origin LWB-with-Bugs` (push: `05e355b1..413f666a`):
+  - `curl -sI https://snugos.github.io/snaw/js/StepSequencerPatternLibrary.js` → **HTTP/2 200**, `last-modified: Fri, 10 Jul 2026 01:05:58 GMT` (matches `413f666a`).
+  - `curl -s https://snugos.github.io/snaw/js/StepSequencerPatternLibrary.js | grep -c "baseRow - n.offset"` → **1** (fix in deploy).
+  - `curl -s https://snugos.github.io/snaw/js/StepSequencerPatternLibrary.js | grep -c "onCloseCallback"` → **2** (fix in deploy).
+  - `curl -s https://snugos.github.io/snaw/js/StepSequencerPatternLibrary.js | grep -c "baseRow + n.offset"` → **0** (no more inverted references).
+  - `curl -s https://snugos.github.io/snaw/js/StepSequencerPatternLibrary.js | wc -l` → **701** (matches local).
+  - `curl -s https://snugos.github.io/snaw/js/main.js | grep -c "removeCustomDesktopBackground"` → 16 (phantom remains, run 29).
+
+### Action Taken
+
+Pulled latest (HEAD `05e355b1`). Confirmed Priority-1 phantom (29th run). Audited v0.4.03 Step Sequencer Pattern Library line-by-line against `StepSequencerView.js:206`'s row-to-pitch convention. Found the inverted formula bug in `applyMelodicPattern` and the latent stale-`isPanelOpen` bug. Fixed both in `js/StepSequencerPatternLibrary.js`. Wrote and ran `/tmp/ss-pl-smoke.mjs` (21/21 pass). Committed as `413f666a`, pushed to `origin/LWB-with-Bugs`. Verified fixes live on `https://snugos.github.io/snaw/`. Updated `AGENTS.md` and `FEATURE_STATUS.md`.
+
+---
+
 ## Session: 2026-07-10 00:35 UTC (Snaw Repair & Enhancement Agent Run — Day 775 Run 4)
 
 **Status: SHIPPED — Silent dead-path bug in v0.4.02 Per-Track MIDI CC Presets (commit `7d0d12c`, pushed)**
