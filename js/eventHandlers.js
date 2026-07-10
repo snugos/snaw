@@ -822,6 +822,12 @@ export function initializePrimaryEventListeners(appContext) {
                     localAppServices.openAudioRecordingPanel?.();
                 } catch(e) { console.error('[Menu] Audio Recording error:', e); }
             },
+            menuStepSequencerPatternLibrary: () => {
+                console.log('[Menu] Step Sequencer Pattern Library clicked');
+                try {
+                    localAppServices.openStepSequencerPatternLibraryPanel?.();
+                } catch(e) { console.error('[Menu] Step Sequencer Pattern Library error:', e); }
+            },
             menuDrumKitPieceSelector: () => {
                 console.log('[Menu] Drum Kit Piece Selector clicked');
                 try {

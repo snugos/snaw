@@ -64,6 +64,7 @@ import { openTrackDelayCompensationPanel, openLatencyCompensationPanel } from '.
 import { initTrackReorderHotkeys, moveActiveTrackBy, isTrackReorderHotkeysInitialized } from './TrackReorderHotkeys.js'; // Track Reorder Hotkeys - Alt+ArrowUp/Down to move active track (v0.3.70)
 import { openGrooveExtractorPanel } from './GrooveExtractor.js';
 import { openStepSequencerView } from './StepSequencerView.js';
+import { initStepSequencerPatternLibrary, openStepSequencerPatternLibraryPanel, isStepSequencerPatternLibraryOpen, getDrumPatternList, getMelodicPatternList } from './StepSequencerPatternLibrary.js';
 import { openPianoRollEditor, initPianoRollEditor, snapSelectedNotesToScale, updatePianoRollPanel } from './PianoRollEditor.js';
 import { initPianoRollPitchBend, openPitchBendEditor, getPianoRollPitchBendWindow } from './PianoRollPitchBend.js';
 import { initMidiVelocityEditor, openMidiVelocityEditorPanel, setSelectedNotesVelocity, applyVelocityRamp, applyVelocityRandom } from './MidiVelocityEditor.js';
@@ -1341,6 +1342,10 @@ const appServices = {
     openDrumKitPieceSelectorPanel,
     isDrumKitPieceSelectorActive,
     getDrumKitPieceList,
+    openStepSequencerPatternLibraryPanel,
+    isStepSequencerPatternLibraryOpen,
+    getDrumPatternList,
+    getMelodicPatternList,
     openLoudnessMeterPanel,
     isLoudnessMeterActive,
     updateLoudnessMeter,
@@ -2474,6 +2479,8 @@ async function initializeSnugOS() {
         if (typeof initWaveformVisualizer === 'function') initWaveformVisualizer(appServices);
         // Drum Kit Piece Selector initialization
         if (typeof initDrumKitPieceSelector === 'function') initDrumKitPieceSelector(appServices);
+        // Step Sequencer Pattern Library initialization
+        if (typeof initStepSequencerPatternLibrary === 'function') initStepSequencerPatternLibrary(appServices);
         // Loudness Meter initialization (EBU R128 LUFS + true-peak dBTP)
         if (typeof initLoudnessMeter === 'function') initLoudnessMeter(appServices);
         // Sends Overview Panel initialization (track → send bus matrix)
