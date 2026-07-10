@@ -161,7 +161,7 @@ import { initDuplicateTrackHotkey } from './DuplicateTrackHotkey.js';
 import { initPerTrackMidiChannelDisplay } from './PerTrackMidiChannelDisplay.js';
 import { initPerTrackGrooveTemplateSelector } from './PerTrackGrooveTemplateSelector.js';
 import { initPerTrackMidiPanic } from './PerTrackMidiPanic.js'; // v0.4.00
-import { initPerTrackMidiCCPresets, openPerTrackMidiCCPresetsForTrack } from './PerTrackMidiCCPresets.js'; // v0.4.02
+import { initPerTrackMidiCCPresets, openPerTrackMidiCCPresetsPanel } from './PerTrackMidiCCPresets.js'; // v0.4.02
 import { initTempoHistoryGraph } from './TempoHistoryGraph.js'; // v0.3.95
 import { initMidiChordDisplay, updateMidiChordLabels, toggleMidiChordDisplay, isMidiChordDisplayEnabled } from './MidiChordDisplay.js';
 import { initSpectrumAnalyzer, openSpectrumAnalyzerPanel } from './SpectrumAnalyzer.js';
@@ -1231,7 +1231,7 @@ const appServices = {
     // through `localAppServices.getTrackById`; this entry
     // point is what right-click context menus, future
     // hotkeys, and the start menu use to open the panel.)
-    openPerTrackMidiCCPresetsForTrack,
+    openPerTrackMidiCCPresetsPanel,
     getMidiMappingsForTrack: (trackId) => {
         if (typeof appServices !== 'undefined' && appServices.stateModule && typeof appServices.stateModule.getMidiMappingsForTrack === 'function') {
             return appServices.stateModule.getMidiMappingsForTrack(trackId) || [];

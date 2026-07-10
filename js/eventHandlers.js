@@ -893,10 +893,10 @@ export function initializePrimaryEventListeners(appContext) {
                         localAppServices.showNotification?.('No track available for Per-Track MIDI CC Presets', 2000);
                         return;
                     }
-                    if (typeof localAppServices.openPerTrackMidiCCPresetsForTrack === 'function') {
-                        localAppServices.openPerTrackMidiCCPresetsForTrack(trackId);
-                    } else if (typeof window !== 'undefined' && typeof window.openPerTrackMidiCCPresetsForTrack === 'function') {
-                        window.openPerTrackMidiCCPresetsForTrack(trackId);
+                    if (typeof localAppServices.openPerTrackMidiCCPresetsPanel === 'function') {
+                        localAppServices.openPerTrackMidiCCPresetsPanel(trackId);
+                    } else if (typeof window !== 'undefined' && typeof window.openPerTrackMidiCCPresetsPanel === 'function') {
+                        window.openPerTrackMidiCCPresetsPanel(trackId);
                     } else {
                         localAppServices.showNotification?.('Per-Track MIDI CC Presets module not loaded yet', 2000);
                     }
