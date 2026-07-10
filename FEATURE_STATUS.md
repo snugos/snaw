@@ -1,3 +1,54 @@
+## Session: 2026-07-10 00:25 UTC (Snaw Repair & Enhancement Agent Run — Day 775 Run 3)
+
+**Status: SHIPPED — Two silent UI-killing bugs in v0.4.01 `ClipVolumeCurvePresets` (commit `cee469da`, rebased onto v0.4.02 `4341805f` and pushed)**
+
+### Pulled & Merged
+- `git fetch origin LWB-with-Bugs` advanced HEAD `a068815f` → `4341805f` (1 commit from parallel builder, v0.4.02 Per-Track MIDI CC Presets).
+- Pre-rebase: working tree clean at `a068815f` (Day 775 Run 2 docs commit). After committing the v0.4.01 fixes as `9f034d0d`, rebased with `git pull --rebase origin LWB-with-Bugs` → final commit `cee469da` (rebased hash). `git push origin LWB-with-Bugs` → `4341805f..cee469da  LWB-with-Bugs -> LWB-with-Bugs`.
+
+### Priority-1 Task Bug Status
+- `main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground is not defined` — **documented false positive for the 27th consecutive run**. The function is defined at `js/main.js:371` (`async function removeCustomDesktopBackground() {…}`), exported on `appServices` (line 1178 in the appServices spread + line ~879 in the explicit `removeCustomDesktopBackground,` shorthand at line 640), and mirrored as `window.removeCustomDesktopBackground` at line 1941. `grep -c "removeCustomDesktopBackground" js/main.js` → 16; `curl -s https://snugos.github.io/snaw/js/main.js | grep -c` → 16 (local and deployed agree). The "line 342" in the task description is just the `if (typeof utilShowNotification === 'function')` inside `showSafeNotification`, not a call to the missing function — the task description is testing the function's COMMENT location, not a real ReferenceError. The fix is therefore a no-op: defining the function in another file or adding an import would either be dead code (re-declaring the function in module scope would conflict with the existing one) or would shadow the existing one. Confirmed false positive for the 27th consecutive scheduled run.
+
+### Bugs Found & Shipped This Run
+- **Bug 1 — wirePanelEvents id mismatch in v0.4.01 `js/ClipVolumeCurvePresets.js` (line 419)**:
+  - **Symptom**: User opens the dockable "Clip Volume Curve Presets" panel from the start menu, sees the 16 built-in presets + empty user-presets section, clicks any preset — and **nothing applies**. The right-click "Volume Curve" submenu path still works because `openPresetPopover()` wires its own click handlers in a different code path (popover buttons, not the dockable panel items). The start-menu path was the broken one.
+  - **Root cause**: `wirePanelEvents()` did `document.getElementById('clipVolumeCurvePresets')` to find the panel's root element, but `SnugWindow` assigns `'window-' + this.id` to its element (see `js/SnugWindow.js` line ~104: `this.element.id = 'window-' + this.id;`). The lookup silently returned `null`, the `setTimeout(..., 50)` gave up, and `querySelectorAll('.volume-curve-preset-item')` returned an empty NodeList → zero click handlers attached → every click in the dockable panel was a no-op.
+  - **Fix**: Try `getElementById('window-clipVolumeCurvePresets')` first (the real SnugWindow id), then fall back to the bare `getElementById('clipVolumeCurvePresets')` for any future legacy / manually-built-window callers. 6-line explanatory comment + 2-line id-prefix fix.
+  - **Detection surface**: Reading `wirePanelEvents` against the `SnugWindow` constructor surfaced this in one pass — the bug is structurally obvious once you compare the module's id expectations to `SnugWindow`'s id assignment. The parallel builder's smoke test (per its `57e10bde` commit message) exercised the public API on a clean window open, but the start-menu open path's `setTimeout` is what was broken — and the smoke test never opened the dockable panel.
+
+- **Bug 2 — refreshOpenPanel selector matches the title bar in v0.4.01 `js/ClipVolumeCurvePresets.js` (line ~670)**:
+  - **Symptom**: User opens the dockable panel, right-clicks a clip → Volume Curve → "Save current envelope as user preset…" → enters a name → clicks Save. The modal closes, the toast says "Saved preset 'My Curve'", and the user-saved preset IS in localStorage — but the **dockable panel is now visually destroyed**: title text replaced with the entire preset-list HTML, minimize/maximize/close buttons gone, the user has to close the panel by some other means or reload the page.
+  - **Root cause**: After saving, the code refreshed the open panel via `root.querySelector('.window-content, .content, .snug-content, .panel-content, .body, .window-body, div')`. None of the first six class selectors match `SnugWindow`'s DOM (`<div class="window"><div class="window-title-bar">…</div><div class="window-content">…</div></div>`), so `querySelector` walked the selector list to the final catch-all `div` — and `querySelector` returns the **first** match in document order, which is the title bar, not the content area. The code then overwrote `innerHTML` of the title bar with the preset list, destroying the window's title text and all three control buttons.
+  - **Fix**: Use `currentPanelWindow.contentArea` (the direct property `SnugWindow` exposes on the window instance, set in its constructor at `js/SnugWindow.js` line ~140) with a fallback to `root.querySelector('.window-content')` for any non-SnugWindow caller. 5-line explanatory comment + 2-line `contentArea`-direct fix.
+  - **Detection surface**: Same as Bug 1 — the `querySelector` call with a final `div` selector is structurally obvious once you compare it to `SnugWindow`'s DOM. The save-then-refresh flow is also a natural test cycle (right-click → save → verify the panel now shows the new preset), but the parallel builder's smoke test would have exercised `saveUserPresets` directly, not the post-save UI refresh.
+
+### Files Modified
+- `js/ClipVolumeCurvePresets.js` — +14/-3 lines, 802 → 807 lines. Both fixes.
+- `AGENTS.md` — this Day 775 Run 3 entry, prepended.
+- `FEATURE_STATUS.md` — this Day 775 Run 3 session entry, prepended.
+
+### Syntax & Deploy Verification
+- `node --check js/ClipVolumeCurvePresets.js` passes (807 lines).
+- `node --check js/main.js` passes (3034 lines, unchanged from Day 775 Run 2).
+- `node --check js/eventHandlers.js` and `node --check js/constants.js` pass.
+- `curl -sI https://snugos.github.io/snaw/js/ClipVolumeCurvePresets.js` → **HTTP/2 200**, `last-modified: Fri, 10 Jul 2026 00:26:57 GMT` (matches `cee469da`'s commit time).
+- `curl -s https://snugos.github.io/snaw/js/ClipVolumeCurvePresets.js | grep -c "window-clipVolumeCurvePresets"` → **2** (the comment + the actual `getElementById` call). Fix 1 is live.
+- `curl -s https://snugos.github.io/snaw/js/ClipVolumeCurvePresets.js | grep -c "currentPanelWindow.contentArea"` → **2** (the comment + the actual property access). Fix 2 is live.
+- `curl -s https://snugos.github.io/snaw/js/ClipVolumeCurvePresets.js | wc -l` → **807** (matches local file, no truncation).
+- `curl -s https://snugos.github.io/snaw/js/main.js | grep -c "removeCustomDesktopBackground"` → 16 (Priority-1 task bug remains a documented phantom, 27th consecutive run).
+
+### Action Taken
+- Pulled latest (`git fetch origin LWB-with-Bugs`, 1 commit from parallel builder: v0.4.02 `4341805f`).
+- Confirmed Priority-1 `removeCustomDesktopBackground` ReferenceError is a documented false positive (27th consecutive run).
+- Audited `js/ClipVolumeCurvePresets.js` line-by-line against `js/SnugWindow.js` and found the two silent bugs.
+- Fixed both in `js/ClipVolumeCurvePresets.js` (Bug 1: `getElementById('window-clipVolumeCurvePresets')` first; Bug 2: `currentPanelWindow.contentArea` first).
+- Verified `node --check` passes on all 4 touched/nearby files.
+- Committed as `9f034d0d`, rebased onto `4341805f` (v0.4.02) to `cee469da`, pushed to `origin/LWB-with-Bugs`.
+- Verified the fixes are live on `https://snugos.github.io/snaw/js/ClipVolumeCurvePresets.js` (807 lines, both patterns present, `last-modified` matches the commit time).
+- Updated `AGENTS.md` (this Day 775 Run 3 entry, prepended) and `FEATURE_STATUS.md` (this Day 775 Run 3 session entry, prepended).
+
+---
+
 ## Session: 2026-07-10 00:05 UTC (Snaw Repair & Enhancement Agent Run — Day 775 Run 2)
 
 **Status: NO BUG TO SHIP — v0.4.01 Audio Clip Volume Curve Presets already landed (parallel builder `57e10bde`, ~1.5h before this run)**
