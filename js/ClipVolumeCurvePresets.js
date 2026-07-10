@@ -416,7 +416,13 @@ function presetItemHTML(preset, kind) {
 
 function wirePanelEvents() {
     setTimeout(() => {
-        const root = document.getElementById('clipVolumeCurvePresets');
+        // SnugWindow prefixes the element id with 'window-' (see js/SnugWindow.js
+        // line ~104: `this.element.id = 'window-' + this.id`), so the dockable
+        // window for this module lives at id 'window-clipVolumeCurvePresets',
+        // not 'clipVolumeCurvePresets'. The earlier lookup silently returned
+        // null, which made every click in the dockable panel a no-op.
+        const root = document.getElementById('window-clipVolumeCurvePresets')
+            || document.getElementById('clipVolumeCurvePresets');
         if (!root) return;
         root.querySelectorAll('.volume-curve-preset-item').forEach(el => {
             el.addEventListener('click', () => {
@@ -661,10 +667,15 @@ function promptSaveUserPreset(clipId, trackId) {
 function refreshOpenPanel() {
     if (!currentPanelWindow || currentPanelWindow.isDestroyed) return;
     const newContent = buildPanelHTML();
-    // SnugWindow stores inner content under .window-content or .content
+    // SnugWindow exposes the content area as `currentPanelWindow.contentArea`
+    // (see js/SnugWindow.js ~line 140: `this.contentArea = document.createElement('div');
+    // this.contentArea.className = 'window-content';`). Using `root.querySelector('div')`
+    // instead would match the first descendant div — the title bar — and overwrite
+    // the window's title with our preset HTML, silently breaking the panel.
     const root = currentPanelWindow.element;
     if (!root) return;
-    const inner = root.querySelector('.window-content, .content, .snug-content, .panel-content, .body, .window-body, div');
+    const inner = currentPanelWindow.contentArea
+        || root.querySelector('.window-content');
     if (inner) {
         inner.innerHTML = newContent;
         wirePanelEvents();
