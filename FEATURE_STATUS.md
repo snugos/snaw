@@ -1,3 +1,52 @@
+## Session: 2026-07-10 00:35 UTC (Snaw Repair & Enhancement Agent Run — Day 775 Run 4)
+
+**Status: SHIPPED — Silent dead-path bug in v0.4.02 Per-Track MIDI CC Presets (commit `7d0d12c`, pushed)**
+
+### Pulled & Merged
+- `git fetch origin LWB-with-Bugs` advanced HEAD `84659af` → no new commits (already in sync from Day 775 Run 3's push of `cee469da`). Pull was a no-op fast-forward.
+
+### Priority-1 Task Bug Status
+- `main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground is not defined` — confirmed false positive for the **28th consecutive run**. Function defined at `js/main.js:374` (slight line shift from Day 775 Run 3's 371 due to v0.4.02's 3-line import-comment addition in main.js, no semantic change), exported on `appServices` (line 1232 in the appServices spread + line ~879 in the explicit shorthand), mirrored as `window.removeCustomDesktopBackground` at line 1964. `grep -c "removeCustomDesktopBackground" js/main.js` → 16; `curl -s https://snugos.github.io/snaw/js/main.js | grep -c` → 16. The "line 342" in the task description is just a comment inside the `showSafeNotification` wrapper block, not a call to the missing function. No fix shipped for Priority-1 (re-declaring the function in another file or adding an import would be either dead code or a conflicting shadow).
+
+### Bug Found & Shipped This Run
+- **Bug — start-menu wiring for v0.4.02 `js/PerTrackMidiCCPresets.js` called a non-existent export** (commit `4341805`, ~30 min before this run):
+  - **Symptom**: User clicks the start menu → "Per-Track MIDI CC Presets" → sees a misleading "Per-Track MIDI CC Presets module not loaded yet" toast and nothing opens. The per-track "CC n" badge in the mixer still works (because its click handler calls the correct function name internally), and the Shift+P global hotkey still works (because it calls the correct `openForActiveTrack()` directly), so the feature looks partially alive but the most discoverable UI surface (the start menu) is broken.
+  - **Root cause**: Three call sites all reference a function named `openPerTrackMidiCCPresetsForTrack` that **does not exist** anywhere in the module. The actual export is `openPerTrackMidiCCPresetsPanel`:
+    1. `js/main.js:164` — `import { initPerTrackMidiCCPresets, openPerTrackMidiCCPresetsForTrack } from './PerTrackMidiCCPresets.js';` (the imported `openPerTrackMidiCCPresetsForTrack` is silently `undefined` — ES module imports of a non-existent name don't throw at import time, they just yield `undefined`).
+    2. `js/main.js:1234` — `appServices` object spread includes the `undefined` `openPerTrackMidiCCPresetsForTrack` shorthand. Now `appServices.openPerTrackMidiCCPresetsForTrack` is `undefined`.
+    3. `js/eventHandlers.js:896-899` — start-menu handler does `if (typeof localAppServices.openPerTrackMidiCCPresetsForTrack === 'function')` → false → falls through to `window.openPerTrackMidiCCPresetsForTrack` (also undefined, since the init function in `js/PerTrackMidiCCPresets.js:680-681` only exposes the correct name `openPerTrackMidiCCPresetsPanel` on window) → falls through to the misleading "module not loaded yet" notification.
+  - **Detection surface**: Reading the import in `js/main.js:164` against the exports in `js/PerTrackMidiCCPresets.js` (only 5: `getPerTrackCCBadgeHTML`, `openPerTrackMidiCCPresetsPanel`, `initPerTrackMidiCCPresets`, `openForActiveTrack`, `isPerTrackMidiCCPresetsInitialized`) surfaced the typo in one pass. The parallel builder's smoke test (per the `4341805` commit message) exercised the badge click path and the public API helpers but did not click the start-menu item, so the dead path was never hit.
+  - **Fix**: Three 1-line renames — `openPerTrackMidiCCPresetsForTrack` → `openPerTrackMidiCCPresetsPanel` in `js/main.js:164`, `js/main.js:1234`, and `js/eventHandlers.js:896-899` (4 occurrences total: 1 import + 1 appServices spread + 2 in the typeof/call pattern in eventHandlers). All 4 sites now point to the real export.
+  - **No APP_VERSION bump** — 3-line defensive rename, no schema or behavior change. The 3 bug sites are now consistent with the rest of the module (badge click handler at `PerTrackMidiCCPresets.js:719` already uses the correct name).
+
+### Files Modified
+- `js/main.js` — 2 lines changed (import + appServices spread). Total diff: 4 lines changed (2 imports/references + 2 context lines).
+- `js/eventHandlers.js` — 4 lines changed (start-menu handler `typeof`/call/window-fallback). Total diff: 8 lines changed.
+- `AGENTS.md` — this Day 775 Run 4 entry, prepended.
+- `FEATURE_STATUS.md` — this Day 775 Run 4 session entry, prepended.
+
+### Syntax & Deploy Verification
+- `node --check js/main.js` passes (3034 lines).
+- `node --check js/eventHandlers.js` passes.
+- `node --check js/PerTrackMidiCCPresets.js` passes (743 lines, unchanged from `4341805`).
+- Smoke test (`/tmp/import-smoke.mjs`): imports the module via absolute path and asserts both `initPerTrackMidiCCPresets` and `openPerTrackMidiCCPresetsPanel` are functions. Both pass — `typeof initPerTrackMidiCCPresets` → `"function"`, `typeof openPerTrackMidiCCPresetsPanel` → `"function"`.
+- `curl -sI https://snugos.github.io/snaw/js/main.js` → **HTTP/2 200**, `last-modified: Fri, 10 Jul 2026 00:33:57 GMT` (matches `7d0d12c`'s push time after ~60s GitHub Pages delay).
+- `curl -s https://snugos.github.io/snaw/js/main.js | grep -c "openPerTrackMidiCCPresetsPanel"` → **2** (import + appServices spread), `grep -c "openPerTrackMidiCCPresetsForTrack"` → **0** (old name purged from deployed file).
+- `curl -s https://snugos.github.io/snaw/js/eventHandlers.js | grep -c "openPerTrackMidiCCPresetsPanel"` → **4** (the typeof check + call + window-fallback typeof check + window call), `grep -c "openPerTrackMidiCCPresetsForTrack"` → **0** (old name purged from deployed file).
+- `curl -s https://snugos.github.io/snaw/js/main.js | grep -c "removeCustomDesktopBackground"` → 16 (Priority-1 task bug remains a documented phantom, 28th consecutive run).
+
+### Action Taken
+- Pulled latest (no-op fast-forward, already at `84659af` from prior push).
+- Confirmed Priority-1 `removeCustomDesktopBackground` ReferenceError is a documented false positive (28th consecutive run, 16 occurrences in both local and deployed `js/main.js`).
+- Audited the freshly-shipped v0.4.02 `js/PerTrackMidiCCPresets.js` (`4341805`, ~30 min old at this run's start) against its 3 wiring sites. Found the typo: import in `main.js:164` + spread in `main.js:1234` + call in `eventHandlers.js:896-899` all reference a non-existent function name.
+- Renamed all 4 occurrences in 2 files via `sed -i 's/openPerTrackMidiCCPresetsForTrack/openPerTrackMidiCCPresetsPanel/g' js/main.js js/eventHandlers.js` (verified `grep` shows only the correct name remains).
+- Verified `node --check` passes on all 3 touched/nearby files.
+- Smoke-tested the import via `/tmp/import-smoke.mjs` — both `initPerTrackMidiCCPresets` and `openPerTrackMidiCCPresetsPanel` resolve to functions.
+- Committed as `7d0d12c`, pushed to `origin/LWB-with-Bugs` (`84659af..7d0d12c`).
+- Verified the fix is live on `https://snugos.github.io/snaw/js/main.js` and `https://snugos.github.io/snaw/js/eventHandlers.js` (both `last-modified: Fri, 10 Jul 2026 00:33:57 GMT`, 0 occurrences of the broken name, correct occurrences in the expected places).
+- Updated `AGENTS.md` (this Day 775 Run 4 entry, prepended) and `FEATURE_STATUS.md` (this run's session entry, prepended).
+
+
 ## Session: 2026-07-10 00:25 UTC (Snaw Repair & Enhancement Agent Run — Day 775 Run 3)
 
 **Status: SHIPPED — Two silent UI-killing bugs in v0.4.01 `ClipVolumeCurvePresets` (commit `cee469da`, rebased onto v0.4.02 `4341805f` and pushed)**
