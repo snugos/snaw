@@ -324,7 +324,14 @@ function renderPanelContent() {
 
     let html = `
         <div class="mb-3 p-3 bg-white dark:bg-slate-700 rounded border border-gray-200 dark:border-slate-600">
-            <div class="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-1">Track Groups by Instrument</div>
+            <div class="flex items-start justify-between gap-2 mb-1">
+                <div class="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">Track Groups by Instrument</div>
+                <button
+                    class="instrument-group-clear-all-btn text-[10px] px-2 py-0.5 rounded border border-gray-300 dark:border-slate-500 text-gray-600 dark:text-gray-300 hover:bg-red-50 hover:text-red-600 hover:border-red-300 dark:hover:bg-slate-600 dark:hover:text-red-300 dark:hover:border-red-400 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-600 dark:disabled:hover:text-gray-300"
+                    ${groupedCount === 0 ? 'disabled' : ''}
+                    title="Remove every track from its instrument group"
+                >Clear all</button>
+            </div>
             <div class="text-xs text-gray-600 dark:text-gray-300">
                 Right-click any track header to assign it to <strong>Drums / Bass / Lead / FX / Other</strong>.
                 Mix presets and routing templates can target a whole group at once.
@@ -400,6 +407,33 @@ function wirePanelEvents(container, showNotification) {
             }
         });
     });
+
+    // Clear-all button: unassign every grouped track in one click.
+    // Iterates over getInstrumentGroupSummary so we work from the same
+    // role-derived membership view the panel renders (no chance of
+    // missing a track that was assigned via the right-click submenu).
+    const clearAllBtn = container.querySelector('.instrument-group-clear-all-btn');
+    if (clearAllBtn && !clearAllBtn.disabled) {
+        clearAllBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const summary = (typeof getInstrumentGroupSummary === 'function')
+                ? getInstrumentGroupSummary()
+                : { total: 0, grouped: 0, byGroup: {} };
+            if (!summary.grouped) return;
+            let removed = 0;
+            for (const [role, count] of Object.entries(summary.byGroup || {})) {
+                if (role === 'none') continue;
+                const memberIds = (typeof getTracksByInstrumentGroup === 'function')
+                    ? getTracksByInstrumentGroup(role).map(t => t && t.id).filter(id => id != null)
+                    : [];
+                for (const id of memberIds) {
+                    if (unassignTrackFromInstrumentGroup(id)) removed++;
+                }
+            }
+            showNotification?.(`Cleared instrument group from ${removed} track${removed === 1 ? '' : 's'}`, 2000);
+            renderPanelContent();
+        });
+    }
 }
 
 function escapeHtml(s) {
