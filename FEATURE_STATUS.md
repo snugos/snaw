@@ -1,3 +1,58 @@
+## Session: 2026-07-11 01:35 UTC (Snaw Feature Completion Agent Run — Day 775 Run 12)
+
+**Status: ONE FIX SHIPPED — APP_VERSION bumped 0.4.04 → 0.4.07 to catch up with three shipped features**
+
+### Pulled & Merged
+- `git pull origin LWB-with-Bugs` → Already up to date at `ca3102d` (Day 775 Run 11 docs). Mid-run, the parallel builder committed `3215651` (MIDI File Import/Export v0.4.07) and `609a5b7` (Run 13 docs). Re-fetched and fast-forwarded to `609a5b7`. Working tree clean at `609a5b7`.
+
+### Priority-1 Task Bug Status
+- `main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground is not defined` — **documented false positive for the 35th consecutive run**. Function defined at `js/main.js:375`, exported on `appServices`, mirrored as `window.removeCustomDesktopBackground`. `grep -c "removeCustomDesktopBackground" js/main.js` → 16; deployed `curl -s https://snugos.github.io/snaw/js/main.js | grep -c` → 16. **No Priority-1 bug to fix this run.**
+
+### Automated Scan Results
+- **TODO/FIXME/XXX/HACK/INCOMPLETE/STUB** markers in active `js/` code → **0 hits**.
+- **Untracked orphan JS files** → **0** (the parallel builder's `js/MidiFileIO.js` + `js/MidiFilePanel.js` were committed as part of `3215651`).
+- **Empty function bodies** → **0**.
+- **Working tree** → clean after this run's commit (`git status --short` → empty).
+- **state.js integrity**: 4090 lines, `node --check` passes. 35th clean entry in the recent sequence.
+- **Syntax validation**: All 18 files pass `node --check`: `main.js`, `state.js` (4090), `audio.js`, `ui.js`, `eventHandlers.js`, `effectsRegistry.js`, `SnugWindow.js`, `TrackInstrumentGrouping.js`, `MarkerAnnotations.js` (381), `StepSequencerView.js`, `StepSequencerPatternLibrary.js`, `PerTrackMidiCCPresets.js`, `ClipVolumeCurvePresets.js`, `TrackFreezeCrossfade.js`, `MarkerColorPresets.js`, `constants.js`, `MidiFileIO.js` (437), `MidiFilePanel.js` (391).
+
+### Incomplete Feature Found & Fixed: APP_VERSION Mismatch (0.4.04 → 0.4.07)
+- **Bug**: Three features had been shipped since the last APP_VERSION bump in `js/constants.js`:
+  - `76e2c03`: Audio Clip Labeling + TimelineMarkers dedup (implied v0.4.05)
+  - `6f04507`: Marker Color Presets (v0.4.06)
+  - `3215651`: MIDI File Import/Export (v0.4.07, per commit message)
+  
+  But `js/constants.js` was still at `APP_VERSION = "0.4.04"` (Track Grouping by Instrument). The welcome toast would show the wrong version on every page load.
+- **Fix**: 1-line bump in `js/constants.js`: `0.4.04` → `0.4.07` with an updated comment listing all four features since v0.4.04. `node --check` passes.
+
+### Previous Fixes Verified Intact (Deployed Site)
+- Run 1: `TrackFreezeCrossfade` per-entry try/catch → deployed.
+- Run 2-3: `ClipVolumeCurvePresets` id-prefix + contentArea fixes → deployed.
+- Run 4: `PerTrackMidiCCPresets` import-name fix → deployed.
+- Run 5: `StepSequencerPatternLibrary` pitch-inversion fix → deployed.
+- Run 6: `StepSequencerView` savedState ReferenceError + init wiring → deployed.
+- Run 7 (parallel): `TrackInstrumentGrouping` Clear-all button fix → deployed.
+- Run 8 (parallel): TrackInstrumentGrouping Ungrouped section → deployed.
+- Run 9: `MarkerAnnotations` context-menu self-closing fix → verified live.
+
+All fixes confirmed live on `https://snugos.github.io/snaw/`.
+
+### Parallel Builder Activity During This Run
+On entry, the parallel builder was mid-flight on MIDI File Import/Export with uncommitted work on `index.html` (+1), `js/KeyboardShortcuts.js` (+3/-1), `js/eventHandlers.js` (+6), `js/main.js` (+3), and new untracked `js/MidiFileIO.js` (437 lines) + `js/MidiFilePanel.js` (391 lines). Mid-run, the builder committed all of it as `3215651` (feat: MIDI File Import/Export v0.4.07) plus docs as `609a5b7`. No coordination conflict — this run's fix was on `constants.js` only and orthogonal to the builder's work.
+
+### Files Modified This Run
+- `js/constants.js` (1 line: APP_VERSION bump 0.4.04 → 0.4.07 with updated comment).
+- `FEATURE_STATUS.md` (this session entry, prepended).
+- `AGENTS.md` (Day 775 Run 12 entry, prepended).
+- Total: 1 code file + 2 doc files.
+
+### Features Still in Progress
+_None from this agent._ The parallel builder shipped v0.4.07 MIDI File Import/Export mid-run. Feature queue is at 0 items.
+
+### Action Taken
+Pulled latest (HEAD at `ca3102d`). Confirmed Priority-1 `removeCustomDesktopBackground` ReferenceError is a documented false positive (35th consecutive run, 16 occurrences). Detected parallel builder mid-flight on MIDI File Import/Export — left untouched per coordination pattern. Mid-run, the builder committed all files as `3215651` + `609a5b7`. Noticed APP_VERSION was stuck at 0.4.04 while three features (v0.4.05 Audio Clip Labeling, v0.4.06 Marker Color Presets, v0.4.07 MIDI File Import/Export) had been shipped without version bumps. Bumped to 0.4.07 with updated comment. Verified `node --check` passes on all 18 files. Committed as `9d8dee2`, pushed to `origin/LWB-with-Bugs`. Verified fix deployed (deployed constants.js shows 0.4.07). Updated `AGENTS.md` and `FEATURE_STATUS.md`.
+
+---
 ## Session: 2026-07-11 01:30 UTC (Snaw Feature Builder Agent Run — Day 775 Run 13)
 
 **Status: SHIPPED v0.4.07 MIDI File Import/Export** (`3215651`)
@@ -60,6 +115,7 @@
 
 Total: 2 new code files + 4 modified code files + 2 modified doc files. 828 lines of new code.
 
+---
 ## Session: 2026-07-11 01:20 UTC (Snaw Feature Completion Agent Run — Day 775 Run 12)
 
 **Status: AUDIT ONLY — No bugs found, codebase clean, parallel builder mid-flight on MIDI File Import/Export**
