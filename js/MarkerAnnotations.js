@@ -163,6 +163,10 @@ function handleMarkerContextMenu(e) {
         ? localAppServices
         : null;
     if (typeof createContextMenu === 'function') {
+        // createContextMenu installs a capture-phase contextmenu closeListener
+        // on document. Stop it from also firing on this same event and
+        // immediately removing the menu we just opened.
+        e.stopImmediatePropagation();
         createContextMenu(e, items, services);
     }
 }
