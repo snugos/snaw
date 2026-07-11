@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.4.04"; // 2026-07-10 - Track Grouping by Instrument (5 fixed instrument groups Drums/Bass/Lead/FX/Other backed by per-track role; dockable panel listing groups + members + per-track remove; right-click context submenu for assignment; helpers for mix presets / routing templates to consume) + bump from v0.4.03. Original v0.4.03 was: Step Sequencer Pattern Library (curated genre-grouped drum + melodic patterns; one-click apply with undo; mini ASCII previews; auto-scales to track length)
+export const APP_VERSION = "0.4.07"; // 2026-07-11 - v0.4.07 MIDI File Import/Export (SMF .mid parse/write + drag-drop import + file-picker + project-wide export), v0.4.06 Marker Color Presets, v0.4.05 Audio Clip Labeling + TimelineMarkers dedup, v0.4.04 Track Grouping by Instrument
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks
