@@ -75,21 +75,27 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 - **Per-Track MIDI Channel Display** - Small "Ch N" / "Omni" badge in each track-strip header (mixer panel) next to the track-type label. Color codes (gray for Omni, emerald for specific channels). Click the badge to open an inline picker (Omni + 1-16) that writes through track.setMidiChannel → undo captured + mixer repainted via the new 'midiChannelChanged' case in handleTrackUIUpdate. Master / Audio / Lyrics tracks skip the badge. Backed by js/PerTrackMidiChannelDisplay.js (v0.3.93) ✅
 - **Per-Track Groove Template Selector** - Small "Groove" badge in each track-strip header (mixer panel) next to the MIDI channel badge showing the current swing/shuffle preset ("None" gray / "Swing 50" / "Swing 66" / "Swing 75" / "Shuffle 33" amber/blue). Click the badge to open an inline picker (None + 4 swing presets) that writes through track.setGroovePreset → undo pre-captured + mixer repainted via the new 'groovePresetChanged' case in handleTrackUIUpdate. Master / Audio / Lyrics tracks skip the badge. Backed by js/PerTrackGrooveTemplateSelector.js (v0.3.94) ✅
 - **Track Freeze with Crossfade** - When freezing a track, apply a per-track configurable fade-in/out envelope (0/25/50/100/250/500/1000/2000 ms) to the rendered audio buffer so the start/end don't click and unfreezing blends cleanly. New `js/TrackFreezeCrossfade.js` module (381 lines): per-track crossfade duration stored in `localStorage` under `snaw_track_freeze_crossfade_<trackId>`, default 100 ms. Each track header shows a small ❄️⚡N indicator (blue when enabled, gray when off) — click to open an inline picker with all duration options. Hooked into the existing `js/TrackFreeze.js` render flow via `window.applyFreezeCrossfadeEnvelope(buffer, trackId)` (called between buffer render and WAV conversion in `freezeTrack`); also exposes `appServices.scheduleUnfreezeRamp(track)` for a fade-in ramp on the live instrument's output gain when the track is unfrozen. Backed by `js/TrackFreezeCrossfade.js` (v0.3.99) ✅
+- **Clip Volume Curve Presets** - Save/load named volume curve presets per track from a dockable panel (Linear, Fade-In, Fade-Out, Pump, Duck, Hold). Backed by `js/ClipVolumeCurvePresets.js` (v0.4.01) ✅
+- **Per-Track MIDI CC Presets** - Small "CC" badge in each track-strip header showing the current CC preset name; click to open an inline picker that writes through `track.setMidiCCPreset`. Backed by `js/PerTrackMidiCCPresets.js` (v0.4.02) ✅
+- **Step Sequencer Pattern Library** - Curated set of stock drum/melodic patterns the user can browse and drag into a track's sequencer slot; categorized by genre. Backed by `js/StepSequencerPatternLibrary.js` (v0.4.03) ✅
+- **Track Grouping by Instrument** - Right-click a track header → "Assign to Group: Drums / Bass / Lead / Pad / FX"; dockable panel shows current mapping. Backed by `js/TrackInstrumentGrouping.js` (v0.4.04) ✅
+- **Project Marker Annotations** - Multi-line notes on any timeline marker; right-click → "Edit Marker Note" popover; small 📝 indicator on annotated markers. Backed by `js/MarkerAnnotations.js` (v0.4.05) ✅
+- **Marker Color Presets** - 8-color semantic palette (Verse / Chorus / Bridge / Intro / Outro / Drop / Break / Custom) for timeline markers via right-click context menu. Backed by `js/MarkerColorPresets.js` (v0.4.06) ✅
 
 ## Current Feature Queue
 
-Queue was emptied after v0.4.02 (Per-Track MIDI CC Presets shipped). Brainstormed 10 fresh feature ideas to refill the queue (Day 775 Run 2 brainstorm, 2026-07-10):
+Queue was emptied after v0.4.06 (Marker Color Presets shipped). Brainstormed 10 fresh feature ideas to refill the queue (Day 775 Run 9 brainstorm, 2026-07-10):
 
-1. **Step Sequencer Pattern Library** - Curated set of stock drum/melodic patterns the user can browse and drag into a track's sequencer slot; categorized by genre (house, techno, hip-hop, etc.)
-2. **Track Grouping by Instrument** - Right-click a track header → "Assign to Group: Drums / Bass / Lead / Pad / FX" so mix presets and routing templates can target a logical bundle of tracks
-3. **Project Marker Annotations** - Attach a multi-line text note to any timeline marker (verse lyrics, mix notes, arrangement reminders); tooltip on marker hover shows the note; edit via right-click → "Edit Marker Note"
-4. **Audio Clip Labeling** - Tag any audio clip with a freeform text label (vocal-take #, sample source, etc.) shown as a small overlay on the clip and filterable in the Project Search panel
-5. **Track Send Pre-Fader Toggle** - Add a per-track pre/post-fader toggle for each send bus (currently always post-fader); lets users set up monitor sends vs. FX sends
-6. **Piano Roll CC Lane** - Per-note or per-clip CC automation lanes in the piano roll (e.g. draw a filter-cutoff curve that follows the selected notes), parallel to the existing v0.3.91 Pitch Bend lane
-7. **Track Headroom Indicator** - Color the track-strip header based on how close the current peak is to 0 dBFS (green/yellow/red) so the user can spot hot tracks at a glance
-8. **Drag-to-Duplicate Clip** - Hold Alt while dragging a clip to create a copy that follows the cursor (mirrors Ableton's behavior); bypasses the existing clipboard-based duplicate
-9. **MIDI Controller Scripting Hooks** - Expose a small `window.SnugOS` scriptable surface (e.g. `SnugOS.setParam(trackId, paramPath, value)`) so users can build a virtual MIDI controller from a webpage
-10. **One-Click Render Selection to Audio** - Quick-bounce a selected time range (use the existing loop region or a click-drag selection) to a new audio track in place, with a single hotkey (e.g. Cmd+Shift+R); complements the existing Quick-Bounce (in-place) and Quick-Bounce Markers
+1. **Audio Clip Labeling** - Tag any audio clip with a freeform text label (vocal-take #, sample source, etc.) shown as a small overlay on the clip and filterable in the Project Search panel
+2. **Track Send Pre-Fader Toggle** - Add a per-track pre/post-fader toggle for each send bus (currently always post-fader); lets users set up monitor sends vs. FX sends
+3. **Piano Roll CC Lane** - Per-note or per-clip CC automation lanes in the piano roll (e.g. draw a filter-cutoff curve that follows the selected notes), parallel to the existing v0.3.91 Pitch Bend lane
+4. **Track Headroom Indicator** - Color the track-strip header based on how close the current peak is to 0 dBFS (green/yellow/red) so the user can spot hot tracks at a glance
+5. **Drag-to-Duplicate Clip** - Hold Alt while dragging a clip to create a copy that follows the cursor (mirrors Ableton's behavior); bypasses the existing clipboard-based duplicate
+6. **MIDI Controller Scripting Hooks** - Expose a small `window.SnugOS` scriptable surface (e.g. `SnugOS.setParam(trackId, paramPath, value)`) so users can build a virtual MIDI controller from a webpage
+7. **One-Click Render Selection to Audio** - Quick-bounce a selected time range (use the existing loop region or a click-drag selection) to a new audio track in place, with a single hotkey (e.g. Cmd+Shift+R); complements the existing Quick-Bounce (in-place) and Quick-Bounce Markers
+8. **Marker Batch Operations** - Multi-select markers in the Markers panel and apply color/position offsets/note templates in bulk (e.g. shift all chorus markers +2 bars, recolor all verses blue)
+9. **Track Mute/Solo Memory Slots** - Save the current mute/solo state as a named "scene" and recall it later (or via a hotkey); great for live performance and A/B mix comparisons
+10. **Project Snapshot Diff** - Take a named snapshot of the project state and visually diff it against the current state (highlight tracks/clips/params that changed); reverts to a snapshot with one click
 
 ## Workflow
 
