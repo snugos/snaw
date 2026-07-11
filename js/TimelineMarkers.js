@@ -226,3 +226,17 @@ function refreshMarkersPanel() {
 
 // Expose for global access
 window.openTimelineMarkersPanel = openTimelineMarkersPanel;
+
+/**
+ * Public re-render hook for sibling modules (MarkerColorPresets, etc.) that
+ * mutate timeline-marker state via appServices.updateTimelineMarker but do not
+ * own the panel. Safe to call when the panel is not open: the inner
+ * refreshMarkersPanel() is a no-op in that case.
+ */
+export function refreshTimelineMarkersPanel() {
+    try {
+        refreshMarkersPanel();
+    } catch (e) {
+        console.warn('[TimelineMarkers] refreshTimelineMarkersPanel failed:', e);
+    }
+}

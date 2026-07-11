@@ -434,6 +434,12 @@ export function initializePrimaryEventListeners(appContext) {
                     }
                 } catch(e) { console.error("[Menu] Track Color Panel error:", e); }
             },
+            menuAudioClipLabeling: () => {
+                console.log("[Menu] Audio Clip Labeling clicked");
+                try {
+                    localAppServices.openAudioClipLabelingPanel?.();
+                } catch(e) { console.error("[Menu] Audio Clip Labeling error:", e); }
+            },
             menuTrackRolePanel: () => {
                 console.log("[Menu] Track Role Panel clicked");
                 try {
