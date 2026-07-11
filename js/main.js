@@ -13,6 +13,7 @@ import { initMarkerAnnotations } from './MarkerAnnotations.js';
 import { initPlayheadMarkerDrop, openPlayheadMarkerDropSettings } from './PlayheadMarkerDrop.js';
 import { initTimelineRulerClick, openTimelineRulerClickSettings } from './TimelineRulerClick.js';
 import { initTempoJumpMarkers } from './TempoJumpMarkers.js';
+import { initMarkerColorPresets } from './MarkerColorPresets.js';
 import { initMuteSelectedTracks } from './MuteSelectedTracks.js';
 import { AIMasteringEnhancement, initAIMasteringEnhancement, openAIMasteringEnhancementPanel } from './AIMasteringEnhancement.js';
 import { AudioStemExportEnhancement, initAudioStemExportEnhancement, openAudioStemExportEnhancementPanel } from './AudioStemExportEnhancement.js';
@@ -2469,6 +2470,7 @@ async function initializeSnugOS() {
         if (typeof initPlayheadMarkerDrop === 'function') initPlayheadMarkerDrop(appServices); // Playhead Marker Drop - double-click to add marker
         if (typeof initTimelineRulerClick === 'function') initTimelineRulerClick(appServices); // Timeline Ruler Click - click to jump playhead
         if (typeof initTempoJumpMarkers === 'function') initTempoJumpMarkers(appServices); // Tempo Jump Markers - click to set tempo jump point
+        if (typeof initMarkerColorPresets === 'function') initMarkerColorPresets(appServices); // Marker Color Presets - semantic color picker for timeline markers
         if (typeof initMuteSelectedTracks === 'function') initMuteSelectedTracks(appServices); // Mute Selected Tracks - M to mute/unmute selected
         if (typeof initMidiChordDisplay === 'function') initMidiChordDisplay(appServices); // MIDI Chord Display initialization
         if (typeof initClipOpacity === 'function') initClipOpacity(appServices); // Clip Opacity initialization
