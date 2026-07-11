@@ -1,3 +1,53 @@
+## Session: 2026-07-10 17:15 UTC (Snaw Feature Completion Agent Run — Day 775 Run 7)
+
+**Status: AUDIT ONLY — No bugs found, codebase clean**
+
+### Pulled & Merged
+- `git pull origin LWB-with-Bugs` → Already up to date at `e2e5ae7` (Day 775 Run 7 — TrackInstrumentGrouping Clear-all fix docs).
+
+### Priority-1 Task Bug Status
+- `main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground is not defined` — **documented false positive for the 31st consecutive run**. Function defined at `js/main.js:375`, exported on `appServices`, mirrored as `window.removeCustomDesktopBackground`. `grep -c "removeCustomDesktopBackground" js/main.js` → 16; deployed `curl -s https://snugos.github.io/snaw/js/main.js | grep -c` → 16.
+
+### Automated Scan Results
+- **TODO/FIXME/XXX/HACK/INCOMPLETE/STUB** markers in active `js/` code → **0 hits**.
+- **Untracked orphan JS files** → **0** (`git ls-files --others --exclude-standard -- 'js/*.js'` → empty).
+- **Empty function bodies** → **0** (all arrow no-ops are legitimate defensive defaults).
+- **Working tree** → **clean** (`git status --short` → empty).
+- **state.js integrity**: 4090 lines, `node --check` passes. 31st clean entry in the recent sequence.
+- **Syntax validation**: All 12 key files pass `node --check`: `main.js` (3106 lines), `state.js` (4090), `audio.js` (2067), `ui.js` (8305), `eventHandlers.js` (3272), `TrackInstrumentGrouping.js` (443), `MarkerAnnotations.js` (377), `StepSequencerView.js` (1034), `StepSequencerPatternLibrary.js` (701), `PerTrackMidiCCPresets.js` (743), `ClipVolumeCurvePresets.js` (807), `TrackFreezeCrossfade.js` (407).
+- **Current APP_VERSION**: 0.4.04 — Track Grouping by Instrument (commits `74f94e1`, `acd7a99`, `d67de9e`).
+
+### v0.4.04 Audit Summary
+The parallel builder shipped Track Grouping by Instrument as three commits:
+- `74f94e1`: Core feature — 5 instrument groups (Drums/Bass/Lead/FX/Other), per-track role-backed assignment, dockable panel with per-group member lists + per-track remove, right-click context submenu, mix-preset/routing-template helpers.
+- `acd7a99`: "Clear all" button addition.
+- `d67de9e`: Bug fix for the Clear-all button (was consuming wrong summary shape from `getInstrumentGroupSummary()` — silently no-op'd).
+
+A parallel Repair & Enhancement Agent instance found and shipped the Clear-all fix (`d67de9e`) earlier in this run window. MarkerAnnotations module (377 lines) was also committed alongside — exports `initMarkerAnnotations` and `refreshMarkerAnnotations`, fully wired (main.js import + init call + index.html script tag + menu item). Menu item opens the existing Timeline Markers panel for inline annotation editing.
+
+### Previous Fixes Verified (Deployed Site)
+- Run 1: `TrackFreezeCrossfade` per-entry try/catch → deployed.
+- Run 2-3: `ClipVolumeCurvePresets` id-prefix fix + `contentArea` fix → deployed.
+- Run 4: `PerTrackMidiCCPresets` import-name fix → deployed.
+- Run 5: `StepSequencerPatternLibrary` pitch-inversion fix → deployed.
+- Run 6: `StepSequencerView` savedState ReferenceError + init wiring → deployed.
+- Run 7 (parallel): `TrackInstrumentGrouping` Clear-all button fix → deployed.
+
+All fixes confirmed live on `https://snugos.github.io/snaw/`.
+
+### Why No Bug This Run
+The parallel builder's v0.4.04 is ~13 hours old. A parallel Repair & Enhancement Agent already audited and fixed the Clear-all button bug (`d67de9e`). No new feature commits since `acd7a99` → `d67de9e` → `e2e5ae7`. The codebase is stable.
+
+### Files Modified This Run
+- `FEATURE_STATUS.md` (this session entry, prepended).
+- `AGENTS.md` (Day 775 Run 7 entry, prepended).
+- No code changes.
+
+### Action Taken
+Pulled latest (already at `e2e5ae7`). Confirmed Priority-1 phantom (31st consecutive run). Ran full scan suite — all clean. Verified all 12 key files pass syntax check. Verified Run 1-7 fixes intact on deployed site. No code authored. Updated docs.
+
+---
+
 ## Session: 2026-07-10 17:14 UTC (Snaw Repair & Enhancement Agent Run — Day 775 Run 7)
 
 **Status: ONE BUG SHIPPED — `TrackInstrumentGrouping.js` "Clear all" button silently no-op'd (wrong shape consumed from `getInstrumentGroupSummary()`)**
@@ -1610,8 +1660,8 @@ Pulled latest (advanced from `4444115` to `7cf6b26` mid-session as the parallel 
 - Empty-function-body scan (`function...(){}` / `=> {}`) found only legitimate no-op fallbacks (e.g. `setLoopRegion: state.setLoopRegion || (() => {})` in `LoopRegionPresets.js` and similar optional-appServices guards in `ui.js`, `ModularRouting.js`, `TimelineClipOperations.js`) — all intentional defensive defaults, not stubs
 - `return null` / `return undefined` instances in core files are all legitimate guard clauses (e.g. `if (this.type === 'Audio' ...) return null`)
 - Syntax validation (`node --check`) for all 17 core modules passed: `audio.js`, `Track.js`, `state.js`, `ui.js`, `eventHandlers.js`, `effectsRegistry.js`, `SnugWindow.js`, `main.js`, `constants.js`, `TrackContextMenu.js`, `TrackNotes.js`, `BounceToTrack.js`, `OneShotPreviewPad.js`, `WaveformVisualizer.js`, `DrumKitPieceSelector.js`, `LoudnessMeter.js`, `SendsOverviewPanel.js`
-- `find js -name '*.js' -type f | wc -l` → 531 files (+2 vs Day 734's 529: the v0.3.60 `SendsOverviewPanel.js` plus one other)
-- `find js -name '*.js' -type f -exec wc -l {} + | tail -1` → 269,366 total lines
+- `find js -name "*.js" -type f | wc -l` → 531 files (+2 vs Day 734's 529: the v0.3.60 `SendsOverviewPanel.js` plus one other)
+- `find js -name "*.js" -type f -exec wc -l {} + | tail -1` → 269,366 total lines
 - No untracked orphan files (`git ls-files --others --exclude-standard -- 'js/*.js'` → empty)
 - `git log --since='2 hours ago' --oneline` → no commits in the last 2 hours (no parallel run mid-flight on origin)
 - Current `APP_VERSION`: 0.3.60 (unchanged — audit only, no new feature shipped)
