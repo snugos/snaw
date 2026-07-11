@@ -84,18 +84,18 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-Queue was emptied after v0.4.06 (Marker Color Presets shipped). Brainstormed 10 fresh feature ideas to refill the queue (Day 775 Run 9 brainstorm, 2026-07-10):
+Queue was emptied after v0.4.07 (MIDI File Import/Export shipped). Brainstormed 10 fresh feature ideas to refill the queue (Day 775 Run 13 brainstorm, 2026-07-11):
 
-1. **Audio Clip Labeling** - Tag any audio clip with a freeform text label (vocal-take #, sample source, etc.) shown as a small overlay on the clip and filterable in the Project Search panel
-2. **Track Send Pre-Fader Toggle** - Add a per-track pre/post-fader toggle for each send bus (currently always post-fader); lets users set up monitor sends vs. FX sends
+1. **Drag-to-Duplicate Clip** - Hold Alt while dragging a clip to create a copy that follows the cursor (mirrors Ableton's behavior); bypasses the existing clipboard-based duplicate
+2. **Track Headroom Indicator** - Color the track-strip header based on how close the current peak is to 0 dBFS (green/yellow/red) so the user can spot hot tracks at a glance
 3. **Piano Roll CC Lane** - Per-note or per-clip CC automation lanes in the piano roll (e.g. draw a filter-cutoff curve that follows the selected notes), parallel to the existing v0.3.91 Pitch Bend lane
-4. **Track Headroom Indicator** - Color the track-strip header based on how close the current peak is to 0 dBFS (green/yellow/red) so the user can spot hot tracks at a glance
-5. **Drag-to-Duplicate Clip** - Hold Alt while dragging a clip to create a copy that follows the cursor (mirrors Ableton's behavior); bypasses the existing clipboard-based duplicate
-6. **MIDI Controller Scripting Hooks** - Expose a small `window.SnugOS` scriptable surface (e.g. `SnugOS.setParam(trackId, paramPath, value)`) so users can build a virtual MIDI controller from a webpage
-7. **One-Click Render Selection to Audio** - Quick-bounce a selected time range (use the existing loop region or a click-drag selection) to a new audio track in place, with a single hotkey (e.g. Cmd+Shift+R); complements the existing Quick-Bounce (in-place) and Quick-Bounce Markers
-8. **Marker Batch Operations** - Multi-select markers in the Markers panel and apply color/position offsets/note templates in bulk (e.g. shift all chorus markers +2 bars, recolor all verses blue)
-9. **Track Mute/Solo Memory Slots** - Save the current mute/solo state as a named "scene" and recall it later (or via a hotkey); great for live performance and A/B mix comparisons
-10. **Project Snapshot Diff** - Take a named snapshot of the project state and visually diff it against the current state (highlight tracks/clips/params that changed); reverts to a snapshot with one click
+4. **Track Send Pre-Fader Toggle** - Add a per-track pre/post-fader toggle for each send bus (currently always post-fader); lets users set up monitor sends vs. FX sends
+5. **Marker Batch Operations** - Multi-select markers in the Markers panel and apply color/position offsets/note templates in bulk (e.g. shift all chorus markers +2 bars, recolor all verses blue)
+6. **Track Mute/Solo Memory Slots** - Save the current mute/solo state as a named "scene" and recall it later (or via a hotkey); great for live performance and A/B mix comparisons
+7. **One-Click Render Selection to Audio** - Quick-bounce a selected time range to a new audio track in place with a single hotkey (e.g. Cmd+Shift+R)
+8. **Project Snapshot Diff** - Take a named snapshot of the project state and visually diff it against the current state (highlight tracks/clips/params that changed); reverts to a snapshot with one click
+9. **MIDI Controller Scripting Hooks** - Expose a small `window.SnugOS` scriptable surface so users can build a virtual MIDI controller from a webpage
+10. **Clip Volume Hotkey** - Press `+` / `-` to bump the currently-focused clip's gain by ±1 dB without opening the inspector
 
 ## Workflow
 

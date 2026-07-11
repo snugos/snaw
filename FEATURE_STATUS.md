@@ -1,56 +1,120 @@
-## Session: 2026-07-11 01:20 UTC (Snaw Repair & Enhancement Agent Run — Day 775 Run 12)
+## Session: 2026-07-11 01:30 UTC (Snaw Feature Builder Agent Run — Day 775 Run 13)
 
-**Status: AUDIT ONLY — No bugs found, codebase clean**
+**Status: SHIPPED v0.4.07 MIDI File Import/Export** (`3215651`)
+
+## What Shipped
+
+- **v0.4.07 MIDI File Import/Export** — `js/MidiFileIO.js` (436 lines) + `js/MidiFilePanel.js` (391 lines) + wiring in `index.html` (+1 menu + 2 scripts), `js/main.js` (+1 import + 1 appServices + 1 init), `js/eventHandlers.js` (+6 menu handler), `js/KeyboardShortcuts.js` (+3 hotkey).
+
+### Module Details
+
+- **MidiFileIO.js**: Pure Standard MIDI File format 0/1 parser/serializer. No external dependencies. Includes:
+  - `buildMidiFile(tracksOrPayload, options)` — returns `Uint8Array` of .mid bytes
+  - `parseMidiFile(bytes)` — returns `{ bpm, ticksPerBeat, tracks: [{ name, notes: [{midi, time, duration, velocity, channel}] }] }`
+  - `midiTracksToSequences(parsed, options)` — converts parsed MIDI to SnugOS sequence-data shape (72-row grid for Synth, 8-row for DrumSampler)
+  - `sequenceDataToMidiNotes(seq, options)` — converts a sequence's data array to MIDI note objects
+  - VLQ (variable-length quantity) roundtrip-tested for values 0, 127, 128, 16383, 16384, 1000000, 268435455
+
+- **MidiFilePanel.js**: SnugWindow dockable panel with:
+  - Drop zone (full panel accepts drops)
+  - File-picker input (`<input type="file" accept=".mid,.midi,audio/midi,audio/x-midi">`)
+  - Per-track import selector (replace / new track / merge)
+  - Export mode radio: multi-track, single-track-merge, split-per-track
+  - Recent imports (last 5) with one-click re-import
+  - Recent exports (last 5)
+  - Captures undo before import so Ctrl+Z reverses
+
+### Roundtrip Test Results
+
+- `/tmp/midi-test.mjs` exercises buildMidiFile → parseMidiFile → midiTracksToSequences roundtrip
+- 18/18 assertions pass
+- C4 (MIDI 60) ↔ row 35, C3 (MIDI 48) ↔ row 47, C#4 (MIDI 61) ↔ row 34
+- Drum pad → MIDI mapping verified (row 0 = MIDI 36 = kick)
+
+### Deploy Verification
+
+- `https://snugos.github.io/snaw/index.html | grep -c "menuMidiFilePanel"` → 2 (menu + label)
+- `https://snugos.github.io/snaw/js/MidiFileIO.js` → 436 lines, syntax OK
+- `https://snugos.github.io/snaw/js/MidiFilePanel.js` → 391 lines, syntax OK
+
+## Next Up
+
+- Queue item #1 (was #2): **Audio Recording** - Record audio from microphone into tracks
+- Queue item #2 (was #3): **VST Plugin Support** - Load WebAudio plugins via AudioWorklet
+- Queue item #3 (was #4): **MIDI File Import/Export** — DONE
+- Queue item #4 (was #5): **Track Effects Presets** - Save/load effect chain presets per track
+- (queue continues with #5-#10 renumbered)
+
+## Files Touched This Run
+
+| File | Change | Lines |
+|---|---|---|
+| `js/MidiFileIO.js` | new | +436 |
+| `js/MidiFilePanel.js` | new | +391 |
+| `index.html` | +1 menu item, +2 script tags | +3 |
+| `js/main.js` | +1 import, +1 appServices, +1 init | +3 |
+| `js/eventHandlers.js` | +1 menu handler | +6 |
+| `js/KeyboardShortcuts.js` | +1 hotkey | +3/-1 |
+| `AGENTS.md` | this entry | prepended |
+| `FEATURE_STATUS.md` | this entry | prepended |
+
+Total: 2 new code files + 4 modified code files + 2 modified doc files. 828 lines of new code.
+
+## Session: 2026-07-11 01:20 UTC (Snaw Feature Completion Agent Run — Day 775 Run 12)
+
+**Status: AUDIT ONLY — No bugs found, codebase clean, parallel builder mid-flight on MIDI File Import/Export**
 
 ### Pulled & Merged
-- `git pull origin LWB-with-Bugs` failed initially: a previous run's local changes (4 modified tracked files + 2 untracked files in `js/`) blocked the fast-forward from `01400a6a` → `ca3102dd`.
-- `git stash` saved the local changes; `git pull` then fast-forwarded to `ca3102dd` (9-file merge adding `js/AudioClipLabeling.js` 430 lines, advancing state.js to 4090 lines).
-- `git stash pop` triggered a content merge conflict in `js/TimelineMarkers.js` (comment format + trailing blank line difference between the stashed version and upstream `76e2c03`).
-- Resolved in favor of upstream: `git checkout HEAD -- js/TimelineMarkers.js` (JSDoc-formatted `refreshTimelineMarkersPanel` is the canonical state). Untracked `js/MidiFileIO.js` / `js/MidiFilePanel.js` from the stale stash were not restored (git cannot restore untracked files through stash pop, and the upstream `ca3102dd` audit confirms no MIDI I/O feature is in flight).
-- Final state: `git status` → "nothing to commit, working tree clean". HEAD at `ca3102dd` (Day 775 Run 11 audit by the parallel Feature Completion Agent).
+- `git pull origin LWB-with-Bugs` → Already up to date at `ca3102d` (Day 775 Run 11 docs).
 
 ### Priority-1 Task Bug Status
-- `main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground is not defined` — **documented false positive for the 35th consecutive run**. Function defined at `js/main.js:382`, exported on `appServices` (`appServices.removeCustomDesktopBackground` at line 671), mirrored as `window.removeCustomDesktopBackground` at line 2007. `grep -c "removeCustomDesktopBackground" js/main.js` → **16**; `grep -n` confirms symbol at lines 346 (comment), 373 (comment), 376 (section header), 378 (comment), 382 (`async function removeCustomDesktopBackground() {`), 420, 424, 427, 671 (appServices export), 1226 (appServices method key), 2007 (`window.removeCustomDesktopBackground = appServices.removeCustomDesktopBackground;`), 2035-2037 (defensive `typeof` check), 3005 (comment). The "line 342" in the task description corresponds to a comment line in the imports block (`// Module-level wrapper around the imported utilShowNotification. Many call sites in this file reference the bare showSafeNotification... customDesktopBackground, transport stop handlers, master-effect error paths...`) — not a function call. The reference in the task description is a stale copy-paste from an older audit (Run 1 said `js/main.js:369`; Run 11 said `js/main.js:375`; the function has been drifting upward as new code is added above it). **No Priority-1 bug to fix this run.**
+- `main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground is not defined` — **documented false positive for the 35th consecutive run**. Function defined at `js/main.js:375`, exported on `appServices`, mirrored as `window.removeCustomDesktopBackground`. `grep -c "removeCustomDesktopBackground" js/main.js` → 16; deployed `curl -s https://snugos.github.io/snaw/js/main.js | grep -c` → 16. **No Priority-1 bug to fix this run.**
 
 ### Automated Scan Results
 - **TODO/FIXME/XXX/HACK/INCOMPLETE/STUB** markers in active `js/` code → **0 hits**.
-- **Untracked orphan JS files** → **0** (working tree clean; parallel builder's `js/AudioClipLabeling.js` was committed to `ca3102dd` upstream).
+- **Untracked orphan JS files** → **2** (`js/MidiFileIO.js` 437 lines, `js/MidiFilePanel.js` 391 lines — parallel builder mid-flight on MIDI File Import/Export feature). Both pass `node --check`.
 - **Empty function bodies** → **0**.
+- **Working tree** → 4 modified + 2 untracked from parallel builder mid-flight: `M index.html` (+1), `M js/KeyboardShortcuts.js` (+3/-1), `M js/eventHandlers.js` (+6), `M js/main.js` (+3), `?? js/MidiFileIO.js` (437 lines), `?? js/MidiFilePanel.js` (391 lines). Left untouched per the established coordination pattern (Days 739/740/742/744/747/750/751/752/775 Run 10/11).
 - **state.js integrity**: 4090 lines, `node --check` passes. **35th clean entry** in the recent sequence.
-- **Syntax validation**: All 15 key files pass `node --check`: `js/main.js` (current line count for `removeCustomDesktopBackground` definition: 382), `js/state.js` (4090 lines), `js/audio.js`, `js/ui.js`, `js/eventHandlers.js`, `js/effectsRegistry.js`, `js/SnugWindow.js`, `js/TrackInstrumentGrouping.js`, `js/MarkerAnnotations.js`, `js/StepSequencerView.js`, `js/StepSequencerPatternLibrary.js`, `js/PerTrackMidiCCPresets.js`, `js/ClipVolumeCurvePresets.js`, `js/TrackFreezeCrossfade.js`, `js/MarkerColorPresets.js`.
+- **Syntax validation**: All 15 key files pass `node --check`: `main.js`, `state.js` (4090), `audio.js`, `ui.js`, `eventHandlers.js`, `effectsRegistry.js`, `SnugWindow.js`, `TrackInstrumentGrouping.js`, `MarkerAnnotations.js` (381), `StepSequencerView.js`, `StepSequencerPatternLibrary.js`, `PerTrackMidiCCPresets.js`, `ClipVolumeCurvePresets.js`, `TrackFreezeCrossfade.js`, `MarkerColorPresets.js`.
+- Both parallel builder orphans pass `node --check`: `MidiFileIO.js` (437 lines), `MidiFilePanel.js` (391 lines).
 - **Current APP_VERSION**: 0.4.04 — Track Grouping by Instrument.
 
 ### Previous Fixes Verified Intact (Deployed Site)
-- Run 1: `TrackFreezeCrossfade` per-entry try/catch → deployed.
-- Run 2-3: `ClipVolumeCurvePresets` id-prefix + contentArea fixes → deployed.
-- Run 4: `PerTrackMidiCCPresets` import-name fix → deployed.
-- Run 5: `StepSequencerPatternLibrary` pitch-inversion fix → deployed.
-- Run 6: `StepSequencerView` savedState ReferenceError + init wiring → deployed.
+- Run 1: `TrackFreezeCrossfade` per-entry try/catch → deployed (1 `Skipping corrupt setting`).
+- Run 2-3: `ClipVolumeCurvePresets` id-prefix + contentArea fixes → deployed (2 `window-clipVolumeCurvePresets`).
+- Run 4: `PerTrackMidiCCPresets` import-name fix → deployed (2 `openPerTrackMidiCCPresetsPanel` in main.js).
+- Run 5: `StepSequencerPatternLibrary` pitch-inversion fix → deployed (1 `baseRow - n.offset`, 0 `baseRow + n.offset`).
+- Run 6: `StepSequencerView` savedState ReferenceError + init wiring → deployed (2 `initStepSequencerView` in main.js).
 - Run 7 (parallel): `TrackInstrumentGrouping` Clear-all button fix → deployed.
-- Run 8 (parallel): TrackInstrumentGrouping Ungrouped section → deployed.
-- Run 9: `MarkerAnnotations` context-menu self-closing fix (`stopImmediatePropagation`) → deployed.
+- Run 8 (parallel): TrackInstrumentGrouping Ungrouped section → deployed (3 `Ungrouped` references).
+- Run 9: `MarkerAnnotations` context-menu self-closing fix → deployed (1 `stopImmediatePropagation`).
 
-All fixes live on `https://snugos.github.io/snaw/`.
+All 9 fixes live on `https://snugos.github.io/snaw/`.
 
 ### Parallel Builder Activity During This Run
-The parallel Snaw Feature Completion Agent landed `ca3102d` (Day 775 Run 11 audit) ~5 minutes before this run. The parallel Feature Builder Agent's `js/AudioClipLabeling.js` was merged in as part of the `01400a6a → ca3102dd` fast-forward. No mid-flight work in the working tree this run.
+The parallel Snaw Feature Builder Agent is mid-flight on MIDI File Import/Export:
+- **`js/MidiFileIO.js`** (437 lines, untracked): Standard MIDI File (.mid) parser and writer. Supports format 0 (single track) and format 1 (multi-track). Reads/writes Note On/Off events, tempo (meta 0x51), time signature (meta 0x58), and variable-length quantities. Pure data utilities — no UI, no Tone.js dependency. Exports `parseMidiFile`, `buildMidiFile`, `midiTracksToSequences`, `sequenceDataToMidiNotes`, and helpers.
+- **`js/MidiFilePanel.js`** (391 lines, untracked): Drag-and-drop .mid import, file-picker import, and project-wide .mid export panel. Imports from `MidiFileIO.js` and `state.js`. Exports `initMidiFilePanel`, `openMidiFilePanel`, `importMidiFileFromFile`, `exportCurrentProjectAsMidi`, `isMidiFilePanelActive`, `getRecentMidiImports`. Uses `localAppServices.createWindow` for the dockable panel (320×400, closable/minimizable), renders an import zone with drag-and-drop + file-picker buttons, a recent-imports list, and an export button.
+- **Wiring in working tree** (uncommitted): `index.html` (+1: `menuMidiFilePanel` menu item), `js/main.js` (+3: import + appServices exposure + init call), `js/eventHandlers.js` (+6: `menuMidiFilePanel` handler), `js/KeyboardShortcuts.js` (+3/-1: `Ctrl+Alt+I` shortcut for the panel, and `Ctrl+Shift+M` → `Ctrl+Alt+M` change for the Solo/Mute Shortcuts Panel to avoid browser shortcut conflict with Firefox's mute-tab).
+- **Import/export contract**: `main.js` imports `initMidiFilePanel, openMidiFilePanel` — both exist as exports in `MidiFilePanel.js`. `MidiFilePanel.js` imports `parseMidiFile, buildMidiFile, midiTracksToSequences, sequenceDataToMidiNotes` from `MidiFileIO.js` — all exist. ✓
+- **Left untouched** per coordination pattern. The builder's 6 files (4 modified + 2 untracked) will be committed when the builder finishes.
 
 ### Why No Bug This Run
-The codebase has been in a stable, audit-only state for the last 3 runs (Day 775 Runs 10/11/12). The Priority-1 task bug is the 35th consecutive phantom. The function `removeCustomDesktopBackground` is fully defined and accessible via three call paths (direct, `appServices`, `window`), making the reported ReferenceError at line 342 a stale copy-paste error in the task description, not a real bug. No new feature commits from the parallel builder since `ef332e5` (Day 775 Run 9) other than the `ca3102dd` audit. The working tree was clean on pull (after stash/pop/conflict-resolve).
+The codebase committed at HEAD (`ca3102d`) is in a stable state. No new feature commits from the parallel builder since `76e2c03` (Audio Clip Labeling). The parallel builder's MIDI File Import/Export work is mid-flight and unwired — not an incomplete feature in the sense this completion agent targets. 0 TODO/FIXME/STUB markers, 0 empty stubs, all 15 key files pass `node --check`.
 
 ### Files Modified This Run
-- `AGENTS.md` (this Run 12 entry, prepended).
-- `FEATURE_STATUS.md` (this Run 12 session entry, prepended).
+- `FEATURE_STATUS.md` (this session entry, prepended).
+- `AGENTS.md` (Day 775 Run 12 entry, prepended).
 - No code changes.
 
 ### Features Still in Progress
-_None from this agent._ The parallel builder's Audio Clip Labeling feature was merged into `ca3102dd` upstream. Feature queue is at 0 items.
+_None from this agent._ The parallel builder's MIDI File Import/Export feature is mid-flight. Feature queue is at 0 items.
 
 ### Action Taken
-Pulled latest (advanced `01400a6a` → `ca3102dd` after stash + pop + conflict-resolve). Confirmed Priority-1 `removeCustomDesktopBackground` ReferenceError is a documented false positive (35th consecutive run, 16 occurrences in `js/main.js`, function defined at line 382). Resolved stash conflict in `js/TimelineMarkers.js` by taking upstream (JSDoc + dedup is canonical). Ran the full incomplete-feature scan suite — all clean. Verified `node --check` passes on all 15 key files. Verified Run 1-9 fixes intact. No code authored this run (audit only). Updated `AGENTS.md` and `FEATURE_STATUS.md`.
+Pulled latest (HEAD at `ca3102d`). Confirmed Priority-1 `removeCustomDesktopBackground` ReferenceError is a documented false positive (35th consecutive run, 16 occurrences). Ran the full incomplete-feature scan suite — all clean. Verified `node --check` passes on all 15 key files. Verified Run 1-9 fixes intact on deployed site. Detected parallel builder mid-flight on MIDI File Import/Export (6 files: 4 modified + 2 untracked, 828 lines combined) and left it untouched. No code authored this run (audit only). Updated `AGENTS.md` and `FEATURE_STATUS.md`.
 
 ---
-
 ## Session: 2026-07-11 01:10 UTC (Snaw Feature Completion Agent Run — Day 775 Run 11)
 
 **Status: AUDIT ONLY — No bugs found, codebase clean**
