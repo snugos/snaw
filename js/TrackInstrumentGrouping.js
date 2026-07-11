@@ -373,6 +373,44 @@ function renderPanelContent() {
         html += `</div></div>`;
     }
 
+    // Ungrouped (N): tracks with role 'none' or 'other' that aren't in a
+    // specific Drums / Bass / Lead / FX group. Pairs with the Clear-all
+    // button: one removes assignments, the other helps make them. Without
+    // this section the only way to assign a track is to scroll the main
+    // track list and right-click each header individually.
+    const ungroupedTracks = groupableTracks.filter(t => {
+        const r = (typeof t.getRole === 'function') ? t.getRole() : (t.role || 'none');
+        return r === 'none' || r === 'other';
+    });
+    if (ungroupedTracks.length > 0) {
+        const assignBtnsHtml = INSTRUMENT_GROUPS
+            .filter(g => g.role !== TRACK_ROLE_OTHER)
+            .map(g => {
+                const safeLabel = escapeHtml(g.label);
+                return `<button class="instrument-group-assign-btn w-6 h-6 rounded flex items-center justify-center text-white text-sm flex-shrink-0 hover:opacity-80" style="background-color: ${g.color}" data-assign-role="${g.role}" title="Assign to ${safeLabel}">${g.icon}</button>`;
+            })
+            .join('');
+        html += `
+            <div class="mb-3 p-3 bg-white dark:bg-slate-700 rounded border border-gray-200 dark:border-slate-600">
+                <div class="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-2">Ungrouped (${ungroupedTracks.length})</div>
+                <div class="text-[11px] text-gray-500 dark:text-gray-400 mb-2">These tracks have no instrument group. Click a group icon to assign.</div>
+                <div class="space-y-1">`;
+        for (const t of ungroupedTracks) {
+            const tId = t.id != null ? String(t.id) : '';
+            const tName = t.name || `Track ${tId}`;
+            html += `
+                    <div class="flex items-center gap-1 py-0.5 px-1 rounded hover:bg-gray-100 dark:hover:bg-slate-600 text-xs" data-ungrouped-track-id="${tId}">
+                        <span class="flex-1 truncate text-gray-700 dark:text-gray-200" title="${escapeHtml(tName)}">${escapeHtml(tName)}</span>
+                        <span class="text-[10px] text-gray-400 dark:text-gray-500">${escapeHtml(t.type || '')}</span>
+                        ${assignBtnsHtml}
+                    </div>`;
+        }
+        html += `
+                </div>
+            </div>
+        `;
+    }
+
     // Tracks that are in a *specific* group (not the Other catch-all).
     const specificallyGrouped = groupableTracks.filter(t => {
         const r = (typeof t.getRole === 'function') ? t.getRole() : (t.role || 'none');
@@ -405,6 +443,34 @@ function wirePanelEvents(container, showNotification) {
                 showNotification?.(`Removed "${track.name}" from its instrument group`, 2000);
                 renderPanelContent();
             }
+        });
+    });
+
+    // Inline assign buttons in the Ungrouped section. Each row has one
+    // button per specific group (Drums/Bass/Lead/FX); click to assign.
+    // The whole row is data-ungrouped-track-id so event delegation
+    // can find the track id from any button in the row.
+    container.querySelectorAll('[data-ungrouped-track-id]').forEach(row => {
+        const tId = row.dataset.ungroupedTrackId;
+        const trackIdNum = parseInt(tId, 10);
+        if (!Number.isFinite(trackIdNum)) return;
+        row.querySelectorAll('.instrument-group-assign-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const role = btn.dataset.assignRole;
+                if (!role) return;
+                const track = (typeof localAppServices.getTrackById === 'function')
+                    ? localAppServices.getTrackById(trackIdNum)
+                    : null;
+                if (!track) return;
+                const ok = assignTrackToInstrumentGroup(trackIdNum, role);
+                if (ok) {
+                    const grp = INSTRUMENT_GROUPS.find(g => g.role === role);
+                    const grpLabel = grp ? grp.label : role;
+                    showNotification?.(`Assigned "${track.name}" to ${grpLabel}`, 2000);
+                    renderPanelContent();
+                }
+            });
         });
     });
 
