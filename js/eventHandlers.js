@@ -440,6 +440,12 @@ export function initializePrimaryEventListeners(appContext) {
                     localAppServices.openAudioClipLabelingPanel?.();
                 } catch(e) { console.error("[Menu] Audio Clip Labeling error:", e); }
             },
+            menuMidiFilePanel: () => {
+                console.log("[Menu] MIDI File Panel clicked");
+                try {
+                    localAppServices.openMidiFilePanel?.();
+                } catch(e) { console.error("[Menu] MIDI File Panel error:", e); }
+            },
             menuTrackRolePanel: () => {
                 console.log("[Menu] Track Role Panel clicked");
                 try {

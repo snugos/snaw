@@ -150,6 +150,7 @@ import { initPerformanceModeRecall, openPerformanceModeRecallPanel, isPerformanc
 import { initGuitarTabEditor, openGuitarTabEditor } from './GuitarTabEditor.js';
 import { initTrackColorPanel, openTrackColorPanel } from './TrackColorPanel.js';
 import { initAudioClipLabeling, openAudioClipLabelingPanel, isAudioClipLabelingActive, applyAudioClipLabelFromExternal, getAllAudioClipLabels } from './AudioClipLabeling.js';
+import { initMidiFilePanel, openMidiFilePanel } from './MidiFilePanel.js';
 import { initTrackRolePanel, openTrackRolePanel, getTracksByRole, getRoleSummary } from './TrackRolePanel.js';
 import { initTrackSnapResolutionPanel, openTrackSnapResolutionPanel } from './TrackSnapResolutionPanel.js';
 import { initTrackIconPicker, openTrackIconPickerPanel } from './TrackIconPicker.js';
@@ -1339,6 +1340,7 @@ const appServices = {
     isAudioClipLabelingActive,
     applyAudioClipLabelFromExternal,
     getAllAudioClipLabels,
+    openMidiFilePanel,
     getTracksByRole,
     getRoleSummary,
     openCountInSettingsPanel,
@@ -2437,6 +2439,7 @@ async function initializeSnugOS() {
         if (typeof initTrackDuplicateOffset === 'function') initTrackDuplicateOffset(appServices); // Track Duplicate with Offset
         if (typeof initTrackColorPanel === 'function') initTrackColorPanel(appServices); // Track Color Panel initialization
         if (typeof initAudioClipLabeling === 'function') initAudioClipLabeling(appServices); // Audio Clip Labeling initialization
+        if (typeof initMidiFilePanel === 'function') initMidiFilePanel(appServices); // MIDI File Import/Export initialization
         if (typeof initTrackRolePanel === 'function') initTrackRolePanel(appServices); // Track Role Panel initialization
         if (typeof initTrackSnapResolutionPanel === 'function') initTrackSnapResolutionPanel(appServices); // Track Snap Resolution Panel initialization
         if (typeof initTrackScrollToCenter === 'function') initTrackScrollToCenter(appServices); // Track Scroll To Center initialization

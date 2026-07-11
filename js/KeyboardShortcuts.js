@@ -63,7 +63,7 @@ const KeyboardShortcuts = (function() {
     register(' ', [], () => { if (typeof togglePlayback === 'function') togglePlayback(); }, 'Play/Stop', 'Transport');
     register('enter', [], () => { if (typeof stopPlayback === 'function') stopPlayback(); }, 'Stop', 'Transport');
     register('m', ['ctrl'], () => { if (typeof toggleMetronome === 'function') toggleMetronome(); }, 'Toggle Metronome', 'Transport');
-    register('m', ['ctrl', 'shift'], () => { if (typeof openSoloMuteShortcutsPanel === 'function') openSoloMuteShortcutsPanel(); }, 'Open Solo/Mute Shortcuts Panel', 'Track');
+    register('m', ['ctrl', 'alt'], () => { if (typeof openSoloMuteShortcutsPanel === 'function') openSoloMuteShortcutsPanel(); }, 'Open Solo/Mute Shortcuts Panel', 'Track');
     register('l', ['ctrl'], () => { if (typeof toggleLoop === 'function') toggleLoop(); }, 'Toggle Loop', 'Transport');
     register('n', ['ctrl'], () => { if (typeof addNewTrack === 'function') addNewTrack(); }, 'New Track', 'Track');
     register('d', ['ctrl'], () => { if (typeof duplicateCurrentTrack === 'function') duplicateCurrentTrack(); }, 'Duplicate Track', 'Track');
@@ -75,6 +75,7 @@ const KeyboardShortcuts = (function() {
     register('x', ['ctrl'], () => { if (typeof cutSelection === 'function') cutSelection(); }, 'Cut', 'Edit');
     register('f', ['ctrl', 'shift'], () => { if (typeof openAudioFadePresetPanel === 'function') openAudioFadePresetPanel({ getSelectedClips: () => { if (typeof getSelectedObjects === 'function') { const selected = getSelectedObjects(); return selected.filter(obj => obj && obj.type === 'clip'); } return []; }, applyFadeToClip: (clipId, buffer) => { if (typeof updateClipAudio === 'function') updateClipAudio(clipId, buffer); } }); }, 'Audio Fade Presets', 'Edit');
     register('?', [], () => { if (typeof openKeyboardShortcutsPanel === 'function') openKeyboardShortcutsPanel(); }, 'Show Keyboard Shortcuts Panel', 'General');
+    register('i', ['ctrl', 'alt'], () => { if (typeof window.openMidiFilePanel === 'function') window.openMidiFilePanel(); else if (typeof openMidiFilePanel === 'function') openMidiFilePanel(); }, 'Open MIDI File Import/Export Panel', 'File');
     register('g', [], () => { if (typeof window.snapSelectedNotesToScale === 'function') window.snapSelectedNotesToScale(); else if (typeof snapSelectedNotesToScale === 'function') snapSelectedNotesToScale(); }, 'Snap Selected Notes To Scale (Piano Roll)', 'Piano Roll');
 
     return { register, enable, disable, isEnabled, clear, getShortcutsByCategory, exportShortcuts };
