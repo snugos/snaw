@@ -675,6 +675,18 @@ export function initializePrimaryEventListeners(appContext) {
                     }
                 } catch(e) { console.error('[Menu] Timeline Markers error:', e); }
             },
+            menuMarkerAnnotations: () => {
+                console.log('[Menu] Marker Annotations clicked');
+                try {
+                    // Open the existing Timeline Markers panel (notes are edited there
+                    // and inline on the timeline itself via the right-click popover).
+                    if (window.openTimelineMarkersPanel) {
+                        window.openTimelineMarkersPanel();
+                    } else if (typeof localAppServices.openTimelineMarkersPanel === 'function') {
+                        localAppServices.openTimelineMarkersPanel();
+                    }
+                } catch(e) { console.error('[Menu] Marker Annotations error:', e); }
+            },
             menuAutoBeatSync: () => {
                 console.log('[Menu] Auto-Beat Sync clicked');
                 try {

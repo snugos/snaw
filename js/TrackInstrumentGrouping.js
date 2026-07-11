@@ -409,20 +409,23 @@ function wirePanelEvents(container, showNotification) {
     });
 
     // Clear-all button: unassign every grouped track in one click.
-    // Iterates over getInstrumentGroupSummary so we work from the same
-    // role-derived membership view the panel renders (no chance of
-    // missing a track that was assigned via the right-click submenu).
+    // getInstrumentGroupSummary() returns an array of {role, count, ...}, not
+    // an object with a `byGroup` map, so iterate the array directly and use
+    // getTracksByInstrumentGroup(role) for membership.
     const clearAllBtn = container.querySelector('.instrument-group-clear-all-btn');
     if (clearAllBtn && !clearAllBtn.disabled) {
         clearAllBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             const summary = (typeof getInstrumentGroupSummary === 'function')
                 ? getInstrumentGroupSummary()
-                : { total: 0, grouped: 0, byGroup: {} };
-            if (!summary.grouped) return;
+                : [];
+            if (!Array.isArray(summary) || summary.length === 0) return;
             let removed = 0;
-            for (const [role, count] of Object.entries(summary.byGroup || {})) {
-                if (role === 'none') continue;
+            for (const entry of summary) {
+                const role = entry && entry.role;
+                if (!role || role === 'none') continue;
+                const count = entry.count || 0;
+                if (count === 0) continue;
                 const memberIds = (typeof getTracksByInstrumentGroup === 'function')
                     ? getTracksByInstrumentGroup(role).map(t => t && t.id).filter(id => id != null)
                     : [];

@@ -92,6 +92,8 @@ function renderTimelineMarkers() {
     
     markers.forEach(marker => {
         const el = document.createElement('div');
+        el.className = 'timeline-marker-dot';
+        el.dataset.markerId = marker.id;
         el.style.cssText = `
             position: absolute;
             left: ${marker.time * pixelsPerSecond}px;
@@ -110,6 +112,12 @@ function renderTimelineMarkers() {
 
     timeline.style.position = 'relative';
     timeline.appendChild(container);
+
+    // Notify listeners (e.g. MarkerAnnotations) that the dots were re-rendered
+    // so they can re-attach note indicators and context menu hooks.
+    try {
+        document.dispatchEvent(new CustomEvent('timelineMarkersRerendered'));
+    } catch (e) { /* old browser */ }
 }
 
 function jumpToMarker(id) {
@@ -177,16 +185,16 @@ function refreshMarkersPanel() {
             <div class="flex items-center gap-2">
                 <div class="w-4 h-4 rounded flex-shrink-0" style="background:${m.color}"></div>
                 <div class="flex-1 min-w-0">
-                    <div class="text-sm font-medium truncate marker-name">${m.name}</div>
+                    <div class="text-sm font-medium truncate marker-name">${escapeHtml(m.name)}</div>
                     <div class="text-xs text-gray-400">${m.time.toFixed(2)}s</div>
                 </div>
-                <button class="go-btn px-2 py-1 bg-blue-600 rounded text-xs hover:bg-blue-500">Go</button>
-                <button class="del-btn px-2 py-1 bg-red-600 rounded text-xs hover:bg-red-500">×</button>
+                <button class="go-btn px-2 py-1 bg-blue-600 rounded text-xs hover:bg-blue-500" title="Jump to this marker">Go</button>
+                <button class="del-btn px-2 py-1 bg-red-600 rounded text-xs hover:bg-red-500" title="Delete marker">×</button>
             </div>
-            ${m.note ? `<div class="text-xs text-gray-300 italic pl-6 marker-note-preview truncate">${escapeHtml(m.note)}</div>` : ''}
-            <div class="flex items-center gap-1 pl-6">
-                <input type="text" class="note-input flex-1 px-2 py-1 bg-gray-700 rounded text-xs text-white placeholder-gray-400" placeholder="Add note..." value="${m.note ? escapeHtml(m.note) : ''}">
-                <button class="save-note-btn px-2 py-1 bg-green-600 rounded text-xs hover:bg-green-500">Save</button>
+            ${m.note ? `<div class="text-xs text-gray-300 italic pl-6 marker-note-preview whitespace-pre-wrap break-words">${escapeHtml(m.note)}</div>` : ''}
+            <div class="flex items-end gap-1 pl-6">
+                <textarea class="note-input flex-1 px-2 py-1 bg-gray-700 rounded text-xs text-white placeholder-gray-400 resize-y" placeholder="Add a multi-line note (verse lyrics, mix note, arrangement reminder)..." rows="2">${m.note ? escapeHtml(m.note) : ''}</textarea>
+                <button class="save-note-btn px-2 py-1 bg-green-600 rounded text-xs hover:bg-green-500" title="Save note">Save</button>
             </div>
         </div>
     `).join('');

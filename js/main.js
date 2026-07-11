@@ -9,6 +9,7 @@ import { DrumPatternGenerator, initDrumPatternGenerator, getDrumGenerator, gener
 import { MelodyGenerator, initMelodyGenerator, getMelodyGenerator, generateMelody, MELODY_STYLES, MELODY_MOODS } from './MelodyGenerator.js';
 import { initQuickActionsMenu, openQuickActionsMenu, closeQuickActionsMenu } from './QuickActionsMenu.js';
 import { initTimelineMarkers, openTimelineMarkersPanel } from './TimelineMarkers.js';
+import { initMarkerAnnotations } from './MarkerAnnotations.js';
 import { initPlayheadMarkerDrop, openPlayheadMarkerDropSettings } from './PlayheadMarkerDrop.js';
 import { initTimelineRulerClick, openTimelineRulerClickSettings } from './TimelineRulerClick.js';
 import { initTempoJumpMarkers } from './TempoJumpMarkers.js';
@@ -329,6 +330,8 @@ import {
     getAutoSaveCount, getAutoSaveCountToday,
     // Groove Presets (v0.3.94 — exposed for Per-Track Groove Template Selector)
     getGroovePresetsState,
+    // Timeline Markers (v0.4.05 — used by MarkerAnnotations)
+    getTimelineMarkers, removeTimelineMarker, updateTimelineMarker,
 } from './state.js';
 
 import {
@@ -675,6 +678,23 @@ const appServices = {
     getTracks: () => {
         if (typeof getTracksState === 'function') return getTracksState();
         return [];
+    },
+    // Timeline Markers (v0.4.05 — used by MarkerAnnotations)
+    getTimelineMarkers: () => {
+        try { return typeof getTimelineMarkers === 'function' ? getTimelineMarkers() : []; }
+        catch (e) { console.warn('[appServices.getTimelineMarkers] failed:', e); return []; }
+    },
+    removeTimelineMarker: (id) => {
+        try {
+            if (typeof removeTimelineMarker === 'function') return removeTimelineMarker(id);
+        } catch (e) { console.warn('[appServices.removeTimelineMarker] failed:', e); }
+        return false;
+    },
+    updateTimelineMarker: (id, updates) => {
+        try {
+            if (typeof updateTimelineMarker === 'function') return updateTimelineMarker(id, updates);
+        } catch (e) { console.warn('[appServices.updateTimelineMarker] failed:', e); }
+        return null;
     },
     // Audio destination for short-lived preview players (loop preview, etc.).
     // Defaults to Tone.Destination; modules can override via appServices for routing.
@@ -2445,6 +2465,7 @@ async function initializeSnugOS() {
         if (typeof initPhaseCorrelationMeter === 'function') initPhaseCorrelationMeter(appServices); // Phase Correlation Meter initialization
         if (typeof initAutoBeatSync === 'function') initAutoBeatSync(appServices); // Auto-Beat Sync initialization
         if (typeof initTimelineMarkers === 'function') initTimelineMarkers(appServices); // Auto-Beat Sync initialization
+        if (typeof initMarkerAnnotations === 'function') initMarkerAnnotations(appServices); // Project Marker Annotations
         if (typeof initPlayheadMarkerDrop === 'function') initPlayheadMarkerDrop(appServices); // Playhead Marker Drop - double-click to add marker
         if (typeof initTimelineRulerClick === 'function') initTimelineRulerClick(appServices); // Timeline Ruler Click - click to jump playhead
         if (typeof initTempoJumpMarkers === 'function') initTempoJumpMarkers(appServices); // Tempo Jump Markers - click to set tempo jump point
