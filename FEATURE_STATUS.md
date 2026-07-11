@@ -1,3 +1,52 @@
+## Session: 2026-07-11 00:40 UTC (Snaw Feature Completion Agent Run — Day 775 Run 9)
+
+**Status: ONE BUG SHIPPED — `MarkerAnnotations.js` context menu self-closing race (missing `stopImmediatePropagation`)**
+
+This run re-applied a fix authored by the parallel builder but lost during mid-flight commits: the Marker Annotations right-click context menu immediately closed itself because `createContextMenu()` installs a capture-phase listener on `document` that fires on the same event. Commit: `ef332e5` ("fix(MarkerAnnotations): prevent context menu from immediately closing via stopImmediatePropagation (Day 775 Run 8)"). Push: `692bd8b..ef332e5` to `origin/LWB-with-Bugs`.
+
+### Bug shipped:
+
+1. **Marker Annotations context menu self-closing race** (`js/MarkerAnnotations.js:169`, in `handleMarkerContextMenu`): `createContextMenu()` installs a capture-phase `contextmenu` close-listener on `document` so clicking anywhere outside the menu closes it. That listener fires on the **same event** that triggered the handler — the right-click bubbles up to `document`, hits the capture-phase listener, and immediately removes the menu. The menu opens and closes within the same microtask, invisible to the user. **Fix**: added `e.stopImmediatePropagation()` before the `createContextMenu(e, items, services)` call (4 lines: 1 code + 3-line comment block). Subsequent right-clicks and clicks elsewhere still close the menu normally — `stopImmediatePropagation` only affects this specific event instance.
+
+### Why the fix was lost
+
+The parallel builder authored this exact fix as uncommitted working-tree work during Run 8's window. Between this run's initial `git status` (which showed `M js/MarkerAnnotations.js` + `M js/TrackInstrumentGrouping.js`) and the follow-up check, the builder committed their v0.4.06 MarkerColorPresets module (`6f04507`) and the Ungrouped section (`01400a6`), which shifted the working tree state and left the MarkerAnnotations fix unstaged and lost. This run re-applied it from the original `git diff`.
+
+### Parallel builder activity during this run
+
+The parallel builder shipped two commits mid-flight: `01400a6` (TrackInstrumentGrouping Ungrouped section with inline assign buttons) and `6f04507` (Marker Color Presets v0.4.06 with a new `js/MarkerColorPresets.js` module, 289 lines, 9 exports). Docs commit `692bd8b` followed. No coordination conflict — this run's fix was orthogonal (different file, different concern).
+
+### Automated scan results
+
+- **TODO/FIXME/XXX/HACK/INCOMPLETE/STUB** markers → **0 hits**.
+- **Untracked orphan JS files** → **0**.
+- **Working tree** → clean after commit.
+- **state.js**: 4090 lines, `node --check` passes. 32nd clean entry.
+- **All 12 key files** pass `node --check`.
+- **Priority-1 phantom**: `removeCustomDesktopBackground` — 16 occurrences, 32nd consecutive false positive.
+
+### Files Modified
+
+- `js/MarkerAnnotations.js` (+4 lines, 377 → 381 lines: `stopImmediatePropagation` call with explanatory comment).
+- `AGENTS.md` (Day 775 Run 9 entry, prepended).
+- `FEATURE_STATUS.md` (this session entry, prepended).
+
+### Deployed-site verification
+
+- `curl -sI https://snugos.github.io/snaw/js/MarkerAnnotations.js` → HTTP/2 200, `last-modified: Sat, 11 Jul 2026 00:43:58 GMT`.
+- `curl -s ... | grep -c "stopImmediatePropagation"` → **1** (fix live).
+- `curl -s https://snugos.github.io/snaw/js/main.js | grep -c "removeCustomDesktopBackground"` → 16 (phantom confirmed).
+
+### Features Still in Progress
+
+_None from this agent._ The parallel builder's v0.4.04+ Ungrouped section and v0.4.06 Marker Color Presets are in a clean state. Feature queue at 0 items.
+
+### Action Taken
+
+Pulled latest (HEAD at `692bd8b`). Confirmed Priority-1 phantom (32nd consecutive run). Detected parallel builder mid-flight — two files modified then committed while reviewing. Re-applied the lost MarkerAnnotations `stopImmediatePropagation` fix. Verified `node --check` passes on all 12 key files. Committed as `ef332e5`, pushed to `origin/LWB-with-Bugs`. Verified fix live on deployed site. Updated docs.
+
+---
+
 ## Session: 2026-07-10 17:15 UTC (Snaw Feature Completion Agent Run — Day 775 Run 7)
 
 **Status: AUDIT ONLY — No bugs found, codebase clean**
