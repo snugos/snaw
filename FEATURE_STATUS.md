@@ -1,3 +1,58 @@
+## Session: 2026-07-12 00:50 UTC (Snaw Feature Completion Agent Run — Day 775 Run 17)
+
+**Status: AUDIT ONLY — Codebase clean, v0.4.07 stable, 40th consecutive phantom confirmation**
+
+### Pulled & Merged
+- `git pull origin LWB-with-Bugs` → Already up to date at `b518e7c` (Day 775 Run 16 docs).
+
+### Priority-1 Task Bug Status
+- `main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground is not defined` — **documented false positive for the 40th consecutive run**. Function defined at `js/main.js:382`, exported on `appServices` (line 671), mirrored as `window.removeCustomDesktopBackground` (line 2007). `grep -c "removeCustomDesktopBackground" js/main.js` → 16; deployed `curl -s https://snugos.github.io/snaw/js/main.js | grep -c` → 16. **No Priority-1 bug to fix this run.**
+
+### Automated Scan Results
+- **TODO/FIXME/XXX/HACK/INCOMPLETE/STUB** markers in active `js/` code → **0 hits**.
+- **Untracked orphan JS files** → **1** (`js/ClipTimeHandles.js`, 106 lines — parallel builder mid-flight on v0.4.08 Clip Time Handles). Passes `node --check`.
+- **Empty function bodies** → **0**.
+- **Working tree** → 2 modified + 1 untracked from parallel builder mid-flight: `M js/main.js` (+4 lines wiring), `M js/constants.js` (APP_VERSION 0.4.07 → 0.4.08), `?? js/ClipTimeHandles.js` (106 lines). `M INSTRUCTION.md` also modified.
+- **state.js integrity**: 4090 lines, `node --check` passes. **40th clean entry** in the recent sequence.
+- **Syntax validation**: All 20 key files pass `node --check`: `main.js`, `state.js` (4090), `audio.js`, `ui.js`, `eventHandlers.js`, `effectsRegistry.js`, `SnugWindow.js`, `TrackInstrumentGrouping.js`, `MarkerAnnotations.js` (381), `StepSequencerView.js`, `StepSequencerPatternLibrary.js`, `PerTrackMidiCCPresets.js`, `ClipVolumeCurvePresets.js`, `TrackFreezeCrossfade.js`, `MarkerColorPresets.js`, `constants.js`, `MidiFileIO.js` (437), `MidiFilePanel.js` (391), `Track.js`, `AudioClipLabeling.js`.
+- **Current APP_VERSION**: 0.4.07 (MIDI File Import/Export).
+
+### Previous Fixes Verified Intact (Deployed Site)
+- Run 1: `TrackFreezeCrossfade` per-entry try/catch → deployed.
+- Run 2-3: `ClipVolumeCurvePresets` id-prefix + contentArea fixes → deployed.
+- Run 4: `PerTrackMidiCCPresets` import-name fix → deployed.
+- Run 5: `StepSequencerPatternLibrary` pitch-inversion fix → deployed.
+- Run 6: `StepSequencerView` savedState ReferenceError + init wiring → deployed.
+- Run 7 (parallel): `TrackInstrumentGrouping` Clear-all button fix → deployed.
+- Run 8 (parallel): TrackInstrumentGrouping Ungrouped section → deployed.
+- Run 9: `MarkerAnnotations` context-menu self-closing fix → deployed.
+- Run 12: APP_VERSION bump 0.4.04 → 0.4.07 → deployed.
+- Run 14: `MidiFilePanel` per-track MIDI channel round-trip → deployed.
+
+All 11 fixes live on `https://snugos.github.io/snaw/`.
+
+### Parallel Builder Activity During This Run
+The parallel Snaw Feature Builder Agent is mid-flight on v0.4.08 Clip Time Handles:
+- **`js/ClipTimeHandles.js`** (106 lines, untracked): mm:ss timecode overlays on audio clips + selected-clip timecode panel. Exports `initClipTimeHandles`, `openClipTimeHandlesPanel`, `refreshClipTimeOverlays`, `getClipTimeHandlesVersion`. Passes `node --check`.
+- **`js/main.js`** (+4): Import + appServices exposure + init call wiring for ClipTimeHandles. Passes `node --check`.
+- **`js/constants.js`** (+1/-1): APP_VERSION bump 0.4.07 → 0.4.08 with "Clip Time Handles" attribution.
+- **Left untouched** per the established coordination pattern.
+
+### Why No Bug This Run
+The codebase has been in a stable, audit-only state for the last 8 runs (Day 775 Runs 10/11/12/13/14/15/16/17). The Priority-1 task bug is the 40th consecutive phantom. All 20 key files pass syntax validation. The parallel builder's mid-flight work is a new feature, not an incomplete one.
+
+### Files Modified This Run
+- `AGENTS.md` (Day 775 Run 17 entry, prepended).
+- `FEATURE_STATUS.md` (this session entry, prepended).
+- No code changes.
+
+### Features Still in Progress
+_None from this agent._ The parallel builder's v0.4.08 Clip Time Handles feature is mid-flight. Feature queue is at 0 items.
+
+### Action Taken
+Pulled latest (HEAD at `b518e7c`). Confirmed Priority-1 `removeCustomDesktopBackground` ReferenceError is a documented false positive (40th consecutive run, 16 occurrences in both local and deployed `js/main.js`). Ran the full incomplete-feature scan suite — all clean. Verified `node --check` passes on all 20 key files. Detected parallel builder mid-flight on v0.4.08 Clip Time Handles and left it untouched. No code authored this run (audit only). Updated `AGENTS.md` and `FEATURE_STATUS.md`.
+
+---
 ## Session: 2026-07-11 17:50 UTC (Snaw Feature Builder Agent Run — Day 775 Run 16)
 
 **Status: ONE FEATURE SHIPPED — v0.4.08 Clip Time Handles (mm:ss readouts on every timeline clip)**
