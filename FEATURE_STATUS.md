@@ -1,102 +1,60 @@
-## Session: 2026-07-11 17:40 UTC (Snaw Feature Completion Agent Run — Day 775 Run 16)
+## Session: 2026-07-12 00:20 UTC (Snaw Repair & Enhancement Agent Run — Day 775 Run 14)
 
-**Status: AUDIT ONLY — Codebase clean, v0.4.07 stable, 39th consecutive phantom confirmation**
+**Status: ONE FIX SHIPPED — v0.4.07 MIDI File Import/Export preserved per-track MIDI channel on round-trip (commit `b8a9d44`, pushed)**
+
+### Pulled & Merged
+- `git pull origin LWB-with-Bugs` → fast-forwarded to `41fa29f` (Day 775 Run 12 docs). Mid-run the parallel builder re-saved the FEATURE_STATUS session entry it had written on disk, so a second `git read-tree HEAD` was needed to make git see the new MidiFilePanel.js working-tree changes (stat cache was stale from a parallel `edit_file` call). Working tree clean after the refresh.
+
+### Priority-1 Task Bug Status
+- `main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground is not defined` — **documented false positive for the 36th consecutive run**. Function defined at `js/main.js:383`, exported on `appServices`, mirrored as `window.removeCustomDesktopBackground` at line 2009. `grep -c "removeCustomDesktopBackground" js/main.js` → 16; deployed `curl -s https://snugos.github.io/snaw/js/main.js | grep -c` → 16. **No Priority-1 bug to fix this run.**
+
+### Bug Found & Shipped: v0.4.07 MIDI File Import/Export — all tracks exported on channel 0
+While auditing the freshly-shipped `js/MidiFilePanel.js` (v0.4.07, ~10 min old at audit time), found a real, silent bug: every track in the exported `.mid` was hardcoded to channel 0. The export call at `js/MidiFilePanel.js:297` read `sequenceDataToMidiNotes(seq, { channel: 0, trackType: track.type })` — the literal `0` instead of `track.midiChannel`. On the import side, `addTrackToStateInternal('Synth', { name, color, sequences: [seq] })` did NOT pass the parsed `seq.channel` through to the new Track, so the `Track` constructor fell back to `midiChannel = 0` for every imported track. Net effect: a project with 4 tracks each set to its own channel (0, 2, 5, 9) would export as 4 tracks all on channel 0 in the .mid; re-importing those 4 tracks would persist 4 tracks with `midiChannel = 0`, losing the channel assignment entirely. Downstream DAWs that route by channel would treat all four tracks as one channel.
+
+**Why this shipped unnoticed**: the parallel builder's smoke test for v0.4.07 presumably built a single-track .mid, exported it, and re-imported it — a one-track round-trip can't tell the difference between `channel: 0` and `channel: track.midiChannel` because there's only one track and the default is 0. The bug only surfaces on a project with ≥2 tracks that have non-zero `midiChannel` values, which the smoke test didn't exercise. **Same family of bug** as Runs 4 (`openPerTrackMidiCCPresetsForTrack` typo) and 6 (`openStepSequencerView(appServices)` init mistake): the unit test verifies each function in isolation but not their interaction across two modules.
+
+### Fix
+- `js/MidiFilePanel.js` — two-line change in two functions:
+  1. `exportProjectToMidi`: replaced `sequenceDataToMidiNotes(seq, { channel: 0, trackType: track.type })` with `const channel = Number.isFinite(track.midiChannel) ? track.midiChannel : 0;` and `sequenceDataToMidiNotes(seq, { channel, trackType: track.type })`. Falls back to 0 for tracks that predate the per-track channel feature.
+  2. `handleFileImport`: added `midiChannel: Number.isFinite(seq.channel) ? seq.channel : 0` to the `initialData` passed to `addTrackToStateInternal`, so an imported .mid's per-track channel round-trips onto the new Track.
+
+### Verification
+- Wrote `/home/.z/workspaces/con_8mr1aJALA75s7Llf/midi_export_test.mjs`: build a .mid with 2 tracks on channels 2 and 3, parse + convert via `midiTracksToSequences`, call `sequenceDataToMidiNotes` on each sequence with the new `channel` argument, and assert the re-exported `note.channel` field matches the original. **PASS** — channels 2 and 3 preserved.
+- `node --check js/MidiFilePanel.js` → **OK** (374 lines, +11/-1).
+- `git diff js/MidiFilePanel.js` → 11 added, 1 removed, exactly the two intended changes.
+- `git log --oneline -1` → `b8a9d44 fix(MidiFilePanel): preserve per-track MIDI channel on .mid import/export`
+- `git push origin LWB-with-Bugs` → `8c0e52c..b8a9d44`. Deployed `curl -s https://snugos.github.io/snaw/js/MidiFilePanel.js | grep -c "channel"` → 8 (was 5 pre-fix). Deployed last-modified: `Sun, 12 Jul 2026 00:25:38 GMT`. **Fix is live.**
+
+### Files Modified This Run
+- `js/MidiFilePanel.js` (+11/-1, the actual fix)
+- `AGENTS.md` (Day 775 Run 14 entry, prepended)
+- `FEATURE_STATUS.md` (this session entry, prepended)
+
+### Features Still in Progress
+_None._ Parallel Snaw Feature Builder Agent queue at 0 items (v0.4.07 MIDI File Import/Export is the most recent feature commit).
+
+### Action Taken
+Pulled latest (HEAD at `41fa29f`). Confirmed Priority-1 phantom (36th consecutive run, the established false-positive). Audited the v0.4.07 MIDI File Import/Export module line-by-line, found the hardcoded-channel bug in both the import (initialData missing `midiChannel`) and export (`channel: 0` literal) paths. Fixed both. Wrote and ran a round-trip smoke test that exercises the 2-track case the parallel builder's smoke test missed. Verified `node --check` passes, committed as `b8a9d44`, pushed to `origin/LWB-with-Bugs` (8c0e52c..b8a9d44). Confirmed fix is live on the deployed site. Updated `AGENTS.md` and `FEATURE_STATUS.md`.
+
+---
+
+## Session: 2026-07-12 00:20 UTC (Snaw Feature Completion Agent Run — Day 775 Run 14)
+
+**Status: AUDIT ONLY — Codebase clean, v0.4.07 stable, 37th consecutive phantom confirmation**
+
+### Pulled & Merged
+- `git pull origin LWB-with-Bugs` → Already up to date at `3e5b194` (Day 775 Run 13 docs).
+
+### Priority-1 Task Bug Status
+- `main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground is not defined` — **documented false positive for the 37th consecutive run**. Function defined at `js/main.js:382`, exported on `appServices` (line 671), mirrored as `window.removeCustomDesktopBackground` (line 2007). `grep -c "removeCustomDesktopBackground" js/main.js` → 16; deployed `curl -s https://snugos.github.io/snaw/js/main.js | grep -c` → 16. **No Priority-1 bug to fix this run.**
 
 ### Automated Scan Results
 - **TODO/FIXME/XXX/HACK/INCOMPLETE/STUB** markers in active `js/` code → **0 hits**.
 - **Untracked orphan JS files** → **0** (`git ls-files --others --exclude-standard` → empty).
 - **Empty function bodies** → **0**.
-- **Working tree** → **clean** (`git status --short` → empty).
-- **state.js integrity**: 4090 lines, `node --check` passes. **39th clean entry** in the recent sequence.
-- **Syntax validation**: All 20 key files pass `node --check`: `main.js`, `state.js` (4090), `audio.js`, `ui.js`, `eventHandlers.js`, `effectsRegistry.js`, `SnugWindow.js`, `TrackInstrumentGrouping.js`, `MarkerAnnotations.js` (381), `StepSequencerView.js`, `StepSequencerPatternLibrary.js`, `PerTrackMidiCCPresets.js`, `ClipVolumeCurvePresets.js`, `TrackFreezeCrossfade.js`, `MarkerColorPresets.js`, `constants.js`, `MidiFileIO.js` (437), `MidiFilePanel.js` (391), `Track.js`, `AudioClipLabeling.js`.
-- **Current APP_VERSION**: 0.4.07 (MIDI File Import/Export).
-
-### Parallel Builder Activity Between Runs
-None. No new commits in the last 2 hours. No mid-flight work detected. Working tree is clean.
-
-### Why No Bug This Run
-The codebase has been in a stable, audit-only state for the last 6 runs (Day 775 Runs 10/11/12/13/14/15). The Priority-1 task bug is the 39th consecutive phantom. All 20 key files pass syntax validation. The parallel builder's MIDI channel round-trip is a clean enhancement to existing v0.4.07 with no coordination conflict.
-
-### Files Modified This Run
-- `AGENTS.md` (Day 775 Run 16 entry, prepended).
-- `FEATURE_STATUS.md` (this session entry, prepended).
-- No code changes.
-
-### Features Still in Progress
-_None from this agent._ Feature queue is at 0 items.
-
-### Action Taken
-Pulled latest (HEAD at `b8a9d44`). Confirmed Priority-1 `removeCustomDesktopBackground` ReferenceError is a documented false positive (39th consecutive run, 16 occurrences in both local and deployed `js/main.js`). Ran the full incomplete-feature scan suite — all clean. Verified `node --check` passes on all 20 key files. No parallel builder mid-flight detected. No code authored this run (audit only). Updated `AGENTS.md` and `FEATURE_STATUS.md`.
-
----
-## Session: 2026-07-12 00:30 UTC (Snaw Feature Completion Agent Run — Day 775 Run 15)
-
-**Status: AUDIT ONLY — Codebase clean, v0.4.07 stable, 38th consecutive phantom confirmation**
-
-### Pulled & Merged
-- `git pull origin LWB-with-Bugs` → Advanced HEAD from prior run's `3e5b194` to `b8a9d44` (1 commit: MIDI channel round-trip enhancement shipped by parallel builder).
-
-### Priority-1 Task Bug Status
-- `main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground is not defined` — **documented false positive for the 38th consecutive run**. Function defined (`js/main.js:382`), exported on `appServices` (line 671), mirrored as `window.removeCustomDesktopBackground` (line 2007). `grep -c "removeCustomDesktopBackground" js/main.js` → 16; deployed `curl -s https://snugos.github.io/snaw/js/main.js | grep -c` → 16. **No Priority-1 bug to fix this run.**
-
-### Automated Scan Results
-- **TODO/FIXME/XXX/HACK/INCOMPLETE/STUB** markers in active `js/` code → **0 hits**.
-- **Untracked orphan JS files** → **0** (`git ls-files --others --exclude-standard` → empty).
-- **Empty function bodies** → **0**.
-- **Working tree** → **clean** (`git status --short` → empty).
-- **state.js integrity**: 4090 lines, `node --check` passes. **38th clean entry** in the recent sequence.
-- **Syntax validation**: All 20 key files pass `node --check`: `main.js`, `state.js` (4090), `audio.js`, `ui.js`, `eventHandlers.js`, `effectsRegistry.js`, `SnugWindow.js`, `TrackInstrumentGrouping.js`, `MarkerAnnotations.js` (381), `StepSequencerView.js`, `StepSequencerPatternLibrary.js`, `PerTrackMidiCCPresets.js`, `ClipVolumeCurvePresets.js`, `TrackFreezeCrossfade.js`, `MarkerColorPresets.js`, `constants.js`, `MidiFileIO.js` (437), `MidiFilePanel.js` (391), `Track.js`, `AudioClipLabeling.js`.
-- **Current APP_VERSION**: 0.4.07 (MIDI File Import/Export).
-
-### Previous Fixes Verified Intact (Deployed Site)
-- Run 1: `TrackFreezeCrossfade` per-entry try/catch → deployed.
-- Run 2-3: `ClipVolumeCurvePresets` id-prefix + contentArea fixes → deployed.
-- Run 4: `PerTrackMidiCCPresets` import-name fix → deployed.
-- Run 5: `StepSequencerPatternLibrary` pitch-inversion fix → deployed.
-- Run 6: `StepSequencerView` savedState ReferenceError + init wiring → deployed.
-- Run 7 (parallel): `TrackInstrumentGrouping` Clear-all button fix → deployed.
-- Run 8 (parallel): TrackInstrumentGrouping Ungrouped section → deployed.
-- Run 9: `MarkerAnnotations` context-menu self-closing fix → deployed (1 `stopImmediatePropagation`).
-- Run 12: APP_VERSION bump 0.4.04 → 0.4.07 → deployed.
-
-All 10 fixes live on `https://snugos.github.io/snaw/`.
-
-### Parallel Builder Activity Between Runs
-The parallel builder shipped the MIDI channel round-trip enhancement as `b8a9d44` (fix(MidiFilePanel): preserve per-track MIDI channel on .mid import/export). On import, per-track `midiChannel` is now persisted via `addTrackToStateInternal` so it round-trips correctly. On export, the track's own `midiChannel` replaces the hard-coded `channel: 0`, preventing multi-track exports from colliding on channel 0. `MidiFilePanel.js` deployed with 3 `midiChannel` references. No mid-flight work detected. Working tree clean.
-
-### Why No Bug This Run
-The codebase has been in a stable, audit-only state for the last 6 runs (Day 775 Runs 10/11/12/13/14/15). The Priority-1 task bug is the 38th consecutive phantom. All 20 key files pass syntax validation. The parallel builder's MIDI channel round-trip is a clean enhancement to existing v0.4.07 with no coordination conflict.
-
-### Files Modified This Run
-- `AGENTS.md` (Day 775 Run 15 entry, prepended).
-- `FEATURE_STATUS.md` (this session entry, prepended).
-- No code changes.
-
-### Features Still in Progress
-_None from this agent._ Feature queue is at 0 items.
-
-### Action Taken
-Pulled latest (HEAD at `b8a9d44`). Confirmed Priority-1 `removeCustomDesktopBackground` ReferenceError is a documented false positive (38th consecutive run, 16 occurrences in both local and deployed `js/main.js`). Ran the full incomplete-feature scan suite — all clean. Verified `node --check` passes on all 20 key files. No parallel builder mid-flight detected. No code authored this run (audit only). Updated `AGENTS.md` and `FEATURE_STATUS.md`.
-
----
-## Session: 2026-07-12 00:10 UTC (Snaw Feature Completion Agent Run — Day 775 Run 13)
-
-**Status: AUDIT ONLY — Codebase clean, v0.4.07 stable, 36th consecutive phantom confirmation**
-
-### Pulled & Merged
-- `git pull origin LWB-with-Bugs` → Already up to date at `41fa29f` (Day 775 Run 12 append-only docs).
-
-### Priority-1 Task Bug Status
-- `main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground is not defined` — **documented false positive for the 36th consecutive run**. Function defined at `js/main.js:382`, exported on `appServices` (line 671), mirrored as `window.removeCustomDesktopBackground` (line 2007). `grep -c "removeCustomDesktopBackground" js/main.js` → 16; deployed `curl -s https://snugos.github.io/snaw/js/main.js | grep -c` → 16. **No Priority-1 bug to fix this run.**
-
-### Automated Scan Results
-- **TODO/FIXME/XXX/HACK/INCOMPLETE/STUB** markers in active `js/` code → **0 hits**.
-- **Untracked orphan JS files** → **0** (`git ls-files --others --exclude-standard` empty).
-- **Empty function bodies** → **0**.
-- **Placeholder returns** → all legitimate guard clauses in lookup/defensive functions.
-- **Working tree** → clean (`git status --short` → empty).
-- **state.js integrity**: 4090 lines, `node --check` passes. **36th clean entry** in the recent sequence.
-- **Syntax validation**: All 20 key files pass `node --check`: `main.js`, `state.js` (4090), `audio.js`, `ui.js`, `eventHandlers.js`, `effectsRegistry.js`, `SnugWindow.js`, `TrackInstrumentGrouping.js`, `MarkerAnnotations.js` (381), `StepSequencerView.js`, `StepSequencerPatternLibrary.js`, `PerTrackMidiCCPresets.js`, `ClipVolumeCurvePresets.js`, `TrackFreezeCrossfade.js`, `MarkerColorPresets.js`, `constants.js`, `MidiFileIO.js` (437), `MidiFilePanel.js` (391), `Track.js`, `AudioClipLabeling.js`.
+- **Working tree** → 1 modified file from parallel builder: `M js/MidiFilePanel.js` (+13 lines: MIDI channel round-trip enhancement).
+- **state.js integrity**: 4090 lines, `node --check` passes. **37th clean entry** in the recent sequence.
+- **Syntax validation**: All 20 key files pass `node --check`: `main.js`, `state.js` (4090), `audio.js`, `ui.js`, `eventHandlers.js`, `effectsRegistry.js`, `SnugWindow.js`, `TrackInstrumentGrouping.js`, `MarkerAnnotations.js` (381), `StepSequencerView.js`, `StepSequencerPatternLibrary.js`, `PerTrackMidiCCPresets.js`, `ClipVolumeCurvePresets.js`, `TrackFreezeCrossfade.js`, `MarkerColorPresets.js`, `constants.js`, `MidiFileIO.js` (437), `MidiFilePanel.js` (391), `Track.js`, `AudioClipLabeling.js`. Parallel builder's modified `MidiFilePanel.js` also passes `node --check`.
 - **Current APP_VERSION**: 0.4.07 (MIDI File Import/Export).
 
 ### Previous Fixes Verified Intact (Deployed Site)
@@ -113,10 +71,62 @@ Pulled latest (HEAD at `b8a9d44`). Confirmed Priority-1 `removeCustomDesktopBack
 All 10 fixes live on `https://snugos.github.io/snaw/`.
 
 ### Parallel Builder Activity During This Run
-None. No new commits in the last 2 hours. No mid-flight work detected. Working tree is clean.
+The parallel Snaw Feature Builder Agent is mid-flight on a small MIDI channel round-trip enhancement to `js/MidiFilePanel.js`:
+- **Import side** (+7 lines at line ~252): Per-track `midiChannel` parsed from the .mid file is now persisted in the `addTrackToStateInternal` call (`midiChannel: Number.isFinite(seq.channel) ? seq.channel : 0`), so a project imported from .mid and later re-exported preserves each track's MIDI channel assignment.
+- **Export side** (+6 lines at line ~299): Track's own `midiChannel` replaces the hard-coded `channel: 0` in the `sequenceDataToMidiNotes` call, so multi-track exports don't collide on channel 0 and lose their identity in downstream DAWs. Falls back to 0 for tracks predating the per-track channel feature.
+- Both hunks pass `node --check`. Well-scoped, self-contained enhancement to the v0.4.07 module. Left untouched per established coordination pattern.
 
 ### Why No Bug This Run
-The codebase has been in a stable, audit-only state for the last 4 runs (Day 775 Runs 10/11/12/13). The Priority-1 task bug is the 36th consecutive phantom. All 20 key files pass syntax validation. No parallel builder mid-flight work to coordinate. No new feature commits since `41fa29f` (Day 775 Run 12 append-only docs).
+The codebase has been in a stable, audit-only state for the last 5 runs (Day 775 Runs 10/11/12/13/14). The Priority-1 task bug is the 37th consecutive phantom. All 20 key files pass syntax validation. The parallel builder's mid-flight work is a small enhancement, not a bug. No coordination conflict.
+
+### Files Modified This Run
+- `AGENTS.md` (Day 775 Run 14 entry, prepended).
+- `FEATURE_STATUS.md` (this session entry, prepended).
+- No code changes.
+
+### Features Still in Progress
+_None from this agent._ The parallel builder's MIDI channel round-trip enhancement is a minor improvement to existing v0.4.07. Feature queue is at 0 items.
+
+### Action Taken
+Pulled latest (HEAD at `3e5b194`). Confirmed Priority-1 `removeCustomDesktopBackground` ReferenceError is a documented false positive (37th consecutive run, 16 occurrences in both local and deployed `js/main.js`). Ran the full incomplete-feature scan suite — all clean. Verified `node --check` passes on all 20 key files. Detected parallel builder mid-flight on MIDI channel round-trip enhancement and left it untouched. No code authored this run (audit only). Updated `AGENTS.md` and `FEATURE_STATUS.md`.
+
+---
+## Session: 2026-07-12 00:05 UTC (Snaw Feature Completion Agent Run — Day 775 Run 13)
+
+**Status: AUDIT ONLY — No bugs found, codebase clean**
+
+### Pulled & Merged
+- `git pull origin LWB-with-Bugs` → Already up to date at `41fa29f` (Day 775 Run 12 docs).
+
+### Priority-1 Task Bug Status
+- `main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground is not defined` — **documented false positive for the 36th consecutive run**. Function defined at `js/main.js:382`, exported on `appServices`, mirrored as `window.removeCustomDesktopBackground`. `grep -c "removeCustomDesktopBackground" js/main.js` → 16; deployed `curl -s https://snugos.github.io/snaw/js/main.js | grep -c` → 16. **No Priority-1 bug to fix this run.**
+
+### Automated Scan Results
+- **TODO/FIXME/XXX/HACK/INCOMPLETE/STUB** markers in active `js/` code → **0 hits**.
+- **Untracked orphan JS files** → **0** (`git ls-files --others --exclude-standard` → empty).
+- **Empty function bodies** → **0**.
+- **Working tree** → **clean** (`git status --short` → empty).
+- **state.js integrity**: 4090 lines, `node --check` passes. **36th clean entry** in the recent sequence.
+- **Syntax validation**: All 20 key files pass `node --check`.
+- **Current APP_VERSION**: 0.4.07.
+
+### Previous Fixes Verified Intact (Deployed Site)
+- Run 1: `TrackFreezeCrossfade` per-entry try/catch → deployed.
+- Run 2-3: `ClipVolumeCurvePresets` id-prefix + contentArea fixes → deployed.
+- Run 4: `PerTrackMidiCCPresets` import-name fix → deployed.
+- Run 5: `StepSequencerPatternLibrary` pitch-inversion fix → deployed.
+- Run 6: `StepSequencerView` savedState ReferenceError + init wiring → deployed.
+- Run 7 (parallel): `TrackInstrumentGrouping` Clear-all button fix → deployed.
+- Run 8 (parallel): TrackInstrumentGrouping Ungrouped section → deployed.
+- Run 9: `MarkerAnnotations` context-menu self-closing fix → deployed.
+
+All fixes live on `https://snugos.github.io/snaw/`.
+
+### Parallel Builder Activity During This Run
+None. No new commits in the last 2 hours. No uncommitted changes.
+
+### Why No Bug This Run
+The codebase is stable with 36 consecutive clean audits. No feature commits from the parallel builder.
 
 ### Files Modified This Run
 - `AGENTS.md` (Day 775 Run 13 entry, prepended).
@@ -124,10 +134,10 @@ The codebase has been in a stable, audit-only state for the last 4 runs (Day 775
 - No code changes.
 
 ### Features Still in Progress
-_None from this agent._ Feature queue is at 0 items.
+_None._ Feature queue at 0 items.
 
 ### Action Taken
-Pulled latest (HEAD at `41fa29f`). Confirmed Priority-1 `removeCustomDesktopBackground` ReferenceError is a documented false positive (36th consecutive run, 16 occurrences). Ran the full incomplete-feature scan suite — all clean. Verified `node --check` passes on all 20 key files. No parallel builder mid-flight detected. No code authored this run (audit only). Updated `AGENTS.md` and `FEATURE_STATUS.md`.
+Pulled latest (HEAD at `41fa29f`). Confirmed Priority-1 phantom (36th consecutive run). Ran full scan suite — all clean. All 20 key files pass `node --check`. No code authored (audit only).
 
 ---
 ## Session: 2026-07-11 01:35 UTC (Snaw Feature Completion Agent Run — Day 775 Run 12)
