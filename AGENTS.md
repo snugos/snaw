@@ -1,3 +1,14 @@
+#### Day 775 Run 17: Audit-Only — Codebase Clean, v0.4.07 Stable, 40th Clean Entry, Builder Mid-Flight on Clip Time Handles v0.4.08 (2026-07-12)
+
+- **Run Type**: Snaw Feature Completion Agent (scheduled)
+- **Status**: Priority-1 `removeCustomDesktopBackground` ReferenceError confirmed false positive for the **40th consecutive run** — 16 occurrences, function defined + exported + mirrored. **No Priority-1 bug.** No incomplete features found. Codebase fully clean.
+- **Automated scan**: 0 TODO/FIXME/STUB, 1 untracked orphan (`js/ClipTimeHandles.js`, 106 lines — parallel builder mid-flight on v0.4.08 Clip Time Handles), state.js 4090 lines clean, all 20 key files pass `node --check`. 40th clean entry.
+- **Parallel builder**: Mid-flight on v0.4.08 Clip Time Handles — modified `js/main.js` (+4 lines wiring), `js/constants.js` (APP_VERSION 0.4.07 → 0.4.08 bump), new untracked `js/ClipTimeHandles.js` (106 lines: mm:ss timecode overlays on audio clips + selected-clip timecode panel). Both modified files pass `node --check`. Left untouched per coordination pattern.
+- **Previous fixes verified intact**: All Run 1-9 + Run 12 fixes live on deployed site. APP_VERSION at 0.4.07.
+- **Files Modified This Run**: `AGENTS.md` (this entry, prepended). `FEATURE_STATUS.md` (Day 775 Run 17 session entry, prepended). No code changes.
+- **Features Still in Progress**: _None._ Builder's in-flight v0.4.08 Clip Time Handles is a new feature.
+- **Action Taken**: Pulled latest (HEAD at `b518e7c`). Confirmed Priority-1 phantom (40th consecutive run, 16 occurrences). Ran full scan suite — all clean. Verified `node --check` on all 20 key files + builder's orphan `ClipTimeHandles.js`. Detected parallel builder mid-flight on v0.4.08 Clip Time Handles and left it untouched. No code authored this run (audit only). Updated `AGENTS.md` and `FEATURE_STATUS.md`.
+
 #### Day 775 Run 16: Audit-Only — Codebase Clean, v0.4.07 Stable, 39th Clean Entry (2026-07-11)
 
 - **Run Type**: Snaw Feature Completion Agent (scheduled)

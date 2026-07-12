@@ -2,100 +2,17 @@
 
 You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job is to add new features — no bug fixing.
 
-## Completed Features
-
-- **Piano Roll Editor** - Clickable piano roll with note editing, drag to move, velocity edit ✅
-- **Audio Recording** - Record audio from microphone into tracks ✅
-- **Track Effects Presets** - Save/load effect chain presets per track ✅
-- **Undo/Redo Visual Stack** - Show undo history in a panel ✅
-- **Keyboard Shortcuts Panel** - Press `?` to show all shortcuts ✅
-- **Waveform Visualization** - Draw waveform on audio clips ✅
-- **Track Color Coding** - Assign colors to tracks for visual grouping ✅
-- **Quantize Selection** - Quantize selected notes to grid ✅
-- **Tempo Ramper UI** - Draw tempo automation points for gradual tempo changes ✅
-- **Ripple Edit** - When deleting, close gaps by rippling following clips ✅
-- **MIDI Channel Per-Row** - Allow different rows in step sequencer to send on different MIDI channels ✅
-- **Clip Gain Per-Instance** - Per-clip volume knob independent of track gain for quick level adjustments ✅
-- **Step Sequencer Probability** - Each step has configurable trigger probability for generative variations ✅
-- **Drum Pattern Randomizer** - Generate random but musical drum patterns from template-based algorithms ✅
-- **Velocity Curve Per-Track** - Per-track velocity response curve for customizing MIDI input dynamics ✅
-- **Track Latency Compensation** - Per-track adjustable delay to compensate for plugin processing latency ✅
-- **MIDI CC Learn Panel** - Visual panel to assign and manage MIDI CC to virtual parameter mappings ✅
-- **Audio Quantize Strength** - Control how strictly audio snaps to grid (0-100% strength slider) ✅
-- **Clip Fade Handles** - Drag start/end of audio clips to set fade in/out curves ✅
-- **MIDI Learn Visual Feedback** - Highlight knobs/controls that are MIDI-mapped with a glow ✅
-- **Track Mute Automation** - Draw mute/unmute automation on tracks for conditional silencing ✅
-- **BPM Tap Average Display** - Show tap tempo average with standard deviation indicator ✅
-- **MIDI Velocity Editor** - Draw velocity curve on selected notes for dynamic shaping ✅
-- **Crossfade Loop Points** - Set loop start/end within audio clip with crossfade preview ✅
-- **Tuner** - Live microphone pitch detection panel with note/frequency/cents display ✅
-- **Detune Per-Track** - Per-track fine detune (±100 cents) via Tone.PitchShift for parallel layering and stereo width tricks ✅
-- **Loop Practice Trainer** - Set loop region, count loops, track best/avg time-to-nail ✅
-- **Track Notes Panel** - Per-track text notes (lyrics, mix notes, performance cues) stored in project ✅
-- **One-Shot Preview Pad** - Click a pad to hear a track's currently active sequence without entering playback ✅
-- **MIDI Panic Button** - Send all-notes-off + reset controllers to all MIDI outputs (one-click panic) ✅
-- **Step Sequencer Note Length** - Set default note length per step in the step sequencer (e.g., 1/16, 1/8, 1/4) ✅
-- **Bounce To Track** - Render a track or selected clips to a new audio track in place ✅
-- **Drum Kit Piece Selector** - Quickly swap drum kit pieces in a Sampler (Pads) track from a curated list ✅
-- **Audio Recording Panel UI** - Start menu entry + dockable panel with track selector and Start/Stop controls (v0.3.55) ✅
-- **Loudness Meter (LUFS + true-peak dBTP)** - Draggable panel with momentary/short-term/integrated LUFS, true peak, true peak hold (v0.3.59) ✅
-- **Sends Overview Panel** - Visual matrix of send levels from every track to every send bus (v0.3.60) ✅
-- **Mark Track As Bass / Drums / Vocal** - Quick-classify tracks for smart mix presets ✅
-- **Export Region Selection** - Export a specific time region (full project / loop region / between two markers / custom time range) (v0.3.62) ✅
-- **Loop Until Marker** - Extend the active loop region to the next/previous timeline marker (or both adjacent markers); works against Timeline Markers, Loop Region Markers, and state.js markers with auto-merge/dedup; optional auto-mode that re-snaps the loop end when the playhead crosses it (v0.3.63) ✅
-- **Project Search** - Search all track names + clip names + notes for a substring ✅
-- **Drum Pad Trigger Mouse-Over** - When the one-shot preview pad is open, mouse-over each pad to highlight the note name and velocity range; click a single pad to preview just that pad in isolation (v0.3.71) ✅
-- **Click Track Volume Slider** - Independent volume control for the metronome click that doesn't affect the project audio (v0.3.77) ✅
-- **Quick Bounce (in-place)** - Ctrl/Cmd+Shift+B skips the bounce dialog and immediately renders selected clips (or all clips on the first non-empty track if nothing is selected) to audio in place (v0.3.78) ✅
-- **Quick-Bounce Markers** - Mark a start + end time on the timeline and one-click render only the audio between them to a brand-new audio track (Tools → Quick-Bounce Markers) (v0.3.80) ✅
-- **MIDI Activity Log** - Small rolling log of the last 8 MIDI events (note on/off, CC) with timestamps in a collapsible panel ✅
-- **Per-Track MIDI Panic** - Small ⚠ button on each non-Master / non-Lyrics track strip (right of Bypass) that silences ONLY that one track and sends All-Notes-Off on the track's specific MIDI channel (Omni → all 16). Brief red flash on click + one-line notification with track name. New `js/PerTrackMidiPanic.js` (175 lines): event-delegated click handler, defers to `appServices.panicStopTrackAudio(trackId)` as the single source of truth (also used by future hotkey wiring via `window.panicStopTrackById`). No undo capture (transient playback-state fix, same as global panic). Backed by `js/PerTrackMidiPanic.js` + the new `panicStopTrackAudio` service in `js/main.js` + the new `sendMidiAllNotesOffOnChannel` helper in `js/state.js` (v0.4.00) ✅
-- **Audio Clip Volume Curve Presets** - 16 built-in gain-envelope presets (Fade In/Out 100/300/500ms, Fade In & Out, Ramp Up/Down, Pump Up 4-beat, Duck 30%, Tremolo fast, Stutter 3 hits, Reverse Ramp, Silence Middle, Clear Envelope) plus user-saved presets in localStorage. Each preset is a 1-second reference envelope that scales linearly to the target clip's duration at apply time. Right-click an audio clip → "Volume Curve" → pick a preset (cursor popover with inline mini-SVG envelope previews), or open the dockable "Volume Curve Presets" panel from the start menu. Applied via the existing `track.setClipGainEnvelope(clipId, points)` API (undo captured automatically by the API). Backed by `js/ClipVolumeCurvePresets.js` (v0.4.01) ✅
-- **Per-Track MIDI CC Presets** - Small "CC N" badge in each track-strip header (mixer panel) showing the count of MIDI CC mappings currently targeting that track. Click the badge (or the new "Per-Track MIDI CC Presets" start-menu entry) to open a dockable panel for that track: list every CC mapping targeting the track (CC #, channel, target param, min/max), save the current set as a named preset in localStorage, apply any saved preset to this track (atomically replaces all mappings for the track — undo captured), delete a preset, export a preset as JSON, import a preset from JSON, or quick-apply a built-in "Quick" starter preset (Volume + Pan + Filter Cutoff on the most common CC numbers). Master / Audio / Lyrics tracks skip the badge. Presets are per-user, per-track, stored under `snaw_per_track_midi_cc_presets_<trackId>`. The panel works on whichever track the user opened it for — no need to re-target when the user changes selection. Backed by `js/PerTrackMidiCCPresets.js` (743 lines) + 3 additive exports in `js/state.js` (`getMidiMappingsForTrack`, `replaceMidiMappingsForTrack`, `applyMidiMappingPresetForTrack`) + start-menu entry in `index.html` + a new `cc-preset-badge` slot in the track-strip header rendered by `js/ui.js` (v0.4.02) ✅
-
-## Completed Features (recent)
-
-- **Master Limiter Toggle** - Quick on/off for a brick-wall master limiter to catch overs ✅
-- **Track Reorder Hotkeys** - Alt+ArrowUp / Alt+ArrowDown to move the active track one slot up/down in the track list (v0.3.70) ✅
-- **Mix-Bus Group Presets** - Save the entire group+send+fx+volume state of a group of tracks as a preset you can re-apply (v0.3.72) ✅
-
-- **Plugin Bypass Per-Track** - Per-track effect-chain bypass (mixer B button + right-click context menu); sources route directly to gainNode while effect settings/params are preserved (v0.3.73) ✅
-- **Tap Tempo MIDI Clock In** - Use a MIDI controller pad as the tap-tempo source instead of the keyboard `T` ✅
-- **Track Folder Collapse Memory** - Remember collapsed state of track folders across sessions ✅
-- **Drag-to-Reorder Master FX** - Drag-and-drop reorder the master-bus effects in the Master Effects Rack window (v0.3.81) ✅
-- **Toolbar Tooltips On Hover** - Snappy custom hover tooltips on every transport / statusbar / taskbar button; ✅
-- **Bar/Beat Ruler Readout** - Hover the timeline ruler to show bar:beat:tick + seconds (v0.3.84) ✅
-- **Track Header Right-Click → Insert Silence** - Right-click a track header → "Insert Silence Here..." submenu (1/2/4/8 bar presets) shifts every clip whose startTime ≥ playhead by N bars (computed from current BPM, 4/4 assumed); captures undo, sorts timelineClips, re-renders the timeline (v0.3.85) ✅
-- **Loop Length Display In Status Bar** - Show the loop region's exact length (mm:ss.ms) next to the existing loop inputs in the transport bar (v0.3.86) ✅
-- **One-Click Random Pitch Snap** - Press `g` to snap all currently-selected piano-roll notes' pitches to the nearest scale degree of the active Scale Lock (v0.3.87) ✅
-- **Undo Last Record Arm Toggle** - Cmd+Z right after arming a track (or hitting Record during playback) restores the previous arm state via a dedicated undo stack in js/ArmToggleHistory.js — avoids the playback/tempo/clip-position churn of a full project-state undo. Click a track's record-arm button, hit Cmd+Z, you're back where you started (v0.3.89) ✅
-- **Quick "Duplicate Track Under Source" Hotkey** - Press Shift+D to duplicate the currently-selected track (or active sequencer track if no explicit selection) and place the new copy DIRECTLY UNDER the source — not at the end of the track list like the existing Ctrl+D. Lets users branch a single source into a stacked family of parallel variations for stems workflows. Undo captures both the duplicate and the reorder (backed by js/DuplicateTrackHotkey.js, registered in the KeyboardShortcuts panel) (v0.3.90) ✅
-- **Per-Note Pitch Bend Lane In Piano Roll** - New Pitch button in the piano roll toolbar opens a drag-to-edit per-note pitch-bend curve editor (click lane to add point, drag point to move, right-click to delete, +Vibrato/+Bend Up/+Bend Down presets, ±200 cents range). Bend data stored on each note as `note.pitchBend = [{offset, value}]`; notes with a curve get an indigo ring + small dot indicator in the roll. Backed by js/PianoRollPitchBend.js (v0.3.91) ✅
-- **Project Auto-Save Counter** - Status-bar indicator showing "AutoSave: N today (M total)" so the user gets visual confirmation that the background auto-save is working. Today's count (N) resets at local midnight; cumulative total (M) persists across reloads via localStorage. Click for a tooltip-style notification with full info; brief green flash on each save. Backed by js/AutoSaveCounter.js (v0.3.92) ✅
-- **Per-Track MIDI Channel Display** - Small "Ch N" / "Omni" badge in each track-strip header (mixer panel) next to the track-type label. Color codes (gray for Omni, emerald for specific channels). Click the badge to open an inline picker (Omni + 1-16) that writes through track.setMidiChannel → undo captured + mixer repainted via the new 'midiChannelChanged' case in handleTrackUIUpdate. Master / Audio / Lyrics tracks skip the badge. Backed by js/PerTrackMidiChannelDisplay.js (v0.3.93) ✅
-- **Per-Track Groove Template Selector** - Small "Groove" badge in each track-strip header (mixer panel) next to the MIDI channel badge showing the current swing/shuffle preset ("None" gray / "Swing 50" / "Swing 66" / "Swing 75" / "Shuffle 33" amber/blue). Click the badge to open an inline picker (None + 4 swing presets) that writes through track.setGroovePreset → undo pre-captured + mixer repainted via the new 'groovePresetChanged' case in handleTrackUIUpdate. Master / Audio / Lyrics tracks skip the badge. Backed by js/PerTrackGrooveTemplateSelector.js (v0.3.94) ✅
-- **Track Freeze with Crossfade** - When freezing a track, apply a per-track configurable fade-in/out envelope (0/25/50/100/250/500/1000/2000 ms) to the rendered audio buffer so the start/end don't click and unfreezing blends cleanly. New `js/TrackFreezeCrossfade.js` module (381 lines): per-track crossfade duration stored in `localStorage` under `snaw_track_freeze_crossfade_<trackId>`, default 100 ms. Each track header shows a small ❄️⚡N indicator (blue when enabled, gray when off) — click to open an inline picker with all duration options. Hooked into the existing `js/TrackFreeze.js` render flow via `window.applyFreezeCrossfadeEnvelope(buffer, trackId)` (called between buffer render and WAV conversion in `freezeTrack`); also exposes `appServices.scheduleUnfreezeRamp(track)` for a fade-in ramp on the live instrument's output gain when the track is unfrozen. Backed by `js/TrackFreezeCrossfade.js` (v0.3.99) ✅
-- **Clip Volume Curve Presets** - Save/load named volume curve presets per track from a dockable panel (Linear, Fade-In, Fade-Out, Pump, Duck, Hold). Backed by `js/ClipVolumeCurvePresets.js` (v0.4.01) ✅
-- **Per-Track MIDI CC Presets** - Small "CC" badge in each track-strip header showing the current CC preset name; click to open an inline picker that writes through `track.setMidiCCPreset`. Backed by `js/PerTrackMidiCCPresets.js` (v0.4.02) ✅
-- **Step Sequencer Pattern Library** - Curated set of stock drum/melodic patterns the user can browse and drag into a track's sequencer slot; categorized by genre. Backed by `js/StepSequencerPatternLibrary.js` (v0.4.03) ✅
-- **Track Grouping by Instrument** - Right-click a track header → "Assign to Group: Drums / Bass / Lead / Pad / FX"; dockable panel shows current mapping. Backed by `js/TrackInstrumentGrouping.js` (v0.4.04) ✅
-- **Project Marker Annotations** - Multi-line notes on any timeline marker; right-click → "Edit Marker Note" popover; small 📝 indicator on annotated markers. Backed by `js/MarkerAnnotations.js` (v0.4.05) ✅
-- **Marker Color Presets** - 8-color semantic palette (Verse / Chorus / Bridge / Intro / Outro / Drop / Break / Custom) for timeline markers via right-click context menu. Backed by `js/MarkerColorPresets.js` (v0.4.06) ✅
-
 ## Current Feature Queue
 
-Queue was emptied after v0.4.07 (MIDI File Import/Export shipped). Brainstormed 10 fresh feature ideas to refill the queue (Day 775 Run 13 brainstorm, 2026-07-11):
-
-1. **Drag-to-Duplicate Clip** - Hold Alt while dragging a clip to create a copy that follows the cursor (mirrors Ableton's behavior); bypasses the existing clipboard-based duplicate
-2. **Track Headroom Indicator** - Color the track-strip header based on how close the current peak is to 0 dBFS (green/yellow/red) so the user can spot hot tracks at a glance
-3. **Piano Roll CC Lane** - Per-note or per-clip CC automation lanes in the piano roll (e.g. draw a filter-cutoff curve that follows the selected notes), parallel to the existing v0.3.91 Pitch Bend lane
-4. **Track Send Pre-Fader Toggle** - Add a per-track pre/post-fader toggle for each send bus (currently always post-fader); lets users set up monitor sends vs. FX sends
-5. **Marker Batch Operations** - Multi-select markers in the Markers panel and apply color/position offsets/note templates in bulk (e.g. shift all chorus markers +2 bars, recolor all verses blue)
-6. **Track Mute/Solo Memory Slots** - Save the current mute/solo state as a named "scene" and recall it later (or via a hotkey); great for live performance and A/B mix comparisons
-7. **One-Click Render Selection to Audio** - Quick-bounce a selected time range to a new audio track in place with a single hotkey (e.g. Cmd+Shift+R)
-8. **Project Snapshot Diff** - Take a named snapshot of the project state and visually diff it against the current state (highlight tracks/clips/params that changed); reverts to a snapshot with one click
-9. **MIDI Controller Scripting Hooks** - Expose a small `window.SnugOS` scriptable surface so users can build a virtual MIDI controller from a webpage
-10. **Clip Volume Hotkey** - Press `+` / `-` to bump the currently-focused clip's gain by ±1 dB without opening the inspector
+1. **Drag-to-Duplicate Clips** - Hold Alt while dragging a timeline clip to leave the original behind (free "clone-paint" workflow)
+2. **Track Notes Sidebar** - Per-track plain-text notes panel; click a small 📝 button in the track header to open an inline textarea (separate from `TrackNotes.js` which is for project notes)
+3. **Smart Undo Description** - When undoing/redoing, briefly show a floating "↶ Undid: Delete Clip" / "↷ Redid: Move Clip" toast so the action is named
+4. **Project Tempo Tap Display** - Already-existing TapTempo is per-track; add a small "TAP" button in the transport bar that sets the project BPM from a 4-tap average
+5. **Duplicate Track with Clones** - "Duplicate Track with Clones" right-click action that copies the source track AND clones every timeline clip on it (1-shot, no repeats)
+6. **Clip Fades Indicator** - When a clip has a fade-in or fade-out, draw a small ⤴/⤵ triangle badge in the clip header so it's visible without opening the clip
+7. **Loop Region Bar Marker** - When a loop region is active, show a small "A→B" label floating in the transport bar with the loop start/stop times
+8. **Project Session Timer** - Add an "MM:SS" elapsed-since-load timer to the status bar that updates once per second; click to reset
+9. **Mute-Others Solo Shortcut** - Press `Shift+S` on a selected track to solo ONLY that track and temporarily mute every other track (toggle off with same shortcut)
 
 ## Workflow
 
@@ -105,7 +22,7 @@ Queue was emptied after v0.4.07 (MIDI File Import/Export shipped). Brainstormed 
 
 ### Step 2: Implement Feature
 - Keep it SIMPLE and MINIMAL
-- Follow existing code patterns
+- Follow existing code patterns (look at e.g. `QuickBounce.js`, `AudioClipLabeling.js`, `SoloMuteShortcuts.js` for the IIFE + init(appServices) + window export pattern)
 - Add necessary UI, state, and audio logic
 - Test locally before committing
 
@@ -125,6 +42,27 @@ After successfully implementing a feature:
 - Renumber the remaining features
 - Update this instruction with new queue
 
+## When Queue is Empty
+
+Run this brainstorming process:
+
+```
+Based on SnugOS being a browser-based DAW with:
+- Tone.js audio engine
+- Multi-track timeline
+- Effects rack
+- Sequencer mode
+- MIDI support
+- 568+ feature modules already shipped
+
+Generate 10 NEW feature ideas that are:
+1. Achievable in a single session
+2. Complement existing features (don't duplicate what already exists in /home/workspace/app-repaired/js/)
+3. Enhance creative workflow
+
+Output as numbered list and update this instruction.
+```
+
 ## Rules
 
 - ONE feature per run
@@ -136,3 +74,4 @@ After successfully implementing a feature:
 ## Context Files
 - Repo: `/home/workspace/app-repaired`
 - Main files: `js/main.js`, `js/state.js`, `js/ui.js`, `js/audio.js`, `index.html`
+- 568+ existing feature modules in `js/` (grep to check before naming a new feature)
