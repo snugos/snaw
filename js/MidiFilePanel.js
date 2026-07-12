@@ -252,6 +252,11 @@ async function handleFileImport(file) {
             const created = await addTrackToStateInternal('Synth', {
                 name: seq.name,
                 color: '#3b82f6',
+                // Persist the per-track MIDI channel parsed from the .mid so a
+                // later re-export of this imported project round-trips each
+                // track's channel. SMF channel 0..15 maps directly to
+                // SnugOS midiChannel 0..15 (0 = Omni).
+                midiChannel: Number.isFinite(seq.channel) ? seq.channel : 0,
                 sequences: [seq]
             });
             if (created && !firstCreatedTrack) firstCreatedTrack = created;
@@ -294,7 +299,12 @@ function exportProjectToMidi(tracks, defaultName) {
         // the row→MIDI math for Synth/InstrumentSampler, plus sane defaults
         // for DrumSampler (GM pad map), Sampler (chromatic 48+), and a
         // middle-C fallback for other track types.
-        const notes = sequenceDataToMidiNotes(seq, { channel: 0, trackType: track.type });
+        // Use the track's own MIDI channel (Per-Track MIDI Channel feature)
+        // so multi-track exports don't collide on channel 0 and lose their
+        // identity in downstream DAWs. Falls back to 0 for tracks that
+        // predate the per-track channel feature.
+        const channel = Number.isFinite(track.midiChannel) ? track.midiChannel : 0;
+        const notes = sequenceDataToMidiNotes(seq, { channel, trackType: track.type });
         if (notes.length > 0) {
             midiTracks.push({ name: track.name || 'Track', notes });
         }
