@@ -80,6 +80,7 @@ import { initKeyboardOctaveShift, getCurrentOctaveShift, setOctaveShift, resetOc
 import { initTimelineZoomMemory, getStoredZoom, saveZoom } from './TimelineZoomMemory.js';
 import { initCountInAudio, setupCountInUI, playCountIn, isCountInActive } from './CountInAudio.js';
 import { initCountInSettingsPanel, openCountInSettingsPanel, getCountInSettings, setCountInBars, setCountInSoundEnabled, setCountInVisualCountdown, setCountInAccentFirstBeat, setCountInVolume } from './CountInSettingsPanel.js';
+import { initClipTimeHandles, refreshClipTimeHandles, formatTimecode } from './ClipTimeHandles.js'; // Clip Time Handles (v0.4.08) - mm:ss timecode overlay on each clip
 import { initMIDArpeggiatorPanel, openMIDArpeggiatorPanel } from './MIDArpeggiatorPanel.js';
 import { initTrackTemplateLibrary, openTrackTemplateLibraryPanel, getTrackTemplateNames, getTrackTemplate, saveTrackTemplate, deleteTrackTemplate, exportTemplates, importTemplates } from './TrackTemplateLibrary.js';
 import { initMixerChannelStripPresets, openMixerChannelStripPresetsPanel, exportChannelStripPresets, importChannelStripPresets } from './MixerChannelStripPresets.js';
@@ -1341,6 +1342,8 @@ const appServices = {
     applyAudioClipLabelFromExternal,
     getAllAudioClipLabels,
     openMidiFilePanel,
+    refreshClipTimeHandles,
+    formatTimecode,
     getTracksByRole,
     getRoleSummary,
     openCountInSettingsPanel,
@@ -2440,6 +2443,7 @@ async function initializeSnugOS() {
         if (typeof initTrackColorPanel === 'function') initTrackColorPanel(appServices); // Track Color Panel initialization
         if (typeof initAudioClipLabeling === 'function') initAudioClipLabeling(appServices); // Audio Clip Labeling initialization
         if (typeof initMidiFilePanel === 'function') initMidiFilePanel(appServices); // MIDI File Import/Export initialization
+        if (typeof initClipTimeHandles === 'function') initClipTimeHandles(appServices); // Clip Time Handles initialization
         if (typeof initTrackRolePanel === 'function') initTrackRolePanel(appServices); // Track Role Panel initialization
         if (typeof initTrackSnapResolutionPanel === 'function') initTrackSnapResolutionPanel(appServices); // Track Snap Resolution Panel initialization
         if (typeof initTrackScrollToCenter === 'function') initTrackScrollToCenter(appServices); // Track Scroll To Center initialization

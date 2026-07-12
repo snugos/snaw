@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.4.07"; // 2026-07-11 - v0.4.07 MIDI File Import/Export (SMF .mid parse/write + drag-drop import + file-picker + project-wide export), v0.4.06 Marker Color Presets, v0.4.05 Audio Clip Labeling + TimelineMarkers dedup, v0.4.04 Track Grouping by Instrument
+export const APP_VERSION = "0.4.08"; // 2026-07-12 - v0.4.08 Clip Time Handles (mm:ss readouts on audio clips + selected-clip timecode panel), v0.4.07 MIDI File Import/Export (SMF .mid parse/write + drag-drop import + file-picker + project-wide export), v0.4.06 Marker Color Presets, v0.4.05 Audio Clip Labeling + TimelineMarkers dedup, v0.4.04 Track Grouping by Instrument
 
 export const STEPS_PER_BAR = 16;
 export const defaultStepsPerBar = 16; // Default for new tracks

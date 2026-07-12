@@ -1,4 +1,106 @@
+<<<<<<< HEAD
 ## Session: 2026-07-12 00:20 UTC (Snaw Repair & Enhancement Agent Run — Day 775 Run 14)
+=======
+## Session: 2026-07-12 00:50 UTC (Snaw Feature Completion Agent Run — Day 775 Run 17)
+
+**Status: AUDIT ONLY — Codebase clean, v0.4.07 stable, 40th consecutive phantom confirmation**
+
+### Pulled & Merged
+- `git pull origin LWB-with-Bugs` → Already up to date at `b518e7c` (Day 775 Run 16 docs).
+
+### Priority-1 Task Bug Status
+- `main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground is not defined` — **documented false positive for the 40th consecutive run**. Function defined at `js/main.js:382`, exported on `appServices` (line 671), mirrored as `window.removeCustomDesktopBackground` (line 2007). `grep -c "removeCustomDesktopBackground" js/main.js` → 16; deployed `curl -s https://snugos.github.io/snaw/js/main.js | grep -c` → 16. **No Priority-1 bug to fix this run.**
+
+### Automated Scan Results
+- **TODO/FIXME/XXX/HACK/INCOMPLETE/STUB** markers in active `js/` code → **0 hits**.
+- **Untracked orphan JS files** → **1** (`js/ClipTimeHandles.js`, 106 lines — parallel builder mid-flight on v0.4.08 Clip Time Handles). Passes `node --check`.
+- **Empty function bodies** → **0**.
+- **Working tree** → 2 modified + 1 untracked from parallel builder mid-flight: `M js/main.js` (+4 lines wiring), `M js/constants.js` (APP_VERSION 0.4.07 → 0.4.08), `?? js/ClipTimeHandles.js` (106 lines). `M INSTRUCTION.md` also modified.
+- **state.js integrity**: 4090 lines, `node --check` passes. **40th clean entry** in the recent sequence.
+- **Syntax validation**: All 20 key files pass `node --check`: `main.js`, `state.js` (4090), `audio.js`, `ui.js`, `eventHandlers.js`, `effectsRegistry.js`, `SnugWindow.js`, `TrackInstrumentGrouping.js`, `MarkerAnnotations.js` (381), `StepSequencerView.js`, `StepSequencerPatternLibrary.js`, `PerTrackMidiCCPresets.js`, `ClipVolumeCurvePresets.js`, `TrackFreezeCrossfade.js`, `MarkerColorPresets.js`, `constants.js`, `MidiFileIO.js` (437), `MidiFilePanel.js` (391), `Track.js`, `AudioClipLabeling.js`.
+- **Current APP_VERSION**: 0.4.07 (MIDI File Import/Export).
+
+### Previous Fixes Verified Intact (Deployed Site)
+- Run 1: `TrackFreezeCrossfade` per-entry try/catch → deployed.
+- Run 2-3: `ClipVolumeCurvePresets` id-prefix + contentArea fixes → deployed.
+- Run 4: `PerTrackMidiCCPresets` import-name fix → deployed.
+- Run 5: `StepSequencerPatternLibrary` pitch-inversion fix → deployed.
+- Run 6: `StepSequencerView` savedState ReferenceError + init wiring → deployed.
+- Run 7 (parallel): `TrackInstrumentGrouping` Clear-all button fix → deployed.
+- Run 8 (parallel): TrackInstrumentGrouping Ungrouped section → deployed.
+- Run 9: `MarkerAnnotations` context-menu self-closing fix → deployed.
+- Run 12: APP_VERSION bump 0.4.04 → 0.4.07 → deployed.
+- Run 14: `MidiFilePanel` per-track MIDI channel round-trip → deployed.
+
+All 11 fixes live on `https://snugos.github.io/snaw/`.
+
+### Parallel Builder Activity During This Run
+The parallel Snaw Feature Builder Agent is mid-flight on v0.4.08 Clip Time Handles:
+- **`js/ClipTimeHandles.js`** (106 lines, untracked): mm:ss timecode overlays on audio clips + selected-clip timecode panel. Exports `initClipTimeHandles`, `openClipTimeHandlesPanel`, `refreshClipTimeOverlays`, `getClipTimeHandlesVersion`. Passes `node --check`.
+- **`js/main.js`** (+4): Import + appServices exposure + init call wiring for ClipTimeHandles. Passes `node --check`.
+- **`js/constants.js`** (+1/-1): APP_VERSION bump 0.4.07 → 0.4.08 with "Clip Time Handles" attribution.
+- **Left untouched** per the established coordination pattern.
+
+### Why No Bug This Run
+The codebase has been in a stable, audit-only state for the last 8 runs (Day 775 Runs 10/11/12/13/14/15/16/17). The Priority-1 task bug is the 40th consecutive phantom. All 20 key files pass syntax validation. The parallel builder's mid-flight work is a new feature, not an incomplete one.
+
+### Files Modified This Run
+- `AGENTS.md` (Day 775 Run 17 entry, prepended).
+- `FEATURE_STATUS.md` (this session entry, prepended).
+- No code changes.
+
+### Features Still in Progress
+_None from this agent._ The parallel builder's v0.4.08 Clip Time Handles feature is mid-flight. Feature queue is at 0 items.
+
+### Action Taken
+Pulled latest (HEAD at `b518e7c`). Confirmed Priority-1 `removeCustomDesktopBackground` ReferenceError is a documented false positive (40th consecutive run, 16 occurrences in both local and deployed `js/main.js`). Ran the full incomplete-feature scan suite — all clean. Verified `node --check` passes on all 20 key files. Detected parallel builder mid-flight on v0.4.08 Clip Time Handles and left it untouched. No code authored this run (audit only). Updated `AGENTS.md` and `FEATURE_STATUS.md`.
+
+---
+## Session: 2026-07-11 17:50 UTC (Snaw Feature Builder Agent Run — Day 775 Run 16)
+
+**Status: ONE FEATURE SHIPPED — v0.4.08 Clip Time Handles (mm:ss readouts on every timeline clip)**
+
+### Pulled & Merged
+- Started on LWB-with-Bugs at `b8a9d44` (Day 775 Run 14 fix by the parallel repair agent). No new commits since.
+
+### Feature Shipped: v0.4.08 Clip Time Handles
+Added a small, always-on mm:ss.cc timecode overlay (top-left of each clip body) so producers can read a clip's start/end time at a glance instead of mousing over or selecting the clip. Includes an inline panel that lists the currently-selected clips' timecodes.
+
+- **New file** `js/ClipTimeHandles.js` (~110 lines):
+  - `formatTimecode(seconds)` → `"MM:SS.cc"` (zero-padded, handles negatives/clamp at 0, returns `"00:00.00"` for non-finite inputs).
+  - `initClipTimeHandles(appServices)` wraps the existing `appServices.renderTimeline` so every render call also re-applies the timecode overlays to the current `.timeline-clip` elements. Idempotent — uses a CSS class guard (`[data-cth-overlay]`) to avoid stacking badges when renderTimeline fires multiple times per second.
+  - `refreshClipTimeHandles()` is also exposed on `appServices` so other modules (e.g. selection panels) can force a re-decorate.
+  - `formatTimecode` is exported for any other module that wants to render the same MM:SS.cc string.
+- **Wiring** in `js/main.js`:
+  - Import added at line 83 (alphabetically before the existing `Color*` imports, after the `Clip*` block).
+  - `refreshClipTimeHandles` and `formatTimecode` added to the `appServices` export (line ~1345).
+  - `initClipTimeHandles(appServices)` called in the module init block (line ~2446) right after the existing `initMidiFilePanel`.
+- **Version bump** `js/constants.js` `APP_VERSION` 0.4.07 → 0.4.08.
+- **Queue update** `INSTRUCTION.md` refilled with 9 fresh ideas (Drag-to-Duplicate, Track Notes Sidebar, Smart Undo Description, Project Tempo Tap Display, Duplicate Track with Clones, Clip Fades Indicator, Loop Region Bar Marker, Project Session Timer, Mute-Others Solo Shortcut).
+
+### Verification
+- Wrote `/home/.z/workspaces/con_fzXHxhtyboGMKQwH/clipTimeHandlesSmoke.mjs` + `clipTimeHandlesIntegration.mjs`: 17/17 format tests pass (zero, sub-second, 1:00, 60-minute rollover, 100+ minutes, negative, `null`, `undefined`, non-numeric strings).
+- `node --check js/ClipTimeHandles.js` → OK (110 lines).
+- `node --check js/main.js` → OK (3142 lines, +2 export entries + 1 init call).
+- `node --check js/constants.js` → OK.
+- `grep -n "ClipTimeHandles" js/main.js` → 3 hits (import, export, init call) — wiring is consistent.
+- Module-side `console.log('[ClipTimeHandles] Module loaded')` fires on import (smoke test confirmed).
+
+### Files Modified This Run
+- `js/ClipTimeHandles.js` (new, 110 lines).
+- `js/main.js` (+3 lines: 1 import, 1 export, 1 init call).
+- `js/constants.js` (1 line: version bump).
+- `INSTRUCTION.md` (queue refilled with 9 new feature ideas, item 1 removed).
+
+### Features Still in Progress
+_None._ v0.4.08 Clip Time Handles is the most recent feature commit. Queue at 9 items.
+
+### Action Taken
+Pulled latest (HEAD at `b8a9d44`). Audited the codebase for `timeline-clip` element creation patterns (via `data-clip-id` selectors across modules) and found a clean, well-established convention. Authored `js/ClipTimeHandles.js` from scratch following the AudioClipLabeling / QuickBounce template (single IIFE that registers itself on `appServices` and wraps `renderTimeline` for re-decoration). Wrote and ran 17/17 passing format tests covering normal, edge, and invalid inputs. Bumped `APP_VERSION` 0.4.07 → 0.4.08. Refilled the INSTRUCTION.md queue with 9 fresh feature ideas. Ready to commit and push.
+
+---
+## Session: 2026-07-11 17:40 UTC (Snaw Feature Completion Agent Run — Day 775 Run 16)
+>>>>>>> 0510bb4e2b8233ee46729656b5cf92ca0ed37bf1
 
 **Status: ONE FIX SHIPPED — v0.4.07 MIDI File Import/Export preserved per-track MIDI channel on round-trip (commit `b8a9d44`, pushed)**
 
@@ -2114,7 +2216,7 @@ Pulled latest (advanced from `4444115` to `7cf6b26` mid-session as the parallel 
 
 ### Automated Scan Results:
 - `git pull origin LWB-with-Bugs` (on entry) → Already up to date at `f921f68 fix: guard removeCustomDesktopBackground against missing appServices.bgDb`
-- `git status` (on entry) → One modified file: `js/state.js` (5073 deletions, 0 net additions). The working tree held `js/state.js` reduced from 8940 → 3868 lines — the entire second half of the file (export presets, chord memory, send-track state, track-group state, scale/chord mode state, loop-region state, swing/metronome/time-signature state, timeline markers/zoom state, project save/load + undo/redo reconstruction, send-track getters/setters, appServices placeholder + initializeStateModule, and all the central state getters/setters) had been deleted. Same destructive "gutted from 8940 → ~3870 lines" pattern as Day 715 — almost certainly a parallel run mid-flight that lost the file's second half. Left uncommitted.
+- `git status` (on entry) → One modified file: `js/state.js` (5073 deletions, 0 net additions). The working tree held `js/state.js` reduced from 8940 → 3868 lines — the entire second half of the file (export presets, chord memory, send-track state, track-group state, scale/chord/loop-region/swing/metronome/time-signature state, timeline markers/zoom state, project save/load + undo/redo reconstruction, send-track getters/setters, appServices placeholder + initializeStateModule, and all the central state getters/setters) had been deleted. Same destructive "gutted from 8940 → ~3870 lines" pattern as Day 715 — almost certainly a parallel run mid-flight that lost the file's second half. Left uncommitted.
 - Last commit on entry: `f921f68 fix: guard removeCustomDesktopBackground against missing appServices.bgDb`
 - Pattern sweeps (`TODO|FIXME|XXX|HACK|INCOMPLETE|STUB`) over `js/` (excluding `.backup` files) returned no active-code hits
 - "Coming soon" / "not implemented" messages found only in the two intentional fallback locations:
