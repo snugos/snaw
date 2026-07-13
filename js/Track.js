@@ -97,6 +97,7 @@ export class Track {
         const currentSoloedId = this.appServices.getSoloedTrackId ? this.appServices.getSoloedTrackId() : null;
         this.isSoloed = currentSoloedId === this.id;
         this.soloLocked = false; // Track Solo Safe Mode - when true, solo cannot be toggled off
+        this.automationArmed = initialData?.automationArmed || false; // Automation recording armed state
         this.previousVolumeBeforeMute = initialData?.volume ?? 0.7;
         // MIDI channel for multi-channel MIDI support (1-16, 0 = omni/all channels)
         this.midiChannel = initialData?.midiChannel ?? 0;
@@ -339,6 +340,8 @@ export class Track {
             }
 
             if (audioData) {
+                this._captureUndoState(`Load Pad ${padIndex + 1} Sample on ${this.name}`);
+
                 // 2. Save to IndexedDB so the sample persists on reload
                 const dbKey = `track_${this.id}_pad_${padIndex}`;
                 await storeAudio(dbKey, audioData);
@@ -1720,6 +1723,7 @@ export class Track {
         const toneNode = createEffectInstance(effectType, defaultParams);
 
         if (toneNode) {
+            this._captureUndoState(`Add ${effectType} effect on ${this.name}`);
             const effectId = `effect-${this.id}-${effectType}-${Date.now()}-${Math.random().toString(36).substr(2,5)}`;
             this.activeEffects.push({
                 id: effectId, type: effectType, toneNode: toneNode, params: JSON.parse(JSON.stringify(defaultParams))
@@ -1739,6 +1743,7 @@ export class Track {
         const effectIndex = this.activeEffects.findIndex(e => e.id === effectId);
         if (effectIndex > -1) {
             const effectToRemove = this.activeEffects[effectIndex];
+            this._captureUndoState(`Remove ${effectToRemove.type} effect from ${this.name}`);
             console.log(`[Track ${this.id}] Removing effect "${effectToRemove.type}" (ID: ${effectId})`);
             if (effectToRemove.toneNode && !effectToRemove.toneNode.disposed) {
                 try {
@@ -2417,6 +2422,66 @@ export class Track {
      */
     getMidiChannel() {
         return this.midiChannel;
+    }
+
+    /**
+     * Set automation armed state for this track.
+     * @param {boolean} armed - True to arm for automation recording, false to disarm
+     * @returns {boolean} The new automation armed state
+     */
+    setAutomationArmed(armed) {
+        const nextValue = !!armed;
+        if (this.automationArmed !== nextValue) {
+            this._captureUndoState(`Toggle Automation Arm ${nextValue ? 'On' : 'Off'} for ${this.name}`);
+        }
+        this.automationArmed = nextValue;
+        return this.automationArmed;
+    }
+
+    /**
+     * Set monitoring enabled state for this track.
+     * @param {boolean} enabled - True to enable input monitoring, false to disable
+     * @returns {boolean} The new monitoring enabled state
+     */
+    setMonitoringEnabled(enabled) {
+        const nextValue = !!enabled;
+        if (this.isMonitoringEnabled !== nextValue) {
+            this._captureUndoState(`Toggle Input Monitoring ${nextValue ? 'On' : 'Off'} for ${this.name}`);
+        }
+        this.isMonitoringEnabled = nextValue;
+        return this.isMonitoringEnabled;
+    }
+
+    /**
+     * Set the selected slice for editing.
+     * @param {number} sliceIndex - The index of the slice to select for editing
+     * @returns {number} The new selected slice index
+     */
+    setSelectedSliceForEdit(sliceIndex) {
+        const maxIndex = Array.isArray(this.slices) && this.slices.length > 0 ? this.slices.length - 1 : 0;
+        const parsedIndex = Number.parseInt(sliceIndex, 10);
+        const nextIndex = Number.isFinite(parsedIndex) ? Math.max(0, Math.min(maxIndex, parsedIndex)) : 0;
+        if (this.selectedSliceForEdit !== nextIndex) {
+            this._captureUndoState(`Select Slice ${nextIndex + 1} on ${this.name}`);
+        }
+        this.selectedSliceForEdit = nextIndex;
+        return this.selectedSliceForEdit;
+    }
+
+    /**
+     * Set the selected drum pad for editing.
+     * @param {number} padIndex - The index of the drum pad to select for editing
+     * @returns {number} The new selected drum pad index
+     */
+    setSelectedDrumPadForEdit(padIndex) {
+        const maxIndex = Array.isArray(this.drumSamplerPads) && this.drumSamplerPads.length > 0 ? this.drumSamplerPads.length - 1 : 0;
+        const parsedIndex = Number.parseInt(padIndex, 10);
+        const nextIndex = Number.isFinite(parsedIndex) ? Math.max(0, Math.min(maxIndex, parsedIndex)) : 0;
+        if (this.selectedDrumPadForEdit !== nextIndex) {
+            this._captureUndoState(`Select Drum Pad ${nextIndex + 1} on ${this.name}`);
+        }
+        this.selectedDrumPadForEdit = nextIndex;
+        return this.selectedDrumPadForEdit;
     }
 
     /**
@@ -11172,10 +11237,10 @@ export class Track {
         } else if (mode === 'morph') {
             // Morphing with crossfade
             for (let i = 0; i < tableSize; i++) {
-                const sign1 = Math.sign(table1[i]);
-                const sign2 = Math.sign(table2[i]);
-                const mag1 = Math.abs(table1[i]);
-                const mag2 = Math.abs(table2[i]);
+                const sign1 = Math.sign(table1[i];
+                const sign2 = Math.sign(table2[i];
+                const mag1 = Math.abs(table1[i];
+                const mag2 = Math.abs(table2[i];
                 const morphedMag = mag1 * (1 - blend) + mag2 * blend;
                 const morphedSign = blend < 0.5 ? sign1 : sign2;
                 result[i] = morphedSign * morphedMag;
