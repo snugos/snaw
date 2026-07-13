@@ -2319,6 +2319,7 @@ export async function undoLastActionInternal() {
         }
 
         if (appServices.showNotification) appServices.showNotification(`Undoing: ${stateToRestore.description || 'last action'}...`, 2000);
+        if (appServices && typeof appServices.fireUndoToast === 'function') appServices.fireUndoToast(stateToRestore.description || 'last action');
         if (appServices) appServices._isReconstructingDAW_flag = true; // Signal reconstruction globally
         await reconstructDAWInternal(stateToRestore, true); // true for isUndoRedo
     } catch (error) {
@@ -2348,6 +2349,7 @@ export async function redoLastActionInternal() {
         }
 
         if (appServices.showNotification) appServices.showNotification(`Redoing: ${stateToRestore.description || 'last action'}...`, 2000);
+        if (appServices && typeof appServices.fireRedoToast === 'function') appServices.fireRedoToast(stateToRestore.description || 'last action');
         if (appServices) appServices._isReconstructingDAW_flag = true;
         await reconstructDAWInternal(stateToRestore, true); // true for isUndoRedo
     } catch (error) {

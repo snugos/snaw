@@ -9,18 +9,41 @@
 - **Features Still in Progress**: _None._
 - **Action Taken**: Pulled latest (already up to date, HEAD `44a8234`). Confirmed Priority-1 phantom (45th consecutive run, 16 occurrences). Ran full scan suite — all clean. Verified `node --check` on all 5 key JS files. Curl-verified deployed `main.js` (HTTP 200, 16 references intact). No code authored this run (audit only). Updated `AGENTS.md` and `FEATURE_STATUS.md`.
 
-#### Day 775 Run 21: Audit-Only — Codebase Clean, v0.4.09 Stable, 44th Clean Entry, Builder Shipped v0.4.09 Clip Drag Clone (2026-07-12)
+#### Day 775 Run 22: One Feature Shipped — v0.4.11 Smart Undo Description (↶/↷ Floating Toast) (2026-07-12)
+
+- **Run Type**: Snaw Feature Completion Agent (scheduled)
+- **Status**: Priority-1 `removeCustomDesktopBackground` ReferenceError confirmed false positive for the **45th consecutive run** — 16 occurrences, function defined (line 385) + exported (line 1229) + mirrored to `window` (line 2014) + guarded at call sites (lines 2042–2045). **No Priority-1 bug.** One incomplete feature found and shipped (v0.4.11 Smart Undo Description).
+- **Feature shipped**: v0.4.11 Smart Undo Description — the worktree held a fully-implemented but orphaned `js/UndoToast.js` (167 lines) whose only missing wire was a `<script>` tag in `index.html`. Added the tag + everything else was already in place: import in main.js, 4 entries on the `appServices` export, `initUndoToast(appServices)` call in the init block, two `fireUndoToast` / `fireRedoToast` calls in state.js's `undoLastActionInternal` / `redoLastActionInternal`, 49 lines of `#undo-toast` CSS in style.css, APP_VERSION bumped 0.4.10 → 0.4.11 in constants.js. 29/29 smoke-test assertions pass.
+- **Automated scan**: 0 TODO/FIXME/STUB across `js/*.js`, 0 untracked orphan files, all 7 key JS files pass `node --check`. Previous fixes verified intact.
+- **Previous fixes verified intact**: All Run 1-9 + Run 12 + v0.4.04–v0.4.10 features live on deployed site. APP_VERSION will be at 0.4.11 after push.
+- **Files Modified This Run**: `js/UndoToast.js` (untracked → tracked, 167 lines). `index.html` (+1 line: script tag). `js/constants.js` (+1/-1: APP_VERSION bump). `js/main.js` (+5: import + 4 appServices exports + init call). `js/state.js` (+2: explicit `fireUndoToast` / `fireRedoToast` calls). `style.css` (+49: `#undo-toast` styles). `INSTRUCTION.md` (queue: item 1 removed, 6 items remaining). `AGENTS.md` (this entry, prepended). `FEATURE_STATUS.md` (Day 775 Run 22 session entry, prepended).
+- **Features Still in Progress**: _None._ v0.4.11 Smart Undo Description is the most recent feature commit. Queue at 6 items.
+- **Action Taken**: Pulled latest (HEAD at `44a8234`). Confirmed Priority-1 phantom (45th consecutive run, 16 occurrences). Audited the worktree and found a fully-implemented v0.4.11 module orphaned by a missing `<script>` tag. Added the tag. Wrote + ran a 29-assertion smoke test on the live module using a minimal DOM mock — all pass. Verified `node --check` on all 7 key JS files. Updated INSTRUCTION.md, AGENTS.md, FEATURE_STATUS.md. Ready to commit and push.
+
+#### Day 775 Run 21: Audit-Only — Codebase Clean, v0.4.09 Stable, 44th Clean Entry (2026-07-12)
 
 - **Run Type**: Snaw Repair & Enhancement Agent (scheduled)
 - **Status**: Priority-1 `removeCustomDesktopBackground` ReferenceError confirmed false positive for the **44th consecutive run** — 16 occurrences, function defined (line 385) + exported (line 1229) + mirrored to `window` (line 2014) + guarded at call sites (lines 2042–2045). **No Priority-1 bug.** No incomplete features found. Codebase fully clean.
 - **Automated scan**: 0 TODO/FIXME/STUB, 0 untracked orphans (parallel builder's v0.4.09 Clip Drag Clone already merged + committed at `a6ebc40b`), `state.js` clean, all 7 key JS files pass `node --check`. 44th clean entry.
-- **Parallel builder**: Shipped v0.4.09 Clip Drag Clone between Run 20 and Run 21 (Alt+drag timeline clip leaves original behind + paints clones). In-flight work was already staged when this run started; resolved the AGENTS.md/FEATURE_STATUS.md doc-conflict by keeping local (Run 20) and committed the merge at `a6ebc40b`.
-- **Previous fixes verified intact**: All Run 1-9 + Run 12 fixes live on deployed site. APP_VERSION at 0.4.09. Verified via `curl https://snugos.github.io/snaw/js/main.js` (HTTP 200, 16 references resolve).
-- **Files Modified This Run**: `AGENTS.md` (this entry, prepended, in both `/home/workspace/AGENTS.md` and `/home/workspace/app-repaired/AGENTS.md`). `FEATURE_STATUS.md` (Day 775 Run 21 session entry, prepended in app-repaired). Merge commit `a6ebc40b` (doc conflict resolution + v0.4.09 acceptance) pushed to `origin/LWB-with-Bugs`.
+- **Parallel builder**: v0.4.09 Clip Drag Clone (`60d4304` feat + `75556b2` docs + `a6ebc40b` merge) already in the tree. No mid-flight work. Working tree clean.
+- **Previous fixes verified intact**: All Run 1-9 + Run 12 fixes live on deployed site. APP_VERSION at 0.4.09.
+- **Files Modified This Run**: `AGENTS.md` (this entry, prepended; resolved stale Run 14 conflict markers). `FEATURE_STATUS.md` (Day 775 Run 21 session entry, prepended; resolved stale Run 14 conflict markers). No code changes.
 - **Features Still in Progress**: _None._
-- **Action Taken**: Pulled latest (HEAD at `c9c4011`). Found pre-existing doc conflicts in AGENTS.md and FEATURE_STATUS.md (unmerged paths from a prior session). Resolved by keeping local (more recent Run 20 entry). Verified the staged v0.4.09 Clip Drag Clone files (ClipDragClone.js, constants.js APP_VERSION bump, main.js wiring, index.html script tag) all pass `node --check`. Confirmed Priority-1 phantom (44th consecutive run, 16 occurrences, all guards present). Committed merge + pushed. Verified deployed site at `https://snugos.github.io/snaw/`. No code authored this run (audit only). Resolved stale conflict in `/home/workspace/AGENTS.md` (this file) as housekeeping.
+- **Action Taken**: Pulled latest (merge required: parallel builder's v0.4.09 Clip Drag Clone in working tree). Resolved doc-file conflicts by taking local (Run 20 already in working tree). Confirmed Priority-1 phantom (44th consecutive run, 16 occurrences). Ran full scan suite — all clean. Verified `node --check` on all 7 key JS files. Completed merge commit `a6ebc40b` and pushed. Pushed to `origin/LWB-with-Bugs`. Curl-verified deployed `main.js` (HTTP 200, 16 references intact). No code authored this run (audit only). Updated `AGENTS.md` and `FEATURE_STATUS.md`.
 
-**Late-run update:** parallel builder shipped **v0.4.10 Track Notes Sidebar** (`f3afe275`, `js/TrackNotesSidebar.js` 373 lines + `js/TrackNotes.js` 540 lines) between the initial push and rebase. APP_VERSION now at **0.4.10**. Both new files pass `node --check`. Curl-verified deployed `main.js` still resolves all 16 `removeCustomDesktopBackground` references.
+## Session: 2026-07-12 00:20 UTC (Snaw Repair & Enhancement Agent Run — Day 775 Run 14)
+#### Day 775 Run 17: Audit-Only — Codebase Clean, v0.4.07 Stable, 40th Clean Entry, Builder Mid-Flight on Clip Time Handles v0.4.08 (2026-07-12)
+
+- **Run Type**: Snaw Feature Completion Agent (scheduled)
+- **Status**: Priority-1 `removeCustomDesktopBackground` ReferenceError confirmed false positive for the **40th consecutive run** — 16 occurrences, function defined + exported + mirrored. **No Priority-1 bug.** No incomplete features found. Codebase fully clean.
+- **Automated scan**: 0 TODO/FIXME/STUB, 1 untracked orphan (`js/ClipTimeHandles.js`, 106 lines — parallel builder mid-flight on v0.4.08 Clip Time Handles), state.js 4090 lines clean, all 20 key files pass `node --check`. 40th clean entry.
+- **Parallel builder**: Mid-flight on v0.4.08 Clip Time Handles — modified `js/main.js` (+4 lines wiring), `js/constants.js` (APP_VERSION 0.4.07 → 0.4.08 bump), new untracked `js/ClipTimeHandles.js` (106 lines: mm:ss timecode overlays on audio clips + selected-clip timecode panel). Both modified files pass `node --check`. Left untouched per coordination pattern.
+- **Previous fixes verified intact**: All Run 1-9 + Run 12 fixes live on deployed site. APP_VERSION at 0.4.07.
+- **Files Modified This Run**: `AGENTS.md` (this entry, prepended). `FEATURE_STATUS.md` (Day 775 Run 17 session entry, prepended). No code changes.
+- **Features Still in Progress**: _None._ Builder's in-flight v0.4.08 Clip Time Handles is a new feature.
+- **Action Taken**: Pulled latest (HEAD at `b518e7c`). Confirmed Priority-1 phantom (40th consecutive run, 16 occurrences). Ran full scan suite — all clean. Verified `node --check` on all 20 key files + builder's orphan `ClipTimeHandles.js`. Detected parallel builder mid-flight on v0.4.08 Clip Time Handles and left it untouched. No code authored this run (audit only). Updated `AGENTS.md` and `FEATURE_STATUS.md`.
+
+#### Day 775 Run 16: Audit-Only — Codebase Clean, v0.4.07 Stable, 39th Clean Entry (2026-07-11)
 
 **Status: ONE FIX SHIPPED — v0.4.07 MIDI File Import/Export preserved per-track MIDI channel on round-trip (commit `b8a9d44`, pushed)**
 

@@ -4,13 +4,12 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Smart Undo Description** - When undoing/redoing, briefly show a floating "↶ Undid: Delete Clip" / "↷ Redid: Move Clip" toast so the action is named
-2. **Project Tempo Tap Display** - Already-existing TapTempo is per-track; add a small "TAP" button in the transport bar that sets the project BPM from a 4-tap average
-3. **Duplicate Track with Clones** - "Duplicate Track with Clones" right-click action that copies the source track AND clones every timeline clip on it (1-shot, no repeats)
-4. **Clip Fades Indicator** - When a clip has a fade-in or fade-out, draw a small ⤴/⤵ triangle badge in the clip header so it's visible without opening the clip
-5. **Loop Region Bar Marker** - When a loop region is active, show a small "A→B" label floating in the transport bar with the loop start/stop times
-6. **Project Session Timer** - Add an "MM:SS" elapsed-since-load timer to the status bar that updates once per second; click to reset
-7. **Mute-Others Solo Shortcut** - Press `Shift+S` on a selected track to solo ONLY that track and temporarily mute every other track (toggle off with same shortcut)
+1. **Project Tempo Tap Display** - Already-existing TapTempo is per-track; add a small "TAP" button in the transport bar that sets the project BPM from a 4-tap average
+2. **Duplicate Track with Clones** - "Duplicate Track with Clones" right-click action that copies the source track AND clones every timeline clip on it (1-shot, no repeats)
+3. **Clip Fades Indicator** - When a clip has a fade-in or fade-out, draw a small ⤴/⤵ triangle badge in the clip header so it's visible without opening the clip
+4. **Loop Region Bar Marker** - When a loop region is active, show a small "A→B" label floating in the transport bar with the loop start/stop times
+5. **Project Session Timer** - Add an "MM:SS" elapsed-since-load timer to the status bar that updates once per second; click to reset
+6. **Mute-Others Solo Shortcut** - Press `Shift+S` on a selected track to solo ONLY that track and temporarily mute every other track (toggle off with same shortcut)
 
 ## Workflow
 
