@@ -9,6 +9,8 @@
 - **Features Still in Progress**: _None._
 - **Action Taken**: Pulled latest (HEAD at `c9c4011`). Found pre-existing doc conflicts in AGENTS.md and FEATURE_STATUS.md (unmerged paths from a prior session). Resolved by keeping local (more recent Run 20 entry). Verified the staged v0.4.09 Clip Drag Clone files (ClipDragClone.js, constants.js APP_VERSION bump, main.js wiring, index.html script tag) all pass `node --check`. Confirmed Priority-1 phantom (44th consecutive run, 16 occurrences, all guards present). Committed merge + pushed. Verified deployed site at `https://snugos.github.io/snaw/`. No code authored this run (audit only). Resolved stale conflict in `/home/workspace/AGENTS.md` (this file) as housekeeping.
 
+**Late-run update:** parallel builder shipped **v0.4.10 Track Notes Sidebar** (`f3afe275`, `js/TrackNotesSidebar.js` 373 lines + `js/TrackNotes.js` 540 lines) between the initial push and rebase. APP_VERSION now at **0.4.10**. Both new files pass `node --check`. Curl-verified deployed `main.js` still resolves all 16 `removeCustomDesktopBackground` references.
+
 **Status: ONE FIX SHIPPED — v0.4.07 MIDI File Import/Export preserved per-track MIDI channel on round-trip (commit `b8a9d44`, pushed)**
 
 ### Pulled & Merged
