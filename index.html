@@ -286,9 +286,9 @@
             <span id="statusBufferQualityValue">Balanced</span>
         </div>
         <div class="text-gray-600">|</div>
-        <div id="statusSessionTimer" class="flex items-center gap-1 cursor-pointer hover:text-gray-300" title="Time since SnugOS loaded">
-            <span class="text-gray-500">Session:</span>
-            <span id="statusSessionTimerValue">00:00:00</span>
+        <div id="statusSessionTimer" class="flex items-center gap-1 cursor-pointer hover:text-gray-300" title="Session elapsed time (MM:SS) — click to reset">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span id="statusSessionTimerValue">00:00</span>
         </div>
         <div class="text-gray-600">|</div>
         <div id="statusTrackCount" class="flex items-center gap-1 cursor-pointer hover:text-gray-300" title="Number of Tracks">
@@ -526,6 +526,7 @@
     <script src="js/MIDIActivityMonitor.js"></script>
     <script type="module" src="js/MIDIActivityLog.js"></script>
     <script type="module" src="js/AutoSaveCounter.js"></script>
+    <script type="module" src="js/ProjectSessionTimer.js"></script>
     <script src="js/MIDILearnBulkAssign.js"></script>
     <script src="js/MIDILearnPresets.js"></script>
     <script src="js/CpuPerformanceMode.js"></script>

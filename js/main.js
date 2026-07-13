@@ -100,6 +100,7 @@ import { initLoopUntilMarker, openLoopUntilMarkerPanel, extendLoopToNextMarker, 
 import { initLoopLengthDisplay, refreshLoopLengthDisplay } from './LoopLengthDisplay.js';
 import { initAutoSaveIndicator, showSaveStatus, getSaveStatus } from './AutoSaveIndicator.js';
 import { initAutoSaveCounter, getAutoSaveCounterStatus } from './AutoSaveCounter.js'; // v0.3.92
+import { initProjectSessionTimer, refreshProjectSessionTimer, resetProjectSessionTimer, getProjectSessionTimerStatus } from './ProjectSessionTimer.js'; // v0.4.12 Project Session Timer (MM:SS, click to reset)
 import { initMIDIActivityLog, refreshMIDIActivityLog, setMIDIActivityLogVisible, toggleMIDIActivityLog } from './MIDIActivityLog.js';
 import { initExportSelection, openExportSelectionPanel } from './ExportSelection.js';
 import { initLyricsTrack, openLyricsTrackPanel, getLyrics, addLyric, importLyricsText, setLyricsTrackEnabled, getCurrentLyric } from './LyricsTrack.js';
@@ -624,6 +625,18 @@ const appServices = {
                 if (typeof getAutoSaveCountToday === 'function') return getAutoSaveCountToday();
             } catch (_) { /* fall through to 0 */ }
             return 0;
+        },
+        // Project Session Timer (v0.4.12) — MM:SS status bar timer with click-to-reset.
+        resetProjectSessionTimer: () => {
+            try {
+                if (typeof resetProjectSessionTimer === 'function') resetProjectSessionTimer();
+            } catch (e) { console.warn('[appServices.resetProjectSessionTimer] Error:', e); }
+        },
+        getProjectSessionTimerStatus: () => {
+            try {
+                if (typeof getProjectSessionTimerStatus === 'function') return getProjectSessionTimerStatus();
+            } catch (_) { /* fall through */ }
+            return null;
         },
         // Loop region passthroughs (v0.3.86 — LoopLengthDisplay)
         getLoopRegionEnabled: () => getLoopRegionEnabled(),
@@ -2413,6 +2426,7 @@ async function initializeSnugOS() {
         if (typeof initMIDIActivityLog === 'function') initMIDIActivityLog(appServices); // MIDI Activity Log initialization (v0.3.88)
         if (typeof initAutoSaveIndicator === 'function') initAutoSaveIndicator(appServices); // Auto-save Indicator initialization
         if (typeof initAutoSaveCounter === 'function') initAutoSaveCounter(appServices); // Auto-save Counter (v0.3.92)
+        if (typeof initProjectSessionTimer === 'function') initProjectSessionTimer(appServices); // Project Session Timer (v0.4.12) — MM:SS, click to reset
         if (typeof initLyricsTrack === 'function') initLyricsTrack(appServices); // Lyrics Track initialization
         if (typeof initLyricsDisplay === 'function') initLyricsDisplay(appServices); // Lyrics Display Karaoke Mode
         if (typeof initTimeSignaturePerTrack === 'function') initTimeSignaturePerTrack(appServices); // Time Signature Per Track initialization
@@ -2730,14 +2744,21 @@ function updatePerformanceStats() {
         if (undoEl) undoEl.textContent = getUndoCount ? getUndoCount() : 0;
         if (redoEl) redoEl.textContent = getRedoCount ? getRedoCount() : 0;
 
-        // Update session timer
+        // Update session timer (ProjectSessionTimer module — MM:SS, click to reset)
         const sessionEl = document.getElementById('statusSessionTimerValue');
         if (sessionEl) {
-            const totalSeconds = Math.floor((now - snawSessionStartTime) / 1000);
-            const hours = Math.floor(totalSeconds / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
-            const seconds = totalSeconds % 60;
-            sessionEl.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            if (typeof refreshProjectSessionTimer === 'function') {
+                refreshProjectSessionTimer();
+            } else if (typeof window !== 'undefined' && typeof window.refreshProjectSessionTimer === 'function') {
+                window.refreshProjectSessionTimer();
+            } else {
+                // Fallback to legacy HH:MM:SS format if module not loaded.
+                const totalSeconds = Math.floor((now - snawSessionStartTime) / 1000);
+                const hours = Math.floor(totalSeconds / 3600);
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+                const seconds = totalSeconds % 60;
+                sessionEl.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }
         }
 
         // Update track count

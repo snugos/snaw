@@ -1,3 +1,75 @@
+## Session: 2026-07-12 18:00 UTC (Snaw Feature Completion Agent Run — Day 775 Run 24)
+
+**Status: ONE FEATURE SHIPPED — v0.4.12 Project Session Timer (MM:SS, Click to Reset) is live**
+
+The Priority-1 `removeCustomDesktopBackground` ReferenceError remains a confirmed **false positive** for the 47th consecutive run:
+- 16 occurrences in `js/main.js`
+- Function defined, exported, mirrored to window, and guarded at every call site
+
+The codebase accepted a clean new feature on top of an existing untracked diff left by the parallel agent's `UndoToast.js` refinement.
+
+### Feature Shipped: v0.4.12 Project Session Timer
+
+| Item | Value |
+| --- | --- |
+| Module | `js/ProjectSessionTimer.js` (new, 116 lines) |
+| Wires | ES module import (main.js:103), 2 `appServices` exports (main.js:630-637), `initProjectSessionTimer(appServices)` call (main.js:2429), per-frame refresh in `updatePerformanceStats` (main.js:2747-2755), `<script type="module">` tag (index.html:529) |
+| Behaviour | `#statusSessionTimer` now shows `MM:SS` (was `HH:MM:SS`), updates once per second from `Date.now()` (decoupled from `performance.now()` delta noise), click to reset (700 ms emerald flash + ↻ icon swap) |
+| UI | Small SVG clock glyph added to the status-bar cell; tooltip clarified to "Session elapsed time (MM:SS) — click to reset" |
+| Public API | `initProjectSessionTimer(appServices)`, `refreshProjectSessionTimer()`, `resetProjectSessionTimer()`, `getProjectSessionTimerStatus()` |
+| Smoke test | 8/8 assertions pass against a minimal DOM mock |
+| APP_VERSION | 0.4.11 → 0.4.12 in `js/constants.js` |
+
+### Files Modified
+
+| File | Change |
+| --- | --- |
+| `js/ProjectSessionTimer.js` | New module (116 lines) |
+| `js/main.js` | Import + 2 appServices exports + init call + per-frame refresh delegation |
+| `index.html` | New module script tag, updated timer block title + initial text, added SVG clock glyph |
+| `js/constants.js` | APP_VERSION bump 0.4.11 → 0.4.12 |
+| `INSTRUCTION.md` | Queue item 1 (Project Session Timer) removed, 6 items remain |
+| `AGENTS.md` | This entry prepended |
+| `FEATURE_STATUS.md` | This entry prepended |
+
+### Verification
+
+- `node --check js/ProjectSessionTimer.js` — OK
+- `node --check js/main.js` — OK
+- `node --check js/constants.js` — OK
+- 8-assertion smoke test (`/home/.z/workspaces/con_QQ4oXQGIzEAu5Dme/smoke_test_session_timer.js`) — all pass
+- All 3 pre-existing uncommitted files from the parallel agent (`AGENTS.md`, `FEATURE_STATUS.md`, `js/UndoToast.js`) were left untouched per coordination pattern
+
+## Session: 2026-07-12 17:50 UTC (Snaw Feature Completion Agent Run — Day 775 Run 23)
+
+**Status: AUDIT ONLY — Codebase clean, v0.4.11 stable, 46th consecutive phantom confirmation**
+
+The Priority-1 `removeCustomDesktopBackground` ReferenceError remains a **false positive** for the 46th consecutive run:
+- 16 occurrences in `js/main.js`
+- Function defined at line 386 (`async function removeCustomDesktopBackground`)
+- Exported via `appServices`
+- Mirrored to `window.removeCustomDesktopBackground` at line 2020
+- Call sites at lines 2048–2050 are inside `typeof === 'function'` guards
+- No `node --check` errors; no runtime errors reported
+
+**Automated scan results:**
+- 0 TODO/FIXME/STUB markers
+- 0 untracked orphan files
+- `state.js` clean
+- All 7 key JS files (`main.js`, `state.js`, `audio.js`, `ui.js`, `eventHandlers.js`, `constants.js`, `UndoToast.js`) pass `node --check`
+
+**Deployed verification:**
+- `https://snugos.github.io/snaw/js/main.js` → HTTP 200
+- 16 references to `removeCustomDesktopBackground` intact in deployed file
+
+**APP_VERSION**: 0.4.11 (Smart Undo Description v0.4.11 + Track Notes Sidebar v0.4.10 + Clip Drag-to-Clone v0.4.09 + Clip Time Handles v0.4.08 all merged)
+
+**Parallel builder activity:** Mid-flight on UndoToast.js refinement (+9/-2: showToast guard removal, dual notification passthrough, init validation). Left untouched per the established coordination pattern.
+
+**Action taken**: Audit only. No code changes. AGENTS.md and this file updated with Run 23 entry.
+
+---
+
 ## Session: 2026-07-12 17:20 UTC (Snaw Repair & Enhancement Agent Run — Day 775 Run 22)
 
 **Status: AUDIT ONLY — Codebase clean, v0.4.10 stable, 45th consecutive phantom confirmation**
