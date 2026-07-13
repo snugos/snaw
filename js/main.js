@@ -15,6 +15,7 @@ import { initTimelineRulerClick, openTimelineRulerClickSettings } from './Timeli
 import { initTempoJumpMarkers } from './TempoJumpMarkers.js';
 import { initMarkerColorPresets } from './MarkerColorPresets.js';
 import { initMuteSelectedTracks } from './MuteSelectedTracks.js';
+import { initMuteOthersSolo } from './MuteOthersSolo.js';
 import { AIMasteringEnhancement, initAIMasteringEnhancement, openAIMasteringEnhancementPanel } from './AIMasteringEnhancement.js';
 import { AudioStemExportEnhancement, initAudioStemExportEnhancement, openAudioStemExportEnhancementPanel } from './AudioStemExportEnhancement.js';
 import { MIDIPatternVariationEnhancement, initMIDIPatternVariationEnhancement, openMIDIPatternVariationEnhancementPanel } from './MIDIPatternVariationEnhancement.js';
@@ -2515,6 +2516,7 @@ async function initializeSnugOS() {
         if (typeof initTempoJumpMarkers === 'function') initTempoJumpMarkers(appServices); // Tempo Jump Markers - click to set tempo jump point
         if (typeof initMarkerColorPresets === 'function') initMarkerColorPresets(appServices); // Marker Color Presets - semantic color picker for timeline markers
         if (typeof initMuteSelectedTracks === 'function') initMuteSelectedTracks(appServices); // Mute Selected Tracks - M to mute/unmute selected
+        if (typeof initMuteOthersSolo === 'function') initMuteOthersSolo(appServices); // Mute-Others Solo - Shift+S soloes selected and temporarily mutes the rest, toggle to restore
         if (typeof initMidiChordDisplay === 'function') initMidiChordDisplay(appServices); // MIDI Chord Display initialization
         if (typeof initClipOpacity === 'function') initClipOpacity(appServices); // Clip Opacity initialization
         if (typeof initClipGainPerInstance === 'function') initClipGainPerInstance(appServices); // Clip Gain Per Instance initialization
