@@ -7893,6 +7893,19 @@ function renderTrackStrip(track) {
         }
     } catch (e) { /* non-fatal — leave the badge empty */ }
 
+    // Per-track 📝 notes-sidebar button (v0.4.10). Tiny icon-only
+    // button rendered in the track-strip header. Clicking it toggles
+    // the inline notes textarea anchored to the strip. Distinct from
+    // TrackNotes.js (which opens a separate panel) — the sidebar
+    // lives next to the strip and is per-track quick scratch space.
+    let trackNotesSidebarBtnHTML = '';
+    try {
+        const nsTrackId = track.id != null ? String(track.id) : '';
+        trackNotesSidebarBtnHTML = `<button type="button" class="track-notes-sidebar-btn w-5 h-5 inline-flex items-center justify-center rounded text-[11px] leading-none bg-gray-700 text-gray-200 hover:bg-yellow-600 hover:text-white border border-gray-600"
+            data-track-id="${nsTrackId}"
+            title="Per-track notes (click to open inline notepad)">📝</button>`;
+    } catch (e) { /* non-fatal */ }
+
     return `
         <div class="track-strip flex-shrink-0 w-44 bg-gray-800 rounded-lg p-3 flex flex-col gap-2 border border-gray-700" data-track-id="${track.id}">
             <div class="text-center">
@@ -7903,6 +7916,7 @@ function renderTrackStrip(track) {
                     ${midiChannelBadgeHTML}
                     ${grooveBadgeHTML}
                     ${ccCountBadgeHTML}
+                    ${trackNotesSidebarBtnHTML}
                 </div>
             </div>
             

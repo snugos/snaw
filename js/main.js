@@ -82,6 +82,7 @@ import { initCountInAudio, setupCountInUI, playCountIn, isCountInActive } from '
 import { initCountInSettingsPanel, openCountInSettingsPanel, getCountInSettings, setCountInBars, setCountInSoundEnabled, setCountInVisualCountdown, setCountInAccentFirstBeat, setCountInVolume } from './CountInSettingsPanel.js';
 import { initClipTimeHandles, refreshClipTimeHandles, formatTimecode } from './ClipTimeHandles.js'; // Clip Time Handles (v0.4.08) - mm:ss timecode overlay on each clip
 import { initClipDragClone, getClipDragCloneVersion } from './ClipDragClone.js'; // Clip Drag Clone (v0.4.09) - Alt+drag to clone-paint clips on the timeline
+import { initTrackNotesSidebar, openTrackNotesSidebar, getTrackNotesSidebarText, setTrackNotesSidebarText, removeTrackNotesSidebar } from './TrackNotesSidebar.js'; // Track Notes Sidebar (v0.4.10) - per-track 📝 button + inline textarea popover
 import { initMIDArpeggiatorPanel, openMIDArpeggiatorPanel } from './MIDArpeggiatorPanel.js';
 import { initTrackTemplateLibrary, openTrackTemplateLibraryPanel, getTrackTemplateNames, getTrackTemplate, saveTrackTemplate, deleteTrackTemplate, exportTemplates, importTemplates } from './TrackTemplateLibrary.js';
 import { initMixerChannelStripPresets, openMixerChannelStripPresetsPanel, exportChannelStripPresets, importChannelStripPresets } from './MixerChannelStripPresets.js';
@@ -1346,6 +1347,11 @@ const appServices = {
     refreshClipTimeHandles,
     formatTimecode,
     initClipDragClone,
+    initTrackNotesSidebar,
+    openTrackNotesSidebar,
+    getTrackNotesSidebarText,
+    setTrackNotesSidebarText,
+    removeTrackNotesSidebar,
     getTracksByRole,
     getRoleSummary,
     openCountInSettingsPanel,
@@ -2447,6 +2453,7 @@ async function initializeSnugOS() {
         if (typeof initMidiFilePanel === 'function') initMidiFilePanel(appServices); // MIDI File Import/Export initialization
         if (typeof initClipTimeHandles === 'function') initClipTimeHandles(appServices); // Clip Time Handles initialization
         if (typeof initClipDragClone === 'function') initClipDragClone(appServices); // Clip Drag Clone (v0.4.09) - Alt+drag to clone-paint
+        if (typeof initTrackNotesSidebar === 'function') initTrackNotesSidebar(appServices); // Track Notes Sidebar (v0.4.10) - per-track 📝 button + inline textarea popover
         if (typeof initTrackRolePanel === 'function') initTrackRolePanel(appServices); // Track Role Panel initialization
         if (typeof initTrackSnapResolutionPanel === 'function') initTrackSnapResolutionPanel(appServices); // Track Snap Resolution Panel initialization
         if (typeof initTrackScrollToCenter === 'function') initTrackScrollToCenter(appServices); // Track Scroll To Center initialization
