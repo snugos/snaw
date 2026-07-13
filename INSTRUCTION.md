@@ -4,16 +4,18 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Mute-Others Solo Shortcut** - Press `Shift+S` on a selected track to solo ONLY that track and temporarily mute every other track (toggle off with same shortcut)
-2. **Quick Project Snapshot List** - Add a small panel listing the last 5 saved project snapshots (auto-saved + manual) so producers can pick a previous state without opening the file dialog
-3. **Inline Track Number Labels** - Add small "1", "2", "3" keyboard-numeral labels next to each track header so producers can see which number key triggers the corresponding track (e.g. for arming/solo shortcuts)
-4. **Recent Project File History** - Store a localStorage list of the last 5 loaded/saved project file names and show them in a "Recent" submenu of the project menu
-5. **Transport Bar Master Output Meter** - Add a small L/R horizontal meter in the transport bar showing master output peaks (post-master-fader, pre-limiter) updated on every audio frame
-6. **Last-Used Effect Preset Memory** - Remember the last effect preset used per-effect-type and offer it as a "Last used" quick-pick at the top of the preset dropdown
+1. **Quick Project Snapshot List** - Add a small panel listing the last 5 saved project snapshots (auto-saved + manual) so producers can pick a previous state without opening the file dialog
+2. **Inline Track Number Labels** - Add small "1", "2", "3" keyboard-numeral labels next to each track header so producers can see which number key triggers the corresponding track (e.g. for arming/solo shortcuts)
+3. **Recent Project File History** - Store a localStorage list of the last 5 loaded/saved project file names and show them in a "Recent" submenu of the project menu
+4. **Transport Bar Master Output Meter** - Add a small L/R horizontal meter in the transport bar showing master output peaks (post-master-fader, pre-limiter) updated on every audio frame
+5. **Last-Used Effect Preset Memory** - Remember the last effect preset used per-effect-type and offer it as a "Last used" quick-pick at the top of the preset dropdown
+6. **Track Renumber Shortcut** - Press `Shift+R` on a selected track to open a small inline prompt that lets you renumber the track (e.g. move it to position 1) and rename it; updates all clip references
+7. **Master Output Meter Bridge** - Add a small peak/RMS meter in the transport bar that shows the master output level (mono sum) with a hold-and-decay indicator
+8. **Quick Marker Set** - Press `M` during playback to drop a numbered marker at the current playhead; `Shift+M` removes the last marker; marker list shown in a tiny popover
 
-8. **Track Renumber Shortcut** - Press `Shift+R` on a selected track to open a small inline prompt that lets you renumber the track (e.g. move it to position 1) and rename it; updates all clip references
-9. **Master Output Meter Bridge** - Add a small peak/RMS meter in the transport bar that shows the master output level (mono sum) with a hold-and-decay indicator
-10. **Quick Marker Set** - Press `M` during playback to drop a numbered marker at the current playhead; `Shift+M` removes the last marker; marker list shown in a tiny popover
+9. *(queue refilling — see brainstorming block below)*
+
+_Bulk-shipped: v0.4.13 Mute-Others Solo Shortcut (Shift+S, toggles back to prior mix)._
 
 ## Workflow
 
