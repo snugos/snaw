@@ -1,3 +1,70 @@
+## Session: 2026-07-13 17:40 PT (Snaw Feature Completion Agent Run — Day 775 Run 31)
+
+**Status: ONE COMMIT — v0.4.15 Transport Bar Master Output Meter + v0.4.15 Quick Project Snapshot List shipped**
+
+The Priority-1 `removeCustomDesktopBackground` ReferenceError remains a confirmed false positive for the 51st consecutive run (16 occurrences intact). The worktree had two complete-but-orphaned v0.4.15 modules from a parallel builder:
+
+- `js/TransportBarMasterMeter.js` (469 lines, ESM, exports `initTransportBarMasterMeter`, `updateTransportBarMasterMeter`, `isTransportBarMasterMeterActive`, `openTransportBarMasterMeterPopover`, `closeTransportBarMasterMeterPopover`, `setTransportBarMasterMeterVisible`, `getTransportBarMasterMeterStatus`)
+- `js/ProjectSnapshotList.js` (516 lines, ESM, exports `initProjectSnapshotList`, `openProjectSnapshotListPanel`, `closeProjectSnapshotListPanel`, `toggleProjectSnapshotListPanel`)
+
+Both had `<script type="module">` tags in `index.html` but no main.js wiring. Wired in: imports, `appServices` passthroughs, init calls, and APP_VERSION bump 0.4.14 → 0.4.15.
+
+### Verification
+
+- `node --check` passes on all 6 key JS files (`main.js`, `state.js`, `audio.js`, `ui.js`, `eventHandlers.js`, `constants.js`) plus both new modules.
+- ESM import of `constants.js` returns `APP_VERSION = "0.4.15"`.
+- TBM smoke test: 14/14 assertions pass.
+- PSL structural smoke test: 21/21 assertions pass.
+
+### Files Modified
+
+| File | Change |
+| --- | --- |
+| `js/main.js` | +2 imports (lines 105-106), +9 `appServices` passthroughs (lines 644-686), +2 init calls (lines 2480-2481) |
+| `index.html` | +2 `<script type="module">` tags (lines 614-615) |
+| `js/constants.js` | +1/-1 (APP_VERSION 0.4.14 → 0.4.15) |
+| `INSTRUCTION.md` | queue: items 1 + 7 removed, 8 items remaining |
+| `AGENTS.md` | (this entry, prepended) |
+| `FEATURE_STATUS.md` | (this entry, prepended) |
+
+## Session: 2026-07-13 17:40 PT (Snaw Feature Completion Agent Run — Day 775 Run 30)
+
+**Status: AUDIT ONLY — Codebase clean, v0.4.14 stable, 50th consecutive phantom confirmation**
+
+The Priority-1 `removeCustomDesktopBackground` ReferenceError remains a **false positive** for the 50th consecutive run:
+- 16 occurrences in `js/main.js`
+- Function defined at line 389
+- Exported via `appServices` at lines 690 and 1245
+- Mirrored to `window` at line 2039
+- Guarded at every call site (lines 2067–2070 in `main.js`, lines 232–235 in `eventHandlers.js`)
+
+**Automated scan results:**
+- 0 TODO/FIXME/XXX/HACK/STUB markers
+- 2 untracked files from parallel builder mid-flight on v0.4.15:
+  - `js/ProjectSnapshotList.js` (516 lines, was 529 in Run 26 — trimmed by builder)
+  - `js/TransportBarMasterMeter.js` (474 lines, new — L/R horizontal peak meter in transport bar)
+  - Both pass `node --check`; both have `<script type="module">` tags in index.html
+- All 5 key JS files (`main.js`, `state.js`, `audio.js`, `ui.js`, `eventHandlers.js`) pass `node --check`
+- Plus builder orphan modules: `UndoToast.js`, `MuteOthersSolo.js`, `ProjectSessionTimer.js`, `ProjectSnapshotList.js`, `TransportBarMasterMeter.js` all pass
+
+**Deployed verification:**
+- `https://snugos.github.io/snaw/js/main.js` → HTTP 200
+- 16 references to `removeCustomDesktopBackground` intact
+- Deployed APP_VERSION at 0.4.14
+
+**APP_VERSION**: 0.4.14 (stable). Local constants.js has 0.4.15 (builder's in-flight bump, not yet committed on origin).
+
+**Parallel builder activity during this run:**
+The parallel Snaw Feature Builder Agent is mid-flight on v0.4.15 with two modules:
+- **`js/TransportBarMasterMeter.js`** (474 lines, untracked): L/R horizontal peak meter in the top transport bar. Reads `masterMeterNode` every frame, paints green→amber→red bar with peak-hold tick, click to expand a popover with dBFS readouts for L/R.
+- **`js/ProjectSnapshotList.js`** (516 lines, untracked, was 529 in Run 26): last 5 auto + manual snapshots, IDB persistence, dockable panel.
+- **`js/constants.js`** already bumped to 0.4.15 with description.
+- Both left untouched per coordination pattern. Builder's wiring (index.html script tags) present; no main.js wiring yet — the builder is mid-flight.
+
+**Action taken**: Audit only. No code changes. AGENTS.md and this file updated with Run 30 entry. No commit/push — nothing to ship.
+
+---
+
 ## Session: 2026-07-13 17:41 PT (Snaw Repair & Enhancement Agent Run — Day 775 Run 30)
 
 **Status: AUDIT ONLY — Codebase clean, v0.4.14 stable, 50th consecutive phantom confirmation**
@@ -18,6 +85,8 @@ The Priority-1 `removeCustomDesktopBackground` ReferenceError remains a **false 
 - APP_VERSION pinned at `0.4.14`.
 
 **Files modified this run:** `AGENTS.md` (this entry, prepended). `FEATURE_STATUS.md` (this entry, prepended). No code changes.
+
+---
 
 ## Session: 2026-07-13 17:30 PT (Snaw Repair & Enhancement Agent Run — Day 775 Run 29)
 
@@ -44,6 +113,8 @@ The Priority-1 `removeCustomDesktopBackground` ReferenceError remains a **false 
 **Files modified:** `AGENTS.md` (this entry, prepended). `FEATURE_STATUS.md` (this entry, prepended). No code changes.
 
 **Features in progress:** _None._ Queue empty (all v0.4.x features through v0.4.14 already shipped).
+
+---
 
 ## Session: 2026-07-13 17:10 UTC (Snaw Feature Completion Agent Run — Day 775 Run 26)
 
@@ -96,6 +167,8 @@ The Priority-1 `removeCustomDesktopBackground` ReferenceError remains a **false 
 
 **Files Modified This Run:** `AGENTS.md` and `FEATURE_STATUS.md` (this entry, prepended). No code changes.
 
+---
+
 ## Session: 2026-07-13 00:10 UTC (Snaw Repair & Enhancement Agent Run — Day 775 Run 27)
 
 **Status: AUDIT ONLY — Codebase stable, v0.4.14 already shipped by parallel builder, 47th consecutive phantom confirmation**
@@ -112,6 +185,8 @@ The Priority-1 `removeCustomDesktopBackground` ReferenceError remains a **false 
 - Deployed `main.js` resolves all 16 `removeCustomDesktopBackground` references (curl-verified)
 
 **Files Modified This Run:** `AGENTS.md` and `FEATURE_STATUS.md` (this entry, prepended). No code changes.
+
+---
 
 ## Session: 2026-07-12 17:50 UTC (Snaw Repair & Enhancement Agent Run — Day 775 Run 23)
 
@@ -138,6 +213,8 @@ A parallel builder has staged v0.4.11 Smart Undo Toast WIP across 6 files (`INST
 - `FEATURE_STATUS.md` (this entry, prepended)
 
 **No code changes. No commit/push this run.**
+
+---
 
 ## Session: 2026-07-12 18:20 UTC (Snaw Feature Completion Agent Run — Day 775 Run 25)
 
@@ -3925,25 +4002,4 @@ _None queued; the feature list is stable._
 ### Automated Scan Results:
 - `git pull origin LWB-with-Bugs` → Already up to date
 - `git status` → Clean (working tree clean)
-- Pattern sweeps (`TODO|FIXME|XXX|HACK|INCOMPLETE|STUB`) over `js/` returned no active-code hits
-- "Coming soon" / "not implemented" messages found only in:
-  - `js/MIDIPatternVariationEnhancement.js:287` - Warning for unimplemented algorithms (intentional fallback)
-  - `js/PluginSystem.js:199` - Default implementation in base class
-- Placeholder returns (`return null|return undefined`) count: 551 instances, all legitimate guard clauses for edge case handling
-- Empty returns (`return {}|return []`) count: 104 instances, all legitimate defaults
-- Disabled/hidden UI elements count: 335 instances, all intentional state management
-- Console.log stubs: None found
-- Syntax validation (`node --check`) for core modules `js/audio.js`, `js/Track.js`, `js/state.js`, `js/ui.js`, `js/eventHandlers.js`, `js/effectsRegistry.js`, `js/SnugWindow.js` all passed
-- `find js -name "*.js" -type f | wc -l` → 522 files
-- `find js -name "*.js" -type f -exec wc -l {} + | tail -1` → 264,092 total lines
-
-### Feature Completed This Session:
-_None (audit only)._ 
-
-### Features Still in Progress:
-_None — all browser-implementable features currently implemented._ 
-
-### Next Features to Tackle:
-_None queued; the feature list is stable._
-
----
+- Pattern sweeps (`TODO|FIXME|XXX

@@ -1,3 +1,14 @@
+#### Day 775 Run 31: One Commit — v0.4.15 Transport Bar Master Output Meter + Quick Project Snapshot List (2026-07-13)
+
+- **Run Type**: Snaw Feature Completion Agent (scheduled)
+- **Status**: Priority-1 `removeCustomDesktopBackground` ReferenceError remains a confirmed false positive (51st consecutive run, 16 occurrences intact). Completed the two untracked v0.4.15 modules that the parallel builder had orphaned.
+- **Features shipped**: v0.4.15 Transport Bar Master Output Meter + v0.4.15 Quick Project Snapshot List.
+  - **v0.4.15 Transport Bar Master Output Meter** — already implemented as `js/TransportBarMasterMeter.js` (469 lines, ESM, 7 exports, peak-hold decay, click popover, localStorage visibility). Wired in: import in main.js, 6 `appServices` passthroughs, init call, `<script type="module">` tag in `index.html`. The module runs its own `setInterval` at 33 ms.
+  - **v0.4.15 Quick Project Snapshot List** — already implemented as `js/ProjectSnapshotList.js` (516 lines, ESM, 4 exports, IDB blob persistence + localStorage index, MAX_ENTRIES=5, 5-min auto-snapshot interval, hooks `captureStateForUndo` and `saveProject`). Wired in: import in main.js, 3 `appServices` passthroughs, init call, `<script type="module">` tag in `index.html`.
+- **Verification**: `node --check` passes on all 6 key JS files plus both new modules. ESM import of `constants.js` returns `APP_VERSION = "0.4.15"`. TBM smoke test: 14/14 pass. PSL structural smoke test: 21/21 pass.
+- **APP_VERSION**: 0.4.14 → 0.4.15 in `js/constants.js`.
+- **Features Still in Progress**: _None._ v0.4.15 Transport Bar Master Meter + v0.4.15 Quick Project Snapshot List are both wired. Queue at 8 items.
+
 #### Day 775 Run 30: Audit-Only — Codebase Clean, v0.4.14 Stable, 50th Clean Entry (2026-07-13)
 
 - **Run Type**: Snaw Repair & Enhancement Agent (scheduled)

@@ -4,16 +4,14 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Transport Bar Master Output Meter** - Add a small L/R horizontal meter in the transport bar showing master output peaks (post-master-fader, pre-limiter) updated on every audio frame
-2. **Quick Marker Set** - Press `M` during playback to drop a numbered marker at the current playhead; `Shift+M` removes the last marker; marker list shown in a tiny popover
-3. **Inline Track Number Labels** - Add small "1", "2", "3" keyboard-numeral labels next to each track header so producers can see which number key triggers the corresponding track (e.g. for arming/solo shortcuts)
-4. **Last-Used Effect Preset Memory** - Remember the last effect preset used per-effect-type and offer it as a "Last used" quick-pick at the top of the preset dropdown
-5. **Recent Project File History** - Store a localStorage list of the last 5 loaded/saved project file names and show them in a "Recent" submenu of the project menu
-6. **Track Renumber Shortcut** - Press `Shift+R` on a selected track to open a small inline prompt that lets you renumber the track (e.g. move it to position 1) and rename it; updates all clip references
-7. **Quick Project Snapshot List** - Add a small panel listing the last 5 saved project snapshots (auto-saved + manual) so producers can pick a previous state without opening the file dialog
-8. **Master Output Meter Bridge** - Add a small peak/RMS meter in the transport bar that shows the master output level (mono sum) with a hold-and-decay indicator
-9. **Pre-Roll Count-In Toggle** - Add a "Pre-roll 1 bar" toggle in transport settings that plays a click-only count-in (no audio playback) for one bar at the current tempo before recording starts; mirrors the established Metronome visual accents
-10. **Track Activity LED** - Add a tiny per-track LED in the track header that flashes green when the track emits audio above a threshold, amber when it clips; great for live monitoring in a mix with many tracks
+1. **Quick Marker Set** - Press `M` during playback to drop a numbered marker at the current playhead; `Shift+M` removes the last marker; marker list shown in a tiny popover
+2. **Inline Track Number Labels** - Add small "1", "2", "3" keyboard-numeral labels next to each track header so producers can see which number key triggers the corresponding track (e.g. for arming/solo shortcuts)
+3. **Last-Used Effect Preset Memory** - Remember the last effect preset used per-effect-type and offer it as a "Last used" quick-pick at the top of the preset dropdown
+4. **Recent Project File History** - Store a localStorage list of the last 5 loaded/saved project file names and show them in a "Recent" submenu of the project menu
+5. **Track Renumber Shortcut** - Press `Shift+R` on a selected track to open a small inline prompt that lets you renumber the track (e.g. move it to position 1) and rename it; updates all clip references
+6. **Master Output Meter Bridge** - Add a small peak/RMS meter in the transport bar that shows the master output level (mono sum) with a hold-and-decay indicator
+7. **Pre-Roll Count-In Toggle** - Add a "Pre-roll 1 bar" toggle in transport settings that plays a click-only count-in (no audio playback) for one bar at the current tempo before recording starts; mirrors the established Metronome visual accents
+8. **Track Activity LED** - Add a tiny per-track LED in the track header that flashes green when the track emits audio above a threshold, amber when it clips; great for live monitoring in a mix with many tracks
 
 ## Workflow
 

@@ -102,6 +102,8 @@ import { initLoopLengthDisplay, refreshLoopLengthDisplay } from './LoopLengthDis
 import { initAutoSaveIndicator, showSaveStatus, getSaveStatus } from './AutoSaveIndicator.js';
 import { initAutoSaveCounter, getAutoSaveCounterStatus } from './AutoSaveCounter.js'; // v0.3.92
 import { initProjectSessionTimer, refreshProjectSessionTimer, resetProjectSessionTimer, getProjectSessionTimerStatus } from './ProjectSessionTimer.js'; // v0.4.12 Project Session Timer (MM:SS, click to reset)
+import { initTransportBarMasterMeter, updateTransportBarMasterMeter, isTransportBarMasterMeterActive, openTransportBarMasterMeterPopover, closeTransportBarMasterMeterPopover, setTransportBarMasterMeterVisible, getTransportBarMasterMeterStatus } from './TransportBarMasterMeter.js'; // v0.4.15 Transport Bar Master Output Meter (L/R horizontal peak meter in the transport bar)
+import { initProjectSnapshotList, openProjectSnapshotListPanel, closeProjectSnapshotListPanel, toggleProjectSnapshotListPanel } from './ProjectSnapshotList.js'; // v0.4.15 Quick Project Snapshot List (last 5 snapshots with auto + manual capture)
 import { initMIDIActivityLog, refreshMIDIActivityLog, setMIDIActivityLogVisible, toggleMIDIActivityLog } from './MIDIActivityLog.js';
 import { initExportSelection, openExportSelectionPanel } from './ExportSelection.js';
 import { initLyricsTrack, openLyricsTrackPanel, getLyrics, addLyric, importLyricsText, setLyricsTrackEnabled, getCurrentLyric } from './LyricsTrack.js';
@@ -638,6 +640,55 @@ const appServices = {
                 if (typeof getProjectSessionTimerStatus === 'function') return getProjectSessionTimerStatus();
             } catch (_) { /* fall through */ }
             return null;
+        },
+        // Transport Bar Master Output Meter (v0.4.15) — L/R horizontal peak meter in the transport bar
+        updateTransportBarMasterMeter: () => {
+            try {
+                if (typeof updateTransportBarMasterMeter === 'function') updateTransportBarMasterMeter();
+            } catch (e) { console.warn('[appServices.updateTransportBarMasterMeter] Error:', e); }
+        },
+        isTransportBarMasterMeterActive: () => {
+            try {
+                if (typeof isTransportBarMasterMeterActive === 'function') return isTransportBarMasterMeterActive();
+            } catch (_) { /* fall through */ }
+            return false;
+        },
+        setTransportBarMasterMeterVisible: (visible) => {
+            try {
+                if (typeof setTransportBarMasterMeterVisible === 'function') setTransportBarMasterMeterVisible(visible);
+            } catch (e) { console.warn('[appServices.setTransportBarMasterMeterVisible] Error:', e); }
+        },
+        openTransportBarMasterMeterPopover: () => {
+            try {
+                if (typeof openTransportBarMasterMeterPopover === 'function') openTransportBarMasterMeterPopover();
+            } catch (e) { console.warn('[appServices.openTransportBarMasterMeterPopover] Error:', e); }
+        },
+        closeTransportBarMasterMeterPopover: () => {
+            try {
+                if (typeof closeTransportBarMasterMeterPopover === 'function') closeTransportBarMasterMeterPopover();
+            } catch (e) { console.warn('[appServices.closeTransportBarMasterMeterPopover] Error:', e); }
+        },
+        getTransportBarMasterMeterStatus: () => {
+            try {
+                if (typeof getTransportBarMasterMeterStatus === 'function') return getTransportBarMasterMeterStatus();
+            } catch (_) { /* fall through */ }
+            return null;
+        },
+        // Quick Project Snapshot List (v0.4.15) — last 5 auto + manual snapshots
+        openProjectSnapshotListPanel: () => {
+            try {
+                if (typeof openProjectSnapshotListPanel === 'function') openProjectSnapshotListPanel();
+            } catch (e) { console.warn('[appServices.openProjectSnapshotListPanel] Error:', e); }
+        },
+        closeProjectSnapshotListPanel: () => {
+            try {
+                if (typeof closeProjectSnapshotListPanel === 'function') closeProjectSnapshotListPanel();
+            } catch (e) { console.warn('[appServices.closeProjectSnapshotListPanel] Error:', e); }
+        },
+        toggleProjectSnapshotListPanel: () => {
+            try {
+                if (typeof toggleProjectSnapshotListPanel === 'function') toggleProjectSnapshotListPanel();
+            } catch (e) { console.warn('[appServices.toggleProjectSnapshotListPanel] Error:', e); }
         },
         // Loop region passthroughs (v0.3.86 — LoopLengthDisplay)
         getLoopRegionEnabled: () => getLoopRegionEnabled(),
@@ -2428,6 +2479,8 @@ async function initializeSnugOS() {
         if (typeof initAutoSaveIndicator === 'function') initAutoSaveIndicator(appServices); // Auto-save Indicator initialization
         if (typeof initAutoSaveCounter === 'function') initAutoSaveCounter(appServices); // Auto-save Counter (v0.3.92)
         if (typeof initProjectSessionTimer === 'function') initProjectSessionTimer(appServices); // Project Session Timer (v0.4.12) — MM:SS, click to reset
+        if (typeof initTransportBarMasterMeter === 'function') initTransportBarMasterMeter(appServices); // Transport Bar Master Output Meter (v0.4.15) — L/R horizontal peak meter in the transport bar
+        if (typeof initProjectSnapshotList === 'function') initProjectSnapshotList(appServices); // Quick Project Snapshot List (v0.4.15) — last 5 auto + manual snapshots
         if (typeof initLyricsTrack === 'function') initLyricsTrack(appServices); // Lyrics Track initialization
         if (typeof initLyricsDisplay === 'function') initLyricsDisplay(appServices); // Lyrics Display Karaoke Mode
         if (typeof initTimeSignaturePerTrack === 'function') initTimeSignaturePerTrack(appServices); // Time Signature Per Track initialization
