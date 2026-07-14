@@ -1,3 +1,42 @@
+#### Day 775 Run 27: Audit-Only — Codebase Stable, v0.4.14 Already Shipped by Parallel Builder, 47th Clean Entry (2026-07-13)
+
+- **Run Type**: Snaw Repair & Enhancement Agent (scheduled)
+- **Status**: Priority-1 `removeCustomDesktopBackground` ReferenceError confirmed false positive for the **47th consecutive run** — 16 occurrences in `js/main.js`, function defined (line 387) + exported via `appServices` (line 676) + mirrored to `window.removeCustomDesktopBackground` (line 2025) + guarded at every call site (`eventHandlers.js:232-235`, `main.js:2053-2056`). Curl-verified deployed `main.js` resolves all 16 references. **No Priority-1 bug.**
+- **Rebase sync**: Local branch was 5 commits behind `origin/LWB-with-Bugs` (parallel builder had shipped v0.4.11 UndoToast, v0.4.12 SessionTimer, v0.4.13 MuteOthersSolo, v0.4.14 daily merge, plus doc entries). Rebased onto `3a30840a`; working tree clean. APP_VERSION now at **0.4.14** (was 0.4.10 at the start of this run).
+- **Syntax audit**: `node --check` passes on all 7 critical JS files (`js/main.js`, `js/state.js`, `js/audio.js`, `js/ui.js`, `js/eventHandlers.js`, `js/UndoToast.js`, `js/MuteOthersSolo.js`).
+- **TODO/FIXME/STUB scan**: 0 markers across `js/`.
+- **Files Modified This Run**: `AGENTS.md` (this entry, prepended). `FEATURE_STATUS.md` (Day 775 Run 27 session entry, prepended). No code changes.
+
+#### Day 775 Run 27: Audit-Only — Codebase Stable, v0.4.14 Already Shipped by Parallel Builder, 47th Clean Entry (2026-07-13)
+
+- **Run Type**: Snaw Repair & Enhancement Agent (scheduled)
+- **Status**: Priority-1 `removeCustomDesktopBackground` ReferenceError confirmed false positive for the **47th consecutive run** — 16 occurrences in `js/main.js`, function defined (line 387) + exported via `appServices` (line 676) + mirrored to `window.removeCustomDesktopBackground` (line 2025) + guarded at every call site (`eventHandlers.js:232-235`, `main.js:2053-2056`). Curl-verified deployed `main.js` resolves all 16 references. **No Priority-1 bug.**
+- **Rebase sync**: Local branch was 5 commits behind `origin/LWB-with-Bugs` (parallel builder had shipped v0.4.11 UndoToast, v0.4.12 SessionTimer, v0.4.13 MuteOthersSolo, v0.4.14 daily merge, plus doc entries). Rebased onto `3a30840a`; working tree clean. APP_VERSION now at **0.4.14** (was 0.4.10 at the start of this run).
+- **Syntax audit**: `node --check` passes on all 7 critical JS files (`js/main.js`, `js/state.js`, `js/audio.js`, `js/ui.js`, `js/eventHandlers.js`, `js/UndoToast.js`, `js/MuteOthersSolo.js`).
+- **TODO/FIXME/STUB scan**: 0 markers across `js/`.
+- **Files Modified This Run**: `AGENTS.md` (this entry, prepended). `FEATURE_STATUS.md` (Day 775 Run 27 session entry, prepended). No code changes.
+
+#### Day 775 Run 27: Audit-Only — Codebase Stable, v0.4.14 Already Shipped by Parallel Builder, 47th Clean Entry (2026-07-13)
+
+- **Run Type**: Snaw Repair & Enhancement Agent (scheduled)
+- **Status**: Priority-1 `removeCustomDesktopBackground` ReferenceError confirmed false positive for the **47th consecutive run** — 16 occurrences in `js/main.js`, function defined (line 387) + exported via `appServices` (line 676) + mirrored to `window.removeCustomDesktopBackground` (line 2025) + guarded at every call site (`eventHandlers.js:232-235`, `main.js:2053-2056`). Curl-verified deployed `main.js` resolves all 16 references. **No Priority-1 bug.**
+- **Rebase sync**: Local branch was 5 commits behind `origin/LWB-with-Bugs` (parallel builder had shipped v0.4.11 UndoToast, v0.4.12 SessionTimer, v0.4.13 MuteOthersSolo, v0.4.14 daily merge, plus doc entries). Rebased onto `3a30840a`; working tree clean. APP_VERSION now at **0.4.14** (was 0.4.10 at the start of this run).
+- **Syntax audit**: `node --check` passes on all 7 critical JS files (`js/main.js`, `js/state.js`, `js/audio.js`, `js/ui.js`, `js/eventHandlers.js`, `js/UndoToast.js`, `js/MuteOthersSolo.js`).
+- **TODO/FIXME/STUB scan**: 0 markers across `js/`.
+- **Files Modified This Run**: `AGENTS.md` (this entry, prepended). `FEATURE_STATUS.md` (Day 775 Run 27 session entry, prepended). No code changes.
+
+#### Day 775 Run 23: Audit-Only — Codebase Stable, 46th Clean Entry, Parallel Builder WIP Detected (2026-07-12)
+
+- **Run Type**: Snaw Repair & Enhancement Agent (scheduled)
+- **Status**: Priority-1 `removeCustomDesktopBackground` ReferenceError confirmed false positive for the **46th consecutive run** — 16 occurrences in `js/main.js`, function defined (line 387) + exported via `appServices` (line 676) + mirrored to `window.removeCustomDesktopBackground` (line 2025) + guarded at every call site (`eventHandlers.js:232-235`, `main.js:2053-2056`). **No Priority-1 bug.**
+- **HEAD**: `5b791d42 docs: Day 775 Run 22 — audit-only, 45th clean entry, codebase stable at v0.4.10`. Working tree clean against the branch tip.
+- **Deployed verification**: `curl https://snugos.github.io/snaw/js/main.js | grep -c removeCustomDesktopBackground` returns 16, matching local count. No deployment drift.
+- **Automated scan results**: 0 `TODO` / `FIXME` / `STUB` / `HACK` / `INCOMPLETE` markers. All 5 key files pass `node --check`. APP_VERSION pinned at `0.4.10`.
+- **Working tree state**: 6 files modified vs HEAD — `INSTRUCTION.md`, `index.html`, `js/constants.js`, `js/main.js`, `js/state.js`, `style.css`. All from a parallel builder staging **v0.4.11 Smart Undo Toast**. **Not committing this WIP** — the staged import `import { initUndoToast, ... } from './UndoToast.js'` references a file that does not exist on disk (`ls js/UndoToast.js` → No such file). Committing now would ship a broken import. Per codebase rules, leaving WIP untouched for the builder to finish.
+- **INSTRUCTION.md queue**: parallel builder removed item #1 (Smart Undo Description) since v0.4.11 is in flight. Queue now 10 items, none of which match the WIP scope; all owned by the Feature Completion / Feature Builder agents.
+- **Files Modified This Run**: `AGENTS.md` (this entry, prepended). `FEATURE_STATUS.md` (Day 775 Run 23 session entry, prepended). No code changes.
+- **No commit/push this run** — the priority-1 bug does not exist, and the only changes in the working tree are mid-flight WIP that must not be committed by this agent.
+
 #### Day 775 Run 25: Audit-Only — Codebase Clean, v0.4.13 Stable, 48th Clean Entry (2026-07-12)
 
 - **Run Type**: Snaw Feature Completion Agent (scheduled)
@@ -8,6 +47,18 @@
 - **Files Modified This Run**: `AGENTS.md` (this entry, prepended). `FEATURE_STATUS.md` (Day 775 Run 25 session entry, prepended). No code changes.
 - **Features Still in Progress**: _None._
 - **Action Taken**: Pulled latest (already up to date, HEAD `daeaa47`). Confirmed Priority-1 phantom (48th consecutive run, 16 occurrences). Ran full scan suite — all clean. Verified `node --check` on all 6 key JS files. Curl-verified deployed `main.js` (HTTP 200, 16 references intact). No code authored this run (audit only). Updated `AGENTS.md` and `FEATURE_STATUS.md`.
+
+#### Day 775 Run 26: Audit-Only — Codebase Clean, v0.4.14 Stable, 49th Clean Entry, Builder Mid-Flight on v0.4.15 Project Snapshot List (2026-07-13)
+
+- **Run Type**: Snaw Feature Completion Agent (scheduled)
+- **Status**: Priority-1 `removeCustomDesktopBackground` ReferenceError confirmed false positive for the **49th consecutive run** — 16 occurrences, function defined + exported + mirrored to `window` + guarded at call sites. **No Priority-1 bug.** No incomplete features found. Codebase fully clean.
+- **Automated scan**: 0 TODO/FIXME/STUB, 1 untracked orphan (`js/ProjectSnapshotList.js`, 529 lines — parallel builder mid-flight on v0.4.15 Project Snapshot List), `state.js` 4092 lines clean, all key JS files pass `node --check`. 49th clean entry.
+- **Parallel builder**: Mid-flight on v0.4.15 Quick Project Snapshot List — new module `js/ProjectSnapshotList.js` (529 lines: last 5 auto + manual snapshots, IDB persistence, dockable panel), wiring in `index.html` (+2), `js/eventHandlers.js` (+1 menu handler), `js/main.js` (+38: import + appServices + init call). All pass `node --check`. Left untouched per coordination pattern.
+- **APP_VERSION**: 0.4.14 (Daily Merge & Bug Fixes).
+- **Deployed site**: HTTP 200, 16 references to `removeCustomDesktopBackground` intact.
+- **Files Modified This Run**: `AGENTS.md` (this entry, prepended). `FEATURE_STATUS.md` (Day 775 Run 26 session entry, prepended). No code changes.
+- **Features Still in Progress**: _None._
+- **Action Taken**: Pulled latest (already up to date, HEAD `3b3d519`). Refreshed git index (cleared stale stat entries from prior runs). Confirmed Priority-1 phantom (49th consecutive run, 16 occurrences). Ran full scan suite — all clean. Verified `node --check` on all key JS files + builder's orphan `ProjectSnapshotList.js`. Detected parallel builder mid-flight on v0.4.15 Project Snapshot List and left it untouched. No code authored this run (audit only). Updated `AGENTS.md` and `FEATURE_STATUS.md`.
 
 #### Day 775 Run 24: One Feature Shipped — v0.4.12 Project Session Timer (MM:SS, Click to Reset) (2026-07-12)
 

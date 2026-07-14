@@ -1,3 +1,97 @@
+## Session: 2026-07-13 17:10 UTC (Snaw Feature Completion Agent Run — Day 775 Run 26)
+
+**Status: AUDIT ONLY — Codebase clean, v0.4.14 stable, 49th consecutive phantom confirmation**
+
+The Priority-1 `removeCustomDesktopBackground` ReferenceError remains a **false positive** for the 49th consecutive run:
+- 16 occurrences in `js/main.js`
+- Function defined, exported, mirrored to window, and guarded at every call site
+
+**Automated scan results:**
+- 0 TODO/FIXME/STUB markers
+- 1 untracked orphan file (`js/ProjectSnapshotList.js`, 529 lines — parallel builder mid-flight on v0.4.15 Project Snapshot List)
+- `state.js` 4092 lines, `node --check` passes
+- All key JS files (`main.js`, `state.js`, `audio.js`, `ui.js`, `eventHandlers.js`, `constants.js`) pass `node --check`
+- Builder's orphan `ProjectSnapshotList.js` also passes `node --check`
+
+**Deployed verification:**
+- `https://snugos.github.io/snaw/js/main.js` → HTTP 200
+- 16 references to `removeCustomDesktopBackground` intact in deployed file
+
+**APP_VERSION**: 0.4.14 (Daily Merge & Bug Fixes)
+
+**Parallel builder activity during this run:**
+The parallel Snaw Feature Builder Agent is mid-flight on v0.4.15 Quick Project Snapshot List:
+- **`js/ProjectSnapshotList.js`** (529 lines, untracked): last 5 auto + manual snapshots, IDB persistence, dockable panel, load via `reconstructDAWInternal`
+- **Wiring**: `index.html` (+2: menu item "Snapshots..." + module script tag), `js/eventHandlers.js` (+1: `menuSnapshots` handler), `js/main.js` (+38: import + appServices passthroughs + init call)
+- All pass `node --check`
+- Left untouched per coordination pattern
+
+The initial `git status` showed stale stat entries for 7 files (including AGENTS.md, FEATURE_STATUS.md, MuteOthersSolo.js, TrackNotesSidebar.js, UndoToast.js) that had 0-byte diffs — these were cleared by `git update-index --refresh`, revealing the actual working tree state (3 modified + 1 untracked for v0.4.15).
+
+**Action taken**: Audit only. No code changes. AGENTS.md and this file updated with Run 26 entry.
+
+---
+
+## Session: 2026-07-13 00:10 UTC (Snaw Repair & Enhancement Agent Run — Day 775 Run 27)
+
+**Status: AUDIT ONLY — Codebase stable, v0.4.14 already shipped by parallel builder, 47th consecutive phantom confirmation**
+
+The Priority-1 `removeCustomDesktopBackground` ReferenceError remains a **false positive** for the 47th consecutive run:
+- 16 occurrences in `js/main.js`
+- Function defined, exported, mirrored to window, and guarded at every call site
+
+**Rebase sync:** local branch was 5 commits behind `origin/LWB-with-Bugs` (parallel builder shipped v0.4.11 UndoToast, v0.4.12 SessionTimer, v0.4.13 MuteOthersSolo, v0.4.14 daily merge, plus doc entries). Rebased onto `3a30840a`; working tree clean. APP_VERSION now at **0.4.14**.
+
+**Automated scan results:**
+- 0 TODO/FIXME/STUB markers
+- 0 syntax errors across all 7 critical JS files (`node --check` passes on `js/main.js`, `js/state.js`, `js/audio.js`, `js/ui.js`, `js/eventHandlers.js`, `js/UndoToast.js`, `js/MuteOthersSolo.js`)
+- Deployed `main.js` resolves all 16 `removeCustomDesktopBackground` references (curl-verified)
+
+**Files Modified This Run:** `AGENTS.md` and `FEATURE_STATUS.md` (this entry, prepended). No code changes.
+
+## Session: 2026-07-13 00:10 UTC (Snaw Repair & Enhancement Agent Run — Day 775 Run 27)
+
+**Status: AUDIT ONLY — Codebase stable, v0.4.14 already shipped by parallel builder, 47th consecutive phantom confirmation**
+
+The Priority-1 `removeCustomDesktopBackground` ReferenceError remains a **false positive** for the 47th consecutive run:
+- 16 occurrences in `js/main.js`
+- Function defined, exported, mirrored to window, and guarded at every call site
+
+**Rebase sync:** local branch was 5 commits behind `origin/LWB-with-Bugs` (parallel builder shipped v0.4.11 UndoToast, v0.4.12 SessionTimer, v0.4.13 MuteOthersSolo, v0.4.14 daily merge, plus doc entries). Rebased onto `3a30840a`; working tree clean. APP_VERSION now at **0.4.14**.
+
+**Automated scan results:**
+- 0 TODO/FIXME/STUB markers
+- 0 syntax errors across all 7 critical JS files (`node --check` passes on `js/main.js`, `js/state.js`, `js/audio.js`, `js/ui.js`, `js/eventHandlers.js`, `js/UndoToast.js`, `js/MuteOthersSolo.js`)
+- Deployed `main.js` resolves all 16 `removeCustomDesktopBackground` references (curl-verified)
+
+**Files Modified This Run:** `AGENTS.md` and `FEATURE_STATUS.md` (this entry, prepended). No code changes.
+
+## Session: 2026-07-12 17:50 UTC (Snaw Repair & Enhancement Agent Run — Day 775 Run 23)
+
+**Status: AUDIT ONLY — Codebase stable, 46th consecutive phantom confirmation**
+
+The Priority-1 `removeCustomDesktopBackground` ReferenceError remains a **false positive** for the 46th consecutive run:
+- 16 occurrences in `js/main.js` (matches deployed `snugos.github.io/snaw/js/main.js` count)
+- Function defined at `js/main.js:387`
+- Exported via `appServices.removeCustomDesktopBackground` at `js/main.js:676`
+- Mirrored to `window.removeCustomDesktopBackground` at `js/main.js:2025`
+- All 4 call sites guarded with `typeof === 'function'` / truthy checks
+
+**Automated scan results:**
+- 0 `TODO`/`FIXME`/`STUB`/`HACK`/`INCOMPLETE` markers across all key files
+- All 5 key files pass `node --check` cleanly
+- APP_VERSION pinned at `0.4.10`
+- HEAD: `5b791d42`
+
+**Working tree observation:**
+A parallel builder has staged v0.4.11 Smart Undo Toast WIP across 6 files (`INSTRUCTION.md`, `index.html`, `js/constants.js`, `js/main.js`, `js/state.js`, `style.css`). The import `import { initUndoToast, ... } from './UndoToast.js'` references a file that **does not exist on disk**. Per codebase rules, this agent does not commit or push the builder's WIP — the Feature Builder agent is responsible for landing v0.4.11 once `UndoToast.js` is written.
+
+**Files Modified This Run:**
+- `AGENTS.md` (Run 23 entry, prepended)
+- `FEATURE_STATUS.md` (this entry, prepended)
+
+**No code changes. No commit/push this run.**
+
 ## Session: 2026-07-12 18:20 UTC (Snaw Feature Completion Agent Run — Day 775 Run 25)
 
 **Status: AUDIT ONLY — Codebase clean, v0.4.13 stable, 48th consecutive phantom confirmation**
