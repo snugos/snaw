@@ -6,13 +6,11 @@
 // unrelated messages so no existing UX is disturbed.
 //
 // Pattern follows the established module style:
-//   - IIFE
+//   - named ESM exports (plus window.* mirrors for legacy loaders)
 //   - init(appServices) wiring
-//   - exports on window
 //   - small, self-contained CSS (added to style.css)
 
-(function() {
-    'use strict';
+'use strict';
 
     const VERSION = 'v0.4.11';
     const TOAST_ID = 'undo-toast';
@@ -157,4 +155,8 @@
         window.fireRedoToast = fireRedoToast;
         window.getUndoToastVersion = getUndoToastVersion;
     }
-})();
+
+    // Named ESM exports so `import { initUndoToast, ... }` from main.js resolves.
+    // Original IIFE only hung these off window, which silently broke the
+    // v0.4.11 module-style import.
+    export { initUndoToast, fireUndoToast, fireRedoToast, getUndoToastVersion };

@@ -2774,7 +2774,7 @@ function updatePerformanceStats() {
         if (clipCountEl && typeof getTracksState === 'function') {
             const allTracks = getTracksState();
             let totalClips = 0;
-            if (Array.isArray(allTracks) {
+            if (Array.isArray(allTracks)) {
                 for (const t of allTracks) {
                     if (t && Array.isArray(t.timelineClips)) {
                         totalClips += t.timelineClips.length;
@@ -2789,7 +2789,7 @@ function updatePerformanceStats() {
         if (noteCountEl && typeof getTracksState === 'function') {
             const allTracks = getTracksState();
             let totalNotes = 0;
-            if (Array.isArray(allTracks) {
+            if (Array.isArray(allTracks)) {
                 for (const t of allTracks) {
                     if (!t || t.type === 'Audio') continue;
                     if (!Array.isArray(t.sequences) || t.sequences.length === 0) continue;

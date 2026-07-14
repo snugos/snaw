@@ -11,7 +11,6 @@
 //   - exports on window for the render-side helper
 //   - syncState in localStorage keyed by trackId
 
-(function() {
     'use strict';
 
     const STORAGE_KEY = 'snaw_track_sidebar_notes_v1';
@@ -370,4 +369,11 @@
     }
 
     console.log('[TrackNotesSidebar] Module loaded');
-})();
+
+// Named ESM exports so `import { ... } from "./TrackNotesSidebar.js"` resolves.
+// The original IIFE only hung these off window, which silently broke the v0.4.10 import.
+export const initTrackNotesSidebar = init;
+export const openTrackNotesSidebar = openPopover;
+export const getTrackNotesSidebarText = getNote;
+export const setTrackNotesSidebarText = setNote;
+export const removeTrackNotesSidebar = clearNote;

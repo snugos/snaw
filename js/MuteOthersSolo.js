@@ -10,7 +10,6 @@
 //   - state is held in module-local variables, not in localStorage
 //     (a fresh "memento" is taken each time Shift+S engages)
 
-(function() {
     'use strict';
 
     // Module-local state. `appServices` is set in init().
@@ -163,10 +162,17 @@
     }
 
     // Exported API for main.js (named imports) and window (for diagnostics).
+    // `isActive` was previously defined as an arrow function inline in this object
+    // (`isActive: () => snapshot !== null`); converting the module from IIFE to ESM
+    // required promoting it to a real function declaration so the named export works.
+    function isActive() {
+        return snapshot !== null;
+    }
+
     const exported = {
         init,
         toggleMuteOthers,
-        isActive: () => snapshot !== null
+        isActive
     };
 
     if (typeof window !== 'undefined') {
@@ -175,4 +181,9 @@
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = exported;
     }
-})();
+
+// `initMuteOthersSolo` alias matches the named import in main.js (line 18).
+// Without this alias, `import { initMuteOthersSolo } from './MuteOthersSolo.js'`
+// resolves to undefined and the Shift+S feature silently fails to wire up.
+const initMuteOthersSolo = init;
+export { init, initMuteOthersSolo, toggleMuteOthers, isActive };

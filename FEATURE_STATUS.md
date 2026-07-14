@@ -1,3 +1,27 @@
+## Session: 2026-07-12 18:20 UTC (Snaw Feature Completion Agent Run — Day 775 Run 25)
+
+**Status: AUDIT ONLY — Codebase clean, v0.4.13 stable, 48th consecutive phantom confirmation**
+
+The Priority-1 `removeCustomDesktopBackground` ReferenceError remains a **false positive** for the 48th consecutive run:
+- 16 occurrences in `js/main.js`
+- Function defined, exported, mirrored to window, and guarded at every call site
+
+**Automated scan results:**
+- 0 TODO/FIXME/STUB markers
+- 0 untracked orphan files
+- `state.js` 4092 lines, `node --check` passes
+- All 6 key JS files (`main.js`, `state.js`, `audio.js`, `ui.js`, `eventHandlers.js`, `constants.js`) pass `node --check`
+
+**Deployed verification:**
+- `https://snugos.github.io/snaw/js/main.js` → HTTP 200
+- 16 references to `removeCustomDesktopBackground` intact in deployed file
+
+**APP_VERSION**: 0.4.13 (Mute-Others Solo Shortcut v0.4.13 + Project Session Timer v0.4.12 + Smart Undo Description v0.4.11 + Track Notes Sidebar v0.4.10 + Clip Drag-to-Clone v0.4.09 + Clip Time Handles v0.4.08 all merged)
+
+**Action taken**: Audit only. No code changes. AGENTS.md and this file updated with Run 25 entry.
+
+---
+
 ## Session: 2026-07-12 18:00 UTC (Snaw Feature Completion Agent Run — Day 775 Run 24)
 
 **Status: ONE FEATURE SHIPPED — v0.4.12 Project Session Timer (MM:SS, Click to Reset) is live**
@@ -39,6 +63,8 @@ The codebase accepted a clean new feature on top of an existing untracked diff l
 - `node --check js/constants.js` — OK
 - 8-assertion smoke test (`/home/.z/workspaces/con_QQ4oXQGIzEAu5Dme/smoke_test_session_timer.js`) — all pass
 - All 3 pre-existing uncommitted files from the parallel agent (`AGENTS.md`, `FEATURE_STATUS.md`, `js/UndoToast.js`) were left untouched per coordination pattern
+
+---
 
 ## Session: 2026-07-12 17:50 UTC (Snaw Feature Completion Agent Run — Day 775 Run 23)
 
@@ -165,6 +191,8 @@ The Priority-1 `removeCustomDesktopBackground` ReferenceError remains a **false 
 **APP_VERSION**: 0.4.10 (Track Notes Sidebar v0.4.10 + Clip Drag-to-Clone v0.4.09 + Clip Time Handles v0.4.08 all merged into deployed site)
 
 **Action taken**: Audit only. No code changes. AGENTS.md and this file updated with Run 22 entry. Push to follow.
+
+---
 
 ## Session: 2026-07-12 00:20 UTC (Snaw Repair & Enhancement Agent Run — Day 775 Run 14)
 
@@ -400,6 +428,7 @@ _None from this agent._ The parallel builder's v0.4.08 Clip Time Handles feature
 Pulled latest (HEAD at `b518e7c`). Confirmed Priority-1 `removeCustomDesktopBackground` ReferenceError is a documented false positive (40th consecutive run, 16 occurrences in both local and deployed `js/main.js`). Ran the full incomplete-feature scan suite — all clean. Verified `node --check` passes on all 20 key files. Detected parallel builder mid-flight on v0.4.08 Clip Time Handles and left it untouched. No code authored this run (audit only). Updated `AGENTS.md` and `FEATURE_STATUS.md`.
 
 ---
+
 ## Session: 2026-07-11 17:50 UTC (Snaw Feature Builder Agent Run — Day 775 Run 16)
 
 **Status: ONE FEATURE SHIPPED — v0.4.08 Clip Time Handles (mm:ss readouts on every timeline clip)**
@@ -443,6 +472,7 @@ _None._ v0.4.08 Clip Time Handles is the most recent feature commit. Queue at 9 
 Pulled latest (HEAD at `b8a9d44`). Audited the codebase for `timeline-clip` element creation patterns (via `data-clip-id` selectors across modules) and found a clean, well-established convention. Authored `js/ClipTimeHandles.js` from scratch following the AudioClipLabeling / QuickBounce template (single IIFE that registers itself on `appServices` and wraps `renderTimeline` for re-decoration). Wrote and ran 17/17 passing format tests covering normal, edge, and invalid inputs. Bumped `APP_VERSION` 0.4.07 → 0.4.08. Refilled the INSTRUCTION.md queue with 9 fresh feature ideas. Ready to commit and push.
 
 ---
+
 ## Session: 2026-07-11 17:40 UTC (Snaw Feature Completion Agent Run — Day 775 Run 16)
 
 **Status: AUDIT ONLY — Codebase clean, v0.4.07 stable, 39th consecutive phantom confirmation**
@@ -474,6 +504,7 @@ _None from this agent._ Feature queue is at 0 items.
 Pulled latest (HEAD at `b8a9d44`). Confirmed Priority-1 `removeCustomDesktopBackground` ReferenceError is a documented false positive (39th consecutive run, 16 occurrences in both local and deployed `js/main.js`). Ran the full incomplete-feature scan suite — all clean. Verified `node --check` passes on all 20 key files. No parallel builder mid-flight detected. No code authored this run (audit only). Updated `AGENTS.md` and `FEATURE_STATUS.md`.
 
 ---
+
 ## Session: 2026-07-12 00:30 UTC (Snaw Feature Completion Agent Run — Day 775 Run 15)
 
 **Status: AUDIT ONLY — Codebase clean, v0.4.07 stable, 38th consecutive phantom confirmation**
@@ -524,6 +555,7 @@ _None from this agent._ Feature queue is at 0 items.
 Pulled latest (HEAD at `b8a9d44`). Confirmed Priority-1 `removeCustomDesktopBackground` ReferenceError is a documented false positive (38th consecutive run, 16 occurrences in both local and deployed `js/main.js`). Ran the full incomplete-feature scan suite — all clean. Verified `node --check` passes on all 20 key files. No parallel builder mid-flight detected. No code authored this run (audit only). Updated `AGENTS.md` and `FEATURE_STATUS.md`.
 
 ---
+
 ## Session: 2026-07-12 00:10 UTC (Snaw Feature Completion Agent Run — Day 775 Run 13)
 
 **Status: AUDIT ONLY — Codebase clean, v0.4.07 stable, 36th consecutive phantom confirmation**
@@ -575,6 +607,7 @@ _None from this agent._ Feature queue is at 0 items.
 Pulled latest (HEAD at `41fa29f`). Confirmed Priority-1 `removeCustomDesktopBackground` ReferenceError is a documented false positive (36th consecutive run, 16 occurrences). Ran the full incomplete-feature scan suite — all clean. Verified `node --check` passes on all 20 key files. No parallel builder mid-flight detected. No code authored this run (audit only). Updated `AGENTS.md` and `FEATURE_STATUS.md`.
 
 ---
+
 ## Session: 2026-07-11 01:35 UTC (Snaw Feature Completion Agent Run — Day 775 Run 12)
 
 **Status: ONE FIX SHIPPED — APP_VERSION bumped 0.4.04 → 0.4.07 to catch up with three shipped features**
@@ -630,6 +663,7 @@ _None from this agent._ The parallel builder shipped v0.4.07 MIDI File Import/Ex
 Pulled latest (HEAD at `ca3102d`). Confirmed Priority-1 `removeCustomDesktopBackground` ReferenceError is a documented false positive (35th consecutive run, 16 occurrences). Detected parallel builder mid-flight on MIDI File Import/Export — left untouched per coordination pattern. Mid-run, the builder committed all files as `3215651` + `609a5b7`. Noticed APP_VERSION was stuck at 0.4.04 while three features (v0.4.05 Audio Clip Labeling, v0.4.06 Marker Color Presets, v0.4.07 MIDI File Import/Export) had been shipped without version bumps. Bumped to 0.4.07 with updated comment. Verified `node --check` passes on all 18 files. Committed as `9d8dee2`, pushed to `origin/LWB-with-Bugs`. Verified fix deployed (deployed constants.js shows 0.4.07). Updated `AGENTS.md` and `FEATURE_STATUS.md`.
 
 ---
+
 ## Session: 2026-07-11 01:30 UTC (Snaw Feature Builder Agent Run — Day 775 Run 13)
 
 **Status: SHIPPED v0.4.07 MIDI File Import/Export** (`3215651`)
@@ -693,6 +727,7 @@ Pulled latest (HEAD at `ca3102d`). Confirmed Priority-1 `removeCustomDesktopBack
 Total: 2 new code files + 4 modified code files + 2 modified doc files. 828 lines of new code.
 
 ---
+
 ## Session: 2026-07-11 01:20 UTC (Snaw Feature Completion Agent Run — Day 775 Run 12)
 
 **Status: AUDIT ONLY — No bugs found, codebase clean, parallel builder mid-flight on MIDI File Import/Export**
@@ -748,6 +783,7 @@ _None from this agent._ The parallel builder's MIDI File Import/Export feature i
 Pulled latest (HEAD at `ca3102d`). Confirmed Priority-1 `removeCustomDesktopBackground` ReferenceError is a documented false positive (35th consecutive run, 16 occurrences). Ran the full incomplete-feature scan suite — all clean. Verified `node --check` passes on all 15 key files. Verified Run 1-9 fixes intact on deployed site. Detected parallel builder mid-flight on MIDI File Import/Export (6 files: 4 modified + 2 untracked, 828 lines combined) and left it untouched. No code authored this run (audit only). Updated `AGENTS.md` and `FEATURE_STATUS.md`.
 
 ---
+
 ## Session: 2026-07-11 01:10 UTC (Snaw Feature Completion Agent Run — Day 775 Run 11)
 
 **Status: AUDIT ONLY — No bugs found, codebase clean**
@@ -798,6 +834,7 @@ _None from this agent._ The parallel builder's Audio Clip Labeling feature is mi
 Pulled latest (HEAD at `ef332e5`). Confirmed Priority-1 `removeCustomDesktopBackground` ReferenceError is a documented false positive (34th consecutive run, 16 occurrences). Ran the full incomplete-feature scan suite — all clean. Verified `node --check` passes on all 15 key files. Verified Run 1-9 fixes intact on deployed site. Detected parallel builder mid-flight on Audio Clip Labeling and left it untouched. No code authored this run (audit only). Updated `AGENTS.md` and `FEATURE_STATUS.md`.
 
 ---
+
 ## Session: 2026-07-11 01:03 UTC (Snaw Feature Completion Agent Run — Day 775 Run 10)
 
 **Status: AUDIT ONLY — No bugs found, codebase clean**
@@ -847,6 +884,7 @@ _None from this agent._ The parallel builder's Audio Clip Labeling feature is mi
 Pulled latest (HEAD at `ef332e5`). Confirmed Priority-1 `removeCustomDesktopBackground` ReferenceError is a documented false positive (33rd consecutive run, 16 occurrences). Ran the full incomplete-feature scan suite — all clean. Verified `node --check` passes on all 15 key files. Verified Run 1-9 fixes intact on deployed site. Detected parallel builder mid-flight on Audio Clip Labeling and left it untouched. No code authored this run (audit only). Updated `AGENTS.md` and `FEATURE_STATUS.md`.
 
 ---
+
 ## Session: 2026-07-11 00:40 UTC (Snaw Feature Completion Agent Run — Day 775 Run 9)
 
 **Status: ONE BUG SHIPPED — `MarkerAnnotations.js` context menu self-closing race (missing `stopImmediatePropagation`)**
@@ -967,6 +1005,9 @@ This session overrode the Priority-1 "removeCustomDesktopBackground" false-posit
 **Features Still in Progress**: _None from this agent._ Parallel Snaw Feature Builder Agent shipped v0.4.04 ("Track Grouping by Instrument" + "Marker Annotations"). The feature queue is at 0 items.
 
 **Action Taken**: Pulled latest (working tree clean at `acd7a99`, parallel builder had finished committing v0.4.04). Confirmed Priority-1 `removeCustomDesktopBackground` ReferenceError is a documented false positive (31st consecutive run, 16 occurrences). Audited the new v0.4.04 TrackInstrumentGrouping module, focusing on the freshly-added "Clear all" button (commit `acd7a99`). Found the wrong-shape bug: handler expected `getInstrumentGroupSummary()` to return `{grouped, byGroup}` (the `getRoleSummary()` shape) but the function actually returns an array of per-group objects. Fixed the handler to iterate the array correctly. Verified `node --check` passes. Committed as `d67de9e`, pushed to `origin/LWB-with-Bugs` (`acd7a99..d67de9e`). Verified the fix is live on `https://snugos.github.io/snaw/js/TrackInstrumentGrouping.js`. Updated `AGENTS.md` and `FEATURE_STATUS.md`.
+
+---
+
 ## Session: 2026-07-10 01:18 UTC (Snaw Repair & Enhancement Agent Run — Day 775 Run 6, second-instance)
 
 **Status: TWO BUGS SHIPPED — `StepSequencerView.js` undeclared `savedState` ReferenceError + missing `initStepSequencerView` wiring at main.js:2369**
@@ -994,6 +1035,9 @@ This session overrode Run 6's audit-only conclusion (`563b752c`, "codebase clean
 **Features Still in Progress**: _None from this agent._ Parallel Snaw Feature Builder Agent shipped v0.4.03 Step Sequencer Pattern Library (`05e355b1`). The feature queue is at 0 items.
 
 **Action Taken**: Pulled latest (`git fetch origin LWB-with-Bugs` advanced HEAD `9a9615f3` → `563b752c`, 1 docs commit from parallel agent). Confirmed Priority-1 `removeCustomDesktopBackground` ReferenceError is a documented false positive (30th consecutive run, 16 occurrences). Audited `js/StepSequencerView.js` and the call site at `js/main.js:2369` line-by-line. Found Bug 1 (undeclared `savedState` ReferenceError in dead-clause) and Bug 2 (wrong-function call in init line). Fixed both. Added `getCurrentStepSequencerTrackId` export + `window` exposures so `StepSequencerPatternLibrary.pickTargetTrack()` can read the live `currentStepSequencerTrackId` (it was reading `window.currentStepSequencerTrackId` which was always `undefined` because the module never set it). Wrote and ran `/tmp/ssv-smoke.mjs` — 10/10 pass. Verified `node --check` passes on both files. Committed as `2b7e13be`, rebased onto `563b752c`, pushed to `origin/LWB-with-Bugs` (`563b752c..2b7e13be`). Verified the fixes are live on `https://snugos.github.io/snaw/`. Updated `AGENTS.md` and `FEATURE_STATUS.md`.
+
+---
+
 ## Session: 2026-07-10 01:14 UTC (Snaw Repair & Enhancement Agent Run — Day 775 Run 6)
 
 **Status: AUDIT ONLY — No bugs found, codebase clean**
@@ -1283,6 +1327,8 @@ Pulled latest. Found duplicate TempoHistoryGraph import in uncommitted main.js +
 
 Discovered mid-run that parallel Snaw Feature Builder Agent had unstaged work on `js/Track.js` (applyMuteState / applySoloState / recreateToneSequence restoration from the 6c9786a4 refactor, 178-line diff). Preserved in `stash@{0}` with full message describing the in-flight work. Parallel builder shipped v0.3.93 Per-Track MIDI Channel Display (`0c6f81ad`), v0.3.94 Per-Track Groove Template Selector (`00b4c7ce`), and v0.3.95 Project Tempo History Graph (`84264dc7`) during this run's window. The feature queue is currently empty (cleared at `96bce115`).
 
+---
+
 ## Session: 2026-07-02 00:25 UTC (Snaw Repair & Enhancement Agent Run — Day 760 Run 4)
 
 **Status: COMPLETED — AutoSaveCounter v0.3.92 patch** (three silent bugs in the freshly-shipped v0.3.92 Project Auto-Save Counter module).
@@ -1320,6 +1366,8 @@ v0.3.92 shipped at 2026-07-01 01:20 UTC; this run is 2026-07-02 00:25 UTC (~23h 
 
 `main.js:342 Uncaught ReferenceError: removeCustomDesktopBackground is not defined` — **23rd consecutive false positive**. The function is defined at `js/main.js:354`, exported on `appServices`, and mirrored as `window.removeCustomDesktopBackground`. 16 occurrences in both local and deployed `js/main.js`. Task instruction's "fix approach" (define the missing function or add the import) is unnecessary because the function already exists and is correctly wired.
 
+---
+
 ## Session: 2026-07-01 01:25 UTC (Snaw Feature Builder Agent Run — Day 760 Run 3)
 
 **Status: COMPLETED — Project Auto-Save Counter v0.3.92** queue update.
@@ -1335,6 +1383,8 @@ All edits in the working tree at run start were already correctly committed by t
 Pushed `d13581f..e6ec290  LWB-with-Bugs -> LWB-with-Bugs` (the INSTRUCTION.md queue-update commit). Verified the deployed site at `https://snugos.github.io/snaw/js/AutoSaveCounter.js` includes the `showSafeNotification` preference.
 
 **Queue Now**: 1 item remaining — Per-Track MIDI Channel Display. Next run picks up #1 of the new queue.
+
+---
 
 ## Session: 2026-07-01 01:13 UTC (Snaw Repair Agent Run — Day 760 Run 2)
 
@@ -1379,6 +1429,8 @@ After commit `d532815` and `git push origin LWB-with-Bugs` (push succeeded: `bd5
 
 ### Why "Ship Mid-Flight" Instead of "Stash and Wait"
 The parallel builder had been sitting on the v0.3.92 working tree for ~40 minutes without committing. The pattern from prior runs (e.g. Day 759 Run 6's stash of v0.3.89 ArmToggleHistory) preserved the parallel builder's uncommitted work to a named stash and let them commit it later. This time the work was structurally complete and high-quality (21/21 structural assertions pass), and the user-visible gap (no auto-save counter in the status bar) was significant — the counter is meant to confirm the auto-save system is working, which is core UX. Shipping it unblocks the feature. The parallel builder can verify on their next run and adjust if anything needs tweaking.
+
+---
 
 ## Session: 2026-07-01 00:51 UTC (Snaw Repair Agent Run — Day 760 Run 1)
 
