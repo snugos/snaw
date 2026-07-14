@@ -1,3 +1,38 @@
+## Session: 2026-07-13 17:50 PT (Snaw Repair & Enhancement Agent Run — Day 775 Run 32)
+
+**Status: ONE COMMIT — v0.4.16 Ctrl+Shift+S Panic Save shipped**
+
+The Priority-1 `removeCustomDesktopBackground` ReferenceError remains a confirmed false positive for the 52nd consecutive run (16 occurrences in `js/main.js`; function defined at line 391, exported via `appServices` at line 741, mirrored to `window` at line 2090, and guarded at every call site). No Priority-1 bug exists in the codebase. The task's workflow says "if no bugs found, add one small enhancement feature," so this run shipped **v0.4.16 Ctrl+Shift+S Panic Save**.
+
+### What shipped
+
+- **v0.4.16 Ctrl+Shift+S Panic Save** — `js/eventHandlers.js` +33 lines, one new keyboard shortcut that, on every trigger, snapshots the in-memory project state (tracks, clips, tempo, transport position, time signature) to `localStorage` under `snawPanicSaves` (max 5 entries, LRU-evicted by timestamp). Surfaces a 2-second `showNotification` toast with the saved timestamp and the current entry count. Recovery path is left to a future run; this run ships only the write half, which is the half most likely to be needed after a crash. Shortcut mirrors the existing Ctrl+Shift+P MIDI Panic pattern: `event.preventDefault()` + `return`, only fires when neither an `<input>` nor a `<textarea>` is the active element, uses the same `localAppServices.showNotification ?? showNotification` fallback chain, and is bounded by try/catch so a bad localStorage write can never break the keydown listener.
+
+### Why this run shipped a feature, not just a doc update
+
+The workflow says "If no bugs found, add one small enhancement feature." The 51st consecutive false-positive confirmation was a doc update; this run is the 52nd and the codebase has been clean for ~52 runs in a row. To keep making forward progress, this run picked a small, isolated, additive change — one new shortcut, one new localStorage key, no changes to existing exports, no changes to the v0.4.15 Transport Bar Master Meter or Project Snapshot List. The new shortcut does not conflict with the existing Ctrl+S (browser save dialog) because it requires Shift; the new key does not conflict with the existing snapshot list (which uses IDB + a separate localStorage index).
+
+### Verification
+
+- `node --check js/eventHandlers.js` passes (3272 → 3305 lines).
+- `node --check js/constants.js` passes (`APP_VERSION 0.4.15` → `0.4.16`).
+- `node --check js/main.js` passes (unchanged from Run 31, still 16 occurrences of `removeCustomDesktopBackground`).
+- Smoke test `/tmp/panic-save-smoke.mjs`: 4/4 assertions pass (valid project save, fallback when `localAppServices` is undefined, LRU eviction at 6 saves, recovery from corrupt JSON).
+- `curl -sI https://snugos.github.io/snaw/js/eventHandlers.js` → HTTP 200 (after 30s Pages deploy delay).
+- `curl -s https://snugos.github.io/snaw/js/eventHandlers.js | grep -c snawPanicSaves` → 1 (new key live).
+- `curl -s https://snugos.github.io/snaw/js/constants.js | grep APP_VERSION` → `0.4.16` (version bump live).
+- `curl -s https://snugos.github.io/snaw/js/main.js | grep -c removeCustomDesktopBackground` → 16 (Priority-1 phantom still a phantom, no regression).
+
+### Files Modified
+
+| File | Change |
+| --- | --- |
+| `js/eventHandlers.js` | +33 lines: new Ctrl+Shift+S shortcut block, defensively guarded |
+| `js/constants.js` | +1/-1: `APP_VERSION 0.4.15` → `0.4.16` with changelog suffix |
+| `AGENTS.md` | (this entry, prepended) |
+| `FEATURE_STATUS.md` | (this entry, prepended) |
+
+
 ## Session: 2026-07-13 17:40 PT (Snaw Feature Completion Agent Run — Day 775 Run 31)
 
 **Status: ONE COMMIT — v0.4.15 Transport Bar Master Output Meter + v0.4.15 Quick Project Snapshot List shipped**

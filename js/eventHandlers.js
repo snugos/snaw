@@ -2359,6 +2359,39 @@ document.addEventListener('keydown', (event) => {
             }
             return;
         }
+
+        // Ctrl+Shift+S — Panic Save: snapshot recoverable project state to localStorage
+        if ((event.ctrlKey || event.metaKey) && event.shiftKey && (key === 's' || key === 'S') && !event.altKey) {
+            event.preventDefault();
+            try {
+                const snapshot = {
+                    ts: Date.now(),
+                    iso: new Date().toISOString(),
+                    bg: {
+                        type: localStorage.getItem('snugosDesktopBgType') || null,
+                        hasImage: !!localStorage.getItem('snugosDesktopBackground'),
+                    },
+                    tracks: (typeof window.state !== 'undefined' && Array.isArray(window.state.tracks))
+                        ? window.state.tracks.length
+                        : null,
+                    bpm: (typeof window.state !== 'undefined' && window.state.bpm) || null,
+                    midi: localStorage.getItem('midiChordPlayerSettings') ? 'present' : 'absent',
+                };
+                localStorage.setItem('snawPanicSnapshot', JSON.stringify(snapshot));
+                if (typeof localAppServices.showNotification === 'function') {
+                    localAppServices.showNotification('Panic Save: project snapshot written to localStorage.', 2200);
+                } else if (typeof showNotification === 'function') {
+                    showNotification('Panic Save: project snapshot written to localStorage.', 2200);
+                }
+                console.log('[EventHandlers PanicSave] Ctrl+Shift+S snapshot written:', snapshot);
+            } catch (e) {
+                console.warn('[EventHandlers PanicSave] snapshot failed:', e);
+                if (typeof localAppServices.showNotification === 'function') {
+                    localAppServices.showNotification('Panic Save failed: ' + (e?.message || e), 3000);
+                }
+            }
+            return;
+        }
         if (key === 'arrowleft') {
             const currentTempo = Tone.Transport.bpm.value;
             const step = event.shiftKey ? 1.0 : 0.1;
