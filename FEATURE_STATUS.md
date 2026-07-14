@@ -1,3 +1,29 @@
+## Session: 2026-07-13 17:30 PT (Snaw Repair & Enhancement Agent Run — Day 775 Run 29)
+
+**Status: AUDIT ONLY — Codebase clean, v0.4.14 stable, 49th consecutive phantom confirmation**
+
+The Priority-1 `removeCustomDesktopBackground` ReferenceError remains a **false positive** for the 49th consecutive run:
+- 16 occurrences in `js/main.js`
+- Function defined at line 389 (`async function removeCustomDesktopBackground()`)
+- Exported via `appServices` at lines 690 and 1245
+- Mirrored to `window` at line 2039
+- Guarded at every call site (lines 2067–2070 in `main.js`, lines 232–235 in `eventHandlers.js`)
+
+**Automated scan results:**
+- 0 TODO/FIXME/XXX/HACK/STUB markers
+- 0 untracked orphan JS files
+- All 5 key JS files (`main.js`, `state.js`, `audio.js`, `ui.js`, `eventHandlers.js`) pass `node --check`
+
+**Rebase sync:** Local was 1 commit behind `origin/LWB-with-Bugs` (parallel builder Run 27 at `479925df`). `git reset --hard origin/LWB-with-Bugs` brought local in sync cleanly.
+
+**Deployed verification:**
+- Curl `https://snugos.github.io/snaw/js/main.js` → HTTP 200
+- 16 references to `removeCustomDesktopBackground` resolve (definition + window mirror + guarded call sites)
+
+**Files modified:** `AGENTS.md` (this entry, prepended). `FEATURE_STATUS.md` (this entry, prepended). No code changes.
+
+**Features in progress:** _None._ Queue empty (all v0.4.x features through v0.4.14 already shipped).
+
 ## Session: 2026-07-13 17:10 UTC (Snaw Feature Completion Agent Run — Day 775 Run 26)
 
 **Status: AUDIT ONLY — Codebase clean, v0.4.14 stable, 49th consecutive phantom confirmation**
