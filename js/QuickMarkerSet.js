@@ -63,14 +63,36 @@ function showPopover(message = '') {
     popover.id = 'quickMarkerPopover';
     popover.style.cssText = 'position:fixed;top:44px;right:14px;z-index:20000;width:220px;padding:10px;background:#111827;color:#f9fafb;border:1px solid #374151;border-radius:7px;box-shadow:0 10px 28px rgba(0,0,0,.4);font:12px system-ui,sans-serif;';
     const rows = markers.slice(-6).reverse().map(marker => {
-        const row = document.createElement('button');
-        row.type = 'button';
+        const row = document.createElement('div');
         row.dataset.markerId = marker.id;
-        row.textContent = `${marker.name}  ${Number(marker.time || 0).toFixed(1)}s`;
-        row.style.cssText = 'display:block;width:100%;padding:5px 6px;text-align:left;color:#e5e7eb;background:transparent;border:0;border-radius:4px;cursor:pointer;';
-        row.addEventListener('mouseenter', () => { row.style.background = '#1f2937'; });
-        row.addEventListener('mouseleave', () => { row.style.background = 'transparent'; });
-        row.addEventListener('click', () => { jumpToMarker(marker); closePopover(); });
+        row.style.cssText = 'display:flex;align-items:center;gap:4px;width:100%;padding:2px 0;';
+
+        const jumpButton = document.createElement('button');
+        jumpButton.type = 'button';
+        jumpButton.textContent = `${marker.name}  ${Number(marker.time || 0).toFixed(1)}s`;
+        jumpButton.title = `Jump to ${marker.name}`;
+        jumpButton.style.cssText = 'flex:1;min-width:0;padding:5px 6px;text-align:left;color:#e5e7eb;background:transparent;border:0;border-radius:4px;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
+        jumpButton.addEventListener('mouseenter', () => { jumpButton.style.background = '#1f2937'; });
+        jumpButton.addEventListener('mouseleave', () => { jumpButton.style.background = 'transparent'; });
+        jumpButton.addEventListener('click', () => { jumpToMarker(marker); closePopover(); });
+
+        const deleteButton = document.createElement('button');
+        deleteButton.type = 'button';
+        deleteButton.textContent = '×';
+        deleteButton.title = `Delete ${marker.name}`;
+        deleteButton.setAttribute('aria-label', `Delete ${marker.name}`);
+        deleteButton.style.cssText = 'width:24px;height:24px;padding:0;color:#fca5a5;background:transparent;border:0;border-radius:4px;cursor:pointer;font-size:16px;line-height:1;';
+        deleteButton.addEventListener('mouseenter', () => { deleteButton.style.background = '#7f1d1d'; });
+        deleteButton.addEventListener('mouseleave', () => { deleteButton.style.background = 'transparent'; });
+        deleteButton.addEventListener('click', () => {
+            if (typeof localAppServices.removeRenderedTimelineMarker === 'function' && localAppServices.removeRenderedTimelineMarker(marker.id)) {
+                localAppServices.showNotification?.(`Removed ${marker.name}`, 1200);
+                showPopover('Marker deleted');
+            }
+        });
+
+        row.appendChild(jumpButton);
+        row.appendChild(deleteButton);
         return row;
     });
     const heading = document.createElement('div');
