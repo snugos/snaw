@@ -1,3 +1,10 @@
+#### Day 776 Run 2: One Feature Shipped — Last-Used Effect Preset Memory (2026-07-15)
+
+- **Feature shipped**: `js/TrackEffectPresets.js` now remembers the last successfully loaded preset per track/effect type in localStorage under `snugos_last_used_effect_presets`. The panel shows a `★ Last used — …` quick-pick when the remembered preset still exists.
+- **Safety**: Deleted or corrupt remembered presets are ignored; existing save/load/delete behavior remains intact.
+- **Verification**: Structural smoke test 4/4; `node --check` passes on `TrackEffectPresets.js`, `ui.js`, `main.js`, `eventHandlers.js`, and `constants.js`; `git diff --check` passes.
+- **Queue**: Inline Track Number Labels is shipped; five items remain, starting with Recent Project File History.
+
 #### Day 776 Run 1: One Feature Shipped — v0.4.17 Quick Marker Set + Enhanced Panic Save (2026-07-14)
 
 - **Run Type**: Snaw Feature Completion Agent (scheduled)

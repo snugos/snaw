@@ -55,6 +55,71 @@ export function openTrackEffectPresetsPanel(trackId) {
     }
 }
 
+const LAST_USED_PRESET_STORAGE_KEY = 'snugos_last_used_effect_presets';
+const LAST_USED_PRESET_OPTION = '__last_used__';
+
+function effectPresetStorageKey(trackId, presetName) {
+    return `snugos_effect_preset_${trackId}_${presetName.replace(/\s+/g, '_')}`;
+}
+
+function readLastUsedPresetMap() {
+    try {
+        const raw = localStorage.getItem(LAST_USED_PRESET_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : {};
+        return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+    } catch (_) {
+        return {};
+    }
+}
+
+function getStoredPreset(trackId, presetName) {
+    try {
+        const raw = localStorage.getItem(effectPresetStorageKey(trackId, presetName));
+        const parsed = raw ? JSON.parse(raw) : null;
+        return parsed && typeof parsed === 'object' ? parsed : null;
+    } catch (_) {
+        return null;
+    }
+}
+
+function rememberLastUsedPreset(track, presetName) {
+    const preset = getStoredPreset(track.id, presetName);
+    const effectTypes = new Set((preset?.effects || track.activeEffects || [])
+        .map(effect => effect?.type)
+        .filter(Boolean));
+    if (!effectTypes.size) return;
+
+    const map = readLastUsedPresetMap();
+    const timestamp = Date.now();
+    effectTypes.forEach(effectType => {
+        map[`${track.id}:${effectType}`] = { trackId: String(track.id), effectType, presetName, timestamp };
+    });
+    try {
+        localStorage.setItem(LAST_USED_PRESET_STORAGE_KEY, JSON.stringify(map));
+    } catch (_) {}
+}
+
+function getLastUsedPresetForTrack(track) {
+    const map = readLastUsedPresetMap();
+    const candidates = Object.values(map)
+        .filter(entry => entry && String(entry.trackId) === String(track.id) && entry.presetName)
+        .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    for (const candidate of candidates) {
+        if (getStoredPreset(track.id, candidate.presetName)) return candidate;
+    }
+    return null;
+}
+
+function escapePresetLabel(value) {
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+
 /**
  * Render the effect presets content for a track
  * @param {object} track - Track object
@@ -64,6 +129,7 @@ function renderEffectPresetsContent(track) {
     if (!container) return;
 
     const presets = track.getAvailableEffectPresets?.() || [];
+    const lastUsedPreset = getLastUsedPresetForTrack(track);
 
     container.innerHTML = `
         <div class="mb-4">
@@ -110,7 +176,8 @@ function renderEffectPresetsContent(track) {
             <h4 class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">Load Preset</h4>
             <select id="effectPresetSelect" class="w-full p-2 text-sm bg-gray-50 dark:bg-slate-600 border border-gray-300 dark:border-slate-500 rounded text-gray-700 dark:text-gray-200 mb-2">
                 <option value="">-- Select preset --</option>
-                ${presets.map(p => `<option value="${p.name}">${p.name} (${p.effectsCount} fx)</option>`).join('')}
+                ${lastUsedPreset ? `<option value="${LAST_USED_PRESET_OPTION}">★ Last used — ${escapePresetLabel(lastUsedPreset.presetName)}</option>` : ''}
+                ${presets.map(p => `<option value="${escapePresetLabel(p.name)}">${escapePresetLabel(p.name)} (${p.effectsCount} fx)</option>`).join('')}
             </select>
             ${presets.length > 0 ? `
                 <div class="flex gap-2">
@@ -181,13 +248,15 @@ function renderEffectPresetsContent(track) {
 
     if (loadBtn) {
         loadBtn.addEventListener('click', () => {
-            const presetName = selectEl?.value;
+            const selectedValue = selectEl?.value;
+            const presetName = selectedValue === LAST_USED_PRESET_OPTION ? lastUsedPreset?.presetName : selectedValue;
             if (!presetName) {
                 localAppServices.showNotification?.('Please select a preset', 1500);
                 return;
             }
             const success = track.loadEffectPreset(presetName);
             if (success) {
+                rememberLastUsedPreset(track, presetName);
                 renderEffectPresetsContent(track);
             }
         });
@@ -195,7 +264,8 @@ function renderEffectPresetsContent(track) {
 
     if (deleteBtn) {
         deleteBtn.addEventListener('click', () => {
-            const presetName = selectEl?.value;
+            const selectedValue = selectEl?.value;
+            const presetName = selectedValue === LAST_USED_PRESET_OPTION ? lastUsedPreset?.presetName : selectedValue;
             if (!presetName) {
                 localAppServices.showNotification?.('Please select a preset to delete', 1500);
                 return;
@@ -209,6 +279,3 @@ function renderEffectPresetsContent(track) {
         });
     }
 }
-
-// Export for manual initialization
-export { openTrackEffectPresetsPanel };
