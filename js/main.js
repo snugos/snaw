@@ -67,6 +67,7 @@ import { initTrackSendRouting, openTrackSendRoutingPanel } from './TrackSendRout
 import { initTrackMuteAutomation, openTrackMuteAutomationPanel } from './TrackMuteAutomation.js';
 import { openTrackDelayCompensationPanel, openLatencyCompensationPanel } from './TrackDelayCompensation.js';
 import { initTrackReorderHotkeys, moveActiveTrackBy, isTrackReorderHotkeysInitialized } from './TrackReorderHotkeys.js'; // Track Reorder Hotkeys - Alt+ArrowUp/Down to move active track (v0.3.70)
+import { initTrackRenumberHotkey } from './TrackRenumberHotkey.js';
 import { openGrooveExtractorPanel } from './GrooveExtractor.js';
 import { openStepSequencerView, initStepSequencerView } from './StepSequencerView.js';
 import { initStepSequencerPatternLibrary, openStepSequencerPatternLibraryPanel, isStepSequencerPatternLibraryOpen, getDrumPatternList, getMelodicPatternList } from './StepSequencerPatternLibrary.js';
@@ -2525,6 +2526,7 @@ async function initializeSnugOS() {
         if (typeof initScaleHighlightMode === 'function') initScaleHighlightMode(appServices); // Scale Highlight Mode initialization
         if (typeof initScaleHighlightGlobal === 'function') initScaleHighlightGlobal(appServices); // Scale Highlight Global initialization
         if (typeof initTrackRenameHotkey === 'function') initTrackRenameHotkey(appServices); // Track Rename Hotkey initialization
+        if (typeof initTrackRenumberHotkey === 'function') initTrackRenumberHotkey(appServices); // Track Renumber Shortcut
         if (typeof initQuickSliceTool === 'function') initQuickSliceTool(appServices);
         if (typeof initClipChopperGrid === 'function') initClipChopperGrid(appServices);
         if (typeof initClipChopperGridMenu === 'function') { initClipChopperGridMenu(); } // Quick Slice Tool - Shift+S to slice
