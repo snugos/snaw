@@ -16,6 +16,40 @@ export function setCountInBars(bars) {
     console.log(`[CountInAudio] Count-in set to ${countInBars} bars`);
 }
 
+export function playFixedCountIn(callback, bpm, bars = 1) {
+    if (countInActive) {
+        callback?.();
+        return;
+    }
+
+    countInActive = true;
+    countInCallback = callback;
+    const beatDuration = 60 / Math.max(1, Number(bpm) || 120);
+    const totalBeats = Math.max(1, Math.round(Number(bars) || 1) * 4);
+
+    import('./audio.js').then(({ playMetronomeClick }) => {
+        for (let beat = 0; beat < totalBeats; beat++) {
+            setTimeout(() => {
+                playMetronomeClick?.(beat % 4 === 0);
+                updateCountInDisplay(beat + 1, totalBeats);
+                if (beat === totalBeats - 1) {
+                    setTimeout(() => {
+                        countInActive = false;
+                        clearCountInDisplay();
+                        countInCallback?.();
+                        countInCallback = null;
+                    }, 200);
+                }
+            }, beat * beatDuration * 1000);
+        }
+    }).catch(() => {
+        countInActive = false;
+        clearCountInDisplay();
+        countInCallback = null;
+        callback?.();
+    });
+}
+
 export function getCountInBars() {
     return countInBars;
 }

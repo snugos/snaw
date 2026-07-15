@@ -4,6 +4,7 @@ import { showNotification, showConfirmationDialog, createContextMenu } from './u
 import { parseMidiFile, midiNotesToSequenceData, encodeSequenceToMidi, midiToNoteName, noteNameToMidi } from './midiUtils.js';
 import { openClipStartOffsetPanel } from './ClipStartOffset.js';
 import { playCountIn, isCountInActive, getCountInBars } from './CountInAudio.js';
+import { isPreRollCountInEnabled, runPreRollCountIn } from './PreRollCountIn.js';
 import {
     getTracksState as getTracks,
     getTrackByIdState as getTrackById,
@@ -1621,6 +1622,10 @@ export function attachGlobalControlEvents(elements) {
 
                 if (!isCurrentlyRec) {
                     if (!trackToRecord) { showNotification("No track armed for recording.", 2000); return; }
+                    if (isPreRollCountInEnabled() && !isCountInActive()) {
+                        runPreRollCountIn(() => recordBtnGlobal.click());
+                        return;
+                    }
                     let recordingInitialized = false;
                     if (trackToRecord.type === 'Audio') {
                         if (localAppServices.startAudioRecording) {

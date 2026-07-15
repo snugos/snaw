@@ -4,8 +4,7 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Pre-Roll Count-In Toggle** - Add a "Pre-roll 1 bar" toggle in transport settings that plays a click-only count-in (no audio playback) for one bar at the current tempo before recording starts; mirrors the established Metronome visual accents
-2. **Track Activity LED** - Add a tiny per-track LED in the track header that flashes green when the track emits audio above a threshold, amber when it clips; great for live monitoring in a mix with many tracks
+1. **Track Activity LED** - Add a tiny per-track LED in the track header that flashes green when the track emits audio above a threshold, amber when it clips; great for live monitoring in a mix with many tracks
 
 ## Workflow
 

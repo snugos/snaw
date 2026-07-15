@@ -82,7 +82,8 @@ import { initBounceSelectedToAudio, bounceSelectedClipsToAudio, openBounceDialog
 import { initQuickBounce, quickBounce } from './QuickBounce.js'; // Quick Bounce (v0.3.78)
 import { initKeyboardOctaveShift, getCurrentOctaveShift, setOctaveShift, resetOctaveShift } from './KeyboardOctaveShift.js';
 import { initTimelineZoomMemory, getStoredZoom, saveZoom } from './TimelineZoomMemory.js';
-import { initCountInAudio, setupCountInUI, playCountIn, isCountInActive } from './CountInAudio.js';
+import { initCountInAudio, setupCountInUI, playCountIn, playFixedCountIn, isCountInActive } from './CountInAudio.js';
+import { initPreRollCountIn } from './PreRollCountIn.js';
 import { initCountInSettingsPanel, openCountInSettingsPanel, getCountInSettings, setCountInBars, setCountInSoundEnabled, setCountInVisualCountdown, setCountInAccentFirstBeat, setCountInVolume } from './CountInSettingsPanel.js';
 import { initClipTimeHandles, refreshClipTimeHandles, formatTimecode } from './ClipTimeHandles.js'; // Clip Time Handles (v0.4.08) - mm:ss timecode overlay on each clip
 import { initClipDragClone, getClipDragCloneVersion } from './ClipDragClone.js'; // Clip Drag Clone (v0.4.09) - Alt+drag to clone-paint clips on the timeline
@@ -1465,6 +1466,7 @@ const appServices = {
     getTracksByRole,
     getRoleSummary,
     openCountInSettingsPanel,
+    playFixedCountIn,
     openTrackSnapResolutionPanel,
     openTempoSyncLFOPanel,
     openGuitarTabEditor,
@@ -2551,6 +2553,7 @@ async function initializeSnugOS() {
         if (typeof initTimelineZoomMemory === 'function') initTimelineZoomMemory(appServices); // Timeline Zoom Memory - remember zoom per project
         if (typeof initTrackFolderCollapseMemory === 'function') initTrackFolderCollapseMemory(appServices); // Track Folder Collapse Memory - remember per-project which track folders are collapsed/expanded (v0.3.76)
         if (typeof initCountInAudio === 'function') initCountInAudio(appServices); // Count-In Audio initialization
+        if (typeof initPreRollCountIn === 'function') initPreRollCountIn(appServices); // Pre-roll 1 bar toggle before recording
         if (typeof initCountInSettingsPanel === 'function') initCountInSettingsPanel(appServices); // Count-In Settings Panel initialization
         setTimeout(() => { if (typeof setupCountInUI === 'function') setupCountInUI(); }, 100); // Setup count-in UI controls
         if (typeof initMIDArpeggiatorPanel === 'function') initMIDArpeggiatorPanel(appServices); // MIDI Arpeggiator Panel initialization
