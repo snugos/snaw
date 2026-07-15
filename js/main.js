@@ -8,7 +8,8 @@ import { AICompositionAssistant, openAICompositionPanel } from './AICompositionA
 import { DrumPatternGenerator, initDrumPatternGenerator, getDrumGenerator, generateDrumPattern, DRUM_STYLES, COMPLEXITY_LEVELS as DRUM_COMPLEXITY_LEVELS } from './DrumPatternGenerator.js';
 import { MelodyGenerator, initMelodyGenerator, getMelodyGenerator, generateMelody, MELODY_STYLES, MELODY_MOODS } from './MelodyGenerator.js';
 import { initQuickActionsMenu, openQuickActionsMenu, closeQuickActionsMenu } from './QuickActionsMenu.js';
-import { initTimelineMarkers, openTimelineMarkersPanel } from './TimelineMarkers.js';
+import { initTimelineMarkers, openTimelineMarkersPanel, addTimelineMarker as addRenderedTimelineMarker, removeTimelineMarker as removeRenderedTimelineMarker, getTimelineMarkers as getRenderedTimelineMarkers } from './TimelineMarkers.js';
+import { initQuickMarkerSet } from './QuickMarkerSet.js';
 import { initMarkerAnnotations } from './MarkerAnnotations.js';
 import { initPlayheadMarkerDrop, openPlayheadMarkerDropSettings } from './PlayheadMarkerDrop.js';
 import { initTimelineRulerClick, openTimelineRulerClickSettings } from './TimelineRulerClick.js';
@@ -750,6 +751,18 @@ const appServices = {
     getTracks: () => {
         if (typeof getTracksState === 'function') return getTracksState();
         return [];
+    },
+    addRenderedTimelineMarker: (time, name = '', color = '#ff6b6b', note = '') => {
+        try { return addRenderedTimelineMarker(time, name, color, note); }
+        catch (e) { console.warn('[appServices.addRenderedTimelineMarker] failed:', e); return null; }
+    },
+    removeRenderedTimelineMarker: (id) => {
+        try { return removeRenderedTimelineMarker(id); }
+        catch (e) { console.warn('[appServices.removeRenderedTimelineMarker] failed:', e); return false; }
+    },
+    getRenderedTimelineMarkers: () => {
+        try { return getRenderedTimelineMarkers(); }
+        catch (e) { console.warn('[appServices.getRenderedTimelineMarkers] failed:', e); return []; }
     },
     // Timeline Markers (v0.4.05 — used by MarkerAnnotations)
     getTimelineMarkers: () => {
@@ -2563,6 +2576,7 @@ async function initializeSnugOS() {
         if (typeof initPhaseCorrelationMeter === 'function') initPhaseCorrelationMeter(appServices); // Phase Correlation Meter initialization
         if (typeof initAutoBeatSync === 'function') initAutoBeatSync(appServices); // Auto-Beat Sync initialization
         if (typeof initTimelineMarkers === 'function') initTimelineMarkers(appServices); // Auto-Beat Sync initialization
+        if (typeof initQuickMarkerSet === 'function') initQuickMarkerSet(appServices); // Quick Marker Set (M / Shift+M)
         if (typeof initMarkerAnnotations === 'function') initMarkerAnnotations(appServices); // Project Marker Annotations
         if (typeof initPlayheadMarkerDrop === 'function') initPlayheadMarkerDrop(appServices); // Playhead Marker Drop - double-click to add marker
         if (typeof initTimelineRulerClick === 'function') initTimelineRulerClick(appServices); // Timeline Ruler Click - click to jump playhead
