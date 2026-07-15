@@ -1,3 +1,32 @@
+## Session: 2026-07-15 01:20 UTC (Snaw Feature Completion Agent Run — Day 776 Run 4)
+
+**Status: v0.4.22 Pre-Roll Count-In shipped; one recursion bug repaired**
+
+- Added `js/PreRollCountIn.js` and a transport-bar `#preRollCountInBtn`. The setting persists in localStorage under `snugosPreRollCountIn`.
+- The toggle runs a one-bar, click-only count-in at the current BPM before recording. It is wired through the existing `CountInAudio.js` click/display path and leaves transport playback stopped until recording begins.
+- Found and fixed a real integration bug in the freshly-shipped path: the pre-roll completion callback re-clicked Record, which would enter the existing configurable count-in path a second time. Commit `d8d461b` adds a one-shot handoff guard so the callback bypasses both count-in branches once, then normal recording proceeds.
+
+### Verification
+
+- Core syntax checks pass for 8 key modules.
+- Pre-roll smoke test: 9/9 assertions pass, including disabled bypass, persisted toggle, one-bar delegation, callback handoff, and guard reset.
+- `git diff --check` passes.
+- Pushed to `origin/LWB-with-Bugs`; local branch is clean.
+- Deployed `APP_VERSION` is `0.4.22`; deployed pre-roll module is present.
+
+### Features completed
+
+- v0.4.22 Pre-Roll Count-In Toggle
+- Track Activity LED (already shipped in `0cfe974`)
+
+### Features still in progress
+
+_None._
+
+### Next feature
+
+The queue is empty; `INSTRUCTION.md` now contains 10 fresh brainstorm candidates for the next builder run.
+
 ## Session: 2026-07-13 18:00 PT (Snaw Feature Completion Agent Run — Day 775 Run 33)
 
 **Status: AUDIT ONLY — Codebase clean, v0.4.16 stable, 53rd consecutive phantom confirmation**

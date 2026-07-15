@@ -1,3 +1,14 @@
+#### Day 776 Run 4: Pre-Roll Count-In shipped and recursion repaired (2026-07-15)
+
+- **Run Type**: Snaw Feature Completion Agent (scheduled)
+- **Status**: v0.4.22 Pre-Roll Count-In Toggle is shipped; one integration bug found and repaired immediately.
+- **Feature shipped**: `js/PreRollCountIn.js` adds a persisted transport-bar “Pre-roll: On/Off” toggle. When enabled, recording waits for one click-only bar at the current BPM, then continues into the existing recording path. The count-in uses `playFixedCountIn` and does not start the transport or track playback during the pre-roll.
+- **Bug repaired**: The first implementation called `recordBtnGlobal.click()` after the pre-roll, which re-entered the same handler and started the existing configurable count-in again. `js/eventHandlers.js` now carries a one-shot `_preRollRecordHandoff` flag: the callback bypasses both count-in branches exactly once, then clears the flag before normal recording setup.
+- **Verification**: `node --check` passes on `js/PreRollCountIn.js`, `js/CountInAudio.js`, `js/eventHandlers.js`, `js/main.js`, `js/ui.js`, `js/audio.js`, `js/state.js`, and `js/constants.js`. Pre-roll smoke test: 9/9 assertions pass. `git diff --check` passes. Worktree clean after commit `d8d461b`, pushed to `origin/LWB-with-Bugs`.
+- **APP_VERSION**: 0.4.22. Deployed `js/constants.js` reports 0.4.22 and deployed `js/PreRollCountIn.js` contains the toggle.
+- **Features still in progress**: _None._ Track Activity LED was already shipped in commit `0cfe974`; the feature queue is now empty.
+- **Next feature**: Brainstorm from the refreshed queue in `INSTRUCTION.md`.
+
 #### Day 775 Run 33: Audit-Only — Codebase Clean, v0.4.16 Stable, 53rd Clean Entry (2026-07-13)
 
 - **Run Type**: Snaw Feature Completion Agent (scheduled)

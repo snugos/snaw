@@ -4,7 +4,20 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-1. **Track Activity LED** - Add a tiny per-track LED in the track header that flashes green when the track emits audio above a threshold, amber when it clips; great for live monitoring in a mix with many tracks
+Queue empty — the Pre-Roll Count-In Toggle and Track Activity LED are shipped. For the next feature-builder run, brainstorm 10 new single-session workflow ideas before implementation.
+
+### Brainstorm candidates
+
+1. **Marker color legend** — show a compact legend for semantic timeline-marker colors.
+2. **Clip audition hotkey** — preview the selected clip from its start without changing transport position.
+3. **Track header meter peak hold** — show the last peak value beside each track LED.
+4. **Tempo nudge history** — undo the last few tempo nudges as a compact history list.
+5. **Record-arm status tooltip** — show the armed track name and input-monitor state on the record control.
+6. **Loop-region duration badge** — show loop length in seconds and bars beside the loop controls.
+7. **MIDI input activity badge** — show the last received MIDI channel beside the input selector.
+8. **Selected-clip inspector shortcut** — open the inspector for the current clip with one keyboard command.
+9. **Project dirty-state indicator** — show when the current project has unsaved changes.
+10. **Mixer channel focus shortcut** — jump keyboard focus to the selected track’s mixer controls.
 
 ## Workflow
 
