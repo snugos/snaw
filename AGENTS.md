@@ -1,3 +1,10 @@
+#### Day 776 Run 3: One Feature Shipped — Track Activity LED (2026-07-15)
+
+- **Feature shipped**: v0.4.21 Track Activity LED. Each non-master mixer track header now includes a compact `track-activity-led` indicator. The existing `updateTrackMeterUI(trackId, level, isClipping)` callback drives it: gray at rest, green at `level >= 0.02`, amber on clipping. No audio routing or graph changes.
+- **Verification**: `node --check` passes on `main.js`, `ui.js`, `audio.js`, `eventHandlers.js`, `constants.js`, and `TrackRenumberHotkey.js`; structural LED smoke test passes; `git diff --check` passes.
+- **Queue**: Master Output Meter Bridge shipped in the parallel builder; the queue now starts with Pre-Roll Count-In Toggle, followed by Track Activity LED.
+- **Files modified**: `index.html`, `js/ui.js`, `js/main.js`, `js/constants.js`, `INSTRUCTION.md`, `FEATURE_STATUS.md`, and this entry.
+
 #### Day 776 Run 2: One Feature Shipped — Last-Used Effect Preset Memory (2026-07-15)
 
 - **Feature shipped**: `js/TrackEffectPresets.js` now remembers the last successfully loaded preset per track/effect type in localStorage under `snugos_last_used_effect_presets`. The panel shows a `★ Last used — …` quick-pick when the remembered preset still exists.

@@ -7914,6 +7914,7 @@ function renderTrackStrip(track, trackIndex = 0) {
                 <div class="flex items-center justify-center gap-1 min-w-0" title="Track ${trackNumber}: ${track.name}">
                     <span class="track-number-label inline-flex items-center justify-center min-w-5 h-5 px-1 rounded bg-gray-900 text-cyan-300 border border-gray-600 text-[10px] font-mono font-semibold" data-track-number="${trackNumber}" aria-label="Track ${trackNumber}" title="Track ${trackNumber} keyboard shortcut">${trackNumber}</span>
                     <div class="text-xs font-medium text-white truncate" title="${track.name}">${track.name}</div>
+                    <span class="track-activity-led" data-track-id="${track.id}" role="status" aria-label="Track activity idle" title="Track activity: idle"></span>
                 </div>
                 <div class="flex items-center justify-center gap-1 mt-0.5">
                     <div class="text-xs text-gray-500">${track.type || 'Track'}</div>

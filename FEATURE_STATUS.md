@@ -1,3 +1,28 @@
+## Session: 2026-07-15 00:50 UTC (Snaw Feature Completion Agent Run — Day 776 Run 3)
+
+**Status: ONE FEATURE SHIPPED — v0.4.21 Track Activity LED**
+
+The next incomplete feature was the Track Activity LED. Added a small per-track LED to every mixer track header. It is gray at rest, green while the track meter is above the activity threshold, and amber while the track clips. The existing track-meter update path now updates both the mixer LED and the existing inspector/mixer level bars without changing the audio graph.
+
+### Verification
+
+- `node --check` passes on `js/main.js`, `js/ui.js`, `js/audio.js`, `js/eventHandlers.js`, `js/constants.js`, and `js/TrackRenumberHotkey.js`.
+- Structural smoke test passes for LED markup, update wiring, threshold classes, and the v0.4.21 version bump.
+- `git diff --check` passes.
+- No public deploy performed by this scheduled run.
+
+### Files Modified
+
+| File | Change |
+| --- | --- |
+| `index.html` | Added LED active/clipping styles. |
+| `js/ui.js` | Added one LED to each non-master mixer track header. |
+| `js/main.js` | Extended the existing meter callback to update LED state. |
+| `js/constants.js` | Bumped APP_VERSION to 0.4.21. |
+| `INSTRUCTION.md` | Removed shipped Master Output Meter Bridge from the queue. |
+
+---
+
 ## Session: 2026-07-14 (Snaw Feature Completion Agent Run — Day 776)
 
 **Status: ONE FEATURE SHIPPED — v0.4.17 Quick Marker Set + Enhanced Panic Save**

@@ -302,6 +302,7 @@ import {
     initializeStateModule,
     // State Getters
     getTracksState, getTrackByIdState, getOpenWindowsState, getWindowByIdState, getHighestZState,
+    reorderTrackInState,
     getMasterEffectsState, getMasterGainValueState,
     getMidiAccessState, getActiveMIDIInputState,
     getMidiOutputDevices, sendMidiNoteOn, sendMidiNoteOff, sendMidiCC, sendMidiAllNotesOff, sendMidiAllNotesOffOnChannel, selectMidiOutput, getActiveMidiOutputState,
@@ -398,8 +399,8 @@ async function removeCustomDesktopBackground() {
 
     try {
         // Clear localStorage
-        localStorage.removeItem(DESKTOP_BACKGROUND_KEY);
-        localStorage.removeItem(DESKTOP_BG_TYPE_KEY);
+        localStorage.removeItem(appServices.DESKTOP_BACKGROUND_KEY);
+        localStorage.removeItem(appServices.DESKTOP_BG_TYPE_KEY);
 
         // Clear desktop background styles
         if (desktop) {
@@ -758,6 +759,9 @@ const appServices = {
     getTracks: () => {
         if (typeof getTracksState === 'function') return getTracksState();
         return [];
+    },
+    reorderTrackInState: (trackId, newIndex) => {
+        if (typeof reorderTrackInState === 'function') return reorderTrackInState(trackId, newIndex);
     },
     addRenderedTimelineMarker: (time, name = '', color = '#ff6b6b', note = '') => {
         try { return addRenderedTimelineMarker(time, name, color, note); }
@@ -1391,6 +1395,16 @@ const appServices = {
                     meterBar.style.width = `${Math.min(100, Math.max(0, level * 100))}%`;
                     meterBar.classList.toggle('clipping', isClipping);
                 }
+            }
+            const trackLed = document.querySelector(`.track-activity-led[data-track-id="${trackId}"]`);
+            if (trackLed) {
+                const active = level > 0.01;
+                const clipping = !!isClipping;
+                trackLed.classList.toggle('active', active && !clipping);
+                trackLed.classList.toggle('clipping', clipping);
+                const state = clipping ? 'clipping' : (active ? 'active' : 'idle');
+                trackLed.setAttribute('aria-label', `Track activity ${state}`);
+                trackLed.title = `Track activity: ${state}`;
             }
             if (mixerWindow?.element && !mixerWindow.isMinimized) {
                 const meterBar = mixerWindow.element.querySelector(`#mixerTrackMeterBar-${trackId}`);
@@ -2203,7 +2217,7 @@ async function handleCustomBackgroundUpload(event) {
                             try { URL.revokeObjectURL(currentDesktopImageObjectUrl); } catch (_) {}
                             currentDesktopImageObjectUrl = null;
                         }
-                        await bgDb.save('desktopImage', file);
+                        await appServices.bgDb.save('desktopImage', file);
                         const objectUrl = URL.createObjectURL(file);
                         currentDesktopImageObjectUrl = objectUrl;
                         localStorage.setItem('snugosDesktopBgType', 'image');
@@ -2231,7 +2245,7 @@ async function handleCustomBackgroundUpload(event) {
             reader.readAsDataURL(file);
         } else if (isVideo) {
             if (typeof showSafeNotification === 'function') showSafeNotification("Processing video background...", 2000);
-            await bgDb.save('desktopVideo', file);
+            await appServices.bgDb.save('desktopVideo', file);
             localStorage.setItem('snugosDesktopBgType', 'video');
             localStorage.removeItem('snugosDesktopBackground');
             // Defensive: revoke any previously-issued desktop-video object URL so the
@@ -3123,12 +3137,12 @@ function applyDesktopBackground(sourceUrl, bgType = 'image') {
 
 // Restore background on load
 async function restoreDesktopBackground() {
-    const bgType = localStorage.getItem(DESKTOP_BG_TYPE_KEY);
+    const bgType = localStorage.getItem(appServices.DESKTOP_BG_TYPE_KEY);
 
     if (bgType === 'video') {
         let restored = false;
         try {
-            const videoBlob = await bgDb.get('desktopVideo');
+            const videoBlob = await appServices.bgDb.get('desktopVideo');
             if (videoBlob) {
                 const objectUrl = URL.createObjectURL(videoBlob);
                 // Track this URL so removeCustomDesktopBackground (and a later
@@ -3144,13 +3158,13 @@ async function restoreDesktopBackground() {
             }
             // Blob missing — clear stale video marker, fall through to image fallback
             console.warn('[restoreDesktopBackground] Stored video bg marker set but IDB blob is missing. Clearing marker.');
-            localStorage.removeItem(DESKTOP_BG_TYPE_KEY);
+            localStorage.removeItem(appServices.DESKTOP_BG_TYPE_KEY);
             if (typeof showSafeNotification === 'function') {
                 showSafeNotification("Stored video background could not be restored (missing data). Falling back to default.", 3500);
             }
         } catch (e) {
             console.warn("Could not restore video background:", e);
-            localStorage.removeItem(DESKTOP_BG_TYPE_KEY);
+            localStorage.removeItem(appServices.DESKTOP_BG_TYPE_KEY);
             if (typeof showSafeNotification === 'function') {
                 showSafeNotification("Video background restore failed. Falling back to default.", 3500);
             }
@@ -3164,7 +3178,7 @@ async function restoreDesktopBackground() {
     // path if that fails. Mirrors the video-IDB restore branch above.
     if (bgType === 'image') {
         try {
-            const imageBlob = await bgDb.get('desktopImage');
+            const imageBlob = await appServices.bgDb.get('desktopImage');
             if (imageBlob) {
                 const objectUrl = URL.createObjectURL(imageBlob);
                 if (currentDesktopImageObjectUrl) {
@@ -3181,7 +3195,7 @@ async function restoreDesktopBackground() {
     }
 
     if (bgType === 'image' || !bgType) {
-        const imageUrl = localStorage.getItem(DESKTOP_BACKGROUND_KEY);
+        const imageUrl = localStorage.getItem(appServices.DESKTOP_BACKGROUND_KEY);
         if (imageUrl) {
             // Defensive: a stale or corrupt imageUrl (revoked blob URL, empty string,
             // an unsupported scheme like javascript:, or a value that fails to parse)
@@ -3199,8 +3213,8 @@ async function restoreDesktopBackground() {
                 if (typeof updateBgStatusIndicator === 'function') updateBgStatusIndicator();
             } else {
                 console.warn('[restoreDesktopBackground] Stored image bg URL is invalid or uses an unsupported scheme. Clearing marker.');
-                localStorage.removeItem(DESKTOP_BACKGROUND_KEY);
-                if (!bgType) localStorage.removeItem(DESKTOP_BG_TYPE_KEY);
+                localStorage.removeItem(appServices.DESKTOP_BACKGROUND_KEY);
+                if (!bgType) localStorage.removeItem(appServices.DESKTOP_BG_TYPE_KEY);
                 if (typeof showSafeNotification === 'function') {
                     showSafeNotification("Stored image background could not be restored (invalid data). Falling back to default.", 3500);
                 }

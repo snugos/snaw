@@ -60,6 +60,26 @@
             background-color: #8b1a1a !important;
             color: #ff9999 !important;
             animation: pulse-record 1s infinite;
+        }        .track-activity-led {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            flex: 0 0 7px;
+            border-radius: 999px;
+            background: #3f3f46;
+            border: 1px solid #52525b;
+            box-shadow: 0 0 0 transparent;
+            transition: background-color 80ms ease, box-shadow 80ms ease;
+        }
+        .track-activity-led.active {
+            background: #22c55e;
+            border-color: #86efac;
+            box-shadow: 0 0 6px rgba(34, 197, 94, 0.8);
+        }
+        .track-activity-led.clipping {
+            background: #f59e0b;
+            border-color: #fde68a;
+            box-shadow: 0 0 7px rgba(245, 158, 11, 0.95);
         }
         @keyframes pulse-record {
             0%, 100% { opacity: 1; }

@@ -44,28 +44,17 @@ function closeEditor() {
 }
 
 function refreshVisibleTrackOrder(tracks) {
+    if (!document.querySelectorAll) return;
     const orderedIds = tracks.map(track => String(track.id));
-    const parents = new Set();
     document.querySelectorAll('[data-track-id]').forEach(element => {
-        if (element.dataset.trackId !== 'master' && element.parentElement) parents.add(element.parentElement);
-    });
-    parents.forEach(parent => {
-        const children = Array.from(parent.children).filter(element => {
-            const id = element.dataset?.trackId;
-            return id != null && id !== 'master' && orderedIds.includes(String(id));
-        });
-        if (children.length < 2) return;
-        const byId = new Map(children.map(element => [String(element.dataset.trackId), element]));
-        orderedIds.forEach(id => {
-            const element = byId.get(id);
-            if (element) parent.appendChild(element);
-        });
-    });
-    tracks.forEach((track, index) => {
-        document.querySelectorAll(`[data-track-id="${track.id}"]`).forEach(element => {
-            element.querySelector('.track-number-label')?.replaceChildren(document.createTextNode(String(index + 1)));
-            element.querySelector('.track-name-label, .track-name, .text-xs.font-medium.text-white')?.replaceChildren(document.createTextNode(track.name || ''));
-        });
+        if (element.dataset.trackId === 'master') return;
+        const numberLabel = element.querySelector?.('.track-number-label');
+        if (numberLabel) {
+            numberLabel.textContent = String(orderedIds.indexOf(String(element.dataset.trackId)) + 1);
+        }
+        const nameLabel = element.querySelector?.('.track-name-label, .track-name, .text-xs.font-medium.text-white');
+        const track = tracks.find(item => String(item.id) === String(element.dataset.trackId));
+        if (nameLabel && track) nameLabel.textContent = track.name || '';
     });
 }
 
@@ -94,8 +83,12 @@ function applyRenumber(track, positionInput, nameInput) {
 
     if (nameChanged) track.name = nextName;
     if (targetIndex !== oldIndex) {
-        const [moved] = tracks.splice(oldIndex, 1);
-        tracks.splice(targetIndex, 0, moved);
+        if (typeof localAppServices.reorderTrackInState === 'function') {
+            localAppServices.reorderTrackInState(track.id, targetIndex);
+        } else {
+            const [moved] = tracks.splice(oldIndex, 1);
+            tracks.splice(targetIndex, 0, moved);
+        }
     }
 
     selectedTrackId = track.id;
@@ -119,7 +112,7 @@ function openEditor(track) {
     const currentPosition = tracks.findIndex(item => String(item?.id) === String(track.id)) + 1;
     const editor = document.createElement('div');
     editor.className = 'track-renumber-editor flex flex-col gap-2 mt-2 p-2 rounded border border-cyan-500 bg-gray-900';
-    editor.setAttribute('data-track-renumber-editor', 'true');
+    editor.dataset.trackRenumberEditor = 'true';
 
     const positionInput = document.createElement('input');
     positionInput.type = 'number';
