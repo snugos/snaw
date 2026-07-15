@@ -425,14 +425,18 @@ async function removeCustomDesktopBackground() {
             currentDesktopImageObjectUrl = null;
         }
 
-        // Remove from db if exists (capture so we can surface a warning if it fails)
-        bgDbDeleteAudio('desktopVideo').catch((dbErr) => {
-            console.warn("[removeCustomDesktopBackground] IndexedDB delete failed (localStorage still cleared):", dbErr);
+        // Remove from IndexedDB if present; localStorage and the visible UI are already cleared.
+        try {
+            await appServices.bgDb.remove('desktopVideo');
+        } catch (dbErr) {
+            console.warn("[removeCustomDesktopBackground] IndexedDB video delete failed (localStorage still cleared):", dbErr);
             if (typeof showSafeNotification === 'function') showSafeNotification("Local DB cleanup failed — background cleared anyway.", 2500);
-        });
-        bgDbDeleteAudio('desktopImage').catch((dbErr) => {
-            console.warn("[removeCustomDesktopBackground] IndexedDB delete of image failed (localStorage still cleared):", dbErr);
-        });
+        }
+        try {
+            await appServices.bgDb.remove('desktopImage');
+        } catch (dbErr) {
+            console.warn("[removeCustomDesktopBackground] IndexedDB image delete failed (localStorage still cleared):", dbErr);
+        }
 
         console.log("[removeCustomDesktopBackground] Custom background removed.");
         if (typeof showSafeNotification === 'function') showSafeNotification("Custom background removed.", 2000);
