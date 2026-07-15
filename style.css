@@ -210,6 +210,16 @@ body {
 #startMenu li:hover, #startMenu li.disabled:hover { background: #7c3aed; color: white; } /* Brighter blue hover */
 #startMenu li.disabled { color: #555555; cursor: default; }
 #startMenu hr { border: none; border-top: 1px solid #3a3a3a; margin: 4px 0; }
+#startMenu .has-submenu { position: relative; }
+#startMenu .submenu-arrow { float: right; color: #888; margin-left: 18px; }
+#startMenu .start-submenu { display: none; position: absolute; left: calc(100% - 4px); top: -4px; min-width: 230px; max-width: 320px; max-height: 260px; overflow-y: auto; padding: 4px; background: #1e1e1e; border: 1px solid #3a3a3a; box-shadow: 2px 2px 8px rgba(0,0,0,0.6); border-radius: 3px; }
+#startMenu .start-submenu.submenu-visible { display: block; }
+#startMenu .start-submenu li { overflow: hidden; text-overflow: ellipsis; }
+#startMenu .start-submenu .recent-project-empty { color: #888; cursor: default; }
+#startMenu .start-submenu .recent-project-empty:hover { background: transparent; color: #888; }
+#startMenu .start-submenu .recent-project-separator { height: 1px; padding: 0; margin: 4px 0; background: #3a3a3a; cursor: default; }
+#startMenu .start-submenu .recent-project-separator:hover { background: #3a3a3a; }
+#startMenu .start-submenu .recent-project-clear { color: #f59e0b; }
 
 
 /* --- Pad Button Styling (Unified Dark Theme) --- */

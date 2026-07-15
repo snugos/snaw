@@ -2647,6 +2647,7 @@ export function saveProjectInternal() {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+        if (typeof appServices.recordRecentProjectFile === 'function') appServices.recordRecentProjectFile(a.download, 'saved');
         if (appServices.showNotification) appServices.showNotification(`Project saved as ${a.download}`, 2000);
     } catch (error) {
         console.error("[State saveProjectInternal] Error saving project:", error);
@@ -2681,6 +2682,7 @@ export async function handleProjectFileLoadInternal(event) {
                 redoStack = [];
                 await reconstructDAWInternal(projectData, false); // false for isUndoRedo
                 captureStateForUndoInternal("Load Project: " + file.name.substring(0, 20)); // Initial state for undo
+                if (typeof appServices.recordRecentProjectFile === 'function') appServices.recordRecentProjectFile(file.name, 'loaded');
             } catch (error) {
                 console.error("[State handleProjectFileLoadInternal] Error loading project from file:", error);
                 if (appServices.showNotification) appServices.showNotification(`Error loading project: ${error.message}. File might be corrupt or invalid.`, 5000);

@@ -10,6 +10,7 @@ import { MelodyGenerator, initMelodyGenerator, getMelodyGenerator, generateMelod
 import { initQuickActionsMenu, openQuickActionsMenu, closeQuickActionsMenu } from './QuickActionsMenu.js';
 import { initTimelineMarkers, openTimelineMarkersPanel, addTimelineMarker as addRenderedTimelineMarker, removeTimelineMarker as removeRenderedTimelineMarker, getTimelineMarkers as getRenderedTimelineMarkers } from './TimelineMarkers.js';
 import { initQuickMarkerSet } from './QuickMarkerSet.js';
+import { initRecentProjectFileHistory, recordRecentProjectFile } from './RecentProjectFileHistory.js';
 import { initMarkerAnnotations } from './MarkerAnnotations.js';
 import { initPlayheadMarkerDrop, openPlayheadMarkerDropSettings } from './PlayheadMarkerDrop.js';
 import { initTimelineRulerClick, openTimelineRulerClickSettings } from './TimelineRulerClick.js';
@@ -335,6 +336,7 @@ import {
     addTrackToStateInternal, removeTrackFromStateInternal, reorderTrackInState,
     captureStateForUndoInternal, undoLastActionInternal, redoLastActionInternal,
     gatherProjectDataInternal, reconstructDAWInternal, saveProjectInternal,
+    loadProjectInternal, handleProjectFileLoadInternal,
     saveProjectTemplate, loadProjectTemplate, getProjectTemplateNames, getProjectTemplate, deleteProjectTemplate,
     // Auto-save (used by AutoSaveIndicator — must be reachable from appServices.stateModule)
     getLastAutoSaveTime,
@@ -1179,7 +1181,12 @@ const appServices = {
         const win = new SnugWindow(id, title, contentHTML, options, appServices);
         return win;
     },
-    uiElementsCache: uiElementsCache, 
+    uiElementsCache: uiElementsCache,
+    saveProject: saveProjectInternal,
+    loadProject: loadProjectInternal,
+    handleProjectFileLoad: handleProjectFileLoadInternal,
+    recordRecentProjectFile,
+
 
     addMasterEffect: async (effectType) => {
         try {
@@ -2498,6 +2505,7 @@ async function initializeSnugOS() {
         if (typeof initProjectSessionTimer === 'function') initProjectSessionTimer(appServices); // Project Session Timer (v0.4.12) — MM:SS, click to reset
         if (typeof initTransportBarMasterMeter === 'function') initTransportBarMasterMeter(appServices); // Transport Bar Master Output Meter (v0.4.15) — L/R horizontal peak meter in the transport bar
         if (typeof initProjectSnapshotList === 'function') initProjectSnapshotList(appServices); // Quick Project Snapshot List (v0.4.15) — last 5 auto + manual snapshots
+        if (typeof initRecentProjectFileHistory === 'function') initRecentProjectFileHistory(appServices); // Recent Project File History — last 5 saved/loaded names
         if (typeof initLyricsTrack === 'function') initLyricsTrack(appServices); // Lyrics Track initialization
         if (typeof initLyricsDisplay === 'function') initLyricsDisplay(appServices); // Lyrics Display Karaoke Mode
         if (typeof initTimeSignaturePerTrack === 'function') initTimeSignaturePerTrack(appServices); // Time Signature Per Track initialization

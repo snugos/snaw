@@ -610,6 +610,15 @@ export function initializePrimaryEventListeners(appContext) {
             },
             menuSaveProject: () => { console.log('[Menu] Save clicked'); localAppServices.saveProject?.(); },
             menuLoadProject: () => { console.log('[Menu] Load clicked'); localAppServices.loadProject?.(); },
+            menuRecentProjectFiles: () => {
+                const submenu = document.getElementById('recentProjectFilesSubmenu');
+                const trigger = document.getElementById('menuRecentProjectFiles');
+                if (submenu && trigger) {
+                    const isOpen = trigger.classList.toggle('submenu-open');
+                    submenu.classList.toggle('submenu-visible', isOpen);
+                    trigger.setAttribute('aria-expanded', String(isOpen));
+                }
+            },
             menuExportWav: () => { console.log('[Menu] Export clicked'); localAppServices.exportToWav?.(); },
             menuExportRegion: () => { console.log('[Menu] Export Region clicked'); try { localAppServices.openExportSelectionPanel?.(); } catch(e) { console.error('[Menu] Export Region error:', e); } },
             menuExportMidi: () => { console.log('[Menu] Export MIDI clicked'); localAppServices.exportToMidi?.(); },
@@ -1124,7 +1133,7 @@ export function initializePrimaryEventListeners(appContext) {
                     e.stopPropagation();
                     console.log(`[Menu] CLICK FIRED: ${menuItemId}`);
                     menuActions[menuItemId]();
-                    if (uiCache.startMenu) uiCache.startMenu.classList.add('hidden');
+                    if (menuItemId !== 'menuRecentProjectFiles' && uiCache.startMenu) uiCache.startMenu.classList.add('hidden');
                 });
             } else {
                 console.warn(`[Menu] NOT FOUND: ${menuItemId}`);
