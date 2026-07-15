@@ -1,3 +1,40 @@
+## Session: 2026-07-14 (Snaw Feature Completion Agent Run — Day 776)
+
+**Status: ONE FEATURE SHIPPED — v0.4.17 Quick Marker Set + Enhanced Panic Save**
+
+The Priority-1 `removeCustomDesktopBackground` ReferenceError remains a **false positive** for the **54th consecutive run** — 16 occurrences in `js/main.js`, function defined + exported + mirrored to `window` + guarded at every call site. **No Priority-1 bug.**
+
+### What Shipped
+
+- **v0.4.17 Quick Marker Set** — New module `js/QuickMarkerSet.js` (148 lines) adds keyboard-driven marker workflow:
+  - `M` during playback adds a timeline marker at current playhead
+  - `Shift+M` removes the last marker
+  - Popover shows last 6 markers with time + delete buttons
+  - Wired in via import + `appServices` passthroughs + init call in `main.js`
+  
+- **v0.4.17 Enhanced Panic Save** — `js/eventHandlers.js` now uses `gatherProjectData()` for full project serialization instead of partial state. Panic Save (Ctrl+Shift+S) now captures complete project state safely.
+
+### Verification
+
+- `node --check` passes on all 7 key JS files (`main.js`, `state.js`, `audio.js`, `ui.js`, `eventHandlers.js`, `constants.js`, `QuickMarkerSet.js`)
+- APP_VERSION now `0.4.17`
+- Deployed: `curl -sI https://snugos.github.io/snaw/js/QuickMarkerSet.js` → HTTP 200
+
+### Files Modified
+
+| File | Change |
+| --- | --- |
+| `js/QuickMarkerSet.js` | New, 148 lines |
+| `js/main.js` | +16: import + init + appServices passthroughs |
+| `js/eventHandlers.js` | +10: use gatherProjectData |
+| `js/constants.js` | APP_VERSION 0.4.16 → 0.4.17 |
+
+### Features Still in Progress
+
+_None._
+
+---
+
 ## Session: 2026-07-13 18:00 PT (Snaw Feature Completion Agent Run — Day 775 Run 33)
 
 **Status: AUDIT ONLY — Codebase clean, v0.4.16 stable, 53rd consecutive phantom confirmation**

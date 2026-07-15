@@ -1,3 +1,17 @@
+#### Day 776 Run 1: One Feature Shipped — v0.4.17 Quick Marker Set + Enhanced Panic Save (2026-07-14)
+
+- **Run Type**: Snaw Feature Completion Agent (scheduled)
+- **Status**: Priority-1 `removeCustomDesktopBackground` ReferenceError confirmed false positive for the **54th consecutive run** — 16 occurrences in `js/main.js`, function defined (line 391, `async function removeCustomDesktopBackground()`) + exported via `appServices` (line 741) + mirrored to `window` (line 2090) + guarded at every call site. **No Priority-1 bug.**
+- **Feature shipped**: v0.4.17 Quick Marker Set + Enhanced Panic Save
+  - **Quick Marker Set** — new module `js/QuickMarkerSet.js` (148 lines): `M` during playback adds timeline marker, `Shift+M` removes last marker, popover shows last 6 markers
+  - **Enhanced Panic Save** — `js/eventHandlers.js` now uses `gatherProjectData()` for full project serialization instead of partial state
+- **Automated scan**: 0 TODO/FIXME/STUB, 1 untracked orphan found (`js/QuickMarkerSet.js`) + deployed to git, all 7 key JS files pass `node --check`. 54th clean entry.
+- **APP_VERSION**: 0.4.17 (stable).
+- **Deployed site**: HTTP 200, `QuickMarkerSet.js` live, 16 references to `removeCustomDesktopBackground` intact, APP_VERSION 0.4.17 live.
+- **Files Modified This Run**: `js/QuickMarkerSet.js` (new, 148 lines). `js/main.js` (+16: import + init + appServices). `js/eventHandlers.js` (+10: use gatherProjectData). `js/constants.js` (+1/-1: APP_VERSION bump). `FEATURE_STATUS.md` (this entry, prepended). `AGENTS.md` (this entry, prepended).
+- **Features Still in Progress**: _None._
+- **Action Taken**: Pulled latest (already up to date, HEAD `563ac89`). Confirmed Priority-1 phantom (54th consecutive run, 16 occurrences). Ran full scan suite — found orphaned `QuickMarkerSet.js` + mid-flight eventHandlers changes. Verified syntax, committed, pushed. Bumped APP_VERSION 0.4.16 → 0.4.17. Updated `FEATURE_STATUS.md` and `AGENTS.md`.
+
 #### Day 775 Run 33: Audit-Only — Codebase Clean, v0.4.16 Stable, 53rd Clean Entry (2026-07-13)
 
 - **Run Type**: Snaw Feature Completion Agent (scheduled)
