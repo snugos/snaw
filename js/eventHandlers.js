@@ -1169,7 +1169,7 @@ export function attachGlobalControlEvents(elements) {
         console.error('[EventHandlers attachGlobalControlEvents] Elements object is null or undefined.');
         return;
     }
-    const { playBtnGlobal, recordBtnGlobal, stopBtnGlobal, tempoGlobalInput, tempoNudgeDown, tempoNudgeUp, tempoFineNudgeDown, tempoFineNudgeUp, midiInputSelectGlobal, midiOutputSelectGlobal, playbackModeToggleBtnGlobal, midiLearnBtnGlobal, tapBtnGlobal, tapHistoryBtn, tapVisualBtn, tapSettingsBtn, loopToggleBtnGlobal, loopStartInput, loopEndInput, metronomeToggleBtnGlobal, metronomeVolumeSlider, metronomeVolumeDisplay, metronomeVolumeControl, performanceMonitorBtn, autoSaveToggleBtn, beatLfoToggleBtnGlobal, scaleSelectGlobal, keySelectGlobal, scaleNotesDisplay, stretchQualityBtn } = elements;
+    const { playBtnGlobal, recordBtnGlobal, stopBtnGlobal, tempoGlobalInput, tempoNudgeDown, tempoNudgeUp, tempoFineNudgeDown, tempoFineNudgeUp, midiInputSelectGlobal, midiOutputSelectGlobal, playbackModeToggleBtnGlobal, midiLearnBtnGlobal, tapBtnGlobal, tapHistoryBtn, tapVisualBtn, tapSettingsBtn, quickMarkerBtnGlobal, loopToggleBtnGlobal, loopStartInput, loopEndInput, metronomeToggleBtnGlobal, metronomeVolumeSlider, metronomeVolumeDisplay, metronomeVolumeControl, performanceMonitorBtn, autoSaveToggleBtn, beatLfoToggleBtnGlobal, scaleSelectGlobal, keySelectGlobal, scaleNotesDisplay, stretchQualityBtn } = elements;
     // Helper function to toggle play/pause icons
     function setPlayButtonState(isPlaying) {
         if (!playBtnGlobal) return;
@@ -1913,6 +1913,13 @@ export function attachGlobalControlEvents(elements) {
                 if (module.initTapTempoSettings) module.initTapTempoSettings(localAppServices);
                 if (module.toggleTapTempoSettings) module.toggleTapTempoSettings();
             }).catch(err => console.error('[EventHandlers] Failed to load TapTempoSettings:', err));
+        });
+    }
+    if (quickMarkerBtnGlobal) {
+        quickMarkerBtnGlobal.addEventListener('click', () => {
+            if (typeof localAppServices.openQuickMarkerPopover === 'function') {
+                localAppServices.openQuickMarkerPopover();
+            }
         });
     }
 

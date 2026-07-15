@@ -9,7 +9,7 @@ import { DrumPatternGenerator, initDrumPatternGenerator, getDrumGenerator, gener
 import { MelodyGenerator, initMelodyGenerator, getMelodyGenerator, generateMelody, MELODY_STYLES, MELODY_MOODS } from './MelodyGenerator.js';
 import { initQuickActionsMenu, openQuickActionsMenu, closeQuickActionsMenu } from './QuickActionsMenu.js';
 import { initTimelineMarkers, openTimelineMarkersPanel, addTimelineMarker as addRenderedTimelineMarker, removeTimelineMarker as removeRenderedTimelineMarker, getTimelineMarkers as getRenderedTimelineMarkers } from './TimelineMarkers.js';
-import { initQuickMarkerSet } from './QuickMarkerSet.js';
+import { initQuickMarkerSet, openQuickMarkerPopover } from './QuickMarkerSet.js';
 import { initRecentProjectFileHistory, recordRecentProjectFile } from './RecentProjectFileHistory.js';
 import { initMarkerAnnotations } from './MarkerAnnotations.js';
 import { initPlayheadMarkerDrop, openPlayheadMarkerDropSettings } from './PlayheadMarkerDrop.js';
@@ -787,6 +787,7 @@ const appServices = {
         } catch (e) { console.warn('[appServices.updateTimelineMarker] failed:', e); }
         return null;
     },
+    openQuickMarkerPopover,
     // Audio destination for short-lived preview players (loop preview, etc.).
     // Defaults to Tone.Destination; modules can override via appServices for routing.
     getPreviewDestination: () => {
@@ -2429,6 +2430,7 @@ async function initializeSnugOS() {
             stopBtnGlobal: document.getElementById('stopBtnGlobal'),
             panicBtnGlobal: document.getElementById('panicBtnGlobal'),
             tempoGlobalInput: document.getElementById('tempoGlobalInput'),
+            quickMarkerBtnGlobal: document.getElementById('quickMarkerBtnGlobal'),
             midiInputSelectGlobal: document.getElementById('midiInputSelectGlobal'),
             midiOutputSelectGlobal: document.getElementById('midiOutputSelectGlobal'),
             masterMeterContainerGlobal: document.getElementById('masterMeterContainerGlobal'),

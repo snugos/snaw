@@ -45,6 +45,20 @@ function jumpToMarker(marker) {
         localAppServices.showNotification(`Jumped to ${marker.name}`, 1000);
     }
 }
+function stepMarker(direction) {
+    const markers = getMarkers().slice().sort((a, b) => Number(a.time || 0) - Number(b.time || 0));
+    if (!markers.length) {
+        showPopover('No markers to navigate');
+        return false;
+    }
+    const now = getCurrentTime();
+    const marker = direction > 0
+        ? (markers.find(item => Number(item.time || 0) > now + 0.001) || markers[0])
+        : ([...markers].reverse().find(item => Number(item.time || 0) < now - 0.001) || markers[markers.length - 1]);
+    jumpToMarker(marker);
+    showPopover(direction > 0 ? 'Next marker' : 'Previous marker');
+    return true;
+}
 
 function closePopover() {
     if (typeof document === 'undefined') return;
@@ -177,7 +191,14 @@ function removeAllMarkers() {
 
 export function handleQuickMarkerKey(event) {
     if (!event || event.repeat || event.ctrlKey || event.metaKey || event.altKey || (typeof document !== 'undefined' && isTypingTarget(document.activeElement))) return false;
-    if (String(event.key).toLowerCase() !== 'm') return false;
+    const key = String(event.key);
+    if (key === '[' || key === ']') {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        stepMarker(key === ']' ? 1 : -1);
+        return true;
+    }
+    if (key.toLowerCase() !== 'm') return false;
     if (!event.shiftKey && !isPlaying()) return false;
     event.preventDefault();
     event.stopImmediatePropagation();
@@ -197,7 +218,7 @@ export function initQuickMarkerSet(appServices) {
     if (typeof document !== 'undefined') document.addEventListener('keydown', handleKeydown, true);
     if (typeof window !== 'undefined') {
         window.openQuickMarkerPopover = () => showPopover();
-        window.quickMarkerSet = { addMarker, removeLastMarker, removeAllMarkers, showPopover };
+        window.quickMarkerSet = { addMarker, removeLastMarker, removeAllMarkers, stepMarker, showPopover };
     }
     console.log('[QuickMarkerSet] Initialized');
 }
