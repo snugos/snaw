@@ -124,7 +124,8 @@ function removeLastMarker() {
 
 export function handleQuickMarkerKey(event) {
     if (!event || event.repeat || event.ctrlKey || event.metaKey || event.altKey || (typeof document !== 'undefined' && isTypingTarget(document.activeElement))) return false;
-    if (String(event.key).toLowerCase() !== 'm' || !isPlaying()) return false;
+    if (String(event.key).toLowerCase() !== 'm') return false;
+    if (!event.shiftKey && !isPlaying()) return false;
     event.preventDefault();
     event.stopImmediatePropagation();
     if (event.shiftKey) removeLastMarker();
