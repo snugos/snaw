@@ -58,6 +58,7 @@ let transportKeepAliveBufferSource = null;
 let silentKeepAliveBuffer = null;
 let _hoveredEffectId = null; // Tracks which effect is currently hovered in effects rack
 let _hoveredEffectTrack = null; // The track that owns the hovered effect
+let _preRollRecordHandoff = false;
 
 // --- MIDI CC Learn / Mapping System ---
 let _midiCCMappings = {}; // { targetId: { cc, channel, min, max } }
@@ -1622,8 +1623,13 @@ export function attachGlobalControlEvents(elements) {
 
                 if (!isCurrentlyRec) {
                     if (!trackToRecord) { showNotification("No track armed for recording.", 2000); return; }
-                    if (isPreRollCountInEnabled() && !isCountInActive()) {
-                        runPreRollCountIn(() => recordBtnGlobal.click());
+                    const bypassCountIn = _preRollRecordHandoff;
+                    _preRollRecordHandoff = false;
+                    if (!bypassCountIn && isPreRollCountInEnabled() && !isCountInActive()) {
+                        runPreRollCountIn(() => {
+                            _preRollRecordHandoff = true;
+                            recordBtnGlobal.click();
+                        });
                         return;
                     }
                     let recordingInitialized = false;
@@ -1637,7 +1643,7 @@ export function attachGlobalControlEvents(elements) {
                         // Count-in before recording
                         const { getCountInBars } = await import('./CountInAudio.js');
                         const countBars = getCountInBars();
-                        if (countBars > 0) {
+                        if (!bypassCountIn && countBars > 0) {
                             // Play count-in, callback will start recording
                             const bpm = Tone.Transport.bpm.value;
                             await playCountIn(async () => {
