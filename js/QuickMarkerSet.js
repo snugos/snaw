@@ -96,8 +96,29 @@ function showPopover(message = '') {
         return row;
     });
     const heading = document.createElement('div');
-    heading.textContent = message || 'Quick markers';
-    heading.style.cssText = 'font-weight:600;color:#93c5fd;margin-bottom:5px;';
+    heading.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px;';
+
+    const headingLabel = document.createElement('span');
+    headingLabel.textContent = message || 'Quick markers';
+    headingLabel.style.cssText = 'font-weight:600;color:#93c5fd;';
+    heading.appendChild(headingLabel);
+
+    if (markers.length) {
+        const clearButton = document.createElement('button');
+        clearButton.type = 'button';
+        clearButton.textContent = 'Clear all';
+        clearButton.title = 'Delete all timeline markers';
+        clearButton.style.cssText = 'padding:2px 5px;color:#fca5a5;background:transparent;border:1px solid #7f1d1d;border-radius:4px;cursor:pointer;font-size:11px;';
+        clearButton.addEventListener('click', () => {
+            const removed = removeAllMarkers();
+            if (removed) {
+                localAppServices.showNotification?.(`Removed ${removed} marker${removed === 1 ? '' : 's'}`, 1200);
+                showPopover('Markers cleared');
+            }
+        });
+        heading.appendChild(clearButton);
+    }
+
     popover.appendChild(heading);
     if (rows.length) rows.forEach(row => popover.appendChild(row));
     else {
@@ -144,6 +165,16 @@ function removeLastMarker() {
     return removed;
 }
 
+function removeAllMarkers() {
+    if (typeof localAppServices.removeRenderedTimelineMarker !== 'function') return 0;
+    const markerIds = getMarkers().map(marker => marker.id);
+    let removed = 0;
+    markerIds.forEach(id => {
+        if (localAppServices.removeRenderedTimelineMarker(id)) removed += 1;
+    });
+    return removed;
+}
+
 export function handleQuickMarkerKey(event) {
     if (!event || event.repeat || event.ctrlKey || event.metaKey || event.altKey || (typeof document !== 'undefined' && isTypingTarget(document.activeElement))) return false;
     if (String(event.key).toLowerCase() !== 'm') return false;
@@ -166,7 +197,7 @@ export function initQuickMarkerSet(appServices) {
     if (typeof document !== 'undefined') document.addEventListener('keydown', handleKeydown, true);
     if (typeof window !== 'undefined') {
         window.openQuickMarkerPopover = () => showPopover();
-        window.quickMarkerSet = { addMarker, removeLastMarker, showPopover };
+        window.quickMarkerSet = { addMarker, removeLastMarker, removeAllMarkers, showPopover };
     }
     console.log('[QuickMarkerSet] Initialized');
 }

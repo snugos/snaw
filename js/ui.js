@@ -7729,8 +7729,8 @@ function renderMixerChannelStripContent() {
     }
 
     // Render each track strip
-    tracks.forEach(track => {
-        html += renderTrackStrip(track);
+    tracks.forEach((track, trackIndex) => {
+        html += renderTrackStrip(track, trackIndex);
     });
 
     html += `
@@ -7750,7 +7750,8 @@ function renderMixerChannelStripContent() {
 /**
  * Renders a single track channel strip.
  */
-function renderTrackStrip(track) {
+function renderTrackStrip(track, trackIndex = 0) {
+    const trackNumber = Number.isFinite(trackIndex) ? trackIndex + 1 : '';
     const isMuted = track.muted || false;
     const isSolo = track.solo || false;
     const isArmed = track.recArm || false;
@@ -7910,7 +7911,10 @@ function renderTrackStrip(track) {
         <div class="track-strip flex-shrink-0 w-44 bg-gray-800 rounded-lg p-3 flex flex-col gap-2 border border-gray-700" data-track-id="${track.id}">
             <div class="text-center">
                 <div class="w-full h-1 rounded mb-1" style="background: ${trackColor};"></div>
-                <div class="text-xs font-medium text-white truncate" title="${track.name}">${track.name}</div>
+                <div class="flex items-center justify-center gap-1 min-w-0" title="Track ${trackNumber}: ${track.name}">
+                    <span class="track-number-label inline-flex items-center justify-center min-w-5 h-5 px-1 rounded bg-gray-900 text-cyan-300 border border-gray-600 text-[10px] font-mono font-semibold" data-track-number="${trackNumber}" aria-label="Track ${trackNumber}" title="Track ${trackNumber} keyboard shortcut">${trackNumber}</span>
+                    <div class="text-xs font-medium text-white truncate" title="${track.name}">${track.name}</div>
+                </div>
                 <div class="flex items-center justify-center gap-1 mt-0.5">
                     <div class="text-xs text-gray-500">${track.type || 'Track'}</div>
                     ${midiChannelBadgeHTML}
