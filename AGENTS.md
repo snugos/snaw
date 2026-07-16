@@ -1,3 +1,10 @@
+#### Day 776 Run 10: Metronome Accent Pattern shipped (2026-07-16)
+
+- **Run Type**: Snaw Feature Builder Agent (scheduled)
+- **Status**: v0.4.26 Metronome Accent Pattern implemented in one focused feature commit.
+- **Feature**: Added four persisted click-accent presets (Downbeat, One & Three, Two & Four, All Beats), a transport-bar `Accent` cycle button, shared menu cycling, and scheduled metronome playback driven by the selected pattern.
+- **Verification**: Real ES-module smoke test passed 3/3 assertions; `node --check` passed on changed modules; `git diff --check` passed.
+
 #### Day 776 Run 9: Background-removal audit and visibility-control polish shipped (2026-07-16)
 
 - **Run Type**: Snaw Repair & Enhancement Agent (scheduled)

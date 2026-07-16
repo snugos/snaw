@@ -226,6 +226,7 @@
         <button id="stretchQualityBtn" title="Audio Stretching Quality" class="transport-btn px-2 text-xs">Stretch: Balanced</button>
         <!-- Metronome Toggle -->
         <button id="metronomeToggleBtnGlobal" title="Toggle Metronome (M)" class="transport-btn px-2">Metronome: Off</button>
+        <button id="metronomeAccentToggleBtnGlobal" title="Metronome accent pattern" class="transport-btn px-2 text-xs">Accent: 1---</button>
         <div class="flex items-center gap-1 ml-1" id="metronomeVolumeControl" style="display:none;">
             <span class="text-[10px] text-[#a0a0a0]">Vol:</span>
             <input type="range" id="metronomeVolumeSlider" min="0" max="100" value="50" class="w-12 h-1 accent-[#ff7700] cursor-pointer" title="Metronome Volume">
@@ -607,7 +608,7 @@
     <script src="js/ChordVoicingPanel.js"></script>
     <script src="js/LoopbackAudio.js"></script>
     <script src="js/MetronomeVisual.js"></script>
-    <script src="js/MetronomeAccentPatterns.js"></script>
+    <script type="module" src="js/MetronomeAccentPatterns.js"></script>
     <script src="js/TimelineSnapResolution.js"></script>
     <script src="js/TrackHeadroomMeter.js"></script>
     <script src="js/PhaseInvertButton.js"></script>

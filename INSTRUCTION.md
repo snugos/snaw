@@ -4,16 +4,15 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-Queue item 1 shipped as v0.4.24 Clip Lock Toggle. The next builder run should pick candidate 1 below.
+Queue item 1 shipped as v0.4.26 Metronome Accent Pattern. The next builder run should pick candidate 1 below.
 
-1. **Metronome Accent Pattern** — choose a minimal four-step accent pattern for the click track, with a persisted default and a transport-bar toggle.
-2. **Selection Bookmark Slots** — save and recall up to four timeline selection ranges, including start/end and track scope, without changing the project arrangement.
-3. **MIDI Note Channel Inspector** — show and edit the MIDI channel of selected piano-roll notes, defaulting to channel 1 for new notes.
-4. **Recording Take Labels** — automatically label each newly recorded clip with a sequential take number and recording timestamp while preserving manual renaming.
-5. **Missing Audio Asset Scan** — add a small project command that lists clips whose audio buffer is unavailable and identifies the affected track and clip name.
-6. **Master Mono Audition Toggle** — add a reversible master-monitor control that sums the output to mono for quick compatibility checks without changing the project mix.
-7. **Track Input Source Badge** — show the active input source and monitoring state directly in the track header, with a tooltip for the complete routing path.
-8. **Snapshot Compare Summary** — compare the current project to a selected saved snapshot and show concise counts for changed tracks, clips, tempo, and effects.
+1. **Selection Bookmark Slots** — save and recall up to four timeline selection ranges, including start/end and track scope, without changing the project arrangement.
+2. **MIDI Note Channel Inspector** — show and edit the MIDI channel of selected piano-roll notes, defaulting to channel 1 for new notes.
+3. **Recording Take Labels** — automatically label each newly recorded clip with a sequential take number and recording timestamp while preserving manual renaming.
+4. **Missing Audio Asset Scan** — add a small project command that lists clips whose audio buffer is unavailable and identifies the affected track and clip name.
+5. **Master Mono Audition Toggle** — add a reversible master-monitor control that sums the output to mono for quick compatibility checks without changing the project mix.
+6. **Track Input Source Badge** — show the active input source and monitoring state directly in the track header, with a tooltip for the complete routing path.
+7. **Snapshot Compare Summary** — compare the current project to a selected saved snapshot and show concise counts for changed tracks, clips, tempo, and effects.
 
 ## Workflow
 

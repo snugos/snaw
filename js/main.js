@@ -117,6 +117,7 @@ import { openTempoRamperPanel } from './TempoRamperUI.js';
 import { initTempoRamperVisual, openTempoRamperVisual } from './TempoRamperVisual.js';
 import { initClipContextMenu } from './ClipContextMenu.js';
 import { initClickTrackVolumeSlider } from './ClickTrackVolumeSlider.js'; // Click Track Volume Slider (v0.3.77)
+import { initMetronomeAccentPatterns } from './MetronomeAccentPatterns.js'; // Metronome Accent Pattern (v0.4.26)
 import { initClipboardHistoryManager } from './ClipboardHistoryManager.js';
 import { initClipSelectionManager } from './ClipSelectionManager.js';
 // v0.4.01 Clip Volume Curve Presets - per-clip gain-envelope shape presets
@@ -2546,6 +2547,7 @@ async function initializeSnugOS() {
         if (typeof initTrackSoloChain === 'function') initTrackSoloChain(appServices); // Track Solo Chain initialization
         if (typeof initMetronomeVisual === 'function') initMetronomeVisual(appServices); // Metronome Visual Beat Indicator
         if (typeof initClickTrackVolumeSlider === 'function') initClickTrackVolumeSlider(appServices); // Click Track Volume Slider initialization (v0.3.77)
+        if (typeof initMetronomeAccentPatterns === 'function') initMetronomeAccentPatterns(appServices); // Metronome Accent Pattern initialization (v0.4.26)
         if (typeof initTempoJumpMarkers === 'function') initTempoJumpMarkers(appServices); // Tempo Jump Markers initialization
         if (typeof initLoopRegionQuickSet === 'function') initLoopRegionQuickSet(appServices); // Loop Region Quick Set initialization
         if (typeof initLoopRegionMarkers === 'function') initLoopRegionMarkers(appServices); // Loop Region Markers initialization

@@ -5,6 +5,7 @@ import * as Constants from './constants.js';
 import { createEffectInstance } from './effectsRegistry.js';
 import { storeAudio, getAudio } from './db.js';
 import { getRecordingStartTimeState, getAdaptiveMetronomeEnabled, getAdaptiveTimingOffset, getMetronomeVolume as getMetronomeVolumeState, setMetronomeVolume as setMetronomeVolumeState } from './state.js';
+import { isBeatAccented } from './MetronomeAccentPatterns.js';
 
 
 let masterEffectsBusInputNode = null;
@@ -510,23 +511,22 @@ export function startMetronomeScheduling(interval = '4n') {
         // ahead of the scheduled audio time, which would mis-flag beats 2/3/4 as
         // downbeats (high-pitch 1200Hz click) while the real downbeat gets the
         // low-pitch 440Hz click.
-        let isDownbeat = true;
+        let beatInBar = 0;
         try {
             // Tone.TransportTime converts a seconds value to a bars:beats:sixteenths position.
             const bbs = Tone.TransportTime(time).toBarsBeatsSixteenths();
             const parts = bbs.split(':');
-            const beatsInBar = parseInt(parts[1], 10);
-            isDownbeat = beatsInBar === 0;
+            beatInBar = parseInt(parts[1], 10) || 0;
         } catch (e) {
             // Legacy fallback: if TransportTime is unavailable or throws, fall
             // back to reading the transport position (the old race-prone path).
             try {
                 const pos = Tone.Transport.position;
                 const parts = pos.split(':');
-                const beatsInBar = parseInt(parts[1], 10);
-                isDownbeat = beatsInBar === 0;
-            } catch (_) { isDownbeat = true; }
+                beatInBar = parseInt(parts[1], 10) || 0;
+            } catch (_) { beatInBar = 0; }
         }
+        const isAccented = isBeatAccented(beatInBar + 1, 4);
         
         // Apply adaptive timing offset if enabled
         let adjustedTime = time;
@@ -535,7 +535,7 @@ export function startMetronomeScheduling(interval = '4n') {
             adjustedTime = time + (offset / 1000); // Convert ms to seconds
         }
         
-        playMetronomeClick(isDownbeat, adjustedTime);
+        playMetronomeClick(isAccented, adjustedTime);
     }, interval);
     
     console.log('[Audio] Metronome scheduling started with interval:', interval);

@@ -1,3 +1,14 @@
+## Session: 2026-07-16 01:10 UTC (Snaw Feature Builder Agent Run)
+
+**Status: v0.4.26 Metronome Accent Pattern implemented**
+
+- Added a minimal four-step accent selector with persisted localStorage state and four presets: Downbeat, One & Three, Two & Four, and All Beats.
+- Added the `Accent: 1---` transport-bar toggle; clicking it cycles the pattern and shows a notification. The existing Metronome Accent Patterns menu action uses the same selector.
+- Wired scheduled transport clicks through the selected pattern while preserving Tone.js scheduling and adaptive timing.
+- Verification before commit: real ES-module smoke test passed 3/3 assertions; `node --check` passed on all changed JavaScript files; `git diff --check` passed.
+
+---
+
 ## Session: 2026-07-16 00:53 UTC (Snaw Repair & Enhancement Agent Run)
 
 **Status: Priority-1 background-removal report audited; small UI cleanup shipped**

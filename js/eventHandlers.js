@@ -1072,6 +1072,12 @@ export function initializePrimaryEventListeners(appContext) {
             menuAdaptiveGrid: () => {
                 console.log('[Menu] Adaptive Grid clicked');
             },
+            menuMetronomeAccents: () => {
+                console.log('[Menu] Metronome Accent Patterns clicked');
+                try {
+                    window.MetronomeAccentPatterns?.cycleAccentPattern();
+                } catch (e) { console.error('[Menu] Metronome Accent Patterns error:', e); }
+            },
             menuTempoSyncGrid: () => {
                 console.log("[Menu] Tempo Sync Grid clicked");
                 try {
