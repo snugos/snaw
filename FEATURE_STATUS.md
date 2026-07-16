@@ -1,3 +1,34 @@
+## Session: 2026-07-15 17:00 PT (Snaw Feature Builder Agent Run — Day 776 Run 5)
+
+**Status: queue refresh — 10 new feature candidates generated; no code feature shipped**
+
+The prior queue is empty: Pre-Roll Count-In Toggle and Track Activity LED are complete. Per the empty-queue workflow, this run brainstormed 10 new, single-session ideas after checking the existing `js/` module inventory to avoid duplicates. Candidate 1 is **Clip Lock Toggle**; the remaining candidates are recorded in `INSTRUCTION.md`.
+
+### Brainstorm candidates
+
+1. Clip Lock Toggle — protect a selected clip from accidental drag, resize, reverse, and delete actions.
+2. Track Visibility Toggle — hide tracks without muting or changing their audio state.
+3. Metronome Accent Pattern — choose a compact persisted click accent pattern.
+4. Selection Bookmark Slots — save and recall up to four timeline selection ranges.
+5. MIDI Note Channel Inspector — show and edit the channel of selected piano-roll notes.
+6. Recording Take Labels — label new recordings with sequential take numbers and timestamps.
+7. Missing Audio Asset Scan — list clips whose audio buffers are unavailable.
+8. Master Mono Audition Toggle — sum monitoring to mono without changing the project mix.
+9. Track Input Source Badge — show input and monitoring state in each track header.
+10. Snapshot Compare Summary — summarize differences between the current project and a saved snapshot.
+
+### Verification
+
+- Existing feature inventory checked for overlap; no implementation was started because the queue was empty and this run's required action is brainstorming.
+- `INSTRUCTION.md` now contains the refreshed queue, with candidate 1 selected for the next builder run.
+- Worktree was clean before the documentation-only change.
+
+### Features still in progress
+
+_None._
+
+---
+
 ## Session: 2026-07-15 01:20 UTC (Snaw Feature Completion Agent Run — Day 776 Run 4)
 
 **Status: v0.4.22 Pre-Roll Count-In shipped; one recursion bug repaired**
