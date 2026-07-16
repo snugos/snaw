@@ -8,6 +8,7 @@ let localGetTracks = null;
 let localGetTrackById = null;
 let localCaptureStateForUndo = null;
 let localRenderTimeline = null;
+let localIsClipLocked = null;
 
 /**
  * Initialize the timeline clip operations module
@@ -19,6 +20,7 @@ export function initTimelineClipOperations(appServices) {
     localGetTrackById = appServices.getTrackById || (() => null);
     localCaptureStateForUndo = appServices.captureStateForUndo || ((desc) => {});
     localRenderTimeline = appServices.renderTimeline || (() => {});
+    localIsClipLocked = appServices.isClipLocked || (() => false);
 
     // Register functions in appServices
     appServices.moveSelectedClips = moveSelectedClips;
@@ -51,7 +53,7 @@ export function moveSelectedClips(clipIds, delta) {
 
     // Group clips by track
     const clipsByTrack = new Map();
-    clipIds.forEach(clipId => {
+    clipIds.filter(clipId => !localIsClipLocked(clipId)).forEach(clipId => {
         for (const track of tracks) {
             const clip = track.timelineClips?.find(c => c.id === clipId);
             if (clip) {
@@ -192,8 +194,15 @@ export function cutSelectedClips(clipIds) {
         return { success: false, message: 'No clips selected' };
     }
 
+    const editableClipIds = clipIds.filter(clipId => !localIsClipLocked(clipId));
+    if (editableClipIds.length === 0) {
+        localAppServices.notifyClipLocked?.('cut');
+        return { success: false, message: 'Selected clips are locked' };
+    }
+    if (editableClipIds.length !== clipIds.length) localAppServices.notifyClipLocked?.('cut');
+
     // First copy
-    const copyResult = copySelectedClips(clipIds);
+    const copyResult = copySelectedClips(editableClipIds);
     if (!copyResult.success) {
         return copyResult;
     }
@@ -202,7 +211,7 @@ export function cutSelectedClips(clipIds) {
     let cutCount = 0;
 
     // Then delete from tracks
-    clipIds.forEach(clipId => {
+    editableClipIds.forEach(clipId => {
         for (const track of tracks) {
             if (track.timelineClips) {
                 const idx = track.timelineClips.findIndex(c => c.id === clipId);
@@ -283,10 +292,17 @@ export function deleteTimelineClips(clipIds) {
         return { success: false, message: 'No clips selected' };
     }
 
+    const editableClipIds = clipIds.filter(clipId => !localIsClipLocked(clipId));
+    if (editableClipIds.length === 0) {
+        localAppServices.notifyClipLocked?.('delete');
+        return { success: false, message: 'Selected clips are locked' };
+    }
+    if (editableClipIds.length !== clipIds.length) localAppServices.notifyClipLocked?.('delete');
+
     const tracks = localGetTracks();
     let deletedCount = 0;
 
-    clipIds.forEach(clipId => {
+    editableClipIds.forEach(clipId => {
         for (const track of tracks) {
             if (track.timelineClips) {
                 const idx = track.timelineClips.findIndex(c => c.id === clipId);
@@ -318,10 +334,17 @@ export function duplicateTimelineClips(clipIds, offset = 1) {
         return { success: false, message: 'No clips selected' };
     }
 
+    const editableClipIds = clipIds.filter(clipId => !localIsClipLocked(clipId));
+    if (editableClipIds.length === 0) {
+        localAppServices.notifyClipLocked?.('duplicate');
+        return { success: false, message: 'Selected clips are locked' };
+    }
+    if (editableClipIds.length !== clipIds.length) localAppServices.notifyClipLocked?.('duplicate');
+
     const tracks = localGetTracks();
     const newClipIds = [];
 
-    clipIds.forEach(clipId => {
+    editableClipIds.forEach(clipId => {
         for (const track of tracks) {
             const clip = track.timelineClips?.find(c => c.id === clipId);
             if (clip) {

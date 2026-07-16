@@ -1,3 +1,11 @@
+#### Day 776 Run 6: Clip Lock Toggle shipped (2026-07-16)
+
+- **Run Type**: Snaw Feature Builder Agent (scheduled)
+- **Status**: v0.4.24 Clip Lock Toggle shipped and pushed to `LWB-with-Bugs`.
+- **Feature**: `js/ClipLockToggle.js` adds a project-serializable `locked` flag, lock/unlock context-menu control, lock badge/outline, and guards around clip drag, Alt-drag clone, resize handles, time-stretch, reverse, phase/start-offset/gain/group/delete context actions, keyboard reverse/delete, cut, duplicate, move, and bulk delete.
+- **Verification**: `node --check` passes on changed JS modules and `git diff --check` passes.
+- **Queue**: `INSTRUCTION.md` now starts with Track Visibility Toggle, followed by eight remaining candidates.
+
 #### Day 776 Run 5: Record-arm status tooltip shipped (2026-07-16)
 
 - Priority-1 `removeCustomDesktopBackground` remains a confirmed false positive: function defined, exported, mirrored to `window`, and present in deployed `js/main.js`.

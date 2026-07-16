@@ -87,6 +87,7 @@ import { initPreRollCountIn } from './PreRollCountIn.js';
 import { initCountInSettingsPanel, openCountInSettingsPanel, getCountInSettings, setCountInBars, setCountInSoundEnabled, setCountInVisualCountdown, setCountInAccentFirstBeat, setCountInVolume } from './CountInSettingsPanel.js';
 import { initClipTimeHandles, refreshClipTimeHandles, formatTimecode } from './ClipTimeHandles.js'; // Clip Time Handles (v0.4.08) - mm:ss timecode overlay on each clip
 import { initClipDragClone, getClipDragCloneVersion } from './ClipDragClone.js'; // Clip Drag Clone (v0.4.09) - Alt+drag to clone-paint clips on the timeline
+import { initClipLockToggle, isClipLocked, toggleClipLock, notifyClipLocked, refreshClipLockStyles } from './ClipLockToggle.js'; // Clip Lock Toggle - protect clips from accidental edits
 import { initTrackNotesSidebar, openTrackNotesSidebar, getTrackNotesSidebarText, setTrackNotesSidebarText, removeTrackNotesSidebar } from './TrackNotesSidebar.js'; // Track Notes Sidebar (v0.4.10) - per-track 📝 button + inline textarea popover
 import { initUndoToast, fireUndoToast, fireRedoToast, getUndoToastVersion } from './UndoToast.js'; // Undo Toast (v0.4.11) - styled ↶/↷ toast on undo/redo with action name
 import { initMIDArpeggiatorPanel, openMIDArpeggiatorPanel } from './MIDArpeggiatorPanel.js';
@@ -1478,6 +1479,10 @@ const appServices = {
     getUndoToastVersion,
     getTracksByRole,
     getRoleSummary,
+    isClipLocked,
+    toggleClipLock,
+    notifyClipLocked,
+    refreshClipLockStyles,
     openCountInSettingsPanel,
     playFixedCountIn,
     openTrackSnapResolutionPanel,
@@ -2546,6 +2551,7 @@ async function initializeSnugOS() {
         if (typeof initClipContextMenu === 'function') initClipContextMenu(appServices); // Clip context menu with reverse
         if (typeof initClipboardHistoryManager === 'function') initClipboardHistoryManager(appServices); // Clipboard History Manager
         if (typeof initClipSelectionManager === 'function') initClipSelectionManager(appServices); // Clip selection manager initialization
+        if (typeof initClipLockToggle === 'function') initClipLockToggle(appServices); // Clip Lock Toggle - protect clips from accidental edits
         if (typeof initClipFadePresets === 'function') initClipFadePresets(appServices); // Clip Fade Presets initialization
         if (typeof initClipVolumeCurvePresets === 'function') initClipVolumeCurvePresets(appServices); // Clip Volume Curve Presets initialization (v0.4.01)
         if (typeof initClipGroupManager === 'function') initClipGroupManager(appServices); // Clip Group Manager

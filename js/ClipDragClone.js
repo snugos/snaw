@@ -7,6 +7,8 @@
 // Works alongside ClipSelectionManager (multi-select aware) and any module
 // that re-renders the timeline (we re-apply our drag transform on every frame).
 
+import { isClipLocked, notifyClipLocked } from './ClipLockToggle.js';
+
 let localAppServices = {};
 let activeDrag = null; // { clipIds, originalClipIds, startX, lastX, pixelsPerSecond, isAlt }
 
@@ -119,6 +121,10 @@ function onMouseDown(e) {
 
     const clipId = clipEl.getAttribute('data-clip-id') || clipEl.getAttribute('data-id');
     if (!clipId) return;
+    if (isClipLocked(clipId)) {
+        notifyClipLocked('move');
+        return;
+    }
 
     // If the clip isn't part of the current selection, treat the click as
     // "select this clip and start dragging it" — matches the usual DAW feel.
@@ -129,6 +135,11 @@ function onMouseDown(e) {
         if (e.shiftKey) return;
         // Plain click on an unselected clip → use just that clip for the drag.
         selectedIds = [String(clipId)];
+    }
+
+    if (selectedIds.some(isClipLocked)) {
+        notifyClipLocked('move');
+        return;
     }
 
     activeDrag = {

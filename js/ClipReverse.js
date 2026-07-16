@@ -1,6 +1,8 @@
 // js/ClipReverse.js - Reverse Audio/MIDI Clips
 // Feature: Reverse audio or MIDI clips with one click
 
+import { isClipLocked, notifyClipLocked } from './ClipLockToggle.js';
+
 let localAppServices = {};
 
 /**
@@ -28,6 +30,11 @@ export function reverseAudioClip(trackId, clipId) {
     const clip = track.timelineClips?.find(c => c.id === clipId);
     if (!clip) {
         console.error('[ClipReverse] Clip not found:', clipId);
+        return false;
+    }
+
+    if (isClipLocked(clipId)) {
+        notifyClipLocked('reverse');
         return false;
     }
 

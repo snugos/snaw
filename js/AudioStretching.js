@@ -8,6 +8,8 @@
  * both speed AND pitch by default, we compensate with detune).
  */
 
+import { isClipLocked, notifyClipLocked } from './ClipLockToggle.js';
+
 let localAppServices = {};
 let stretchEnabled = true;
 
@@ -86,6 +88,10 @@ export function applyStretchToClip(clipId, stretchFactor, algorithm = 'simple') 
         const clip = track.timelineClips.find(c => c.id === clipId);
         
         if (clip && clip.type === 'audio') {
+            if (isClipLocked(clipId)) {
+                notifyClipLocked('resize');
+                return false;
+            }
             if (localAppServices.captureStateForUndo) {
                 localAppServices.captureStateForUndo(`Apply ${stretchFactor}x stretch to clip`);
             }
@@ -131,6 +137,10 @@ export function removeStretchFromClip(clipId) {
         const clip = track.timelineClips.find(c => c.id === clipId);
         
         if (clip && clip.type === 'audio' && clip.stretchFactor !== undefined) {
+            if (isClipLocked(clipId)) {
+                notifyClipLocked('resize');
+                return false;
+            }
             if (localAppServices.captureStateForUndo) {
                 localAppServices.captureStateForUndo(`Remove stretch from clip`);
             }

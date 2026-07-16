@@ -4,6 +4,7 @@
  */
 
 import { getLoopStretchInfo } from './ClipLoopStretch.js';
+import { isClipLocked, notifyClipLocked } from './ClipLockToggle.js';
 
 let localAppServices = {};
 let stretchHandleState = {
@@ -224,6 +225,10 @@ function handleStretchMouseDown(e) {
     e.stopPropagation();
     
     const { clipId, type, clip, trackId } = result;
+    if (isClipLocked(clipId)) {
+        notifyClipLocked('resize');
+        return;
+    }
     
     // Get original duration
     const info = getLoopStretchInfo(clip);

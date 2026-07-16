@@ -3,6 +3,8 @@
  * Visual curve preview while dragging
  */
 
+import { isClipLocked, notifyClipLocked } from './ClipLockToggle.js';
+
 let fadeHandleState = {
     active: false,
     type: null, // 'fadeIn' | 'fadeOut'
@@ -109,6 +111,10 @@ function handleFadeMouseDown(e) {
     e.stopPropagation();
     
     const { clipId, type, value } = result;
+    if (isClipLocked(clipId)) {
+        notifyClipLocked('resize');
+        return;
+    }
     
     fadeHandleState.active = true;
     fadeHandleState.type = type;

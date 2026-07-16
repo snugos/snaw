@@ -6,6 +6,7 @@ import { getFadePresets, applyFadePresetToClip, clearFadePoints } from './ClipFa
 import { createClipGroup, getCurrentClipSelections } from './ClipGroupManager.js';
 import { openClipStartOffsetPanel } from './ClipStartOffset.js';
 import { openStretchPanel, getClipStretchInfo } from './AudioStretching.js';
+import { isClipLocked, toggleClipLock, notifyClipLocked } from './ClipLockToggle.js';
 
 let localAppServices = {};
 let contextMenuListenersInitialized = false;
@@ -113,6 +114,7 @@ function showClipContextMenu(x, y, clipId, trackId) {
     
     const isReversed = clip.reversed || false;
     const isPhaseInverted = clip.phaseInverted || false;
+    const isLocked = isClipLocked(clipId);
     const isAudioClip = clip.type === 'audio';
     const stretchInfo = isAudioClip ? getClipStretchInfo(clipId) : null;
     const hasStretch = stretchInfo?.hasStretch || false;
@@ -133,6 +135,10 @@ function showClipContextMenu(x, y, clipId, trackId) {
         <div class="px-3 py-1.5 text-xs text-gray-400 border-b border-gray-700">
             ${escapeHtml(clip.name || 'Unnamed Clip')}
         </div>
+        <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="toggleLock" data-clip-id="${clipId}" data-track-id="${trackId}">
+            <span class="w-4">${isLocked ? '🔓' : '🔒'}</span>
+            <span>${isLocked ? 'Unlock Clip' : 'Lock Clip'}</span>
+        </button>
         <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="reverse" data-clip-id="${clipId}" data-track-id="${trackId}">
             <span class="w-4">🔄</span>
             <span>${isReversed ? 'Unreverse' : 'Reverse'}</span>
@@ -268,6 +274,14 @@ function closeClipContextMenu() {
  * @param {number} trackId - Track ID
  */
 function handleClipAction(action, clipId, trackId) {
+    if (action === 'toggleLock') {
+        toggleClipLock(clipId);
+        return;
+    }
+    if (isClipLocked(clipId)) {
+        notifyClipLocked(action === 'delete' ? 'delete' : 'modify');
+        return;
+    }
     const track = localAppServices.getTrackById?.(trackId);
     if (!track) return;
     
@@ -360,6 +374,15 @@ function handleClipKeyboardShortcut(e) {
     // Ignore if typing in an input
     if (e.target.matches('input, textarea, select')) return;
     
+    const selectedForLock = document.querySelector('.timeline-clip.selected');
+    const selectedLockId = selectedForLock?.dataset.clipId;
+    if (selectedLockId && isClipLocked(selectedLockId) && ['r', 'f', 'delete', 'backspace'].includes(e.key.toLowerCase())) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        notifyClipLocked(['delete', 'backspace'].includes(e.key.toLowerCase()) ? 'delete' : 'modify');
+        return;
+    }
+
     // R key for reverse (when a clip is selected)
     if (e.key === 'r' || e.key === 'R') {
         const selectedClip = document.querySelector('.timeline-clip.selected');

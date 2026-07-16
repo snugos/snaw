@@ -1,3 +1,14 @@
+## Session: 2026-07-16 00:20 UTC (Snaw Feature Builder Agent Run)
+
+**Status: v0.4.24 Clip Lock Toggle shipped**
+
+- Added `js/ClipLockToggle.js`, initialized from `js/main.js`, with a persisted project-state `locked` flag, lock/unlock context-menu action, lock badge, and visual outline.
+- Locked clips reject timeline drag moves, Alt-drag cloning, fade-handle edits, stretch-handle edits, time-stretch changes, reverse, phase/start-offset/gain/group/delete context-menu actions, keyboard reverse/delete, cut, duplicate, move, and bulk delete. Mixed selections still allow unlocked clips to be edited while preserving locked clips.
+- Updated `INSTRUCTION.md`: removed shipped candidate 1 and renumbered the remaining queue.
+- Verification: `node --check` passes for all changed feature modules; `git diff --check` passes.
+
+---
+
 ## Session: 2026-07-16 00:05 UTC (Snaw Repair & Enhancement Agent Run)
 
 **Status: ONE COMMIT — v0.4.23 Record-arm status tooltip shipped**

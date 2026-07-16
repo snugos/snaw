@@ -4,20 +4,17 @@ You are the feature addition agent for SnugOS DAW (snugos/snaw). Your ONLY job i
 
 ## Current Feature Queue
 
-Queue empty — the Pre-Roll Count-In Toggle and Track Activity LED are shipped. This run refreshed the next-feature candidates below; the next builder run should pick candidate 1.
+Queue item 1 shipped as v0.4.24 Clip Lock Toggle. The next builder run should pick candidate 1 below.
 
-### Brainstorm candidates
-
-1. **Clip Lock Toggle** — lock a selected clip against accidental drag, resize, reverse, or delete actions; unlock it from the clip context menu.
-2. **Track Visibility Toggle** — hide selected tracks from the timeline and mixer without muting or changing their audio state, with a compact Show All control.
-3. **Metronome Accent Pattern** — choose a minimal four-step accent pattern for the click track, with a persisted default and a transport-bar toggle.
-4. **Selection Bookmark Slots** — save and recall up to four timeline selection ranges, including start/end and track scope, without changing the project arrangement.
-5. **MIDI Note Channel Inspector** — show and edit the MIDI channel of selected piano-roll notes, defaulting to channel 1 for new notes.
-6. **Recording Take Labels** — automatically label each newly recorded clip with a sequential take number and recording timestamp while preserving manual renaming.
-7. **Missing Audio Asset Scan** — add a small project command that lists clips whose audio buffer is unavailable and identifies the affected track and clip name.
-8. **Master Mono Audition Toggle** — add a reversible master-monitor control that sums the output to mono for quick compatibility checks without changing the project mix.
-9. **Track Input Source Badge** — show the active input source and monitoring state directly in the track header, with a tooltip for the complete routing path.
-10. **Snapshot Compare Summary** — compare the current project to a selected saved snapshot and show concise counts for changed tracks, clips, tempo, and effects.
+1. **Track Visibility Toggle** — hide selected tracks from the timeline and mixer without muting or changing their audio state, with a compact Show All control.
+2. **Metronome Accent Pattern** — choose a minimal four-step accent pattern for the click track, with a persisted default and a transport-bar toggle.
+3. **Selection Bookmark Slots** — save and recall up to four timeline selection ranges, including start/end and track scope, without changing the project arrangement.
+4. **MIDI Note Channel Inspector** — show and edit the MIDI channel of selected piano-roll notes, defaulting to channel 1 for new notes.
+5. **Recording Take Labels** — automatically label each newly recorded clip with a sequential take number and recording timestamp while preserving manual renaming.
+6. **Missing Audio Asset Scan** — add a small project command that lists clips whose audio buffer is unavailable and identifies the affected track and clip name.
+7. **Master Mono Audition Toggle** — add a reversible master-monitor control that sums the output to mono for quick compatibility checks without changing the project mix.
+8. **Track Input Source Badge** — show the active input source and monitoring state directly in the track header, with a tooltip for the complete routing path.
+9. **Snapshot Compare Summary** — compare the current project to a selected saved snapshot and show concise counts for changed tracks, clips, tempo, and effects.
 
 ## Workflow
 
