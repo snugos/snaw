@@ -1,3 +1,14 @@
+## Session: 2026-07-16 00:53 UTC (Snaw Repair & Enhancement Agent Run)
+
+**Status: Priority-1 background-removal report audited; small UI cleanup shipped**
+
+- `removeCustomDesktopBackground()` was already correctly defined in `js/main.js`, exported through `appServices`, mirrored to `window`, and present in the deployed file; no ReferenceError repair was needed.
+- Added a focused cleanup: removing a custom background now immediately refreshes the background-status indicator, preventing stale “custom background active” UI after removal.
+- Verification: `node --check` passes for `js/main.js`, `js/state.js`, `js/audio.js`, `js/ui.js`, and `js/eventHandlers.js`; `git diff --check` passes. Commit `2c1ce16` was pushed to `origin/LWB-with-Bugs`.
+- Deployment verification: GitHub Pages returns HTTP 200; deployed `js/main.js` contains the function definition and status-indicator refresh; deployed `js/constants.js` reports APP_VERSION `0.4.25`.
+
+---
+
 ## Session: 2026-07-16 00:45 UTC (Snaw Feature Builder Agent Run)
 
 **Status: v0.4.25 Track Visibility Toggle shipped**

@@ -1,3 +1,11 @@
+#### Day 776 Run 8: Background-removal audit and status refresh shipped (2026-07-16)
+
+- **Run Type**: Snaw Repair & Enhancement Agent (scheduled)
+- **Status**: Priority-1 `removeCustomDesktopBackground` was again a false positive. The function is defined, exported through `appServices`, mirrored to `window`, and present in the deployed `js/main.js`.
+- **Small enhancement**: `removeCustomDesktopBackground()` now refreshes the custom-background status indicator immediately after clearing the persisted background markers, so the UI no longer leaves the “custom background active” indicator visible after removal.
+- **Verification**: Pulled `origin/LWB-with-Bugs`; `node --check` passes for `js/main.js`, `js/state.js`, `js/audio.js`, `js/ui.js`, and `js/eventHandlers.js`; `git diff --check` passes; worktree clean after push `2c1ce16`.
+- **Deployment**: GitHub Pages returns HTTP 200; deployed `js/main.js` contains the function definition and the status-indicator refresh; deployed `js/constants.js` reports APP_VERSION `0.4.25`.
+
 #### Day 776 Run 7: Count-in cancellation on panic stop shipped (2026-07-16)
 
 - **Run Type**: Snaw Feature Completion Agent (scheduled)
