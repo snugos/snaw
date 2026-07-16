@@ -404,6 +404,9 @@ async function removeCustomDesktopBackground() {
         // Clear localStorage
         localStorage.removeItem(appServices.DESKTOP_BACKGROUND_KEY);
         localStorage.removeItem(appServices.DESKTOP_BG_TYPE_KEY);
+        if (typeof appServices.updateBgStatusIndicator === 'function') {
+            appServices.updateBgStatusIndicator();
+        }
 
         // Clear desktop background styles
         if (desktop) {
