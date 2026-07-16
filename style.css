@@ -777,6 +777,39 @@ input::placeholder,
 .timeline-track-lane:nth-child(even) {
     background-color: #1a1a1a;
 }
+
+.track-visibility-toggle,
+.track-visibility-show-all {
+    border: 1px solid #4b5563;
+    background: #374151;
+    color: #d1d5db;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.track-visibility-toggle {
+    margin-left: 4px;
+    width: 20px;
+    height: 20px;
+    line-height: 16px;
+    font-size: 12px;
+}
+
+.track-visibility-toggle:hover,
+.track-visibility-show-all:hover {
+    background: #4b5563;
+    color: #fff;
+}
+
+.track-visibility-show-all {
+    position: fixed;
+    top: 58px;
+    right: 12px;
+    z-index: 30;
+    padding: 4px 8px;
+    font-size: 12px;
+}
+
 .timeline-track-lane-name {
     position: sticky;
     left: 0;

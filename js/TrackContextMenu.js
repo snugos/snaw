@@ -126,6 +126,10 @@ function showTrackContextMenu(x, y, trackId) {
                 <span class="w-4">🎨</span>
                 <span>Change Color</span>
             </button>
+            <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="toggleVisibility" data-track-id="${trackId}">
+                <span class="w-4">${track.isVisible === false ? '◉' : '◌'}</span>
+                <span>${track.isVisible === false ? 'Show Track' : 'Hide Track'}</span>
+            </button>
             <button class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2" data-action="snapResolution" data-track-id="${trackId}">
                 <span class="w-4">⌗</span>
                 <span>Snap Resolution</span>
@@ -392,6 +396,16 @@ function handleTrackAction(action, trackId, btn) {
                     if (localAppServices.renderTracks) localAppServices.renderTracks();
                     localAppServices.showNotification?.('Track color changed', 1500);
                 }
+            }
+            break;
+
+        case 'toggleVisibility':
+            if (localAppServices.toggleTrackVisibility) {
+                localAppServices.toggleTrackVisibility(trackId);
+            } else {
+                track.isVisible = track.isVisible === false;
+                localAppServices.renderTimeline?.();
+                localAppServices.updateMixerChannelStripPanel?.();
             }
             break;
 

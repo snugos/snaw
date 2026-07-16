@@ -88,6 +88,7 @@ import { initCountInSettingsPanel, openCountInSettingsPanel, getCountInSettings,
 import { initClipTimeHandles, refreshClipTimeHandles, formatTimecode } from './ClipTimeHandles.js'; // Clip Time Handles (v0.4.08) - mm:ss timecode overlay on each clip
 import { initClipDragClone, getClipDragCloneVersion } from './ClipDragClone.js'; // Clip Drag Clone (v0.4.09) - Alt+drag to clone-paint clips on the timeline
 import { initClipLockToggle, isClipLocked, toggleClipLock, notifyClipLocked, refreshClipLockStyles } from './ClipLockToggle.js'; // Clip Lock Toggle - protect clips from accidental edits
+import { initTrackVisibilityToggle, setTrackVisibility, toggleTrackVisibility, showAllTracks, getHiddenTrackIds } from './TrackVisibilityToggle.js';
 import { initTrackNotesSidebar, openTrackNotesSidebar, getTrackNotesSidebarText, setTrackNotesSidebarText, removeTrackNotesSidebar } from './TrackNotesSidebar.js'; // Track Notes Sidebar (v0.4.10) - per-track 📝 button + inline textarea popover
 import { initUndoToast, fireUndoToast, fireRedoToast, getUndoToastVersion } from './UndoToast.js'; // Undo Toast (v0.4.11) - styled ↶/↷ toast on undo/redo with action name
 import { initMIDArpeggiatorPanel, openMIDArpeggiatorPanel } from './MIDArpeggiatorPanel.js';
@@ -282,7 +283,7 @@ import * as FeatureAdditions from './FeatureAdditions.js';
 import { getMimeTypeFromFilename, getMasterMeterNode, getMasterLimiterNode, setMasterLimiterEnabled, setMasterLimiterThresholdDb, setMasterLimiterCeilingDb, getMasterLimiterReductionDb, getMasterLimiterThresholdDb, getMasterLimiterCeilingDb, isMasterLimiterEnabled as audioIsMasterLimiterEnabledImpl, setMasterEffectWet } from './audio.js';
 // setupGenericDropZoneListeners is imported here but used via appServices by ui.js
 import { showNotification as utilShowNotification, createContextMenu, createDropZoneHTML, setupGenericDropZoneListeners } from './utils.js';
-import { openKeyboardShortcutsPanel } from './ui.js';
+import { openKeyboardShortcutsPanel, updateMixerChannelStripPanel } from './ui.js';
 import {
     initializeEventHandlersModule, initializePrimaryEventListeners, initializeMIDIDropZone, setupMIDI, attachGlobalControlEvents,
     selectMIDIInput as eventSelectMIDIInput, 
@@ -761,6 +762,13 @@ const appServices = {
     getTracks: () => {
         if (typeof getTracksState === 'function') return getTracksState();
         return [];
+    },
+    toggleTrackVisibility,
+    setTrackVisibility,
+    showAllTracks,
+    getHiddenTrackIds,
+    updateMixerChannelStripPanel: () => {
+        if (typeof updateMixerChannelStripPanel === 'function') updateMixerChannelStripPanel();
     },
     reorderTrackInState: (trackId, newIndex) => {
         if (typeof reorderTrackInState === 'function') return reorderTrackInState(trackId, newIndex);
@@ -2556,6 +2564,7 @@ async function initializeSnugOS() {
         if (typeof initClipboardHistoryManager === 'function') initClipboardHistoryManager(appServices); // Clipboard History Manager
         if (typeof initClipSelectionManager === 'function') initClipSelectionManager(appServices); // Clip selection manager initialization
         if (typeof initClipLockToggle === 'function') initClipLockToggle(appServices); // Clip Lock Toggle - protect clips from accidental edits
+        if (typeof initTrackVisibilityToggle === 'function') initTrackVisibilityToggle(appServices); // Track Visibility Toggle - hide tracks without muting audio
         if (typeof initClipFadePresets === 'function') initClipFadePresets(appServices); // Clip Fade Presets initialization
         if (typeof initClipVolumeCurvePresets === 'function') initClipVolumeCurvePresets(appServices); // Clip Volume Curve Presets initialization (v0.4.01)
         if (typeof initClipGroupManager === 'function') initClipGroupManager(appServices); // Clip Group Manager

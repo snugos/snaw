@@ -93,6 +93,7 @@ export class Track {
 
         this.isMuted = initialData?.isMuted || false;
         this.isArchived = initialData?.isArchived || false;
+        this.isVisible = initialData?.isVisible !== false;
         this.isMonitoringEnabled = initialData?.isMonitoringEnabled !== undefined ? initialData.isMonitoringEnabled : (this.type === 'Audio'); 
         const currentSoloedId = this.appServices.getSoloedTrackId ? this.appServices.getSoloedTrackId() : null;
         this.isSoloed = currentSoloedId === this.id;

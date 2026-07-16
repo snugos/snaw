@@ -2390,6 +2390,7 @@ export function gatherProjectDataInternal() {
                     id: track.id, type: track.type, name: track.name,
                     trackNotes: track.trackNotes || '',
                     isMuted: track.isMuted,
+                    isVisible: track.isVisible !== false,
                     volume: track.previousVolumeBeforeMute, // Store the actual volume, not the muted one
                     snapResolution: track.snapResolution !== undefined ? track.snapResolution : null,
                     // Plugin Bypass Per-Track (v0.3.73) - persist bypass state across reloads

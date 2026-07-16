@@ -1,3 +1,34 @@
+## Session: 2026-07-16 00:45 UTC (Snaw Feature Builder Agent Run)
+
+**Status: v0.4.25 Track Visibility Toggle shipped**
+
+- Added `js/TrackVisibilityToggle.js`, initialized from `js/main.js`, with persisted `isVisible` state, per-track hide/show buttons, track context-menu action, and a compact `Show all` control.
+- Hidden tracks are excluded from mixer strips and hidden from timeline/mixer DOM roots without changing mute, solo, record-arm, monitoring, or audio state.
+- Added undo captures and notifications for individual visibility changes and Show All; legacy projects default to visible tracks.
+
+### Verification
+
+- `node --check` passes on all changed JavaScript files.
+- Real ES-module import of `js/TrackVisibilityToggle.js` passes.
+- `git diff --check` passes.
+- Committed as `feat: Track Visibility Toggle` and pushed to `origin/LWB-with-Bugs`.
+- Deployed verification: `APP_VERSION` and the feature module are present on GitHub Pages after the deployment wait.
+
+### Features completed
+
+- v0.4.25 Track Visibility Toggle
+- v0.4.24 Clip Lock Toggle
+
+### Features still in progress
+
+_None._
+
+### Next feature
+
+Metronome Accent Pattern (candidate 1 in `INSTRUCTION.md`).
+
+---
+
 ## Session: 2026-07-16 00:35 UTC (Snaw Feature Completion Agent Run)
 
 **Status: ONE COMMIT — cancelled count-in callbacks on panic stop**

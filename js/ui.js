@@ -7699,6 +7699,7 @@ function renderMixerChannelStripContent() {
     if (!container) return;
 
     const tracks = localAppServices.getTracks ? localAppServices.getTracks() : [];
+    const visibleTracks = tracks.filter(track => track?.isVisible !== false);
     const masterTrack = localAppServices.getMasterTrack ? localAppServices.getMasterTrack() : null;
     
     let html = `
@@ -7707,7 +7708,7 @@ function renderMixerChannelStripContent() {
                 <span class="text-xs text-gray-400">Select Track:</span>
                 <select id="mixerTrackSelect" class="p-1.5 text-sm bg-gray-800 border border-gray-600 rounded text-white">
                     <option value="">-- All Tracks --</option>
-                    ${tracks.map(t => `<option value="${t.id}">${t.name}</option>`).join('')}
+                    ${visibleTracks.map(t => `<option value="${t.id}">${t.name}</option>`).join('')}
                 </select>
             </div>
             <div class="flex items-center gap-2">
@@ -7730,14 +7731,14 @@ function renderMixerChannelStripContent() {
 
     // Render each track strip
     tracks.forEach((track, trackIndex) => {
-        html += renderTrackStrip(track, trackIndex);
+        if (track.isVisible !== false) html += renderTrackStrip(track, trackIndex);
     });
 
     html += `
         </div>
         <div class="mt-2 text-xs text-gray-500 flex justify-between px-1">
             <span>Drag faders to adjust volume. Pan knobs support mouse drag.</span>
-            <span id="mixerStatusText">${tracks.length} track(s)</span>
+            <span id="mixerStatusText">${visibleTracks.length} track(s)</span>
         </div>
     `;
 
