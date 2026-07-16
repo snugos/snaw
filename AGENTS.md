@@ -1,3 +1,9 @@
+#### Day 776 Run 5: Record-arm status tooltip shipped (2026-07-16)
+
+- Priority-1 `removeCustomDesktopBackground` remains a confirmed false positive: function defined, exported, mirrored to `window`, and present in deployed `js/main.js`.
+- Shipped v0.4.23: global Record control tooltip/ARIA label now names the armed or recording track and input-monitor state; it refreshes at startup and after arm changes.
+- `node --check` passes on `js/main.js`, `js/state.js`, `js/audio.js`, `js/ui.js`, `js/eventHandlers.js`, and `js/constants.js`; `git diff --check` passes.
+
 #### Day 776 Run 5: Feature queue refreshed after completion (2026-07-15)
 
 - **Run Type**: Snaw Feature Builder Agent (scheduled)

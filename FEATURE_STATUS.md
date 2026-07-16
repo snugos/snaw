@@ -1,3 +1,13 @@
+## Session: 2026-07-16 00:05 UTC (Snaw Repair & Enhancement Agent Run)
+
+**Status: ONE COMMIT — v0.4.23 Record-arm status tooltip shipped**
+
+- The reported `removeCustomDesktopBackground` ReferenceError is a false positive: the function is defined at `js/main.js:397`, exposed through `appServices`, mirrored to `window`, and present in the deployed file.
+- Added a small enhancement to `js/main.js`: the global Record control now identifies the armed or recording track and shows input-monitor state in its tooltip and accessible label. The label refreshes on startup and whenever record-arm state changes.
+- Verification: `node --check` passes on all six key JavaScript files; `git diff --check` passes.
+
+---
+
 ## Session: 2026-07-15 17:00 PT (Snaw Feature Builder Agent Run — Day 776 Run 5)
 
 **Status: queue refresh — 10 new feature candidates generated; no code feature shipped**

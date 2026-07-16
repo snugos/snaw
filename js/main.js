@@ -1131,8 +1131,21 @@ const appServices = {
     },
     updateRecordButtonUI: (isRec) => {
         if (uiElementsCache.recordBtnGlobal) {
+            const armedTrackId = getArmedTrackIdState();
+            const armedTrack = armedTrackId !== null ? getTrackByIdState(armedTrackId) : null;
+            const recordingTrackId = getRecordingTrackIdState();
+            const recordingTrack = recordingTrackId !== null ? getTrackByIdState(recordingTrackId) : null;
+            const statusTrack = isRec ? recordingTrack : armedTrack;
+            const monitorState = armedTrack?.isMonitoringEnabled ? 'On' : 'Off';
+            const label = isRec
+                ? `Stop recording${statusTrack ? ` for ${statusTrack.name}` : ''}`
+                : statusTrack
+                    ? `Record ${statusTrack.name} (input monitoring: ${monitorState})`
+                    : 'Record (no track armed)';
             uiElementsCache.recordBtnGlobal.textContent = isRec ? 'Stop Rec' : 'Record';
             uiElementsCache.recordBtnGlobal.classList.toggle('recording', isRec);
+            uiElementsCache.recordBtnGlobal.title = label;
+            uiElementsCache.recordBtnGlobal.setAttribute('aria-label', label);
         } else { console.warn("Global record button not found in cache."); }
     },
     closeAllWindows: (isReconstruction = false) => {
@@ -2304,6 +2317,7 @@ function handleTrackUIUpdate(trackId, reason, detail) {
                     if (armBtn) armBtn.classList.toggle('armed', getArmedTrackIdState() === track.id);
                 }
                 if (mixerElement && typeof updateMixerWindow === 'function') updateMixerWindow();
+                if (typeof appServices.updateRecordButtonUI === 'function') appServices.updateRecordButtonUI(isTrackRecordingState());
                 break;
             case 'effectsListChanged':
                  if (effectsRackElement && typeof renderEffectsList === 'function') {
@@ -2500,6 +2514,7 @@ async function initializeSnugOS() {
         if (typeof initializeUIModule === 'function') initializeUIModule(appServices); else console.error("initializeUIModule is not a function");
         if (typeof initializeAudioModule === 'function') initializeAudioModule(appServices); else console.error("initializeAudioModule is not a function");
         if (typeof initializeEventHandlersModule === 'function') initializeEventHandlersModule(appServices); else console.error("initializeEventHandlersModule is not a function");
+        if (typeof appServices.updateRecordButtonUI === 'function') appServices.updateRecordButtonUI(isTrackRecordingState());
         if (typeof initPianoRollSequencer === 'function') initPianoRollSequencer(appServices); // Piano Roll Sequencer initialization
         if (typeof initScoreEditor === 'function') initScoreEditor(appServices); // Score Editor initialization
         if (typeof initClipReverse === 'function') initClipReverse(appServices); // Clip Reverse feature initialization
