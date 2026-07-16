@@ -20,7 +20,16 @@ function getVisibilityButtonLabel(track) {
 }
 
 function decorateTrackRoot(root, track) {
-    if (!root || root.dataset.trackVisibilityDecorated === 'true') return;
+    if (!root) return;
+    const label = `${getVisibilityButtonLabel(track)} without changing audio`;
+    const icon = track.isVisible === false ? '◌' : '◉';
+    const existingButton = root.querySelector('.track-visibility-toggle');
+    if (existingButton) {
+        existingButton.title = label;
+        existingButton.setAttribute('aria-label', label);
+        existingButton.textContent = icon;
+        return;
+    }
     const anchor = root.matches('.track-strip')
         ? root.querySelector('.text-center') || root
         : root.querySelector('.track-header') || root;
@@ -28,9 +37,9 @@ function decorateTrackRoot(root, track) {
     button.type = 'button';
     button.className = 'track-visibility-toggle';
     button.dataset.trackId = String(track.id);
-    button.title = `${getVisibilityButtonLabel(track)} without changing audio`;
-    button.setAttribute('aria-label', button.title);
-    button.textContent = track.isVisible === false ? '◌' : '◉';
+    button.title = label;
+    button.setAttribute('aria-label', label);
+    button.textContent = icon;
     anchor.appendChild(button);
     root.dataset.trackVisibilityDecorated = 'true';
 }

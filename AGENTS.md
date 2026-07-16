@@ -1,3 +1,10 @@
+#### Day 776 Run 9: Background-removal audit and visibility-control polish shipped (2026-07-16)
+
+- **Run Type**: Snaw Repair & Enhancement Agent (scheduled)
+- **Status**: Priority-1 `removeCustomDesktopBackground` remains a false positive. The function is defined, exported through `appServices`, mirrored to `window`, and present in the deployed `js/main.js`.
+- **Small enhancement**: Track Visibility Toggle now refreshes the existing per-track button's icon, tooltip, and ARIA label when a track is hidden or shown, so the control never reports stale state after a toggle or redraw.
+- **Verification**: Pulled `origin/LWB-with-Bugs`; `node --check` passes for `js/main.js`, `js/state.js`, `js/audio.js`, `js/ui.js`, `js/eventHandlers.js`, and `js/TrackVisibilityToggle.js`; `git diff --check` passes.
+
 #### Day 776 Run 8: Background-removal audit and status refresh shipped (2026-07-16)
 
 - **Run Type**: Snaw Repair & Enhancement Agent (scheduled)
