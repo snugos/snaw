@@ -5,6 +5,25 @@ let localAppServices = {};
 let countInBars = 1; // Number of bars for count-in (0 = disabled)
 let countInActive = false;
 let countInCallback = null;
+let countInRunToken = 0;
+const countInTimers = new Set();
+
+function scheduleCountInTimer(callback, delay) {
+    const timerId = setTimeout(() => {
+        countInTimers.delete(timerId);
+        callback();
+    }, delay);
+    countInTimers.add(timerId);
+    return timerId;
+}
+
+function finishCountIn(token) {
+    if (token !== countInRunToken || !countInActive) return;
+    countInActive = false;
+    clearCountInDisplay();
+    countInCallback?.();
+    countInCallback = null;
+}
 
 export function initCountInAudio(services) {
     localAppServices = services;
@@ -17,37 +36,26 @@ export function setCountInBars(bars) {
 }
 
 export function playFixedCountIn(callback, bpm, bars = 1) {
-    if (countInActive) {
-        callback?.();
-        return;
-    }
-
+    if (countInActive) return false;
     countInActive = true;
     countInCallback = callback;
+    const token = ++countInRunToken;
     const beatDuration = 60 / Math.max(1, Number(bpm) || 120);
     const totalBeats = Math.max(1, Math.round(Number(bars) || 1) * 4);
-
     import('./audio.js').then(({ playMetronomeClick }) => {
+        if (token !== countInRunToken || !countInActive) return;
         for (let beat = 0; beat < totalBeats; beat++) {
-            setTimeout(() => {
+            scheduleCountInTimer(() => {
+                if (token !== countInRunToken || !countInActive) return;
                 playMetronomeClick?.(beat % 4 === 0);
                 updateCountInDisplay(beat + 1, totalBeats);
-                if (beat === totalBeats - 1) {
-                    setTimeout(() => {
-                        countInActive = false;
-                        clearCountInDisplay();
-                        countInCallback?.();
-                        countInCallback = null;
-                    }, 200);
-                }
+                if (beat === totalBeats - 1) scheduleCountInTimer(() => finishCountIn(token), 200);
             }, beat * beatDuration * 1000);
         }
     }).catch(() => {
-        countInActive = false;
-        clearCountInDisplay();
-        countInCallback = null;
-        callback?.();
+        if (token === countInRunToken && countInActive) finishCountIn(token);
     });
+    return true;
 }
 
 export function getCountInBars() {
@@ -71,37 +79,26 @@ export async function playCountIn(callback, bpm) {
 
     countInActive = true;
     countInCallback = callback;
-
-    const { playMetronomeClick } = await import('./audio.js');
-    
+    const token = ++countInRunToken;
+    let playMetronomeClick;
+    try {
+        ({ playMetronomeClick } = await import('./audio.js'));
+    } catch (_) {
+        finishCountIn(token);
+        return;
+    }
+    if (token !== countInRunToken || !countInActive) return;
     const beatsPerBar = 4;
     const totalBeats = countInBars * beatsPerBar;
-    const beatDuration = 60 / bpm; // in seconds
-    
-    console.log(`[CountInAudio] Playing ${countInBars} bar count-in at ${bpm} BPM`);
-
+    const beatDuration = 60 / Math.max(1, Number(bpm) || 120);
     for (let beat = 0; beat < totalBeats; beat++) {
-        const delay = beat * beatDuration * 1000; // ms
         const isDownbeat = beat % beatsPerBar === 0;
-        
-        setTimeout(() => {
-            if (playMetronomeClick) {
-                playMetronomeClick(isDownbeat);
-            }
-            
-            // Update UI
+        scheduleCountInTimer(() => {
+            if (token !== countInRunToken || !countInActive) return;
+            playMetronomeClick?.(isDownbeat);
             updateCountInDisplay(beat + 1, totalBeats);
-            
-            if (beat === totalBeats - 1) {
-                // Count-in complete
-                setTimeout(() => {
-                    countInActive = false;
-                    clearCountInDisplay();
-                    countInCallback?.();
-                    countInCallback = null;
-                }, 200);
-            }
-        }, delay);
+            if (beat === totalBeats - 1) scheduleCountInTimer(() => finishCountIn(token), 200);
+        }, beat * beatDuration * 1000);
     }
 }
 
@@ -133,6 +130,9 @@ function clearCountInDisplay() {
  * Cancel ongoing count-in
  */
 export function cancelCountIn() {
+    countInRunToken++;
+    countInTimers.forEach(timerId => clearTimeout(timerId));
+    countInTimers.clear();
     countInActive = false;
     countInCallback = null;
     clearCountInDisplay();
@@ -180,4 +180,7 @@ export function setupCountInUI() {
 }
 
 // Export for use by recording system
-export { countInActive, isCountInActive: () => countInActive };
+export { countInActive };
+export function isCountInActive() {
+    return countInActive;
+}

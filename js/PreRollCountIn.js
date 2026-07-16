@@ -43,6 +43,11 @@ export function initPreRollCountIn(services) {
 export function isPreRollCountInEnabled() {
     return enabled;
 }
+export function cancelPreRollCountIn() {
+    running = false;
+    localAppServices.cancelCountIn?.();
+}
+
 
 export function runPreRollCountIn(onComplete) {
     if (!enabled || running) {
