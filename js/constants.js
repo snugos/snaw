@@ -1,6 +1,6 @@
 // js/constants.js - Shared constants for SnugOS
 
-export const APP_VERSION = "0.4.30"; // v0.4.27 Daily Merge // v0.4.26 Metronome Accent Pattern Bug Fix Check - No changes required (all features already present, no bugs found)
+export const APP_VERSION = "0.4.31"; // v0.4.30 Daily Merge - Added tap tempo constants, verified all features and bug fixes // v0.4.27 Daily Merge // v0.4.26 Metronome Accent Pattern Bug Fix Check - No changes required (all features already present, no bugs found)
 // v0.4.26 Metronome Accent Pattern (four-step persisted pattern + transport toggle); v0.4.25 Track Visibility Toggle (hide/show tracks in timeline and mixer without muting audio); v0.4.24 Clip Lock Toggle // 2026-07-16 - v0.4.23 Record-arm status tooltip (record control identifies the armed/recording track and input-monitor state); v0.4.22 Pre-roll Count-In Toggle (transport-bar toggle for a persisted one-bar click-only count-in before recording), v0.4.20 Quick Marker navigation shortcuts ([ / ]) + transport-bar Markers button; v0.4.19 Quick Marker Set clear-all control + v0.4.17 Quick Marker Set (M + Shift+M marker shortcuts, per-marker delete controls) + Enhanced Panic Save (full project serialization) // 2026-07-13 - v0.4.16 Ctrl+Shift+S Panic Save (defensively-guarded keyboard shortcut that snapshots in-memory project state to localStorage under snawPanicSaves, max 5 LRU entries, surfaces 2s showNotification toast with timestamp + entry count, recovery deferred to a follow-up), v0.4.15 Transport Bar Master Output Meter (L/R horizontal peak meter in the transport bar, post-master-fader, pre-limiter; per-frame update via updateTransportBarMasterMeter hook in updatePerformanceStats; click-to-toggle settings popover; db-floored -60 dB range, peak-hold ticks, green/amber/red gradient) + Quick Project Snapshot List (last 5 auto + manual snapshots persisted to IndexedDB under snapshot_<id> keys; localStorage index for synchronous panel render; openProjectSnapshotListPanel / close / toggle window exports; captureProjectSnapshot window export for ad-hoc captures; auto-snapshot every 5min after a recent mutation; load via reconstructDAWInternal; wraps appServices.captureStateForUndo and saveProject to nudge the auto-snapshot throttle), v0.4.14 Daily Merge & Bug Fixes (merged app bugfixes: setAutomationArmed, setMonitoringEnabled, setSelectedSliceForEdit, setSelectedDrumPadForEdit methods with undo captures; added undo captures to loadSampleToPad, addEffect, removeEffect), v0.4.13 Mute-Others Solo (Shift+S soloes selected track and temporarily mutes every other track; same shortcut toggles back to the previous mix), v0.4.12 Project Session Timer (MM:SS elapsed-since-load in status bar, click to reset), v0.4.11 Undo Toast (↶/↷ styled toast on undo/redo with action name), v0.4.10 Track Notes Sidebar (📝 button on every track-strip opens an inline textarea popover, auto-saves on blur, separate from TrackNotes.js), v0.4.09 Clip Drag-to-Clone (Alt-drag timeline clip leaves original behind + paints clones), v0.4.08 Clip Time Handles (mm:ss readouts on audio clips + selected-clip timecode panel), v0.4.07 MIDI File Import/Export (SMF .mid parse/write + drag-drop import + file-picker + project-wide export), v0.4.06 Marker Color Presets, v0.4.05 Audio Clip Labeling + TimelineMarkers dedup, v0.4.04 Track Grouping by Instrument
 
 export const STEPS_PER_BAR = 16;
@@ -10,6 +10,13 @@ export const MAX_BARS = 512; // Maximum number of bars a sequence can have
 export const MIN_TEMPO = 0; // Minimum tempo in BPM
 export const MAX_TEMPO = 999; // Maximum tempo in BPM
 export const DEFAULT_TEMPO = 120; // Default tempo for Alt+click reset on tempo nudge buttons
+
+// Tap Tempo Constants
+export const TAP_TEMPO_TIMEOUT_MS = 2000; // Reset tap buffer after 2 seconds of inactivity
+export const TAP_TEMPO_MIN_TAPS = 2; // Minimum taps needed to calculate tempo
+export const TAP_TEMPO_MAX_TAPS = 8; // Maximum taps to keep for averaging
+export const TAP_TEMPO_MIN_BPM = 20; // Minimum acceptable BPM
+export const TAP_TEMPO_MAX_BPM = 300; // Maximum acceptable BPM
 
 // Note: Reversed for typical top-to-bottom piano roll display in a UI
 export const synthPitches = [
